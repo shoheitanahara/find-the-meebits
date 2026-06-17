@@ -4,6 +4,14 @@ import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 
+/** 内側の枠線 (inset-[12.5%]) に合わせてワールド座標をマップ上の % に変換 */
+const MAP_INSET_RATIO = 0.125
+
+function worldToMapPercent(coordinate: number) {
+  const normalized = (coordinate + WORLD_RADIUS) / (WORLD_RADIUS * 2)
+  return (MAP_INSET_RATIO + normalized * (1 - MAP_INSET_RATIO * 2)) * 100
+}
+
 export function MiniMap() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
@@ -24,15 +32,15 @@ export function MiniMap() {
           const targetPosition = npcPositions[npc.id] ?? npc.position
           return {
             id: npc.id,
-            xPercent: ((targetPosition[0] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100,
-            zPercent: ((targetPosition[2] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100,
+            xPercent: worldToMapPercent(targetPosition[0]),
+            zPercent: worldToMapPercent(targetPosition[2]),
           }
         })
         .filter((marker): marker is NonNullable<typeof marker> => marker !== null)
     : []
 
-  const xPercent = ((position[0] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
-  const zPercent = ((position[2] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
+  const xPercent = worldToMapPercent(position[0])
+  const zPercent = worldToMapPercent(position[2])
   const arrowRotation = -rotationY + Math.PI
 
   return (
@@ -59,7 +67,7 @@ export function MiniMap() {
       <div className="relative mt-1 size-12 overflow-hidden rounded-lg border border-neutral-600 bg-neutral-800 md:mt-3 md:size-36 md:rounded-2xl">
         <div className="absolute left-1/2 top-0 h-full w-px bg-neutral-600/70" />
         <div className="absolute left-0 top-1/2 h-px w-full bg-neutral-600/70" />
-        <div className="absolute inset-1.5 border border-neutral-500/50 md:inset-3" />
+        <div className="absolute inset-[12.5%] border border-neutral-500/50" />
         {targetMarkers.map((marker) => (
           <div
             key={marker.id}
@@ -73,7 +81,7 @@ export function MiniMap() {
           />
         ))}
         <div
-          className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 md:h-4 md:w-4"
+          className="absolute flex items-center justify-center"
           style={{
             left: `${clampPercent(xPercent)}%`,
             top: `${clampPercent(zPercent)}%`,
