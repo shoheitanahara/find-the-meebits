@@ -66,6 +66,10 @@ export function NPC({ profile }: NPCProps) {
     storeUpdateTimerRef.current = 0
     useNpcStore.getState().setNpcPosition(profile.id, [profile.position[0], 0, profile.position[2]])
 
+    if (rootRef.current) {
+      rootRef.current.position.set(profile.position[0], profile.position[1], profile.position[2])
+    }
+
     const wantsVrm = isNpcVrmActive(profile.id)
     shouldLoadVRMRef.current = wantsVrm
     if (wantsVrm) {
@@ -121,8 +125,14 @@ export function NPC({ profile }: NPCProps) {
 
     const isFarNpc = distance > NPC_FAR_UPDATE_DISTANCE
     const frameBucket = Math.floor(state.clock.elapsedTime * 20)
-    if (isFarNpc && frameBucket % 3 !== farUpdatePhaseRef.current) {
+    const skipDetailedUpdate =
+      isFarNpc && frameBucket % 3 !== farUpdatePhaseRef.current && !isAnswerRevealed
+
+    if (skipDetailedUpdate) {
       root.position.set(currentPosition.x, profile.position[1], currentPosition.z)
+      if (isTarget) {
+        useNpcStore.getState().setNpcPosition(profile.id, [currentPosition.x, 0, currentPosition.z])
+      }
       return
     }
 
@@ -182,14 +192,14 @@ export function NPC({ profile }: NPCProps) {
 
     storeUpdateTimerRef.current += delta
     const positionStoreInterval = isFarNpc ? 0.5 : 0.25
-    if (storeUpdateTimerRef.current >= positionStoreInterval) {
+    if (isAnswerRevealed || storeUpdateTimerRef.current >= positionStoreInterval) {
       storeUpdateTimerRef.current = 0
       useNpcStore.getState().setNpcPosition(profile.id, [currentPosition.x, 0, currentPosition.z])
     }
   })
 
   return (
-    <group ref={rootRef} position={profile.position} rotation={[0, profile.rotation[1], 0]}>
+    <group ref={rootRef} rotation={[0, profile.rotation[1], 0]}>
       {vrmScene ? <primitive object={vrmScene} scale={1.05} /> : <MeebitSilhouette />}
       {status === 'error' ? <FallbackMeebit /> : null}
       {isNearest ? <InteractionPin /> : null}
