@@ -91,7 +91,7 @@ export function ClearOverlay() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-neutral-600">
             {isConquered
-              ? `You cleared Semifinal and Final at ${getChallengeNpcCount()} Meebits. Full conquest complete.`
+              ? `You cleared Semifinal, Final, and Grand Final at ${getChallengeNpcCount()} Meebits. Full conquest complete.`
               : nextStep
                 ? `Next: ${getStageLabel(nextStep)} — ${getStageDescription(nextStep)}`
                 : `Next stage: ${activeNpcCount} Meebits.`}

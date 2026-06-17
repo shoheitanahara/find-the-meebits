@@ -2,7 +2,17 @@ import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { TargetPreview } from './TargetPreview'
 
-const TARGET_PREVIEW_SIZE = 'h-36 w-36'
+function getTargetPreviewSize(targetCount: number) {
+  if (targetCount >= 5) {
+    return 'h-24 w-24'
+  }
+
+  if (targetCount >= 3) {
+    return 'h-28 w-28'
+  }
+
+  return 'h-36 w-36'
+}
 
 export function TargetHUD() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -13,16 +23,19 @@ export function TargetHUD() {
   const isAnswerReveal = gamePhase === 'timedOut'
   const isVisible = gamePhase === 'playing' || isAnswerReveal
   const shouldMountPreview = gamePhase === 'preparing' || isVisible
+  const targetCount = targetNpcs.length
+  const previewSize = getTargetPreviewSize(targetCount)
+  const useCompactGrid = targetCount > 1
 
-  if (!shouldMountPreview || targetNpcs.length === 0) {
+  if (!shouldMountPreview || targetCount === 0) {
     return null
   }
-
-  const useCompactGrid = targetNpcs.length > 1
 
   return (
     <aside
       className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md md:block ${
+        targetCount >= 5 ? 'w-[13.5rem]' : 'w-auto'
+      } ${
         isAnswerReveal
           ? 'border-amber-300/40 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'
@@ -34,31 +47,38 @@ export function TargetHUD() {
           isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
         }`}
       >
-        {isAnswerReveal ? 'Answer' : targetNpcs.length > 1 ? 'Targets' : 'Target'}
+        {isAnswerReveal ? 'Answer' : targetCount > 1 ? 'Targets' : 'Target'}
+        {targetCount > 1 ? ` (${targetCount})` : ''}
       </p>
-      <div
-        className={`mt-1.5 grid gap-2 ${useCompactGrid ? 'grid-cols-2' : 'grid-cols-1'}`}
-      >
+      <div className={`mt-1.5 grid gap-1.5 ${useCompactGrid ? 'grid-cols-2' : 'grid-cols-1'}`}>
         {targetNpcs.map((npc, index) => (
           <div
             key={npc.id}
-            className={`min-w-0 ${useCompactGrid && targetNpcs.length === 3 && index === 2 ? 'col-span-2 mx-auto w-[9rem]' : ''}`}
+            className={`min-w-0 ${
+              useCompactGrid && targetCount % 2 === 1 && index === targetCount - 1
+                ? 'col-span-2 mx-auto w-[6rem]'
+                : ''
+            }`}
           >
-            <p className={`text-base font-black ${isAnswerReveal ? 'text-amber-100' : ''}`}>
+            <p
+              className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
+                isAnswerReveal ? 'text-amber-100' : ''
+              }`}
+            >
               #{npc.meebitNumber}
             </p>
-            <div className="mt-1">
+            <div className="mt-0.5">
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
-                modelScale={1.06}
-                sizeClassName={TARGET_PREVIEW_SIZE}
+                modelScale={targetCount >= 5 ? 1.02 : 1.06}
+                sizeClassName={previewSize}
               />
             </div>
           </div>
         ))}
       </div>
       {isAnswerReveal ? (
-        <p className="mt-2 max-w-[11rem] text-[0.65rem] leading-snug text-amber-100/80">
+        <p className="mt-2 text-[0.65rem] leading-snug text-amber-100/80">
           Follow the golden glow in the gallery.
         </p>
       ) : null}

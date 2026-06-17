@@ -68,7 +68,7 @@ export function MobileTopBar() {
       </div>
 
       {targetNpcs.length > 0 ? (
-        <div className="absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex max-h-[calc(3*4.5rem+2*0.25rem+0.75rem)] flex-col items-end gap-1">
+        <div className="absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex max-h-[min(70dvh,calc(5*3rem+4*0.25rem+0.75rem))] flex-col items-end gap-1 overflow-y-auto overscroll-contain">
           <p
             className={`pr-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.18em] ${
               isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
@@ -76,7 +76,7 @@ export function MobileTopBar() {
           >
             {isAnswerReveal ? 'Answer' : targetNpcs.length > 1 ? 'Targets' : 'Target'}
           </p>
-          {targetNpcs.slice(0, 3).map((npc) => (
+          {targetNpcs.map((npc) => (
             <div
               key={npc.id}
               className={`flex items-center gap-1.5 rounded-xl border px-1.5 py-1 shadow-lg backdrop-blur-md ${
@@ -90,10 +90,14 @@ export function MobileTopBar() {
               </p>
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
-                modelScale={1.1}
+                modelScale={targetNpcs.length >= 4 ? 1.02 : 1.1}
                 cameraDistance={3.05}
                 modelYOffset={-1.0}
-                sizeClassName="h-[4.5rem] w-[4.5rem] shrink-0 rounded-lg"
+                sizeClassName={
+                  targetNpcs.length >= 4
+                    ? 'h-12 w-12 shrink-0 rounded-lg'
+                    : 'h-[4.5rem] w-[4.5rem] shrink-0 rounded-lg'
+                }
               />
             </div>
           ))}

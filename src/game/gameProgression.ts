@@ -1,6 +1,6 @@
 import { isMobilePerfMode } from './perfConfig'
 
-export type StageKind = 'regular' | 'semifinal' | 'final'
+export type StageKind = 'regular' | 'semifinal' | 'final' | 'grandfinal'
 
 export type ProgressionStep = {
   stageNumber: number
@@ -43,6 +43,12 @@ export function getProgressionSteps(): ProgressionStep[] {
       targetCount: 3,
       kind: 'final',
     },
+    {
+      stageNumber: 8,
+      npcCount: challengeNpcCount,
+      targetCount: 5,
+      kind: 'grandfinal',
+    },
   ]
 }
 
@@ -59,15 +65,19 @@ export function getStageLabel(step: ProgressionStep) {
     return 'Final'
   }
 
+  if (step.kind === 'grandfinal') {
+    return 'Grand Final'
+  }
+
   return `Stage ${step.stageNumber}`
 }
 
 export function getStageDescription(step: ProgressionStep) {
-  if (step.kind === 'semifinal') {
+  if (step.kind === 'semifinal' || step.kind === 'final') {
     return `Find ${step.targetCount} targets among ${step.npcCount} Meebits`
   }
 
-  if (step.kind === 'final') {
+  if (step.kind === 'grandfinal') {
     return `Find all ${step.targetCount} targets among ${step.npcCount} Meebits`
   }
 
@@ -78,6 +88,7 @@ export function getProgressionSummary() {
   const regularCounts = isMobilePerfMode() ? SP_REGULAR_NPC_COUNTS : PC_REGULAR_NPC_COUNTS
   const first = regularCounts[0]
   const lastRegular = regularCounts[regularCounts.length - 1]
+  const challengeNpcCount = getChallengeNpcCount()
 
-  return `${first}–${lastRegular} across 5 stages, then Semifinal (2 targets) and Final (3 targets) at ${getChallengeNpcCount()} Meebits`
+  return `${first}–${lastRegular} across 5 stages, then Semifinal (2), Final (3), and Grand Final (5 targets) at ${challengeNpcCount} Meebits`
 }
