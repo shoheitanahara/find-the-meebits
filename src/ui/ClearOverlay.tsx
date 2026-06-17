@@ -14,11 +14,7 @@ export function ClearOverlay() {
   const continueToNextStage = useGameStore((state) => state.continueToNextStage)
   const resetGame = useGameStore((state) => state.resetGame)
   const clearedNpc = clearedNpcId ? getNpcById(clearedNpcId) : null
-
-  if (gamePhase !== 'cleared' && gamePhase !== 'conquered') {
-    return null
-  }
-
+  const isVisible = gamePhase === 'cleared' || gamePhase === 'conquered'
   const isConquered = gamePhase === 'conquered'
 
   const handleContinue = () => {
@@ -39,6 +35,10 @@ export function ClearOverlay() {
   }
 
   useEffect(() => {
+    if (!isVisible) {
+      return
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Enter') return
       if (event.repeat) return
@@ -50,7 +50,11 @@ export function ClearOverlay() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [isConquered])
+  }, [isVisible, isConquered, continueToNextStage, resetGame])
+
+  if (!isVisible) {
+    return null
+  }
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 grid place-items-center bg-neutral-950/75 p-6 backdrop-blur-sm">

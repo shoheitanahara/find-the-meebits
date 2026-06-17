@@ -13,10 +13,7 @@ export function TimeUpOverlay() {
   const retryStage = useGameStore((state) => state.retryStage)
   const resetGame = useGameStore((state) => state.resetGame)
   const targetNpc = getNpcById(targetNpcId)
-
-  if (gamePhase !== 'timedOut' || !targetNpc) {
-    return null
-  }
+  const isVisible = gamePhase === 'timedOut' && targetNpc !== null
 
   const handleRetry = () => {
     usePlayerStore
@@ -34,6 +31,10 @@ export function TimeUpOverlay() {
   }
 
   useEffect(() => {
+    if (!isVisible) {
+      return
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== 'Enter') return
       if (event.repeat) return
@@ -45,7 +46,11 @@ export function TimeUpOverlay() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [isVisible, retryStage])
+
+  if (!isVisible || !targetNpc) {
+    return null
+  }
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center p-4 sm:p-6">
