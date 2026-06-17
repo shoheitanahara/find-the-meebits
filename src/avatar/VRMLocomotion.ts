@@ -13,8 +13,46 @@ const armRestZ = {
   right: -1.35,
 }
 
+const attentionArmZ = {
+  left: 1.56,
+  right: -1.56,
+}
+
 const elbowBaseBend = 0.08
 const kneeBaseBend = -0.16
+
+/** プレビュー用の立正ポーズ（両腕を体の横に下ろす） */
+export function applyVRMAttentionPose(vrm: VRM | null) {
+  if (!vrm) {
+    return
+  }
+
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Head), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(leftUpperArm, { x: 0, y: 0, z: attentionArmZ.left })
+  setRotationImmediate(rightUpperArm, { x: 0, y: 0, z: attentionArmZ.right })
+  setRotationImmediate(leftLowerArm, { x: 0.03, y: 0, z: 0 })
+  setRotationImmediate(rightLowerArm, { x: 0.03, y: 0, z: 0 })
+  setRotationImmediate(leftUpperLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(rightUpperLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(leftLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
+  setRotationImmediate(rightLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
+  setRotationImmediate(leftFoot, { x: 0.04, y: 0, z: 0 })
+  setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
+}
 
 export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) {
   if (!vrm) {
@@ -119,4 +157,21 @@ function setRotation(
   if (rotation.x !== undefined) bone.rotation.x = MathUtils.lerp(bone.rotation.x, rotation.x, smoothing)
   if (rotation.y !== undefined) bone.rotation.y = MathUtils.lerp(bone.rotation.y, rotation.y, smoothing)
   if (rotation.z !== undefined) bone.rotation.z = MathUtils.lerp(bone.rotation.z, rotation.z, smoothing)
+}
+
+function setRotationImmediate(
+  bone: Object3D | null,
+  rotation: {
+    x?: number
+    y?: number
+    z?: number
+  },
+) {
+  if (!bone) {
+    return
+  }
+
+  if (rotation.x !== undefined) bone.rotation.x = rotation.x
+  if (rotation.y !== undefined) bone.rotation.y = rotation.y
+  if (rotation.z !== undefined) bone.rotation.z = rotation.z
 }

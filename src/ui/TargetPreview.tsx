@@ -2,6 +2,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Group } from 'three'
 import { FallbackMeebit } from '../avatar/FallbackMeebit'
+import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { useVRMModel } from '../avatar/useVRMModel'
 
 type TargetPreviewProps = {
@@ -37,12 +38,20 @@ function PreviewModel({
   modelScale?: number
 }) {
   const rootRef = useRef<Group>(null)
-  const { vrmScene, status, update } = useVRMModel(meebitNumber, true, -250, false)
+  const { vrmRef, vrmScene, status, update } = useVRMModel(
+    meebitNumber,
+    true,
+    -250,
+    true,
+    true,
+  )
 
   useFrame((state, delta) => {
     if (rootRef.current) {
       rootRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.25
     }
+
+    applyVRMAttentionPose(vrmRef.current)
     update(delta)
   })
 
