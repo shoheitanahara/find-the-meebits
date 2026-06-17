@@ -5,19 +5,19 @@ import tailwindcss from '@tailwindcss/vite'
 const meebitsVrmProxy = {
   target: 'https://files.meebits.app',
   changeOrigin: true,
-  rewrite: (path: string) => path.replace(/^\/vrm\/(\d+)\.vrm$/, '/vrm/$1.vrm'),
+  rewrite: (path: string) => path.replace(/^\/api\/vrm\/(\d+)\.vrm$/, '/vrm/$1.vrm'),
 }
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/vrm': meebitsVrmProxy,
+      '/api/vrm': meebitsVrmProxy,
     },
   },
   preview: {
     proxy: {
-      '/vrm': meebitsVrmProxy,
+      '/api/vrm': meebitsVrmProxy,
     },
   },
 })

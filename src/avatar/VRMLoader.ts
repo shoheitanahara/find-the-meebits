@@ -6,7 +6,9 @@ import { DEFAULT_PLAYER_MEEBIT_ID } from '../game/gameConfig'
 export const DEFAULT_MEEBIT_ID = DEFAULT_PLAYER_MEEBIT_ID
 
 export function getMeebitVrmUrl(meebitId: number = DEFAULT_MEEBIT_ID) {
-  return `/vrm/${meebitId}.vrm`
+  // Vercel 本番では外部配信元の CORS で VRM 読み込みが失敗しやすいので、
+  // 同一オリジンの API 経由でプロキシして読み込む。
+  return `/api/vrm/${meebitId}.vrm`
 }
 
 export function loadVRM(url: string): Promise<VRM> {
