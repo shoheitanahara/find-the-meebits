@@ -45,13 +45,13 @@ export function DialogueBox() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-5 z-30 mx-auto w-[min(860px,calc(100%-2rem))]">
-      <div className="grid gap-4 rounded-3xl border border-white/60 bg-white/90 px-5 py-4 shadow-2xl shadow-sky-900/15 backdrop-blur-md sm:grid-cols-[auto_1fr] sm:px-6 sm:py-5">
+    <div className="pointer-events-auto absolute inset-x-0 bottom-5 z-30 mx-auto w-[min(860px,calc(100%-2rem))] max-md:bottom-[max(7.5rem,env(safe-area-inset-bottom))] max-md:w-[calc(100%-1rem)]">
+      <div className="grid gap-4 rounded-3xl border border-white/60 bg-white/90 px-5 py-4 shadow-2xl shadow-sky-900/15 backdrop-blur-md max-md:gap-3 max-md:px-4 max-md:py-3 sm:grid-cols-[auto_1fr] sm:px-6 sm:py-5">
         <div className="mx-auto sm:mx-0">
           <TargetPreview
             meebitNumber={npc.meebitNumber}
             modelScale={1.1}
-            sizeClassName="h-40 w-40"
+            sizeClassName="h-40 w-40 max-md:h-28 max-md:w-28"
           />
         </div>
 
@@ -83,7 +83,7 @@ export function DialogueBox() {
             </p>
             <button
               type="button"
-              className="rounded-full bg-neutral-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-neutral-700"
+              className="rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-neutral-700 max-md:px-6 max-md:py-3"
               onClick={handleNext}
             >
               {isLastLine ? 'Done' : 'Next'}

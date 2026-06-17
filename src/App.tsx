@@ -13,6 +13,8 @@ import { HUD } from './ui/HUD'
 import { InteractionPrompt } from './ui/InteractionPrompt'
 import { LoadingScreen } from './ui/LoadingScreen'
 import { MiniMap } from './ui/MiniMap'
+import { MobileControls } from './ui/mobile/MobileControls'
+import { MobileTopBar } from './ui/mobile/MobileTopBar'
 import { StartScreen } from './ui/StartScreen'
 import { TargetHUD } from './ui/TargetHUD'
 
@@ -24,11 +26,13 @@ export default function App() {
       <StagePrepareSystem />
       <TargetVrmPreloader />
       <GameTimer />
+      <MobileTopBar />
       <HUD />
       <DialogueSystem />
       <InteractionPrompt />
       <TargetHUD />
       <MiniMap />
+      <MobileControls />
       <DialogueBox />
       <LoadingScreen />
       <ErrorMessage />

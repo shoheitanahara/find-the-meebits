@@ -3,6 +3,7 @@ import { Vector2 } from 'three'
 import { PLAYER_COLLISION_RADIUS, resolveMovement } from '../collision/collision'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { useTouchControlsStore } from '../stores/touchControlsStore'
 import { useKeyboardControls } from './useKeyboardControls'
 
 const MOVE_SPEED = 7
@@ -26,10 +27,15 @@ export function AvatarController() {
 
     moveVector.set(0, 0)
 
-    if (controls.forward) moveVector.y -= 1
-    if (controls.backward) moveVector.y += 1
-    if (controls.left) moveVector.x -= 1
-    if (controls.right) moveVector.x += 1
+    const touch = useTouchControlsStore.getState()
+    if (touch.joystickActive) {
+      moveVector.set(touch.joystickX, touch.joystickY)
+    } else {
+      if (controls.forward) moveVector.y -= 1
+      if (controls.backward) moveVector.y += 1
+      if (controls.left) moveVector.x -= 1
+      if (controls.right) moveVector.x += 1
+    }
 
     const isMoving = moveVector.lengthSq() > 0
 

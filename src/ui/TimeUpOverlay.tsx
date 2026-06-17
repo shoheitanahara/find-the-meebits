@@ -53,32 +53,34 @@ export function TimeUpOverlay() {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center p-4 sm:p-6">
-      <section className="pointer-events-auto grid w-full max-w-3xl gap-5 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-5 text-white shadow-2xl backdrop-blur-md sm:grid-cols-[auto_1fr] sm:p-6">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center p-4 max-md:bottom-[max(7rem,env(safe-area-inset-bottom))] sm:p-6">
+      <section className="pointer-events-auto grid w-full max-w-3xl gap-5 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-5 text-white shadow-2xl backdrop-blur-md max-md:gap-4 max-md:p-4 sm:grid-cols-[auto_1fr] sm:p-6">
         <TargetPreview
           meebitNumber={targetNpc.meebitNumber}
           modelScale={1.12}
-          sizeClassName="h-40 w-40"
+          sizeClassName="mx-auto h-40 w-40 max-md:h-28 max-md:w-28"
         />
         <div className="text-center sm:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">Time Up</p>
-          <h2 className="mt-2 text-3xl font-black sm:text-4xl">Answer reveal</h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+          <h2 className="mt-2 text-3xl font-black max-md:text-2xl sm:text-4xl">Answer reveal</h2>
+          <p className="mt-3 text-sm leading-relaxed text-neutral-300 max-md:text-xs">
             Stage {stage} with {activeNpcCount} Meebits. The correct avatar is{' '}
             <span className="font-black text-amber-200">Meebit #{targetNpc.meebitNumber}</span> and
-            glows gold in the gallery. Keep moving with WASD to find them.
+            glows gold in the gallery.
+            <span className="max-md:hidden"> Keep moving with WASD to find them.</span>
+            <span className="md:hidden"> Use the joystick to find them.</span>
           </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3 sm:justify-start">
+          <div className="mt-5 flex flex-wrap justify-center gap-3 max-md:flex-col sm:justify-start">
             <button
               type="button"
-              className="rounded-full bg-amber-400 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-amber-300"
+              className="rounded-full bg-amber-400 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-amber-300 max-md:w-full max-md:py-3.5"
               onClick={handleRetry}
             >
               Retry Stage
             </button>
             <button
               type="button"
-              className="rounded-full border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:border-white hover:bg-white/10"
+              className="rounded-full border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:border-white hover:bg-white/10 max-md:w-full max-md:py-3.5"
               onClick={handleBackToTitle}
             >
               Title

@@ -57,13 +57,13 @@ export function ClearOverlay() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 grid place-items-center bg-neutral-950/75 p-6 backdrop-blur-sm">
-      <section className="grid max-w-2xl gap-6 rounded-[2rem] border border-white/15 bg-white p-6 text-neutral-950 shadow-2xl sm:grid-cols-[auto_1fr] sm:p-8">
+    <div className="pointer-events-auto absolute inset-0 z-50 overflow-y-auto bg-neutral-950/75 p-4 backdrop-blur-sm max-md:py-[max(1rem,env(safe-area-inset-top))] md:grid md:place-items-center md:p-6">
+      <section className="mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-white/15 bg-white p-5 text-neutral-950 shadow-2xl max-md:my-auto sm:grid-cols-[auto_1fr] sm:p-8">
         {clearedNpc ? (
           <TargetPreview
             meebitNumber={clearedNpc.meebitNumber}
             modelScale={1.14}
-            sizeClassName="h-48 w-48"
+            sizeClassName="mx-auto h-48 w-48 max-md:h-36 max-md:w-36"
           />
         ) : null}
         <div className="text-center sm:text-left">
@@ -91,7 +91,7 @@ export function ClearOverlay() {
           </p>
           <button
             type="button"
-            className="mt-6 rounded-full bg-neutral-950 px-6 py-3 text-sm font-black uppercase tracking-[0.25em] text-white transition hover:bg-neutral-700"
+            className="mt-6 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.25em] text-white transition hover:bg-neutral-700 max-md:py-4 sm:w-auto"
             onClick={handleContinue}
           >
             {isConquered ? 'Back to Title' : 'Next Stage'}

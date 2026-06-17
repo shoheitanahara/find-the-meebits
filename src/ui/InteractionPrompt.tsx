@@ -16,7 +16,7 @@ export function InteractionPrompt() {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-28 z-20 flex justify-center">
+    <div className="pointer-events-none absolute inset-x-0 bottom-28 z-20 hidden justify-center md:flex">
       <div className="rounded-full border border-white/60 bg-slate-900/80 px-5 py-2 text-sm font-bold text-white shadow-xl backdrop-blur-md">
         Press E to inspect this Meebit
       </div>

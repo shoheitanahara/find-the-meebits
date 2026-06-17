@@ -16,7 +16,7 @@ export function TargetHUD() {
 
   return (
     <aside
-      className={`pointer-events-none absolute right-5 top-5 z-30 rounded-[1.75rem] border p-4 text-white shadow-2xl backdrop-blur-md ${
+      className={`pointer-events-none absolute right-5 top-5 z-30 hidden rounded-[1.75rem] border p-4 text-white shadow-2xl backdrop-blur-md md:block ${
         isAnswerReveal
           ? 'border-amber-300/40 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'

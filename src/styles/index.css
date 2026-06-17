@@ -24,8 +24,14 @@ body,
 body {
   min-width: 320px;
   background: #bfe9ff;
+  overscroll-behavior: none;
+}
+
+#root {
+  touch-action: manipulation;
 }
 
 canvas {
   display: block;
+  touch-action: none;
 }

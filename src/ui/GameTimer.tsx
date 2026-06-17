@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { GAME_TIME_LIMIT_SECONDS } from '../game/gameConfig'
-import { getElapsedSeconds, getRemainingSeconds, useGameStore } from '../stores/gameStore'
+import { getTimerDisplay } from './gameTimerDisplay'
+import { useGameStore } from '../stores/gameStore'
 
 export function GameTimer() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -16,7 +16,7 @@ export function GameTimer() {
   const { label, value, urgent } = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds)
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-5 z-30 -translate-x-1/2">
+    <div className="pointer-events-none absolute left-1/2 top-5 z-30 hidden -translate-x-1/2 md:block">
       <section
         className={`rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${
           urgent
@@ -29,56 +29,4 @@ export function GameTimer() {
       </section>
     </div>
   )
-}
-
-function getTimerDisplay(
-  gamePhase: ReturnType<typeof useGameStore.getState>['gamePhase'],
-  startedAt: number | null,
-  clearTimeSeconds: number | null,
-) {
-  if (gamePhase === 'preparing') {
-    return {
-      label: 'Starting Soon',
-      value: formatTimerSeconds(GAME_TIME_LIMIT_SECONDS),
-      urgent: false,
-    }
-  }
-
-  if (gamePhase === 'playing') {
-    const remaining = getRemainingSeconds(startedAt)
-    return {
-      label: 'Time Left',
-      value: formatTimerSeconds(remaining),
-      urgent: remaining <= 30,
-    }
-  }
-
-  if (gamePhase === 'timedOut') {
-    return {
-      label: 'Time Up',
-      value: '0:00',
-      urgent: true,
-    }
-  }
-
-  if (gamePhase === 'cleared' || gamePhase === 'conquered') {
-    return {
-      label: 'Clear Time',
-      value: formatTimerSeconds(clearTimeSeconds ?? 0),
-      urgent: false,
-    }
-  }
-
-  return {
-    label: 'Time Limit',
-    value: formatTimerSeconds(GAME_TIME_LIMIT_SECONDS),
-    urgent: false,
-  }
-}
-
-function formatTimerSeconds(seconds: number) {
-  const clamped = Math.max(0, seconds)
-  const minutes = Math.floor(clamped / 60)
-  const remainingSeconds = Math.floor(clamped % 60)
-  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`
 }

@@ -22,8 +22,8 @@ export function PrepareOverlay() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-neutral-950/55 p-6 backdrop-blur-[2px]">
-      <section className="max-w-md rounded-[2rem] border border-white/15 bg-neutral-950/90 px-8 py-7 text-center text-white shadow-2xl">
+    <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-neutral-950/55 p-4 backdrop-blur-[2px] max-md:px-3">
+      <section className="w-full max-w-md rounded-[2rem] border border-white/15 bg-neutral-950/90 px-6 py-6 text-center text-white shadow-2xl max-md:px-5 max-md:py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">Preparing Stage</p>
         <h2 className="mt-3 text-3xl font-black">Loading the museum</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-300">

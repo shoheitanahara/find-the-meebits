@@ -41,15 +41,17 @@ export function StartScreen() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-40 grid place-items-center bg-neutral-950/80 p-6 backdrop-blur-sm">
-      <section className="grid max-w-4xl gap-6 rounded-[2rem] border border-white/15 bg-neutral-50 p-6 text-neutral-950 shadow-2xl md:grid-cols-[auto_1fr] md:p-8">
-        <TargetPreview meebitNumber={targetNpc.meebitNumber} />
+    <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-neutral-950/80 p-4 backdrop-blur-sm max-md:items-start max-md:py-[max(1rem,env(safe-area-inset-top))] md:grid md:place-items-center md:p-6">
+      <section className="grid w-full max-w-4xl gap-6 rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-md:max-w-lg max-md:p-4 md:grid-cols-[auto_1fr] md:p-8">
+        <div className="mx-auto max-md:w-full">
+          <TargetPreview meebitNumber={targetNpc.meebitNumber} sizeClassName="h-40 w-40 max-md:mx-auto max-md:h-36 max-md:w-full max-md:max-w-[12rem]" />
+        </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">
             Meebits Museum Hunt
           </p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">Find the Meebit</h1>
-          <p className="mt-4 text-base leading-relaxed text-neutral-600">
+          <h1 className="mt-3 text-3xl font-black tracking-tight max-md:text-2xl md:text-5xl">Find the Meebit</h1>
+          <p className="mt-4 text-base leading-relaxed text-neutral-600 max-md:text-sm">
             Stage 1 starts with {INITIAL_NPC_COUNT} Meebits. Each clear adds {NPC_COUNT_INCREMENT} more,
             up to {MAX_NPC_COUNT} for full conquest. You have 3 minutes per stage.
           </p>
@@ -69,11 +71,11 @@ export function StartScreen() {
               </button>
             </div>
           </div>
-          <div className="mt-5 grid gap-4 rounded-2xl border border-neutral-200 bg-white p-4 sm:grid-cols-[auto_1fr]">
+          <div className="mt-5 grid gap-4 rounded-2xl border border-neutral-200 bg-white p-4 max-md:grid-cols-1 sm:grid-cols-[auto_1fr]">
             <TargetPreview
               meebitNumber={playerMeebitNumber}
               modelScale={1.05}
-              sizeClassName="h-28 w-28"
+              sizeClassName="h-28 w-28 max-md:mx-auto"
             />
             <label className="block">
               <div className="flex items-start justify-between gap-4">
@@ -102,7 +104,7 @@ export function StartScreen() {
           </div>
           <button
             type="button"
-            className="mt-6 rounded-full bg-neutral-950 px-6 py-3 text-sm font-black uppercase tracking-[0.25em] text-white transition hover:bg-neutral-700"
+            className="mt-6 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.25em] text-white transition hover:bg-neutral-700 max-md:py-4"
             onClick={handleStart}
           >
             Start
