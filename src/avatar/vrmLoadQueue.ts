@@ -39,3 +39,11 @@ function drainQueue() {
     nextLoad?.run()
   }
 }
+
+/** ステージ切り替え時にキューに溜まったロード要求を捨てる */
+export function clearPendingVrmLoads() {
+  const cancelled = pendingLoads.splice(0)
+  for (const load of cancelled) {
+    load.reject(new Error('VRM load queue cleared'))
+  }
+}

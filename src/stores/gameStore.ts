@@ -9,7 +9,7 @@ import {
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
-import { preloadVrm, resetVrmInstancePool } from '../avatar/vrmInstancePool'
+import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { buildNpcProfiles } from '../npc/npcGeneration'
 import type { NPCProfile } from '../npc/npcTypes'
 import type { LoadingStatus } from '../types/game'
@@ -169,7 +169,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
     const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount)
-    resetStageRuntimeState()
+    resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
     seedNpcPositions(npcLayout.npcProfiles)
     resetPlayerToStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -196,7 +196,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
     const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount, state.targetNpcIds)
-    resetStageRuntimeState()
+    resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
     seedNpcPositions(npcLayout.npcProfiles)
     resetPlayerToStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -263,6 +263,19 @@ function preloadTargetVrms(profiles: NPCProfile[], targetNpcIds: string[]) {
   }
 }
 
+function collectKeepMeebitIds(profiles: NPCProfile[], targetNpcIds: string[]) {
+  const keepIds = new Set<number>([usePlayerStore.getState().meebitNumber])
+
+  for (const targetNpcId of targetNpcIds) {
+    const targetNpc = profiles.find((npc) => npc.id === targetNpcId)
+    if (targetNpc) {
+      keepIds.add(targetNpc.meebitNumber)
+    }
+  }
+
+  return [...keepIds]
+}
+
 function seedNpcPositions(profiles: NPCProfile[]) {
   const npcPositions: Record<string, [number, number, number]> = {}
 
@@ -314,8 +327,8 @@ function softResetForGameStart() {
   useNpcStore.setState({ nearestNpcId: null })
 }
 
-function resetStageRuntimeState() {
-  resetVrmInstancePool()
+function resetStageRuntimeState(keepMeebitIds: number[] = []) {
+  resetVrmInstancePoolForStageChange(keepMeebitIds)
   clearActiveVrmNpcIds()
   useDialogueStore.getState().closeDialogue()
   useNpcStore.setState({

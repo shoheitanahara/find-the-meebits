@@ -24,3 +24,8 @@ export function getMaxConcurrentVrmLoads() {
 export function getStageReadyMinCount() {
   return isMobilePerfMode() ? MOBILE_STAGE_READY_MIN_COUNT : 24
 }
+
+/** 同時表示上限 + ターゲット/プレイヤー分。これを超える VRM テンプレートは LRU で破棄 */
+export function getMaxVrmTemplateCache() {
+  return getNpcMaxConcurrentVrm() + 12
+}
