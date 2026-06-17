@@ -9,22 +9,30 @@ type TargetPreviewProps = {
   meebitNumber: number
   sizeClassName?: string
   modelScale?: number
+  cameraDistance?: number
+  modelYOffset?: number
 }
 
 export function TargetPreview({
   meebitNumber,
   sizeClassName = 'h-44 w-44',
   modelScale = 1.15,
+  cameraDistance = 4,
+  modelYOffset = -0.9,
 }: TargetPreviewProps) {
   return (
     <div
       className={`${sizeClassName} overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100`}
     >
-      <Canvas camera={{ position: [0, 1.6, 4], fov: 30 }} gl={{ antialias: true }}>
+      <Canvas camera={{ position: [0, 1.6, cameraDistance], fov: 30 }} gl={{ antialias: true }}>
         <color attach="background" args={['#f5f5f5']} />
         <ambientLight intensity={1.4} />
         <directionalLight position={[3, 4, 3]} intensity={1.8} />
-        <PreviewModel meebitNumber={meebitNumber} modelScale={modelScale} />
+        <PreviewModel
+          meebitNumber={meebitNumber}
+          modelScale={modelScale}
+          modelYOffset={modelYOffset}
+        />
       </Canvas>
     </div>
   )
@@ -33,9 +41,11 @@ export function TargetPreview({
 function PreviewModel({
   meebitNumber,
   modelScale = 1.15,
+  modelYOffset = -0.9,
 }: {
   meebitNumber: number
   modelScale?: number
+  modelYOffset?: number
 }) {
   const rootRef = useRef<Group>(null)
   const { vrmRef, vrmScene, status, update } = useVRMModel(
@@ -56,7 +66,7 @@ function PreviewModel({
   })
 
   return (
-    <group ref={rootRef} position={[0, -0.9, 0]} rotation={[0, Math.PI, 0]}>
+    <group ref={rootRef} position={[0, modelYOffset, 0]} rotation={[0, Math.PI, 0]}>
       {vrmScene ? <primitive object={vrmScene} scale={modelScale} /> : null}
       {status === 'error' ? <FallbackMeebit /> : null}
     </group>

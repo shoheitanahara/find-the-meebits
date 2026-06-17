@@ -42,7 +42,7 @@ export function DialogueBox() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-md:bottom-auto max-md:top-[max(5.25rem,env(safe-area-inset-top))] max-md:w-[calc(100%-0.75rem)]">
+    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-md:bottom-auto max-md:top-[max(6rem,env(safe-area-inset-top))] max-md:w-[calc(100%-0.75rem)]">
       <div className="rounded-3xl border border-white/60 bg-white/90 px-5 py-4 shadow-2xl shadow-sky-900/15 backdrop-blur-md max-md:px-3.5 max-md:py-3 sm:px-6 sm:py-5">
         <div className="hidden sm:grid sm:grid-cols-[auto_1fr] sm:gap-4">
           <div>
