@@ -5,9 +5,12 @@ const VRM_CONTENT_TYPE = 'model/vrm'
 
 function getIdParam(request: VercelRequest): string | null {
   const raw = request.query.id
-  const id = Array.isArray(raw) ? raw[0] : raw
-  if (!id) return null
-  return /^\d+$/.test(id) ? id : null
+  const rawId = Array.isArray(raw) ? raw[0] : raw
+  if (!rawId) return null
+
+  // `/api/vrm/2766` と `/api/vrm/2766.vrm` の両方を許容する。
+  const normalized = rawId.replace(/\.vrm$/i, '')
+  return /^\d+$/.test(normalized) ? normalized : null
 }
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
