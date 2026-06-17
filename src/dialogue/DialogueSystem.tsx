@@ -40,10 +40,12 @@ export function DialogueSystem() {
 }
 
 function closeDialogue() {
-  const completionAction = useDialogueStore.getState().closeDialogue()
+  const dialogue = useDialogueStore.getState()
+  const foundNpcId = dialogue.activeNpcId
+  const completionAction = dialogue.closeDialogue()
 
-  if (completionAction === 'clearGame') {
-    useGameStore.getState().clearGame()
+  if (completionAction === 'clearGame' && foundNpcId) {
+    useGameStore.getState().clearGame(foundNpcId)
     return
   }
 

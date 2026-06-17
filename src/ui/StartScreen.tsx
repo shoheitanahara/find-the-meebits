@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { INITIAL_NPC_COUNT, MAX_NPC_COUNT, NPC_COUNT_INCREMENT, PLAYER_START_POSITION } from '../game/gameConfig'
-import { DEFAULT_PLAYER_MEEBIT_ID } from '../game/gameConfig'
+import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import { getProgressionStep, getProgressionSummary, getStageDescription } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -10,10 +10,11 @@ export function StartScreen() {
   const [playerMeebitInput, setPlayerMeebitInput] = useState(String(DEFAULT_PLAYER_MEEBIT_ID))
   const gamePhase = useGameStore((state) => state.gamePhase)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
-  const targetNpcId = useGameStore((state) => state.targetNpcId)
+  const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const startGame = useGameStore((state) => state.startGame)
-  const rerollTarget = useGameStore((state) => state.rerollTarget)
-  const targetNpc = getNpcById(targetNpcId)
+  const rerollTargets = useGameStore((state) => state.rerollTargets)
+  const firstTargetNpc = getNpcById(targetNpcIds[0] ?? '')
+  const firstStep = getProgressionStep(0)
   const playerMeebitNumber = normalizeMeebitNumber(playerMeebitInput)
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function StartScreen() {
     usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
   }, [gamePhase, playerMeebitNumber])
 
-  if (gamePhase !== 'intro' || !targetNpc) {
+  if (gamePhase !== 'intro' || !firstTargetNpc || !firstStep) {
     return null
   }
 
@@ -44,7 +45,7 @@ export function StartScreen() {
     <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-neutral-950/80 p-4 backdrop-blur-sm max-md:flex max-md:items-center max-md:justify-center max-md:p-3 max-md:py-[max(0.5rem,env(safe-area-inset-top))] md:grid md:place-items-center md:p-6">
       <section className="grid w-full max-w-4xl gap-6 rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-md:max-h-[calc(100dvh-1rem)] max-md:max-w-none max-md:gap-3 max-md:rounded-3xl max-md:p-3 md:grid-cols-[auto_1fr] md:p-8">
         <div className="max-md:hidden">
-          <TargetPreview meebitNumber={targetNpc.meebitNumber} sizeClassName="h-40 w-40" />
+          <TargetPreview meebitNumber={firstTargetNpc.meebitNumber} sizeClassName="h-40 w-40" />
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500 max-md:text-[0.6rem] max-md:tracking-[0.25em]">
@@ -54,25 +55,20 @@ export function StartScreen() {
             Find the Meebit
           </h1>
           <p className="mt-4 text-base leading-relaxed text-neutral-600 max-md:mt-1.5 max-md:text-xs max-md:leading-snug">
-            <span className="md:hidden">
-              Stage 1: {INITIAL_NPC_COUNT} Meebits · 3 min limit · up to {MAX_NPC_COUNT}
-            </span>
-            <span className="max-md:hidden">
-              Stage 1 starts with {INITIAL_NPC_COUNT} Meebits. Each clear adds {NPC_COUNT_INCREMENT} more,
-              up to {MAX_NPC_COUNT} for full conquest. You have 3 minutes per stage.
-            </span>
+            {getStageDescription(firstStep)} · 3 min per stage.
+            <span className="max-md:hidden"> {getProgressionSummary()}.</span>
           </p>
 
           <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-md:mt-2 max-md:p-2.5">
             <div className="flex items-center gap-3">
               <TargetPreview
-                meebitNumber={targetNpc.meebitNumber}
+                meebitNumber={firstTargetNpc.meebitNumber}
                 modelScale={1}
                 sizeClassName="h-20 w-20 shrink-0 md:hidden"
               />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-neutral-500 max-md:text-xs">Stage 1 Target</p>
-                <p className="text-3xl font-black max-md:text-xl">Meebit #{targetNpc.meebitNumber}</p>
+                <p className="text-3xl font-black max-md:text-xl">Meebit #{firstTargetNpc.meebitNumber}</p>
                 <p className="mt-1 text-xs font-medium text-neutral-500 max-md:mt-0 max-md:text-[0.65rem]">
                   {activeNpcCount} Meebits in the museum
                 </p>
@@ -80,7 +76,7 @@ export function StartScreen() {
               <button
                 type="button"
                 className="shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 max-md:px-2.5 max-md:py-1 max-md:text-[0.6rem]"
-                onClick={rerollTarget}
+                onClick={rerollTargets}
               >
                 Random
               </button>

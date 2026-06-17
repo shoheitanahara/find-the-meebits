@@ -42,18 +42,19 @@ function maybeBuildTargetHintLine(npc: NPCProfile, talkCount: number): DialogueL
     return null
   }
 
-  const targetNpcId = useGameStore.getState().targetNpcId
-  if (!targetNpcId || targetNpcId === npc.id) {
+  const targetNpcIds = useGameStore.getState().targetNpcIds.filter((id) => id !== npc.id)
+  if (targetNpcIds.length === 0) {
     return null
   }
 
-  const targetNpc = getNpcById(targetNpcId)
+  const hintTargetId = targetNpcIds[Math.floor(Math.random() * targetNpcIds.length)]
+  const targetNpc = getNpcById(hintTargetId)
   if (!targetNpc) {
     return null
   }
 
   const playerPosition = usePlayerStore.getState().position
-  const targetPosition = useNpcStore.getState().npcPositions[targetNpcId] ?? targetNpc.position
+  const targetPosition = useNpcStore.getState().npcPositions[hintTargetId] ?? targetNpc.position
   const text = buildTargetLocationHint(playerPosition, targetPosition)
 
   return toDialogueLine(npc.id, talkCount, -1, text, 'hint')

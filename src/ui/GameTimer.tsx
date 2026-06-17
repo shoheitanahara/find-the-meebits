@@ -16,9 +16,11 @@ export function GameTimer() {
   const { label, value, urgent } = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds)
 
   return (
-    <div className="pointer-events-none absolute left-1/2 top-5 z-30 hidden -translate-x-1/2 md:block">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden grid grid-cols-[minmax(0,1fr)_minmax(0,50vw)_minmax(0,1fr)] items-start gap-4 px-5 pt-5 md:grid">
+      <div aria-hidden className="min-w-0" />
+
       <section
-        className={`rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${
+        className={`justify-self-center rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${
           urgent
             ? 'border-red-400/50 bg-red-950/85 text-red-100'
             : 'border-white/30 bg-neutral-950/85 text-white'
@@ -27,6 +29,8 @@ export function GameTimer() {
         <p className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-neutral-400">{label}</p>
         <p className="text-2xl font-black tabular-nums tracking-tight">{value}</p>
       </section>
+
+      <div aria-hidden className="min-w-0" />
     </div>
   )
 }

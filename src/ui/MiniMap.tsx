@@ -6,7 +6,7 @@ import { usePlayerStore } from '../stores/playerStore'
 
 export function MiniMap() {
   const gamePhase = useGameStore((state) => state.gamePhase)
-  const targetNpcId = useGameStore((state) => state.targetNpcId)
+  const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const position = usePlayerStore((state) => state.position)
   const rotationY = usePlayerStore((state) => state.rotationY)
   const npcPositions = useNpcStore((state) => state.npcPositions)
@@ -16,21 +16,24 @@ export function MiniMap() {
     return null
   }
 
-  const targetNpc = isAnswerReveal ? getNpcById(targetNpcId) : null
-  const targetPosition = targetNpc
-    ? (npcPositions[targetNpc.id] ?? targetNpc.position)
-    : null
+  const targetMarkers = isAnswerReveal
+    ? targetNpcIds
+        .map((id) => {
+          const npc = getNpcById(id)
+          if (!npc) return null
+          const targetPosition = npcPositions[npc.id] ?? npc.position
+          return {
+            id: npc.id,
+            xPercent: ((targetPosition[0] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100,
+            zPercent: ((targetPosition[2] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100,
+          }
+        })
+        .filter((marker): marker is NonNullable<typeof marker> => marker !== null)
+    : []
 
   const xPercent = ((position[0] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
   const zPercent = ((position[2] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
-  // 矢印の左右が逆に見えるため回転方向を反転
   const arrowRotation = -rotationY + Math.PI
-  const targetXPercent = targetPosition
-    ? ((targetPosition[0] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
-    : null
-  const targetZPercent = targetPosition
-    ? ((targetPosition[2] + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
-    : null
 
   return (
     <aside
@@ -62,17 +65,18 @@ export function MiniMap() {
         <div className="absolute left-1/2 top-0 h-full w-px bg-neutral-600/70" />
         <div className="absolute left-0 top-1/2 h-px w-full bg-neutral-600/70" />
         <div className="absolute inset-3 border border-neutral-500/50" />
-        {targetXPercent !== null && targetZPercent !== null ? (
+        {targetMarkers.map((marker) => (
           <div
+            key={marker.id}
             className={`absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full ${
               isAnswerReveal ? 'animate-pulse bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.95)]' : 'bg-red-400'
             }`}
             style={{
-              left: `${clampPercent(targetXPercent)}%`,
-              top: `${clampPercent(targetZPercent)}%`,
+              left: `${clampPercent(marker.xPercent)}%`,
+              top: `${clampPercent(marker.zPercent)}%`,
             }}
           />
-        ) : null}
+        ))}
         <div
           className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2"
           style={{

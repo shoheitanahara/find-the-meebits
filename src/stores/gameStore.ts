@@ -3,14 +3,11 @@ import {
   CREATOR_NPC_ID,
   DEFAULT_PLAYER_MEEBIT_ID,
   GAME_TIME_LIMIT_SECONDS,
-  INITIAL_NPC_COUNT,
-  MAX_NPC_COUNT,
-  NPC_COUNT_INCREMENT,
   NPC_VRM_ALWAYS_LOAD_DISTANCE,
   PLAYER_START_POSITION,
-  getStageFromNpcCount,
-  isFullyConquered,
 } from '../game/gameConfig'
+import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
+import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, resetVrmInstancePool } from '../avatar/vrmInstancePool'
 import { buildNpcProfiles } from '../npc/npcGeneration'
@@ -24,9 +21,12 @@ type GamePhase = 'intro' | 'preparing' | 'playing' | 'cleared' | 'timedOut' | 'c
 
 type GameState = {
   gamePhase: GamePhase
+  progressionIndex: number
   activeNpcCount: number
   stage: number
-  targetNpcId: string
+  stageKind: StageKind
+  targetNpcIds: string[]
+  foundTargetNpcIds: string[]
   clearedNpcId: string | null
   startedAt: number | null
   preparedAt: number | null
@@ -37,12 +37,12 @@ type GameState = {
   playerModelError: string | null
   startGame: () => void
   beginPlaying: () => void
-  clearGame: () => void
+  clearGame: (foundNpcId: string) => void
   timeUp: () => void
   continueToNextStage: () => void
   retryStage: () => void
   resetGame: () => void
-  rerollTarget: () => void
+  rerollTargets: () => void
   setNpcProfiles: (npcProfiles: NPCProfile[]) => void
   setPlayerModelLoading: () => void
   setPlayerModelReady: () => void
@@ -50,16 +50,25 @@ type GameState = {
 }
 
 function createInitialState() {
-  const activeNpcCount = INITIAL_NPC_COUNT
+  const progressionIndex = 0
+  const step = getProgressionStep(progressionIndex)
+  if (!step) {
+    throw new Error('Progression step 0 is missing.')
+  }
+
+  const activeNpcCount = step.npcCount
   const npcProfiles = buildNpcProfiles(activeNpcCount)
   resetPlayerToStart()
   seedNpcPositions(npcProfiles)
 
   return {
     gamePhase: 'intro' as const,
+    progressionIndex,
     activeNpcCount,
-    stage: getStageFromNpcCount(activeNpcCount),
-    targetNpcId: getRandomTargetNpcId(npcProfiles),
+    stage: step.stageNumber,
+    stageKind: step.kind,
+    targetNpcIds: pickRandomTargetNpcIds(npcProfiles, step.targetCount),
+    foundTargetNpcIds: [] as string[],
     clearedNpcId: null,
     startedAt: null,
     preparedAt: null,
@@ -77,14 +86,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     softResetForGameStart()
     usePlayerStore.getState().setMovementLocked(true)
 
+    const step = getProgressionStep(get().progressionIndex)
+    if (!step) return
+
     set({
       gamePhase: 'preparing',
-      targetNpcId: get().targetNpcId,
       clearedNpcId: null,
       clearTimeSeconds: null,
       startedAt: null,
       preparedAt: Date.now(),
-      stage: getStageFromNpcCount(get().activeNpcCount),
+      stage: step.stageNumber,
+      stageKind: step.kind,
+      foundTargetNpcIds: [],
     })
   },
   beginPlaying: () => {
@@ -96,25 +109,50 @@ export const useGameStore = create<GameState>((set, get) => ({
       preparedAt: null,
     })
   },
-  clearGame: () =>
+  clearGame: (foundNpcId) =>
     set((state) => {
-      const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
-      const nextNpcCount = Math.min(MAX_NPC_COUNT, state.activeNpcCount + NPC_COUNT_INCREMENT)
+      if (!state.targetNpcIds.includes(foundNpcId)) {
+        return state
+      }
 
-      if (isFullyConquered(state.activeNpcCount)) {
+      const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
+      const foundTargetNpcIds = [...state.foundTargetNpcIds, foundNpcId]
+      const remainingTargets = state.targetNpcIds.filter((id) => id !== foundNpcId)
+
+      if (remainingTargets.length > 0) {
+        usePlayerStore.getState().setMovementLocked(false)
+
         return {
-          gamePhase: 'conquered',
-          clearedNpcId: state.targetNpcId,
+          foundTargetNpcIds,
+          targetNpcIds: remainingTargets,
+          clearedNpcId: foundNpcId,
+          gamePhase: 'playing' as const,
+        }
+      }
+
+      const nextIndex = state.progressionIndex + 1
+      const nextStep = getProgressionStep(nextIndex)
+
+      if (!nextStep) {
+        return {
+          gamePhase: 'conquered' as const,
+          foundTargetNpcIds,
+          targetNpcIds: [],
+          clearedNpcId: foundNpcId,
           clearTimeSeconds,
         }
       }
 
       return {
-        gamePhase: 'cleared',
-        clearedNpcId: state.targetNpcId,
+        gamePhase: 'cleared' as const,
+        progressionIndex: nextIndex,
+        activeNpcCount: nextStep.npcCount,
+        stage: nextStep.stageNumber,
+        stageKind: nextStep.kind,
+        foundTargetNpcIds: [],
+        targetNpcIds: [],
+        clearedNpcId: foundNpcId,
         clearTimeSeconds,
-        activeNpcCount: nextNpcCount,
-        stage: getStageFromNpcCount(nextNpcCount),
       }
     }),
   timeUp: () => {
@@ -126,67 +164,75 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   continueToNextStage: () => {
     const state = get()
-    const npcLayout = createNpcLayout(state.activeNpcCount, state.npcLayoutVersion)
-    const targetNpcId = getRandomTargetNpcId(npcLayout.npcProfiles)
-    const targetNpc = npcLayout.npcProfiles.find((npc) => npc.id === targetNpcId)
+    const step = getProgressionStep(state.progressionIndex)
+    if (!step) return
+
+    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
+    const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount)
     resetStageRuntimeState()
     seedNpcPositions(npcLayout.npcProfiles)
     resetPlayerToStart()
     usePlayerStore.getState().setMovementLocked(true)
-
-    if (targetNpc) {
-      preloadVrm(targetNpc.meebitNumber, -300)
-    }
+    preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
 
     set({
       gamePhase: 'preparing',
       ...npcLayout,
-      targetNpcId,
+      activeNpcCount: step.npcCount,
+      targetNpcIds,
+      foundTargetNpcIds: [],
       clearedNpcId: null,
       clearTimeSeconds: null,
       startedAt: null,
       preparedAt: Date.now(),
-      stage: getStageFromNpcCount(state.activeNpcCount),
+      stage: step.stageNumber,
+      stageKind: step.kind,
     })
   },
   retryStage: () => {
     const state = get()
-    const npcLayout = createNpcLayout(state.activeNpcCount, state.npcLayoutVersion)
-    const targetNpcId = getRandomTargetNpcId(npcLayout.npcProfiles, state.targetNpcId)
-    const targetNpc = npcLayout.npcProfiles.find((npc) => npc.id === targetNpcId)
+    const step = getProgressionStep(state.progressionIndex)
+    if (!step) return
+
+    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
+    const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount, state.targetNpcIds)
     resetStageRuntimeState()
     seedNpcPositions(npcLayout.npcProfiles)
     resetPlayerToStart()
     usePlayerStore.getState().setMovementLocked(true)
-
-    if (targetNpc) {
-      preloadVrm(targetNpc.meebitNumber, -300)
-    }
+    preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
 
     set({
       gamePhase: 'preparing',
       ...npcLayout,
-      targetNpcId,
+      activeNpcCount: step.npcCount,
+      targetNpcIds,
+      foundTargetNpcIds: [],
       clearedNpcId: null,
       clearTimeSeconds: null,
       startedAt: null,
       preparedAt: Date.now(),
+      stage: step.stageNumber,
+      stageKind: step.kind,
     })
   },
   resetGame: () => {
     resetStageRuntimeState()
     set(createInitialState())
   },
-  rerollTarget: () =>
+  rerollTargets: () =>
     set((state) => {
-      const targetNpcId = getRandomTargetNpcId(state.npcProfiles, state.targetNpcId)
-      const targetNpc = state.npcProfiles.find((npc) => npc.id === targetNpcId)
+      const step = getProgressionStep(state.progressionIndex)
+      if (!step) return state
 
-      if (targetNpc) {
-        preloadVrm(targetNpc.meebitNumber, -300)
-      }
+      const targetNpcIds = pickRandomTargetNpcIds(
+        state.npcProfiles,
+        step.targetCount,
+        state.targetNpcIds,
+      )
+      preloadTargetVrms(state.npcProfiles, targetNpcIds)
 
-      return { targetNpcId }
+      return { targetNpcIds }
     }),
   setNpcProfiles: (npcProfiles) =>
     set((state) => {
@@ -208,6 +254,15 @@ function createNpcLayout(activeNpcCount: number, currentLayoutVersion: number) {
   }
 }
 
+function preloadTargetVrms(profiles: NPCProfile[], targetNpcIds: string[]) {
+  for (const targetNpcId of targetNpcIds) {
+    const targetNpc = profiles.find((npc) => npc.id === targetNpcId)
+    if (targetNpc) {
+      preloadVrm(targetNpc.meebitNumber, -300)
+    }
+  }
+}
+
 function seedNpcPositions(profiles: NPCProfile[]) {
   const npcPositions: Record<string, [number, number, number]> = {}
 
@@ -220,9 +275,6 @@ function seedNpcPositions(profiles: NPCProfile[]) {
 }
 
 function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
-  // 次ステージ遷移直後に 1 フレームだけ active=0 になり得るので、ここで初期値を埋める。
-  // ただし最初から大量に active にするとロードキューが散って「近くが先にロードされない」ので、
-  // スタート地点の近場（ALWAYS_LOAD圏）に絞ってウォームスタートする。
   const playerX = PLAYER_START_POSITION[0]
   const playerZ = PLAYER_START_POSITION[2]
 
@@ -272,27 +324,6 @@ function resetStageRuntimeState() {
   })
 }
 
-function getRandomTargetNpcId(profiles: NPCProfile[], excludeNpcId?: string) {
-  const candidates = profiles.filter((npc) => npc.id !== CREATOR_NPC_ID)
-
-  if (candidates.length === 0) {
-    return 'npc-001'
-  }
-
-  if (candidates.length === 1) {
-    return candidates[0].id
-  }
-
-  let nextId = candidates[0].id
-
-  do {
-    const index = Math.floor(Math.random() * candidates.length)
-    nextId = candidates[index].id
-  } while (nextId === excludeNpcId)
-
-  return nextId
-}
-
 export function getElapsedSeconds(startedAt: number | null) {
   if (startedAt === null) {
     return 0
@@ -303,4 +334,9 @@ export function getElapsedSeconds(startedAt: number | null) {
 
 export function getRemainingSeconds(startedAt: number | null) {
   return Math.max(0, GAME_TIME_LIMIT_SECONDS - getElapsedSeconds(startedAt))
+}
+
+export function getCurrentStageLabel(progressionIndex: number) {
+  const step = getProgressionStep(progressionIndex)
+  return step ? getStageLabel(step) : 'Stage'
 }

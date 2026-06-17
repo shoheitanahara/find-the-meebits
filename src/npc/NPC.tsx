@@ -41,9 +41,9 @@ export function NPC({ profile }: NPCProps) {
   const storeUpdateTimerRef = useRef(0)
   const isNearest = useNpcStore((state) => state.nearestNpcId === profile.id)
   const isDialogueActive = useDialogueStore((state) => state.activeNpcId === profile.id)
-  const isTarget = useGameStore((state) => state.targetNpcId === profile.id)
+  const isTarget = useGameStore((state) => state.targetNpcIds.includes(profile.id))
   const isAnswerRevealed = useGameStore(
-    (state) => state.gamePhase === 'timedOut' && state.targetNpcId === profile.id,
+    (state) => state.gamePhase === 'timedOut' && state.targetNpcIds.includes(profile.id),
   )
   const [shouldLoadVRM, setShouldLoadVRM] = useState(() => isNpcVrmActive(profile.id))
   const [loadPriority, setLoadPriority] = useState(9999)

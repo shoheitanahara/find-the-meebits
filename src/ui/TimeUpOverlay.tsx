@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
+import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -7,13 +8,18 @@ import { TargetPreview } from './TargetPreview'
 
 export function TimeUpOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
-  const stage = useGameStore((state) => state.stage)
+  const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
-  const targetNpcId = useGameStore((state) => state.targetNpcId)
+  const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const retryStage = useGameStore((state) => state.retryStage)
   const resetGame = useGameStore((state) => state.resetGame)
-  const targetNpc = getNpcById(targetNpcId)
-  const isVisible = gamePhase === 'timedOut' && targetNpc !== null
+  const targetNpcs = targetNpcIds
+    .map((id) => getNpcById(id))
+    .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
+  const step = getProgressionStep(progressionIndex)
+  const stageLabel = step ? getStageLabel(step) : 'Stage'
+  const isVisible = gamePhase === 'timedOut' && targetNpcs.length > 0
+  const targetNumbersLabel = targetNpcs.map((npc) => `#${npc.meebitNumber}`).join(', ')
 
   const handleRetry = () => {
     usePlayerStore
@@ -48,46 +54,94 @@ export function TimeUpOverlay() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isVisible, retryStage])
 
-  if (!isVisible || !targetNpc) {
+  if (!isVisible) {
     return null
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center p-4 max-md:bottom-[max(7rem,env(safe-area-inset-bottom))] sm:p-6">
-      <section className="pointer-events-auto grid w-full max-w-3xl gap-5 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-5 text-white shadow-2xl backdrop-blur-md max-md:gap-4 max-md:p-4 sm:grid-cols-[auto_1fr] sm:p-6">
-        <TargetPreview
-          meebitNumber={targetNpc.meebitNumber}
-          modelScale={1.12}
-          sizeClassName="mx-auto h-40 w-40 max-md:h-28 max-md:w-28"
-        />
-        <div className="text-center sm:text-left">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">Time Up</p>
-          <h2 className="mt-2 text-3xl font-black max-md:text-2xl sm:text-4xl">Answer reveal</h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-300 max-md:text-xs">
-            Stage {stage} with {activeNpcCount} Meebits. The correct avatar is{' '}
-            <span className="font-black text-amber-200">Meebit #{targetNpc.meebitNumber}</span> and
-            glows gold in the gallery.
-            <span className="max-md:hidden"> Keep moving with WASD to find them.</span>
-            <span className="md:hidden"> Use the joystick to find them.</span>
+    <>
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-40 px-2.5 pt-[calc(max(0.5rem,env(safe-area-inset-top))+3.35rem)] md:hidden">
+        <section className="pointer-events-auto w-[min(68vw,26rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-4 py-3.5 text-white shadow-lg backdrop-blur-md">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-300/95">
+            Time Up · Answer Reveal
           </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3 max-md:flex-col sm:justify-start">
+          <p className="mt-1.5 text-sm leading-snug text-neutral-300">
+            <span className="font-bold text-amber-200">{targetNumbersLabel}</span> glow gold. Move to find
+            them.
+          </p>
+          <div className="mt-3 flex gap-2.5">
             <button
               type="button"
-              className="rounded-full bg-amber-400 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-amber-300 max-md:w-full max-md:py-3.5"
+              className="flex-1 rounded-full bg-amber-400 px-3 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-neutral-950 transition active:bg-amber-300"
               onClick={handleRetry}
             >
-              Retry Stage
+              Retry
             </button>
             <button
               type="button"
-              className="rounded-full border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:border-white hover:bg-white/10 max-md:w-full max-md:py-3.5"
+              className="flex-1 rounded-full border border-white/25 px-3 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-white transition active:bg-white/10"
               onClick={handleBackToTitle}
             >
               Title
             </button>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 hidden justify-center p-4 sm:p-6 md:flex">
+        <section className="pointer-events-auto grid w-full max-w-3xl gap-5 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-6 text-white shadow-2xl backdrop-blur-md sm:grid-cols-[auto_1fr]">
+          <div className="grid gap-2">
+            {targetNpcs.map((npc) => (
+              <TargetPreview
+                key={npc.id}
+                meebitNumber={npc.meebitNumber}
+                modelScale={1.12}
+                sizeClassName="mx-auto h-40 w-40"
+              />
+            ))}
+          </div>
+          <div className="text-left">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">Time Up</p>
+            <h2 className="mt-2 text-4xl font-black">Answer reveal</h2>
+            <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+              {stageLabel} with {activeNpcCount} Meebits.{' '}
+              {targetNpcs.length > 1 ? (
+                <>
+                  The remaining targets are{' '}
+                  {targetNpcs.map((npc, index) => (
+                    <span key={npc.id}>
+                      {index > 0 ? (index === targetNpcs.length - 1 ? ' and ' : ', ') : ''}
+                      <span className="font-black text-amber-200">#{npc.meebitNumber}</span>
+                    </span>
+                  ))}
+                </>
+              ) : (
+                <>
+                  The correct avatar is{' '}
+                  <span className="font-black text-amber-200">Meebit #{targetNpcs[0]?.meebitNumber}</span>
+                </>
+              )}{' '}
+              and glows gold in the gallery. Keep moving with WASD to find them.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="rounded-full bg-amber-400 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-amber-300"
+                onClick={handleRetry}
+              >
+                Retry Stage
+              </button>
+              <button
+                type="button"
+                className="rounded-full border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:border-white hover:bg-white/10"
+                onClick={handleBackToTitle}
+              >
+                Title
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
   )
 }

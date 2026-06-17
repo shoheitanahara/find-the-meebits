@@ -16,13 +16,13 @@ type LodCandidate = {
 function isForcedVrmNpc(
   npcId: string,
   dialogueNpcId: string | null,
-  targetNpcId: string,
+  targetNpcIds: string[],
   nearestNpcId: string | null,
 ) {
   return (
     npcId === CREATOR_NPC_ID ||
     npcId === dialogueNpcId ||
-    npcId === targetNpcId ||
+    targetNpcIds.includes(npcId) ||
     npcId === nearestNpcId
   )
 }
@@ -87,7 +87,7 @@ export function NPCVrmLodSystem() {
           ] as [number, number, number])
         : usePlayerStore.getState().position
     const npcProfiles = useGameStore.getState().npcProfiles
-    const targetNpcId = useGameStore.getState().targetNpcId
+    const targetNpcIds = useGameStore.getState().targetNpcIds
     const dialogueNpcId = useDialogueStore.getState().activeNpcId
     const nearestNpcId = useNpcStore.getState().nearestNpcId
     const npcPositions = useNpcStore.getState().npcPositions
@@ -101,7 +101,7 @@ export function NPCVrmLodSystem() {
       const dz = playerPosition[2] - npcPosition[2]
       const distance = Math.hypot(dx, dz)
       const wasActive = previousActiveIds.has(npc.id)
-      const isForced = isForcedVrmNpc(npc.id, dialogueNpcId, targetNpcId, nearestNpcId)
+      const isForced = isForcedVrmNpc(npc.id, dialogueNpcId, targetNpcIds, nearestNpcId)
       const inRange = isNpcWithinVrmRange(distance, playerPosition, npcPosition, wasActive)
 
       if (!inRange && !isForced) {
@@ -119,7 +119,7 @@ export function NPCVrmLodSystem() {
     const forcedNpcIds = [
       CREATOR_NPC_ID,
       dialogueNpcId,
-      targetNpcId,
+      ...targetNpcIds,
       nearestNpcId,
     ].filter((npcId): npcId is string => Boolean(npcId))
 

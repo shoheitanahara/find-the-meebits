@@ -27,10 +27,11 @@ export function DialogueBox() {
   }
 
   const handleClose = () => {
+    const foundNpcId = activeNpcId
     const completionAction = closeDialogue()
 
-    if (completionAction === 'clearGame') {
-      clearGame()
+    if (completionAction === 'clearGame' && foundNpcId) {
+      clearGame(foundNpcId)
       return
     }
 

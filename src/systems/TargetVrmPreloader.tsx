@@ -7,11 +7,13 @@ const TARGET_PRELOAD_PRIORITY = -300
 
 export function TargetVrmPreloader() {
   const gamePhase = useGameStore((state) => state.gamePhase)
-  const targetNpcId = useGameStore((state) => state.targetNpcId)
-  const targetNpc = getNpcById(targetNpcId)
+  const targetNpcIds = useGameStore((state) => state.targetNpcIds)
+  const targetMeebitNumbers = targetNpcIds
+    .map((id) => getNpcById(id)?.meebitNumber)
+    .filter((value): value is number => value !== undefined)
 
   useEffect(() => {
-    if (!targetNpc) {
+    if (targetMeebitNumbers.length === 0) {
       return
     }
 
@@ -21,9 +23,11 @@ export function TargetVrmPreloader() {
       gamePhase === 'playing' ||
       gamePhase === 'timedOut'
     ) {
-      preloadVrm(targetNpc.meebitNumber, TARGET_PRELOAD_PRIORITY)
+      for (const meebitNumber of targetMeebitNumbers) {
+        preloadVrm(meebitNumber, TARGET_PRELOAD_PRIORITY)
+      }
     }
-  }, [gamePhase, targetNpc?.meebitNumber])
+  }, [gamePhase, targetMeebitNumbers.join(',')])
 
   return null
 }

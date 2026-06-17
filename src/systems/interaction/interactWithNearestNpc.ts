@@ -27,7 +27,7 @@ export function interactWithNearestNpc(): boolean {
     return false
   }
 
-  if (targetNpcId === game.targetNpcId) {
+  if (game.targetNpcIds.includes(targetNpcId)) {
     recordNpcTalk(targetNpcId, usePlayerStore.getState().position)
     usePlayerStore.getState().setMovementLocked(true)
     dialogue.openDialogue(

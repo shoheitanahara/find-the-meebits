@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import { MAX_NPC_COUNT, PLAYER_START_POSITION } from '../game/gameConfig'
+import { PLAYER_START_POSITION } from '../game/gameConfig'
+import { getProgressionStep, getStageDescription, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
-import { useGameStore } from '../stores/gameStore'
+import { getCurrentStageLabel, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from './TargetPreview'
 
@@ -9,13 +10,15 @@ export function ClearOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const clearedNpcId = useGameStore((state) => state.clearedNpcId)
   const clearTimeSeconds = useGameStore((state) => state.clearTimeSeconds)
-  const stage = useGameStore((state) => state.stage)
+  const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const continueToNextStage = useGameStore((state) => state.continueToNextStage)
   const resetGame = useGameStore((state) => state.resetGame)
   const clearedNpc = clearedNpcId ? getNpcById(clearedNpcId) : null
   const isVisible = gamePhase === 'cleared' || gamePhase === 'conquered'
   const isConquered = gamePhase === 'conquered'
+  const clearedStep = getProgressionStep(isConquered ? progressionIndex : progressionIndex - 1)
+  const nextStep = isConquered ? null : getProgressionStep(progressionIndex)
 
   const handleContinue = () => {
     usePlayerStore
@@ -56,6 +59,8 @@ export function ClearOverlay() {
     return null
   }
 
+  const clearedStageLabel = clearedStep ? getStageLabel(clearedStep) : getCurrentStageLabel(progressionIndex)
+
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 overflow-y-auto bg-neutral-950/75 p-4 backdrop-blur-sm max-md:py-[max(1rem,env(safe-area-inset-top))] md:grid md:place-items-center md:p-6">
       <section className="mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-white/15 bg-white p-5 text-neutral-950 shadow-2xl max-md:my-auto sm:grid-cols-[auto_1fr] sm:p-8">
@@ -81,13 +86,15 @@ export function ClearOverlay() {
             </div>
             <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">Stage</p>
-              <p className="mt-1 text-2xl font-black">{isConquered ? 'MAX' : stage}</p>
+              <p className="mt-1 text-2xl font-black">{isConquered ? 'Complete' : clearedStageLabel}</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-neutral-600">
             {isConquered
-              ? `You cleared the final stage with ${MAX_NPC_COUNT} Meebits wandering the museum.`
-              : `Next stage: ${activeNpcCount} Meebits. The museum gets denser every clear.`}
+              ? 'You cleared Semifinal and Final at 500 Meebits. Full conquest complete.'
+              : nextStep
+                ? `Next: ${getStageLabel(nextStep)} — ${getStageDescription(nextStep)}`
+                : `Next stage: ${activeNpcCount} Meebits.`}
           </p>
           <button
             type="button"
