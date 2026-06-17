@@ -10,9 +10,9 @@ export type ProgressionStep = {
 }
 
 const PC_REGULAR_NPC_COUNTS = [200, 250, 300, 350, 400] as const
-const SP_REGULAR_NPC_COUNTS = [100, 150, 200, 250, 300] as const
+const SP_REGULAR_NPC_COUNTS = [100, 125, 150, 175, 200] as const
 const PC_CHALLENGE_NPC_COUNT = 400
-const SP_CHALLENGE_NPC_COUNT = 300
+const SP_CHALLENGE_NPC_COUNT = 200
 
 export function getChallengeNpcCount() {
   return isMobilePerfMode() ? SP_CHALLENGE_NPC_COUNT : PC_CHALLENGE_NPC_COUNT
