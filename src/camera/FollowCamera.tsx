@@ -17,11 +17,18 @@ const dialogueCameraDirection = new Vector3()
 const lookAtOffset = new Vector3(0, 1.4, 0)
 const dialogueCameraHeight = new Vector3(0, 2.35, 0)
 const dialogueLookAtHeight = new Vector3(0, 1.55, 0)
+const mobileDialogueCameraHeight = new Vector3(0, 2.1, 0)
+const mobileDialogueLookAtHeight = new Vector3(0, 1.15, 0)
+
+function isMobileViewport() {
+  return window.innerWidth < 768
+}
 
 export function FollowCamera() {
   useFrame(({ camera }, delta) => {
     const { position } = usePlayerStore.getState()
     const dialogue = useDialogueStore.getState()
+    const isMobile = isMobileViewport()
 
     playerPosition.set(position[0], position[1], position[2])
 
@@ -42,11 +49,16 @@ export function FollowCamera() {
         dialogueSide.set(-dialogueDirection.z, 0, dialogueDirection.x).normalize()
         dialogueCameraDirection
           .copy(dialogueSide)
-          .multiplyScalar(0.72)
-          .addScaledVector(dialogueDirection, 0.48)
+          .multiplyScalar(isMobile ? 0.55 : 0.72)
+          .addScaledVector(dialogueDirection, isMobile ? 0.35 : 0.48)
           .normalize()
-        desiredPosition.copy(midpoint).addScaledVector(dialogueCameraDirection, 4.6).add(dialogueCameraHeight)
-        lookAtTarget.copy(midpoint).add(dialogueLookAtHeight)
+
+        const cameraDistance = isMobile ? 5.8 : 4.6
+        const cameraHeight = isMobile ? mobileDialogueCameraHeight : dialogueCameraHeight
+        const lookAtHeight = isMobile ? mobileDialogueLookAtHeight : dialogueLookAtHeight
+
+        desiredPosition.copy(midpoint).addScaledVector(dialogueCameraDirection, cameraDistance).add(cameraHeight)
+        lookAtTarget.copy(midpoint).add(lookAtHeight)
 
         camera.position.lerp(desiredPosition, 1 - Math.exp(-delta * 8))
         camera.lookAt(lookAtTarget)

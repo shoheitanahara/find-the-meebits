@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { useDialogueStore } from '../dialogue/dialogueStore'
+import { advanceDialogue } from './advanceDialogue'
+import { useDialogueStore } from './dialogueStore'
 import { interactWithNearestNpc } from '../systems/interaction/interactWithNearestNpc'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -11,17 +12,14 @@ export function DialogueSystem() {
 
       if (event.code === 'Escape' && dialogue.isOpen) {
         event.preventDefault()
-        finishDialogue()
+        closeDialogue()
         return
       }
 
       if (dialogue.isOpen) {
         if (event.code === 'Enter' || event.code === 'KeyE' || event.code === 'Space') {
           event.preventDefault()
-          const hasNext = dialogue.nextLine()
-          if (!hasNext) {
-            finishDialogue()
-          }
+          advanceDialogue()
         }
         return
       }
@@ -41,7 +39,7 @@ export function DialogueSystem() {
   return null
 }
 
-function finishDialogue() {
+function closeDialogue() {
   const completionAction = useDialogueStore.getState().closeDialogue()
 
   if (completionAction === 'clearGame') {

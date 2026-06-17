@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { advanceDialogue } from '../../dialogue/advanceDialogue'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { getNpcById } from '../../npc/npcData'
 import { interactWithNearestNpc } from '../../systems/interaction/interactWithNearestNpc'
@@ -6,16 +7,41 @@ import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
 import { useTouchControlsStore } from '../../stores/touchControlsStore'
 
-const JOYSTICK_RADIUS = 52
+const JOYSTICK_RADIUS = 44
+const BASE_SIZE = 112
+const KNOB_SIZE = 44
 
 export function MobileControls() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+  const currentIndex = useDialogueStore((state) => state.currentIndex)
+  const lines = useDialogueStore((state) => state.lines)
   const nearestNpcId = useNpcStore((state) => state.nearestNpcId)
   const canMove = gamePhase === 'playing' || gamePhase === 'timedOut'
   const nearestNpc = nearestNpcId ? getNpcById(nearestNpcId) : null
+  const isLastLine = currentIndex >= lines.length - 1
 
-  if (!canMove || isDialogueOpen) {
+  if (isDialogueOpen) {
+    return (
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
+        <button
+          type="button"
+          className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
+          onPointerDown={(event) => {
+            event.preventDefault()
+            advanceDialogue()
+          }}
+        >
+          <span className="text-2xl leading-none">→</span>
+          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+            {isLastLine ? 'Done' : 'Next'}
+          </span>
+        </button>
+      </div>
+    )
+  }
+
+  if (!canMove) {
     return null
   }
 
@@ -35,7 +61,7 @@ export function MobileControls() {
           <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">Inspect</span>
         </button>
       ) : (
-        <div className="h-20 w-20" />
+        <div className="h-20 w-20 shrink-0" />
       )}
     </div>
   )
@@ -96,18 +122,30 @@ function VirtualJoystick() {
 
   return (
     <div
-      ref={baseRef}
-      className="pointer-events-auto relative h-32 w-32 touch-none select-none"
+      className="pointer-events-auto relative ml-1 touch-none select-none"
+      style={{ width: BASE_SIZE, height: BASE_SIZE }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
     >
-      <div className="absolute inset-0 rounded-full border-2 border-white/25 bg-neutral-950/45 backdrop-blur-sm" />
       <div
-        className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/60 bg-white/25 shadow-lg"
+        ref={baseRef}
+        className="absolute left-1/2 top-1/2 rounded-full border-2 border-white/25 bg-neutral-950/45 backdrop-blur-sm"
         style={{
-          transform: `translate(calc(-50% + ${knobOffset.x}px), calc(-50% + ${knobOffset.y}px))`,
+          width: BASE_SIZE,
+          height: BASE_SIZE,
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+      <div
+        className="absolute rounded-full border-2 border-white/60 bg-white/25 shadow-lg"
+        style={{
+          width: KNOB_SIZE,
+          height: KNOB_SIZE,
+          left: `calc(50% + ${knobOffset.x}px)`,
+          top: `calc(50% + ${knobOffset.y}px)`,
+          transform: 'translate(-50%, -50%)',
         }}
       />
     </div>
