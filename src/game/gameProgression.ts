@@ -11,10 +11,16 @@ export type ProgressionStep = {
 
 const PC_REGULAR_NPC_COUNTS = [300, 350, 400, 450, 500] as const
 const SP_REGULAR_NPC_COUNTS = [100, 150, 200, 250, 300] as const
-const CHALLENGE_NPC_COUNT = 500
+const PC_CHALLENGE_NPC_COUNT = 500
+const SP_CHALLENGE_NPC_COUNT = 300
+
+export function getChallengeNpcCount() {
+  return isMobilePerfMode() ? SP_CHALLENGE_NPC_COUNT : PC_CHALLENGE_NPC_COUNT
+}
 
 export function getProgressionSteps(): ProgressionStep[] {
   const regularCounts = isMobilePerfMode() ? SP_REGULAR_NPC_COUNTS : PC_REGULAR_NPC_COUNTS
+  const challengeNpcCount = getChallengeNpcCount()
 
   const regularSteps: ProgressionStep[] = regularCounts.map((npcCount, index) => ({
     stageNumber: index + 1,
@@ -27,13 +33,13 @@ export function getProgressionSteps(): ProgressionStep[] {
     ...regularSteps,
     {
       stageNumber: 6,
-      npcCount: CHALLENGE_NPC_COUNT,
+      npcCount: challengeNpcCount,
       targetCount: 2,
       kind: 'semifinal',
     },
     {
       stageNumber: 7,
-      npcCount: CHALLENGE_NPC_COUNT,
+      npcCount: challengeNpcCount,
       targetCount: 3,
       kind: 'final',
     },
@@ -69,13 +75,9 @@ export function getStageDescription(step: ProgressionStep) {
 }
 
 export function getProgressionSummary() {
-  const steps = getProgressionSteps()
-  const regularEnd = steps.find((step) => step.kind === 'semifinal')
-  const first = steps[0]
+  const regularCounts = isMobilePerfMode() ? SP_REGULAR_NPC_COUNTS : PC_REGULAR_NPC_COUNTS
+  const first = regularCounts[0]
+  const lastRegular = regularCounts[regularCounts.length - 1]
 
-  if (!first || !regularEnd) {
-    return ''
-  }
-
-  return `${first.npcCount}–${regularEnd.npcCount} across 5 stages, then Semifinal (2 targets) and Final (3 targets) at ${CHALLENGE_NPC_COUNT} Meebits`
+  return `${first}–${lastRegular} across 5 stages, then Semifinal (2 targets) and Final (3 targets) at ${getChallengeNpcCount()} Meebits`
 }

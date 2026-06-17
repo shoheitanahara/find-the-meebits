@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
-import { getProgressionStep, getStageDescription, getStageLabel } from '../game/gameProgression'
+import { getProgressionStep, getStageDescription, getStageLabel, getChallengeNpcCount } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { getCurrentStageLabel, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -91,7 +91,7 @@ export function ClearOverlay() {
           </div>
           <p className="mt-4 text-sm leading-relaxed text-neutral-600">
             {isConquered
-              ? 'You cleared Semifinal and Final at 500 Meebits. Full conquest complete.'
+              ? `You cleared Semifinal and Final at ${getChallengeNpcCount()} Meebits. Full conquest complete.`
               : nextStep
                 ? `Next: ${getStageLabel(nextStep)} — ${getStageDescription(nextStep)}`
                 : `Next stage: ${activeNpcCount} Meebits.`}
