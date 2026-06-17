@@ -147,8 +147,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       startedAt: null,
       preparedAt: Date.now(),
       stage: getStageFromNpcCount(state.activeNpcCount),
-      playerModelStatus: 'idle',
-      playerModelError: null,
     })
   },
   retryStage: () => {
@@ -173,8 +171,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearTimeSeconds: null,
       startedAt: null,
       preparedAt: Date.now(),
-      playerModelStatus: 'idle',
-      playerModelError: null,
     })
   },
   resetGame: () => {

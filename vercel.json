@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/vrm/:id(\\d+).vrm",
+      "source": "/vrm/:id(\\d+)\\.vrm",
       "destination": "https://files.meebits.app/vrm/:id.vrm"
     }
   ]
