@@ -55,8 +55,7 @@ export function StartScreen() {
             Find the Meebit
           </h1>
           <p className="mt-4 text-base leading-relaxed text-neutral-600 max-md:mt-1.5 max-md:text-xs max-md:leading-snug">
-            {getStageDescription(firstStep)} · 3 min per stage.
-            <span className="max-md:hidden"> {getProgressionSummary()}.</span>
+            {getStageDescription(firstStep)} · 3 min per stage. {getProgressionSummary()}.
           </p>
 
           <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-md:mt-2 max-md:p-2.5">

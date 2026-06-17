@@ -5,6 +5,39 @@ import { useGameStore } from '../../stores/gameStore'
 import { getTimerDisplay } from '../gameTimerDisplay'
 import { TargetPreview } from '../TargetPreview'
 
+function getTargetStackLayout(targetCount: number) {
+  if (targetCount >= 5) {
+    return {
+      previewSize: 'h-9 w-9',
+      modelScale: 1.0,
+      stackGap: 'gap-0.5',
+      itemGap: 'gap-1',
+      itemPadding: 'px-1 py-0.5',
+      idClassName: 'min-w-[1.85rem] text-right text-[0.6rem] font-black leading-none text-white',
+    }
+  }
+
+  if (targetCount >= 4) {
+    return {
+      previewSize: 'h-10 w-10',
+      modelScale: 1.02,
+      stackGap: 'gap-0.5',
+      itemGap: 'gap-1',
+      itemPadding: 'px-1 py-0.5',
+      idClassName: 'min-w-[2rem] text-right text-[0.65rem] font-black leading-none text-white',
+    }
+  }
+
+  return {
+    previewSize: 'h-[4.5rem] w-[4.5rem]',
+    modelScale: 1.1,
+    stackGap: 'gap-1',
+    itemGap: 'gap-1.5',
+    itemPadding: 'px-1.5 py-1',
+    idClassName: 'min-w-[2.25rem] text-right text-[0.7rem] font-black leading-none text-white',
+  }
+}
+
 export function MobileTopBar() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
@@ -36,6 +69,7 @@ export function MobileTopBar() {
   const targetNpcs = targetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
+  const targetLayout = getTargetStackLayout(targetNpcs.length)
   const { label, value, urgent } = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds)
   const barTone = urgent
     ? 'border-red-400/40 bg-red-950/90 text-red-50'
@@ -68,7 +102,9 @@ export function MobileTopBar() {
       </div>
 
       {targetNpcs.length > 0 ? (
-        <div className="absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex max-h-[min(70dvh,calc(5*3rem+4*0.25rem+0.75rem))] flex-col items-end gap-1 overflow-y-auto overscroll-contain">
+        <div
+          className={`absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex flex-col items-end ${targetLayout.stackGap}`}
+        >
           <p
             className={`pr-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.18em] ${
               isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
@@ -79,25 +115,19 @@ export function MobileTopBar() {
           {targetNpcs.map((npc) => (
             <div
               key={npc.id}
-              className={`flex items-center gap-1.5 rounded-xl border px-1.5 py-1 shadow-lg backdrop-blur-md ${
+              className={`flex items-center rounded-xl border shadow-lg backdrop-blur-md ${targetLayout.itemGap} ${targetLayout.itemPadding} ${
                 isAnswerReveal
                   ? 'border-amber-300/40 bg-amber-950/90'
                   : 'border-white/20 bg-neutral-950/90'
               }`}
             >
-              <p className="min-w-[2.25rem] text-right text-[0.7rem] font-black leading-none text-white">
-                #{npc.meebitNumber}
-              </p>
+              <p className={targetLayout.idClassName}>#{npc.meebitNumber}</p>
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
-                modelScale={targetNpcs.length >= 4 ? 1.02 : 1.1}
+                modelScale={targetLayout.modelScale}
                 cameraDistance={3.05}
                 modelYOffset={-1.0}
-                sizeClassName={
-                  targetNpcs.length >= 4
-                    ? 'h-12 w-12 shrink-0 rounded-lg'
-                    : 'h-[4.5rem] w-[4.5rem] shrink-0 rounded-lg'
-                }
+                sizeClassName={`${targetLayout.previewSize} shrink-0 rounded-lg`}
               />
             </div>
           ))}
