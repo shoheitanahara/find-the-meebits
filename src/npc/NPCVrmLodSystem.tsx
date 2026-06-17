@@ -1,5 +1,6 @@
 import { useFrame } from '@react-three/fiber'
-import { CREATOR_NPC_ID, NPC_MAX_CONCURRENT_VRM, NPC_VRM_ALWAYS_LOAD_DISTANCE, PLAYER_START_POSITION } from '../game/gameConfig'
+import { CREATOR_NPC_ID, NPC_VRM_ALWAYS_LOAD_DISTANCE, PLAYER_START_POSITION } from '../game/gameConfig'
+import { getNpcMaxConcurrentVrm } from '../game/perfConfig'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -123,7 +124,7 @@ export function NPCVrmLodSystem() {
     ].filter((npcId): npcId is string => Boolean(npcId))
 
     setActiveVrmNpcIds(
-      selectActiveVrmNpcIds(eligibleCandidates, forcedNpcIds, NPC_MAX_CONCURRENT_VRM),
+      selectActiveVrmNpcIds(eligibleCandidates, forcedNpcIds, getNpcMaxConcurrentVrm()),
     )
   })
 

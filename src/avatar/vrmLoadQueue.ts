@@ -1,4 +1,4 @@
-const MAX_CONCURRENT_LOADS = 24
+import { getMaxConcurrentVrmLoads } from '../game/perfConfig'
 
 type PendingLoad<T> = {
   priority: number
@@ -34,7 +34,7 @@ export function enqueueVrmLoad<T>(loader: () => Promise<T>, priority = 9999): Pr
 }
 
 function drainQueue() {
-  while (activeLoads < MAX_CONCURRENT_LOADS && pendingLoads.length > 0) {
+  while (activeLoads < getMaxConcurrentVrmLoads() && pendingLoads.length > 0) {
     const nextLoad = pendingLoads.shift()
     nextLoad?.run()
   }
