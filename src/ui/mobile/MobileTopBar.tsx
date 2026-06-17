@@ -3,6 +3,7 @@ import { getStageLabel, getProgressionStep } from '../../game/gameProgression'
 import { getNpcById } from '../../npc/npcData'
 import { useGameStore } from '../../stores/gameStore'
 import { getTimerDisplay } from '../gameTimerDisplay'
+import { FoundTargetIcon } from '../FoundTargetIcon'
 import { TargetPreview } from '../TargetPreview'
 
 function getTargetStackLayout(targetCount: number) {
@@ -43,6 +44,7 @@ export function MobileTopBar() {
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
+  const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const startedAt = useGameStore((state) => state.startedAt)
   const clearTimeSeconds = useGameStore((state) => state.clearTimeSeconds)
   const [, setTick] = useState(0)
@@ -112,25 +114,47 @@ export function MobileTopBar() {
           >
             {isAnswerReveal ? 'Answer' : targetNpcs.length > 1 ? 'Targets' : 'Target'}
           </p>
-          {targetNpcs.map((npc) => (
+          {targetNpcs.map((npc) => {
+            const isFound = foundTargetNpcIds.includes(npc.id)
+
+            return (
             <div
               key={npc.id}
               className={`flex items-center rounded-xl border shadow-lg backdrop-blur-md ${targetLayout.itemGap} ${targetLayout.itemPadding} ${
                 isAnswerReveal
                   ? 'border-amber-300/40 bg-amber-950/90'
-                  : 'border-white/20 bg-neutral-950/90'
+                  : isFound
+                    ? 'border-emerald-400/35 bg-neutral-950/90'
+                    : 'border-white/20 bg-neutral-950/90'
               }`}
             >
-              <p className={targetLayout.idClassName}>#{npc.meebitNumber}</p>
-              <TargetPreview
-                meebitNumber={npc.meebitNumber}
-                modelScale={targetLayout.modelScale}
-                cameraDistance={3.05}
-                modelYOffset={-1.0}
-                sizeClassName={`${targetLayout.previewSize} shrink-0 rounded-lg`}
-              />
+              <div className="flex min-w-0 items-center gap-0.5">
+                <p
+                  className={`${targetLayout.idClassName} ${isFound ? 'text-emerald-300' : ''}`}
+                >
+                  #{npc.meebitNumber}
+                </p>
+                {isFound ? (
+                  <FoundTargetIcon className="size-3 shrink-0 text-emerald-400" />
+                ) : null}
+              </div>
+              <div className="relative shrink-0">
+                <TargetPreview
+                  meebitNumber={npc.meebitNumber}
+                  modelScale={targetLayout.modelScale}
+                  cameraDistance={3.05}
+                  modelYOffset={-1.0}
+                  sizeClassName={`${targetLayout.previewSize} rounded-lg ${isFound ? 'opacity-55' : ''}`}
+                />
+                {isFound ? (
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-500/15">
+                    <FoundTargetIcon className="size-3.5 text-emerald-300" />
+                  </span>
+                ) : null}
+              </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       ) : null}
     </header>

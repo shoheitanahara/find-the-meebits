@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
-import { useGameStore } from '../stores/gameStore'
+import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from './TargetPreview'
 
@@ -11,9 +11,11 @@ export function TimeUpOverlay() {
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
+  const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const retryStage = useGameStore((state) => state.retryStage)
   const resetGame = useGameStore((state) => state.resetGame)
-  const targetNpcs = targetNpcIds
+  const remainingTargetNpcIds = getRemainingTargetNpcIds(targetNpcIds, foundTargetNpcIds)
+  const targetNpcs = remainingTargetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
   const step = getProgressionStep(progressionIndex)

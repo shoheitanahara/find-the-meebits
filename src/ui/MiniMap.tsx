@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { WORLD_RADIUS } from '../game/gameConfig'
 import { getNpcById } from '../npc/npcData'
-import { useGameStore } from '../stores/gameStore'
+import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import type { Vector3Tuple } from '../types/game'
@@ -53,6 +53,7 @@ function MapMarker({ xPercent, zPercent, transform = 'translate(-50%, -50%)', cl
 export function MiniMap() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
+  const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const position = usePlayerStore((state) => state.position)
   const rotationY = usePlayerStore((state) => state.rotationY)
   const npcPositions = useNpcStore((state) => state.npcPositions)
@@ -73,7 +74,7 @@ export function MiniMap() {
   }
 
   const targetMarkers = isAnswerReveal
-    ? targetNpcIds
+    ? getRemainingTargetNpcIds(targetNpcIds, foundTargetNpcIds)
         .map((id) => {
           const npc = getNpcById(id)
           if (!npc) return null

@@ -42,12 +42,15 @@ function maybeBuildTargetHintLine(npc: NPCProfile, talkCount: number): DialogueL
     return null
   }
 
-  const targetNpcIds = useGameStore.getState().targetNpcIds.filter((id) => id !== npc.id)
-  if (targetNpcIds.length === 0) {
+  const { targetNpcIds, foundTargetNpcIds } = useGameStore.getState()
+  const unfoundTargetNpcIds = targetNpcIds.filter(
+    (id) => id !== npc.id && !foundTargetNpcIds.includes(id),
+  )
+  if (unfoundTargetNpcIds.length === 0) {
     return null
   }
 
-  const hintTargetId = targetNpcIds[Math.floor(Math.random() * targetNpcIds.length)]
+  const hintTargetId = unfoundTargetNpcIds[Math.floor(Math.random() * unfoundTargetNpcIds.length)]
   const targetNpc = getNpcById(hintTargetId)
   if (!targetNpc) {
     return null

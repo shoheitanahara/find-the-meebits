@@ -111,20 +111,22 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   clearGame: (foundNpcId) =>
     set((state) => {
-      if (!state.targetNpcIds.includes(foundNpcId)) {
+      if (
+        !state.targetNpcIds.includes(foundNpcId) ||
+        state.foundTargetNpcIds.includes(foundNpcId)
+      ) {
         return state
       }
 
       const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
       const foundTargetNpcIds = [...state.foundTargetNpcIds, foundNpcId]
-      const remainingTargets = state.targetNpcIds.filter((id) => id !== foundNpcId)
+      const hasRemainingTargets = state.targetNpcIds.some((id) => !foundTargetNpcIds.includes(id))
 
-      if (remainingTargets.length > 0) {
+      if (hasRemainingTargets) {
         usePlayerStore.getState().setMovementLocked(false)
 
         return {
           foundTargetNpcIds,
-          targetNpcIds: remainingTargets,
           clearedNpcId: foundNpcId,
           gamePhase: 'playing' as const,
         }
@@ -232,7 +234,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       )
       preloadTargetVrms(state.npcProfiles, targetNpcIds)
 
-      return { targetNpcIds }
+      return { targetNpcIds, foundTargetNpcIds: [] }
     }),
   setNpcProfiles: (npcProfiles) =>
     set((state) => {
@@ -335,6 +337,10 @@ function resetStageRuntimeState(keepMeebitIds: number[] = []) {
     nearestNpcId: null,
     npcPositions: {},
   })
+}
+
+export function getRemainingTargetNpcIds(targetNpcIds: string[], foundTargetNpcIds: string[]) {
+  return targetNpcIds.filter((id) => !foundTargetNpcIds.includes(id))
 }
 
 export function getElapsedSeconds(startedAt: number | null) {

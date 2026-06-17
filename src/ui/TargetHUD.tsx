@@ -1,5 +1,6 @@
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
+import { FoundTargetIcon } from './FoundTargetIcon'
 import { TargetPreview } from './TargetPreview'
 
 function getTargetPreviewSize(targetCount: number) {
@@ -17,6 +18,7 @@ function getTargetPreviewSize(targetCount: number) {
 export function TargetHUD() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
+  const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const targetNpcs = targetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
@@ -51,31 +53,47 @@ export function TargetHUD() {
         {targetCount > 1 ? ` (${targetCount})` : ''}
       </p>
       <div className={`mt-1.5 grid gap-1.5 ${useCompactGrid ? 'grid-cols-2' : 'grid-cols-1'}`}>
-        {targetNpcs.map((npc, index) => (
+        {targetNpcs.map((npc, index) => {
+          const isFound = foundTargetNpcIds.includes(npc.id)
+
+          return (
           <div
             key={npc.id}
             className={`min-w-0 ${
               useCompactGrid && targetCount % 2 === 1 && index === targetCount - 1
                 ? 'col-span-2 mx-auto w-[6rem]'
                 : ''
-            }`}
+            } ${isFound ? 'opacity-80' : ''}`}
           >
-            <p
-              className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
-                isAnswerReveal ? 'text-amber-100' : ''
-              }`}
-            >
-              #{npc.meebitNumber}
-            </p>
-            <div className="mt-0.5">
+            <div className="flex items-center gap-1">
+              <p
+                className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
+                  isAnswerReveal ? 'text-amber-100' : isFound ? 'text-emerald-300' : ''
+                }`}
+              >
+                #{npc.meebitNumber}
+              </p>
+              {isFound ? (
+                <FoundTargetIcon
+                  className={`shrink-0 text-emerald-400 ${targetCount >= 5 ? 'size-3.5' : 'size-4'}`}
+                />
+              ) : null}
+            </div>
+            <div className="relative mt-0.5">
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
                 modelScale={targetCount >= 5 ? 1.02 : 1.06}
-                sizeClassName={previewSize}
+                sizeClassName={`${previewSize} ${isFound ? 'opacity-55' : ''}`}
               />
+              {isFound ? (
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-500/15">
+                  <FoundTargetIcon className={`text-emerald-300 ${targetCount >= 5 ? 'size-6' : 'size-7'}`} />
+                </span>
+              ) : null}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
       {isAnswerReveal ? (
         <p className="mt-2 text-[0.65rem] leading-snug text-amber-100/80">
