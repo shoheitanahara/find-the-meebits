@@ -9,9 +9,9 @@ export type ProgressionStep = {
   kind: StageKind
 }
 
-const PC_REGULAR_NPC_COUNTS = [300, 350, 400, 450, 500] as const
+const PC_REGULAR_NPC_COUNTS = [200, 250, 300, 350, 400] as const
 const SP_REGULAR_NPC_COUNTS = [100, 150, 200, 250, 300] as const
-const PC_CHALLENGE_NPC_COUNT = 500
+const PC_CHALLENGE_NPC_COUNT = 400
 const SP_CHALLENGE_NPC_COUNT = 300
 
 export function getChallengeNpcCount() {

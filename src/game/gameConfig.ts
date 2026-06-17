@@ -1,9 +1,9 @@
 /** @deprecated Use gameProgression instead */
-export const INITIAL_NPC_COUNT = 300
+export const INITIAL_NPC_COUNT = 200
 /** @deprecated Use gameProgression instead */
 export const NPC_COUNT_INCREMENT = 50
 /** @deprecated Use gameProgression instead */
-export const MAX_NPC_COUNT = 500
+export const MAX_NPC_COUNT = 400
 export const GAME_TIME_LIMIT_SECONDS = 180
 export const WORLD_RADIUS = 72
 export const PLAYER_START_POSITION = [0, 0, 62] as const
