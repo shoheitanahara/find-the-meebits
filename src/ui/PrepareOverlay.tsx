@@ -1,0 +1,47 @@
+import { useEffect, useState } from 'react'
+import { getPrepareProgress } from '../systems/StagePrepareSystem'
+import { useGameStore } from '../stores/gameStore'
+
+export function PrepareOverlay() {
+  const gamePhase = useGameStore((state) => state.gamePhase)
+  const [, setTick] = useState(0)
+
+  useEffect(() => {
+    if (gamePhase !== 'preparing') {
+      return
+    }
+
+    const intervalId = window.setInterval(() => setTick((value) => value + 1), 120)
+    return () => window.clearInterval(intervalId)
+  }, [gamePhase])
+
+  const progress = getPrepareProgress()
+
+  if (gamePhase !== 'preparing' || !progress) {
+    return null
+  }
+
+  return (
+    <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-neutral-950/55 p-6 backdrop-blur-[2px]">
+      <section className="max-w-md rounded-[2rem] border border-white/15 bg-neutral-950/90 px-8 py-7 text-center text-white shadow-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">Preparing Stage</p>
+        <h2 className="mt-3 text-3xl font-black">Loading the museum</h2>
+        <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+          Nearby Meebits: {progress.nearReady}/{progress.nearCount} (within 40m)
+        </p>
+        <p className="mt-1 text-xs text-neutral-400">
+          Museum total: {progress.readyCount}/{progress.activeCount}
+        </p>
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-neutral-800">
+          <div
+            className="h-full rounded-full bg-white transition-[width] duration-300"
+            style={{ width: `${progress.totalProgress}%` }}
+          />
+        </div>
+        <p className="mt-3 text-xs font-medium text-neutral-400">
+          The timer starts once avatars around you are ready.
+        </p>
+      </section>
+    </div>
+  )
+}
