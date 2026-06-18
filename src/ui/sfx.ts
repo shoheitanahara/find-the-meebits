@@ -45,6 +45,106 @@ function scheduleBeep(ctx: AudioContext, options: { frequency: number; durationM
   osc.stop(now + duration + 0.01)
 }
 
+type VocalSyllable = {
+  offsetMs: number
+  durationMs: number
+  pitchHz: number
+  formantHz: number
+}
+
+function scheduleVocalSyllable(
+  ctx: AudioContext,
+  startTime: number,
+  syllable: VocalSyllable,
+  masterGain: GainNode,
+) {
+  const duration = syllable.durationMs / 1000
+  const endTime = startTime + duration
+
+  const envelope = ctx.createGain()
+  envelope.gain.setValueAtTime(0, startTime)
+  envelope.gain.linearRampToValueAtTime(1, startTime + 0.014)
+  envelope.gain.exponentialRampToValueAtTime(0.0001, endTime)
+  envelope.connect(masterGain)
+
+  const voice = ctx.createOscillator()
+  voice.type = 'triangle'
+  voice.frequency.setValueAtTime(syllable.pitchHz, startTime)
+  voice.frequency.exponentialRampToValueAtTime(syllable.pitchHz * 1.06, startTime + duration * 0.55)
+
+  const voiceGain = ctx.createGain()
+  voiceGain.gain.value = 0.42
+
+  const voiceFilter = ctx.createBiquadFilter()
+  voiceFilter.type = 'lowpass'
+  voiceFilter.frequency.setValueAtTime(780, startTime)
+  voiceFilter.Q.value = 0.7
+
+  voice.connect(voiceGain)
+  voiceGain.connect(voiceFilter)
+  voiceFilter.connect(envelope)
+
+  const formant = ctx.createOscillator()
+  formant.type = 'sine'
+  formant.frequency.setValueAtTime(syllable.formantHz, startTime)
+  formant.frequency.exponentialRampToValueAtTime(syllable.formantHz * 0.94, endTime)
+
+  const formantGain = ctx.createGain()
+  formantGain.gain.value = 0.16
+  formant.connect(formantGain)
+  formantGain.connect(envelope)
+
+  const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * Math.min(duration, 0.04)))
+  const noiseBuffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
+  const noiseData = noiseBuffer.getChannelData(0)
+  for (let i = 0; i < noiseLength; i += 1) {
+    noiseData[i] = Math.random() * 2 - 1
+  }
+
+  const noise = ctx.createBufferSource()
+  noise.buffer = noiseBuffer
+
+  const noiseFilter = ctx.createBiquadFilter()
+  noiseFilter.type = 'bandpass'
+  noiseFilter.frequency.value = 2400
+  noiseFilter.Q.value = 1.1
+
+  const noiseGain = ctx.createGain()
+  noiseGain.gain.setValueAtTime(0.12, startTime)
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.03)
+
+  noise.connect(noiseFilter)
+  noiseFilter.connect(noiseGain)
+  noiseGain.connect(envelope)
+
+  voice.start(startTime)
+  formant.start(startTime)
+  noise.start(startTime)
+  voice.stop(endTime + 0.02)
+  formant.stop(endTime + 0.02)
+  noise.stop(endTime + 0.02)
+}
+
+/** 本物の会話ほどではないが、短い「むにゃっ」系の声に近い合成音 */
+function playTalkMurmur(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const pitchJitter = 0.92 + Math.random() * 0.14
+
+  const master = ctx.createGain()
+  master.gain.value = 0.11
+  master.connect(ctx.destination)
+
+  const syllables: VocalSyllable[] = [
+    { offsetMs: 0, durationMs: 78, pitchHz: 165 * pitchJitter, formantHz: 920 },
+    { offsetMs: 88, durationMs: 72, pitchHz: 188 * pitchJitter, formantHz: 1080 },
+    { offsetMs: 168, durationMs: 84, pitchHz: 152 * pitchJitter, formantHz: 860 },
+  ]
+
+  for (const syllable of syllables) {
+    scheduleVocalSyllable(ctx, now + syllable.offsetMs / 1000, syllable, master)
+  }
+}
+
 export function playSfx(kind: SfxKind) {
   const ctx = getAudioContext()
   if (!ctx) return
@@ -57,13 +157,9 @@ export function playSfx(kind: SfxKind) {
 
   if (kind === 'uiConfirm') {
     scheduleBeep(ctx, { frequency: 520, durationMs: 30, type: 'triangle', gain: 0.055 })
-    // tiny second tone for “confirm”
     scheduleBeep(ctx, { frequency: 780, durationMs: 26, type: 'triangle', gain: 0.04 })
     return
   }
 
-  // talk
-  scheduleBeep(ctx, { frequency: 420, durationMs: 24, type: 'sine', gain: 0.05 })
-  scheduleBeep(ctx, { frequency: 680, durationMs: 24, type: 'sine', gain: 0.04 })
+  playTalkMurmur(ctx)
 }
-
