@@ -145,16 +145,11 @@ export function MobileTopBar() {
                     : 'border-white/20 bg-neutral-950/90'
               }`}
             >
-              <div className="flex min-w-0 items-center gap-0.5">
-                <p
-                  className={`${targetLayout.idClassName} ${isFound ? 'text-emerald-300' : ''}`}
-                >
-                  #{npc.meebitNumber}
-                </p>
-                {isFound ? (
-                  <FoundTargetIcon className="size-3 shrink-0 text-emerald-400" />
-                ) : null}
-              </div>
+              <p
+                className={`${targetLayout.idClassName} ${isFound ? 'text-emerald-300' : ''}`}
+              >
+                #{npc.meebitNumber}
+              </p>
               <div className="relative shrink-0">
                 <TargetPreview
                   meebitNumber={npc.meebitNumber}

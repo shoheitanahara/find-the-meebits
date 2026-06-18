@@ -65,20 +65,13 @@ export function TargetHUD() {
                 : ''
             } ${isFound ? 'opacity-80' : ''}`}
           >
-            <div className="flex items-center gap-1">
-              <p
-                className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
-                  isAnswerReveal ? 'text-amber-100' : isFound ? 'text-emerald-300' : ''
-                }`}
-              >
-                #{npc.meebitNumber}
-              </p>
-              {isFound ? (
-                <FoundTargetIcon
-                  className={`shrink-0 text-emerald-400 ${targetCount >= 5 ? 'size-3.5' : 'size-4'}`}
-                />
-              ) : null}
-            </div>
+            <p
+              className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
+                isAnswerReveal ? 'text-amber-100' : isFound ? 'text-emerald-300' : ''
+              }`}
+            >
+              #{npc.meebitNumber}
+            </p>
             <div className="relative mt-0.5">
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
