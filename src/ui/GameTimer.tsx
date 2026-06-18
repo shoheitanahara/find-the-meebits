@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getTimerDisplay } from './gameTimerDisplay'
+import { StageRetryButton } from './StageRetryButton'
 import { useGameStore } from '../stores/gameStore'
 
 export function GameTimer() {
@@ -15,29 +16,31 @@ export function GameTimer() {
   }, [])
 
   const timerDisplay = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds, gameMode)
+  const showRetry = gamePhase === 'playing' || gamePhase === 'timedOut'
 
-  if (!timerDisplay) {
+  if (!timerDisplay && !showRetry) {
     return null
   }
 
-  const { label, value, urgent } = timerDisplay
+  const urgent = timerDisplay?.urgent ?? false
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden grid grid-cols-[minmax(0,1fr)_minmax(0,50vw)_minmax(0,1fr)] items-start gap-4 px-5 pt-5 md:grid">
-      <div aria-hidden className="min-w-0" />
-
-      <section
-        className={`justify-self-center rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${
-          urgent
-            ? 'border-red-400/50 bg-red-950/85 text-red-100'
-            : 'border-white/30 bg-neutral-950/85 text-white'
-        }`}
-      >
-        <p className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-neutral-400">{label}</p>
-        <p className="text-2xl font-black tabular-nums tracking-tight">{value}</p>
-      </section>
-
-      <div aria-hidden className="min-w-0" />
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden flex-col items-center gap-1 px-5 pt-5 md:flex">
+      {timerDisplay ? (
+        <section
+          className={`rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${
+            urgent
+              ? 'border-red-400/50 bg-red-950/85 text-red-100'
+              : 'border-white/30 bg-neutral-950/85 text-white'
+          }`}
+        >
+          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-neutral-400">
+            {timerDisplay.label}
+          </p>
+          <p className="text-2xl font-black tabular-nums tracking-tight">{timerDisplay.value}</p>
+        </section>
+      ) : null}
+      {showRetry ? <StageRetryButton /> : null}
     </div>
   )
 }

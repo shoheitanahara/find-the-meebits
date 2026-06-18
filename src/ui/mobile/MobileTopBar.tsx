@@ -5,6 +5,7 @@ import { useGameStore } from '../../stores/gameStore'
 import { getTimerDisplay, shouldShowGameTimer } from '../gameTimerDisplay'
 import { getGameModeLabel } from '../../game/gameMode'
 import { FoundTargetIcon } from '../FoundTargetIcon'
+import { StageRetryButton } from '../StageRetryButton'
 import { TargetPreview } from '../TargetPreview'
 
 function getTargetStackLayout(targetCount: number) {
@@ -87,6 +88,7 @@ export function MobileTopBar() {
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
   const targetLayout = getTargetStackLayout(targetNpcs.length)
   const showTimer = shouldShowGameTimer(gameMode)
+  const showRetry = gamePhase === 'playing' || gamePhase === 'timedOut'
   const timerDisplay = showTimer ? getTimerDisplay(gamePhase, startedAt, clearTimeSeconds, gameMode) : null
   const urgent = timerDisplay?.urgent ?? false
   const barTone = urgent
@@ -121,12 +123,17 @@ export function MobileTopBar() {
             </div>
 
             {showTimer && timerDisplay ? (
-              <div className="shrink-0 text-right">
-                <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-neutral-400">
-                  {timerDisplay.label}
-                </p>
-                <p className="text-lg font-black tabular-nums leading-tight">{timerDisplay.value}</p>
+              <div className="flex shrink-0 flex-col items-center gap-0.5">
+                <div className="text-center">
+                  <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-neutral-400">
+                    {timerDisplay.label}
+                  </p>
+                  <p className="text-lg font-black tabular-nums leading-tight">{timerDisplay.value}</p>
+                </div>
+                {showRetry ? <StageRetryButton compact /> : null}
               </div>
+            ) : showRetry ? (
+              <StageRetryButton compact />
             ) : null}
           </div>
         </div>
