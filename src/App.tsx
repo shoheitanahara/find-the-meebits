@@ -19,6 +19,7 @@ import { MobileControls } from './ui/mobile/MobileControls'
 import { MobileTopBar } from './ui/mobile/MobileTopBar'
 import { StartScreen } from './ui/StartScreen'
 import { TargetHUD } from './ui/TargetHUD'
+import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
       <FootstepAudioSystem />
       <StagePrepareSystem />
       <TargetVrmPreloader />
+      <TargetPreviewCapture />
       <GameTimer />
       <MobileTopBar />
       <HUD />

@@ -1,76 +1,75 @@
-import { Canvas, useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
-import { Group } from 'three'
-import { FallbackMeebit } from '../avatar/FallbackMeebit'
-import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
-import { useVRMModel } from '../avatar/useVRMModel'
+import { useEffect, useState } from 'react'
+import {
+  getTargetPreviewImage,
+  isTargetPreviewError,
+  isTargetPreviewPending,
+  requestTargetPreview,
+  subscribeTargetPreview,
+} from './targetPreviewCache'
 
 type TargetPreviewProps = {
   meebitNumber: number
   sizeClassName?: string
+  /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
   modelScale?: number
+  /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
   cameraDistance?: number
+  /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
   cameraY?: number
+  /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
   modelYOffset?: number
 }
 
 export function TargetPreview({
   meebitNumber,
   sizeClassName = 'h-44 w-44',
-  modelScale = 1.15,
-  cameraDistance = 4,
-  cameraY = 1.6,
-  modelYOffset = -0.9,
 }: TargetPreviewProps) {
+  const [, refresh] = useState(0)
+
+  useEffect(() => {
+    requestTargetPreview(meebitNumber)
+    return subscribeTargetPreview(meebitNumber, () => {
+      refresh((value) => value + 1)
+    })
+  }, [meebitNumber])
+
+  const imageSrc = getTargetPreviewImage(meebitNumber)
+  const isPending = isTargetPreviewPending(meebitNumber)
+  const isError = isTargetPreviewError(meebitNumber)
+
   return (
     <div
       className={`${sizeClassName} overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100`}
     >
-      <Canvas camera={{ position: [0, cameraY, cameraDistance], fov: 30 }} gl={{ antialias: true }}>
-        <color attach="background" args={['#f5f5f5']} />
-        <ambientLight intensity={1.4} />
-        <directionalLight position={[3, 4, 3]} intensity={1.8} />
-        <PreviewModel
-          meebitNumber={meebitNumber}
-          modelScale={modelScale}
-          modelYOffset={modelYOffset}
+      {imageSrc ? (
+        <img
+          src={imageSrc}
+          alt={`Meebit #${meebitNumber}`}
+          className="h-full w-full object-cover"
+          draggable={false}
         />
-      </Canvas>
+      ) : isError ? (
+        <PreviewFallback meebitNumber={meebitNumber} />
+      ) : isPending ? (
+        <PreviewLoading />
+      ) : null}
     </div>
   )
 }
 
-function PreviewModel({
-  meebitNumber,
-  modelScale = 1.15,
-  modelYOffset = -0.9,
-}: {
-  meebitNumber: number
-  modelScale?: number
-  modelYOffset?: number
-}) {
-  const rootRef = useRef<Group>(null)
-  const { vrmRef, vrmScene, status, update } = useVRMModel(
-    meebitNumber,
-    true,
-    -250,
-    true,
-    true,
-  )
-
-  useFrame((state, delta) => {
-    if (rootRef.current) {
-      rootRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.25
-    }
-
-    applyVRMAttentionPose(vrmRef.current)
-    update(delta)
-  })
-
+function PreviewLoading() {
   return (
-    <group ref={rootRef} position={[0, modelYOffset, 0]} rotation={[0, Math.PI, 0]}>
-      {vrmScene ? <primitive object={vrmScene} scale={modelScale} /> : null}
-      {status === 'error' ? <FallbackMeebit /> : null}
-    </group>
+    <div className="flex h-full w-full items-center justify-center bg-neutral-200">
+      <div className="size-5 animate-pulse rounded-full bg-neutral-400/70" />
+    </div>
+  )
+}
+
+function PreviewFallback({ meebitNumber }: { meebitNumber: number }) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center bg-neutral-200 text-neutral-500">
+      <span className="text-[0.55rem] font-semibold uppercase tracking-[0.2em]">Meebit</span>
+      <span className="text-sm font-black">#{meebitNumber}</span>
+    </div>
   )
 }
