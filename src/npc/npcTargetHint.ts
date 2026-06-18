@@ -17,35 +17,35 @@ export function buildTargetLocationHint(playerPosition: Vector3Tuple, targetPosi
 function getDirectionPhrase(dx: number, dz: number) {
   if (Math.abs(dz) >= Math.abs(dx)) {
     if (dz < -DIRECTION_THRESHOLD) {
-      return 'toward the back of the museum'
+      return 'at the back of the museum'
     }
 
     if (dz > DIRECTION_THRESHOLD) {
-      return 'near the entrance side'
+      return 'near the entrance'
     }
 
-    return 'around the middle of the gallery'
+    return 'in the middle of the gallery'
   }
 
   if (dx < -DIRECTION_THRESHOLD) {
-    return 'to the west side'
+    return 'on the west side'
   }
 
   if (dx > DIRECTION_THRESHOLD) {
-    return 'to the east side'
+    return 'on the east side'
   }
 
-  return 'near the center lanes'
+  return 'near the center'
 }
 
 function getDistancePhrase(distance: number) {
   if (distance < NEAR_DISTANCE) {
-    return 'and pretty close to here'
+    return 'and close to here'
   }
 
   if (distance > FAR_DISTANCE) {
-    return 'on the other side of the crowd'
+    return 'and far from here'
   }
 
-  return 'somewhere in that direction'
+  return 'in that direction'
 }
