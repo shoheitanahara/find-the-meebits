@@ -58,7 +58,11 @@ function maybeBuildTargetHintLine(npc: NPCProfile, talkCount: number): DialogueL
 
   const playerPosition = usePlayerStore.getState().position
   const targetPosition = useNpcStore.getState().npcPositions[hintTargetId] ?? targetNpc.position
-  const text = buildTargetLocationHint(playerPosition, targetPosition)
+  const text = buildTargetLocationHint(
+    playerPosition,
+    targetPosition,
+    talkCount + hintTargetId.length + npc.meebitNumber,
+  )
 
   return toDialogueLine(npc.id, talkCount, -1, text, 'hint')
 }
