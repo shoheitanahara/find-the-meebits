@@ -187,7 +187,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount)
     resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
     seedNpcPositions(npcLayout.npcProfiles)
-    resetPlayerToStart()
+    resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
     preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
 
@@ -214,7 +214,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount, state.targetNpcIds)
     resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
     seedNpcPositions(npcLayout.npcProfiles)
-    resetPlayerToStart()
+    resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
     preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
 
@@ -327,8 +327,7 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
   setActiveVrmNpcIds(nextIds)
 }
 
-function resetPlayerToStart() {
-  usePlayerStore.getState().setMeebitNumber(DEFAULT_PLAYER_MEEBIT_ID)
+function resetPlayerPositionToStart() {
   usePlayerStore
     .getState()
     .setPlayerTransform(
@@ -337,6 +336,11 @@ function resetPlayerToStart() {
     )
   usePlayerStore.getState().setMovementState(false, false)
   usePlayerStore.getState().setMovementLocked(false)
+}
+
+function resetPlayerToStart() {
+  usePlayerStore.getState().setMeebitNumber(DEFAULT_PLAYER_MEEBIT_ID)
+  resetPlayerPositionToStart()
 }
 
 function softResetForGameStart() {
