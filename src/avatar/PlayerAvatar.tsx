@@ -5,6 +5,7 @@ import { FallbackMeebit } from './FallbackMeebit'
 import { applyVRMLocomotion } from './VRMLocomotion'
 import { useVRMModel } from './useVRMModel'
 import { useGameStore } from '../stores/gameStore'
+import { VRM_WORLD_SCALE } from '../game/gameConfig'
 import { usePlayerStore } from '../stores/playerStore'
 import { savePlayerPosition } from '../systems/save/localStorage'
 
@@ -76,7 +77,7 @@ export function PlayerAvatar() {
 
   return (
     <group ref={rootRef}>
-      {vrmScene ? <primitive object={vrmScene} scale={1.05} /> : null}
+      {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : null}
       {status === 'error' ? <FallbackMeebit /> : null}
     </group>
   )

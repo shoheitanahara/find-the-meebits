@@ -19,6 +19,9 @@ export const NPC_VRM_UNLOAD_DISTANCE_MAP_DEEP = 110
 export const NPC_FAR_UPDATE_DISTANCE = 50
 export const NPC_MAX_CONCURRENT_VRM = 300
 export const DEFAULT_PLAYER_MEEBIT_ID = 4274
+export const VRM_WORLD_SCALE = 1.05
+/** 足元を地面に合わせたあと、わずかに持ち上げる（Z-fighting 防止） */
+export const VRM_FEET_Y_OFFSET = 0.06
 export const CREATOR_NPC_ID = 'npc-shawn-t-art'
 export const CREATOR_MEEBIT_ID = 11143
 

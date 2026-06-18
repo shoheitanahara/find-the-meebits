@@ -7,7 +7,7 @@ import { applyVRMLocomotion } from '../avatar/VRMLocomotion'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { collidesWithObstacles, NPC_COLLISION_RADIUS } from '../collision/collision'
-import { INTERACTION_DISTANCE, NPC_FAR_UPDATE_DISTANCE, WORLD_RADIUS } from '../game/gameConfig'
+import { INTERACTION_DISTANCE, NPC_FAR_UPDATE_DISTANCE, VRM_WORLD_SCALE, WORLD_RADIUS } from '../game/gameConfig'
 import { isNpcVrmActive, setNpcVrmReady } from './vrmLodState'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -206,7 +206,7 @@ export function NPC({ profile }: NPCProps) {
 
   return (
     <group ref={rootRef} rotation={[0, profile.rotation[1], 0]}>
-      {vrmScene ? <primitive object={vrmScene} scale={1.05} /> : <MeebitSilhouette />}
+      {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : <MeebitSilhouette />}
       {status === 'error' ? <FallbackMeebit /> : null}
       {isNearest ? <InteractionPin /> : null}
       {isAnswerRevealed ? <TargetAnswerGlow /> : null}
