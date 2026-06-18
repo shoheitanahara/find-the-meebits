@@ -1,4 +1,4 @@
-type SfxKind = 'uiClick' | 'uiConfirm' | 'talk'
+type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep'
 
 let audioContext: AudioContext | null = null
 
@@ -13,6 +13,10 @@ function getAudioContext(): AudioContext | null {
   return audioContext
 }
 
+export function getSharedAudioContext(): AudioContext | null {
+  return getAudioContext()
+}
+
 export async function unlockAudioIfNeeded() {
   const ctx = getAudioContext()
   if (!ctx) return
@@ -25,24 +29,27 @@ export async function unlockAudioIfNeeded() {
   }
 }
 
-function scheduleBeep(ctx: AudioContext, options: { frequency: number; durationMs: number; type: OscillatorType; gain: number }) {
-  const now = ctx.currentTime
+function scheduleBeep(
+  ctx: AudioContext,
+  options: { frequency: number; durationMs: number; type: OscillatorType; gain: number; startTime?: number },
+) {
+  const startTime = options.startTime ?? ctx.currentTime
   const duration = options.durationMs / 1000
 
   const osc = ctx.createOscillator()
   osc.type = options.type
-  osc.frequency.setValueAtTime(options.frequency, now)
+  osc.frequency.setValueAtTime(options.frequency, startTime)
 
   const gain = ctx.createGain()
-  gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(options.gain, now + 0.006)
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+  gain.gain.setValueAtTime(0, startTime)
+  gain.gain.linearRampToValueAtTime(options.gain, startTime + 0.006)
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration)
 
   osc.connect(gain)
   gain.connect(ctx.destination)
 
-  osc.start(now)
-  osc.stop(now + duration + 0.01)
+  osc.start(startTime)
+  osc.stop(startTime + duration + 0.01)
 }
 
 type VocalSyllable = {
@@ -145,6 +152,73 @@ function playTalkMurmur(ctx: AudioContext) {
   }
 }
 
+function playFootstepTap(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const duration = 0.055
+  const pitch = 0.88 + Math.random() * 0.22
+
+  const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * duration))
+  const buffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < noiseLength; i += 1) {
+    data[i] = Math.random() * 2 - 1
+  }
+
+  const noise = ctx.createBufferSource()
+  noise.buffer = buffer
+
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'lowpass'
+  filter.frequency.value = (220 + Math.random() * 120) * pitch
+  filter.Q.value = 0.8
+
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0, now)
+  gain.gain.linearRampToValueAtTime(0.07, now + 0.004)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+
+  const thump = ctx.createOscillator()
+  thump.type = 'sine'
+  thump.frequency.setValueAtTime(95 * pitch, now)
+  thump.frequency.exponentialRampToValueAtTime(55 * pitch, now + duration)
+
+  const thumpGain = ctx.createGain()
+  thumpGain.gain.setValueAtTime(0, now)
+  thumpGain.gain.linearRampToValueAtTime(0.05, now + 0.003)
+  thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+
+  noise.connect(filter)
+  filter.connect(gain)
+  gain.connect(ctx.destination)
+  thump.connect(thumpGain)
+  thumpGain.connect(ctx.destination)
+
+  noise.start(now)
+  thump.start(now)
+  noise.stop(now + duration + 0.01)
+  thump.stop(now + duration + 0.01)
+}
+
+function playClearFanfare(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const notes = [
+    { frequency: 523.25, offsetMs: 0, durationMs: 140, gain: 0.07 },
+    { frequency: 659.25, offsetMs: 110, durationMs: 140, gain: 0.075 },
+    { frequency: 783.99, offsetMs: 220, durationMs: 160, gain: 0.08 },
+    { frequency: 1046.5, offsetMs: 340, durationMs: 280, gain: 0.085 },
+  ]
+
+  for (const note of notes) {
+    scheduleBeep(ctx, {
+      frequency: note.frequency,
+      durationMs: note.durationMs,
+      type: 'triangle',
+      gain: note.gain,
+      startTime: now + note.offsetMs / 1000,
+    })
+  }
+}
+
 export function playSfx(kind: SfxKind) {
   const ctx = getAudioContext()
   if (!ctx) return
@@ -158,6 +232,16 @@ export function playSfx(kind: SfxKind) {
   if (kind === 'uiConfirm') {
     scheduleBeep(ctx, { frequency: 520, durationMs: 30, type: 'triangle', gain: 0.055 })
     scheduleBeep(ctx, { frequency: 780, durationMs: 26, type: 'triangle', gain: 0.04 })
+    return
+  }
+
+  if (kind === 'clear') {
+    playClearFanfare(ctx)
+    return
+  }
+
+  if (kind === 'footstep') {
+    playFootstepTap(ctx)
     return
   }
 

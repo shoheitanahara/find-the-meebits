@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { getProgressionStep, getStageDescription, getStageLabel, getChallengeNpcCount } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
@@ -20,6 +20,16 @@ export function ClearOverlay() {
   const isConquered = gamePhase === 'conquered'
   const clearedStep = getProgressionStep(isConquered ? progressionIndex : progressionIndex - 1)
   const nextStep = isConquered ? null : getProgressionStep(progressionIndex)
+  const wasVisibleRef = useRef(false)
+
+  useEffect(() => {
+    if (isVisible && !wasVisibleRef.current) {
+      unlockAudioIfNeeded()
+      playSfx('clear')
+    }
+
+    wasVisibleRef.current = isVisible
+  }, [isVisible])
 
   const handleContinue = () => {
     unlockAudioIfNeeded()
