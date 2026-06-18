@@ -52,8 +52,8 @@ const creatorNpc: NPCProfile = {
     },
     {
       id: 'shawn-art-1',
-      text: 'The best target is not hidden by darkness. It is hidden by attention.',
-      category: 'hint',
+      text: 'Twenty thousand avatars, one museum, zero agreed-upon lunch spot.',
+      category: 'meebits',
     },
     {
       id: 'shawn-art-2',
@@ -62,8 +62,8 @@ const creatorNpc: NPCProfile = {
     },
     {
       id: 'shawn-hint-1',
-      text: 'Do not chase the number on the map. Chase the silhouette you remember.',
-      category: 'hint',
+      text: 'If I knew where your target was, I would be playing too.',
+      category: 'joke',
     },
   ],
 }

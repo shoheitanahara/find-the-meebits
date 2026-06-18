@@ -83,7 +83,7 @@ export function DialogueBox() {
 
 type DialogueContentProps = {
   npc: NonNullable<ReturnType<typeof getNpcById>>
-  currentLine: { text: string }
+  currentLine: { text: string; category: string }
   currentIndex: number
   linesLength: number
   isLastLine: boolean
@@ -131,13 +131,32 @@ function DialogueContent({
         </button>
       </div>
 
-      <p
-        className={`leading-relaxed text-slate-800 ${
-          compact ? 'mt-2.5 text-sm leading-snug' : 'mt-4 text-base sm:text-lg'
-        }`}
-      >
-        {currentLine.text}
-      </p>
+      {currentLine.category === 'hint' ? (
+        <div className={compact ? 'mt-2.5' : 'mt-4'}>
+          <p
+            className={`font-semibold uppercase tracking-[0.2em] text-amber-700 ${
+              compact ? 'text-[0.6rem]' : 'text-xs'
+            }`}
+          >
+            Hint
+          </p>
+          <p
+            className={`mt-1.5 font-black leading-relaxed text-neutral-950 ${
+              compact ? 'text-sm leading-snug' : 'text-base sm:text-lg'
+            }`}
+          >
+            {currentLine.text}
+          </p>
+        </div>
+      ) : (
+        <p
+          className={`leading-relaxed text-slate-800 ${
+            compact ? 'mt-2.5 text-sm leading-snug' : 'mt-4 text-base sm:text-lg'
+          }`}
+        >
+          {currentLine.text}
+        </p>
+      )}
 
       <div className={`flex items-center justify-between gap-3 ${compact ? 'mt-3' : 'mt-5'}`}>
         <p className="text-xs font-medium text-slate-500">
