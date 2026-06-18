@@ -3,6 +3,7 @@ import { GAME_TIME_LIMIT_SECONDS } from '../game/gameConfig'
 import { isTimedGameMode } from '../game/gameMode'
 import { getElapsedSeconds, useGameStore } from '../stores/gameStore'
 import { useDialogueStore } from '../dialogue/dialogueStore'
+import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 
 export function GameTimerSystem() {
   useEffect(() => {
@@ -21,6 +22,7 @@ export function GameTimerSystem() {
         useDialogueStore.getState().closeDialogue()
       }
 
+      unlockAudioIfNeeded().then(() => playSfx('timeUp'))
       game.timeUp()
     }, 100)
 

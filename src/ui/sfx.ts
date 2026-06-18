@@ -1,4 +1,4 @@
-type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep'
+type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep' | 'timeUp'
 
 let audioContext: AudioContext | null = null
 
@@ -174,7 +174,7 @@ function playFootstepTap(ctx: AudioContext) {
 
   const gain = ctx.createGain()
   gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(0.07, now + 0.004)
+  gain.gain.linearRampToValueAtTime(0.14, now + 0.004)
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
 
   const thump = ctx.createOscillator()
@@ -184,7 +184,7 @@ function playFootstepTap(ctx: AudioContext) {
 
   const thumpGain = ctx.createGain()
   thumpGain.gain.setValueAtTime(0, now)
-  thumpGain.gain.linearRampToValueAtTime(0.05, now + 0.003)
+  thumpGain.gain.linearRampToValueAtTime(0.1, now + 0.003)
   thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
 
   noise.connect(filter)
@@ -219,6 +219,46 @@ function playClearFanfare(ctx: AudioContext) {
   }
 }
 
+function playTimeUpFail(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const notes = [
+    { frequency: 392.0, offsetMs: 0, durationMs: 200, gain: 0.08 },
+    { frequency: 311.13, offsetMs: 160, durationMs: 220, gain: 0.085 },
+    { frequency: 261.63, offsetMs: 340, durationMs: 280, gain: 0.09 },
+    { frequency: 196.0, offsetMs: 520, durationMs: 420, gain: 0.08 },
+  ]
+
+  for (const note of notes) {
+    scheduleBeep(ctx, {
+      frequency: note.frequency,
+      durationMs: note.durationMs,
+      type: 'triangle',
+      gain: note.gain,
+      startTime: now + note.offsetMs / 1000,
+    })
+  }
+
+  const buzz = ctx.createOscillator()
+  buzz.type = 'sawtooth'
+  buzz.frequency.setValueAtTime(130, now + 0.45)
+  buzz.frequency.exponentialRampToValueAtTime(72, now + 1.15)
+
+  const buzzFilter = ctx.createBiquadFilter()
+  buzzFilter.type = 'lowpass'
+  buzzFilter.frequency.value = 280
+
+  const buzzGain = ctx.createGain()
+  buzzGain.gain.setValueAtTime(0, now + 0.45)
+  buzzGain.gain.linearRampToValueAtTime(0.045, now + 0.5)
+  buzzGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2)
+
+  buzz.connect(buzzFilter)
+  buzzFilter.connect(buzzGain)
+  buzzGain.connect(ctx.destination)
+  buzz.start(now + 0.45)
+  buzz.stop(now + 1.25)
+}
+
 export function playSfx(kind: SfxKind) {
   const ctx = getAudioContext()
   if (!ctx) return
@@ -242,6 +282,11 @@ export function playSfx(kind: SfxKind) {
 
   if (kind === 'footstep') {
     playFootstepTap(ctx)
+    return
+  }
+
+  if (kind === 'timeUp') {
+    playTimeUpFail(ctx)
     return
   }
 

@@ -3,7 +3,7 @@ import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
 
-const FOOTSTEP_INTERVAL_MS = 340
+const FOOTSTEP_INTERVAL_MS = 250
 
 export function FootstepAudioSystem() {
   useEffect(() => {
