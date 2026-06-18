@@ -4,6 +4,7 @@ import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { SP_MINI_MAP_BOTTOM_OFFSET, SP_MINI_MAP_LEFT_OFFSET, SP_MINI_MAP_OUTER_WIDTH } from './MiniMap'
 import { TargetPreview } from './TargetPreview'
 
 export function TimeUpOverlay() {
@@ -62,26 +63,32 @@ export function TimeUpOverlay() {
 
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-40 px-2.5 pt-[calc(max(0.5rem,env(safe-area-inset-top))+3.35rem)] md:hidden">
-        <section className="pointer-events-auto w-[min(68vw,26rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-4 py-3.5 text-white shadow-lg backdrop-blur-md">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-300/95">
+      <div
+        className="pointer-events-none absolute z-40 md:hidden"
+        style={{
+          bottom: SP_MINI_MAP_BOTTOM_OFFSET,
+          left: `calc(${SP_MINI_MAP_LEFT_OFFSET} + ${SP_MINI_MAP_OUTER_WIDTH} + 0.5rem)`,
+        }}
+      >
+        <section className="pointer-events-auto w-[min(46vw,13.5rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-3.5 py-3 text-white shadow-lg backdrop-blur-md">
+          <p className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-amber-300/95">
             Time Up · Answer Reveal
           </p>
-          <p className="mt-1.5 text-sm leading-snug text-neutral-300">
+          <p className="mt-1 text-xs leading-snug text-neutral-300">
             <span className="font-bold text-amber-200">{targetNumbersLabel}</span> glow gold. Move to find
             them.
           </p>
-          <div className="mt-3 flex gap-2.5">
+          <div className="mt-2.5 flex gap-2">
             <button
               type="button"
-              className="flex-1 rounded-full bg-amber-400 px-3 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-neutral-950 transition active:bg-amber-300"
+              className="flex-1 rounded-full bg-amber-400 px-2.5 py-2 text-[0.65rem] font-black uppercase tracking-[0.1em] text-neutral-950 transition active:bg-amber-300"
               onClick={handleRetry}
             >
               Retry
             </button>
             <button
               type="button"
-              className="flex-1 rounded-full border border-white/25 px-3 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-white transition active:bg-white/10"
+              className="flex-1 rounded-full border border-white/25 px-2.5 py-2 text-[0.65rem] font-black uppercase tracking-[0.1em] text-white transition active:bg-white/10"
               onClick={handleBackToTitle}
             >
               Title

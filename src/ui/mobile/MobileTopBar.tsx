@@ -10,12 +10,13 @@ import { TargetPreview } from '../TargetPreview'
 function getTargetStackLayout(targetCount: number) {
   if (targetCount >= 5) {
     return {
-      previewSize: 'h-9 w-9',
-      modelScale: 1.0,
-      stackGap: 'gap-0.5',
-      itemGap: 'gap-1',
-      itemPadding: 'px-1 py-0.5',
-      idClassName: 'min-w-[1.85rem] text-right text-[0.6rem] font-black leading-none text-white',
+      previewSize: 'h-[3.825rem] w-[3.825rem]',
+      modelScale: 1.7,
+      stackGap: 'gap-1',
+      itemGap: 'gap-1.5',
+      itemPadding: 'px-1.5 py-1',
+      idClassName: 'min-w-[3.15rem] text-right text-[0.7rem] font-black leading-none text-white',
+      foundIconSize: 'size-6',
     }
   }
 
@@ -27,6 +28,7 @@ function getTargetStackLayout(targetCount: number) {
       itemGap: 'gap-1',
       itemPadding: 'px-1 py-0.5',
       idClassName: 'min-w-[2rem] text-right text-[0.65rem] font-black leading-none text-white',
+      foundIconSize: 'size-3.5',
     }
   }
 
@@ -37,6 +39,7 @@ function getTargetStackLayout(targetCount: number) {
     itemGap: 'gap-1.5',
     itemPadding: 'px-1.5 py-1',
     idClassName: 'min-w-[2.25rem] text-right text-[0.7rem] font-black leading-none text-white',
+    foundIconSize: 'size-4',
   }
 }
 
@@ -160,7 +163,7 @@ export function MobileTopBar() {
                 />
                 {isFound ? (
                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-500/15">
-                    <FoundTargetIcon className="size-3.5 text-emerald-300" />
+                    <FoundTargetIcon className={`${targetLayout.foundIconSize} text-emerald-300`} />
                   </span>
                 ) : null}
               </div>
