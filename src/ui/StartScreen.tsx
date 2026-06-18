@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
 import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import {
+  getGameModeDescription,
+  getGameModeLabel,
+} from '../game/gameMode'
 import { getProgressionStep, getProgressionSummary, getStageDescription } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
@@ -9,6 +13,8 @@ import { TargetPreview } from './TargetPreview'
 export function StartScreen() {
   const [playerMeebitInput, setPlayerMeebitInput] = useState(String(DEFAULT_PLAYER_MEEBIT_ID))
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const gameMode = useGameStore((state) => state.gameMode)
+  const setGameMode = useGameStore((state) => state.setGameMode)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const startGame = useGameStore((state) => state.startGame)
@@ -55,8 +61,41 @@ export function StartScreen() {
             Find the Meebit
           </h1>
           <p className="mt-4 text-base leading-relaxed text-neutral-600 max-md:mt-1.5 max-md:text-xs max-md:leading-snug">
-            {getStageDescription(firstStep)} · 3 min per stage. {getProgressionSummary()}.
+            {getStageDescription(firstStep)} · {getProgressionSummary()}.
           </p>
+
+          <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-md:mt-2 max-md:p-2.5">
+            <p className="text-sm font-semibold text-neutral-500 max-md:text-xs">Game Mode</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(['challenge', 'enjoy'] as const).map((mode) => {
+                const isSelected = gameMode === mode
+
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={`rounded-xl border px-3 py-2.5 text-left transition max-md:px-2.5 max-md:py-2 ${
+                      isSelected
+                        ? 'border-neutral-950 bg-neutral-950 text-white'
+                        : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-neutral-400'
+                    }`}
+                    onClick={() => setGameMode(mode)}
+                  >
+                    <p className="text-sm font-black uppercase tracking-[0.12em] max-md:text-xs">
+                      {getGameModeLabel(mode)}
+                    </p>
+                    <p
+                      className={`mt-1 text-xs leading-snug max-md:text-[0.65rem] ${
+                        isSelected ? 'text-neutral-300' : 'text-neutral-500'
+                      }`}
+                    >
+                      {getGameModeDescription(mode)}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-md:mt-2 max-md:p-2.5">
             <div className="flex items-center gap-3">

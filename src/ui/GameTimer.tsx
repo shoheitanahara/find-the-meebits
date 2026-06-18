@@ -3,6 +3,7 @@ import { getTimerDisplay } from './gameTimerDisplay'
 import { useGameStore } from '../stores/gameStore'
 
 export function GameTimer() {
+  const gameMode = useGameStore((state) => state.gameMode)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const startedAt = useGameStore((state) => state.startedAt)
   const clearTimeSeconds = useGameStore((state) => state.clearTimeSeconds)
@@ -13,7 +14,13 @@ export function GameTimer() {
     return () => window.clearInterval(intervalId)
   }, [])
 
-  const { label, value, urgent } = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds)
+  const timerDisplay = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds, gameMode)
+
+  if (!timerDisplay) {
+    return null
+  }
+
+  const { label, value, urgent } = timerDisplay
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden grid grid-cols-[minmax(0,1fr)_minmax(0,50vw)_minmax(0,1fr)] items-start gap-4 px-5 pt-5 md:grid">

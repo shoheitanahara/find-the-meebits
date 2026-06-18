@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { isTimedGameMode } from '../game/gameMode'
 import { getPrepareProgress } from '../systems/StagePrepareSystem'
 import { useGameStore } from '../stores/gameStore'
 
 export function PrepareOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const gameMode = useGameStore((state) => state.gameMode)
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -39,7 +41,9 @@ export function PrepareOverlay() {
           />
         </div>
         <p className="mt-3 text-xs font-medium text-neutral-400">
-          The timer starts once avatars around you are ready.
+          {isTimedGameMode(gameMode)
+            ? 'The timer starts once avatars around you are ready.'
+            : 'No time limit — explore freely once avatars around you are ready.'}
         </p>
       </section>
     </div>

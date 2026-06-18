@@ -6,6 +6,7 @@ import {
   NPC_VRM_ALWAYS_LOAD_DISTANCE,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
+import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
@@ -20,6 +21,7 @@ import { usePlayerStore } from './playerStore'
 type GamePhase = 'intro' | 'preparing' | 'playing' | 'cleared' | 'timedOut' | 'conquered'
 
 type GameState = {
+  gameMode: GameMode
   gamePhase: GamePhase
   progressionIndex: number
   activeNpcCount: number
@@ -35,6 +37,7 @@ type GameState = {
   npcLayoutVersion: number
   playerModelStatus: LoadingStatus
   playerModelError: string | null
+  setGameMode: (gameMode: GameMode) => void
   startGame: () => void
   beginPlaying: () => void
   clearGame: (foundNpcId: string) => void
@@ -62,6 +65,7 @@ function createInitialState() {
   seedNpcPositions(npcProfiles)
 
   return {
+    gameMode: DEFAULT_GAME_MODE,
     gamePhase: 'intro' as const,
     progressionIndex,
     activeNpcCount,
@@ -82,6 +86,7 @@ function createInitialState() {
 
 export const useGameStore = create<GameState>((set, get) => ({
   ...createInitialState(),
+  setGameMode: (gameMode) => set({ gameMode }),
   startGame: () => {
     softResetForGameStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -158,6 +163,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
     }),
   timeUp: () => {
+    if (!isTimedGameMode(get().gameMode)) {
+      return
+    }
+
     usePlayerStore.getState().setMovementLocked(false)
     set((state) => ({
       gamePhase: 'timedOut',

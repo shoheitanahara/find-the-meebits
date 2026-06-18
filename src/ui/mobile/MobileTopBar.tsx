@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { getStageLabel, getProgressionStep } from '../../game/gameProgression'
 import { getNpcById } from '../../npc/npcData'
 import { useGameStore } from '../../stores/gameStore'
-import { getTimerDisplay } from '../gameTimerDisplay'
+import { getTimerDisplay, shouldShowGameTimer } from '../gameTimerDisplay'
+import { getGameModeLabel } from '../../game/gameMode'
 import { FoundTargetIcon } from '../FoundTargetIcon'
 import { TargetPreview } from '../TargetPreview'
 
@@ -40,6 +41,7 @@ function getTargetStackLayout(targetCount: number) {
 }
 
 export function MobileTopBar() {
+  const gameMode = useGameStore((state) => state.gameMode)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
@@ -72,7 +74,9 @@ export function MobileTopBar() {
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
   const targetLayout = getTargetStackLayout(targetNpcs.length)
-  const { label, value, urgent } = getTimerDisplay(gamePhase, startedAt, clearTimeSeconds)
+  const showTimer = shouldShowGameTimer(gameMode)
+  const timerDisplay = showTimer ? getTimerDisplay(gamePhase, startedAt, clearTimeSeconds, gameMode) : null
+  const urgent = timerDisplay?.urgent ?? false
   const barTone = urgent
     ? 'border-red-400/40 bg-red-950/90 text-red-50'
     : isAnswerReveal
@@ -83,22 +87,35 @@ export function MobileTopBar() {
     <header className="pointer-events-none absolute inset-x-0 top-0 z-30 md:hidden">
       <div className="px-2.5 pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div
-          className={`w-[min(54vw,22rem)] rounded-2xl border px-2.5 py-1.5 shadow-xl backdrop-blur-md ${barTone}`}
+          className={`${showTimer ? 'w-[min(54vw,22rem)]' : 'w-[min(42vw,16rem)]'} rounded-2xl border px-2.5 py-1.5 shadow-xl backdrop-blur-md ${barTone}`}
         >
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
+          <div
+            className={
+              showTimer
+                ? 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3'
+                : 'min-w-0'
+            }
+          >
             <div className="min-w-0">
               <p className="text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 {stageLabel}
               </p>
               <p className="truncate text-[0.65rem] font-bold text-neutral-300">{activeNpcCount} Meebits</p>
+              {!showTimer ? (
+                <p className="mt-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                  {getGameModeLabel(gameMode)}
+                </p>
+              ) : null}
             </div>
 
-            <div className="shrink-0 text-right">
-              <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-neutral-400">
-                {label}
-              </p>
-              <p className="text-lg font-black tabular-nums leading-tight">{value}</p>
-            </div>
+            {showTimer && timerDisplay ? (
+              <div className="shrink-0 text-right">
+                <p className="text-[0.55rem] font-semibold uppercase tracking-[0.15em] text-neutral-400">
+                  {timerDisplay.label}
+                </p>
+                <p className="text-lg font-black tabular-nums leading-tight">{timerDisplay.value}</p>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
