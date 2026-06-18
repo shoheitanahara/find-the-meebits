@@ -11,7 +11,10 @@ function getTargetStackLayout(targetCount: number) {
   if (targetCount >= 5) {
     return {
       previewSize: 'h-[3.825rem] w-[3.825rem]',
-      modelScale: 1.7,
+      modelScale: 1.05,
+      cameraDistance: 4.25,
+      cameraY: 1.45,
+      modelYOffset: -1.2,
       stackGap: 'gap-1',
       itemGap: 'gap-1.5',
       itemPadding: 'px-1.5 py-1',
@@ -23,7 +26,10 @@ function getTargetStackLayout(targetCount: number) {
   if (targetCount >= 4) {
     return {
       previewSize: 'h-10 w-10',
-      modelScale: 1.02,
+      modelScale: 1.0,
+      cameraDistance: 3.85,
+      cameraY: 1.5,
+      modelYOffset: -1.1,
       stackGap: 'gap-0.5',
       itemGap: 'gap-1',
       itemPadding: 'px-1 py-0.5',
@@ -35,6 +41,9 @@ function getTargetStackLayout(targetCount: number) {
   return {
     previewSize: 'h-[4.5rem] w-[4.5rem]',
     modelScale: 1.1,
+    cameraDistance: 3.6,
+    cameraY: 1.55,
+    modelYOffset: -1.05,
     stackGap: 'gap-1',
     itemGap: 'gap-1.5',
     itemPadding: 'px-1.5 py-1',
@@ -157,8 +166,9 @@ export function MobileTopBar() {
                 <TargetPreview
                   meebitNumber={npc.meebitNumber}
                   modelScale={targetLayout.modelScale}
-                  cameraDistance={3.05}
-                  modelYOffset={-1.0}
+                  cameraDistance={targetLayout.cameraDistance}
+                  cameraY={targetLayout.cameraY}
+                  modelYOffset={targetLayout.modelYOffset}
                   sizeClassName={`${targetLayout.previewSize} rounded-lg ${isFound ? 'opacity-55' : ''}`}
                 />
                 {isFound ? (

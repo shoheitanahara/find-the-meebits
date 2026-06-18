@@ -10,6 +10,7 @@ type TargetPreviewProps = {
   sizeClassName?: string
   modelScale?: number
   cameraDistance?: number
+  cameraY?: number
   modelYOffset?: number
 }
 
@@ -18,13 +19,14 @@ export function TargetPreview({
   sizeClassName = 'h-44 w-44',
   modelScale = 1.15,
   cameraDistance = 4,
+  cameraY = 1.6,
   modelYOffset = -0.9,
 }: TargetPreviewProps) {
   return (
     <div
       className={`${sizeClassName} overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100`}
     >
-      <Canvas camera={{ position: [0, 1.6, cameraDistance], fov: 30 }} gl={{ antialias: true }}>
+      <Canvas camera={{ position: [0, cameraY, cameraDistance], fov: 30 }} gl={{ antialias: true }}>
         <color attach="background" args={['#f5f5f5']} />
         <ambientLight intensity={1.4} />
         <directionalLight position={[3, 4, 3]} intensity={1.8} />
