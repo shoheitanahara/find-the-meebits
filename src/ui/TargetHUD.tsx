@@ -35,7 +35,7 @@ export function TargetHUD() {
 
   return (
     <aside
-      className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md md:block ${
+      className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:block ${
         targetCount >= 5 ? 'w-[13.5rem]' : 'w-auto'
       } ${
         isAnswerReveal

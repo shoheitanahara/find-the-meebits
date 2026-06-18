@@ -25,7 +25,7 @@ export function GameTimer() {
   const urgent = timerDisplay?.urgent ?? false
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden flex-col items-center gap-1 px-5 pt-5 md:flex">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 hidden flex-col items-center gap-1 px-5 pt-5 lg:flex">
       {timerDisplay ? (
         <section
           className={`rounded-full border px-5 py-2 text-center shadow-xl shadow-black/20 backdrop-blur-md ${

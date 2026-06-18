@@ -23,7 +23,7 @@ export function MobileControls() {
 
   if (isDialogueOpen) {
     return (
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
         <button
           type="button"
           className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
@@ -46,7 +46,7 @@ export function MobileControls() {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-between px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-between px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
       <VirtualJoystick />
       {nearestNpc ? (
         <button

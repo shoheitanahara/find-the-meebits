@@ -95,33 +95,33 @@ export function MiniMap() {
 
   return (
     <aside
-      className={`pointer-events-none absolute bottom-[9.5rem] left-3 z-30 rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md md:bottom-5 md:left-5 md:rounded-3xl md:p-4 ${
+      className={`pointer-events-none absolute bottom-[9.5rem] left-3 z-30 rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:bottom-5 lg:left-5 lg:rounded-3xl lg:p-4 ${
         isAnswerReveal
           ? 'border-amber-300/35 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'
       }`}
     >
-      <div className="flex items-center justify-between gap-2 md:gap-4">
+      <div className="flex items-center justify-between gap-2 lg:gap-4">
         <p
-          className={`text-[0.65rem] font-semibold uppercase tracking-[0.2em] md:text-[0.65rem] md:tracking-[0.3em] ${
+          className={`text-[0.65rem] font-semibold uppercase tracking-[0.2em] lg:text-[0.65rem] lg:tracking-[0.3em] ${
             isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
           }`}
         >
           Map
         </p>
-        <p className="hidden text-xs font-semibold text-neutral-400 md:block">
+        <p className="hidden text-xs font-semibold text-neutral-400 lg:block">
           {Math.round(position[0])}, {Math.round(position[2])}
         </p>
       </div>
 
-      <div className="relative mt-2 size-24 overflow-hidden rounded-xl border border-neutral-600 bg-neutral-800 md:mt-3 md:size-36 md:rounded-2xl">
+      <div className="relative mt-2 size-24 overflow-hidden rounded-xl border border-neutral-600 bg-neutral-800 lg:mt-3 lg:size-36 lg:rounded-2xl">
         <div className="absolute left-1/2 top-0 h-full w-px bg-neutral-600/70" />
         <div className="absolute left-0 top-1/2 h-px w-full bg-neutral-600/70" />
         <div className="absolute inset-[12.5%] border border-neutral-500/50" />
         {targetMarkers.map((marker) => (
           <MapMarker key={marker.id} xPercent={marker.xPercent} zPercent={marker.zPercent}>
             <div
-              className={`h-3 w-3 rounded-full md:h-3 md:w-3 ${
+              className={`h-3 w-3 rounded-full lg:h-3 lg:w-3 ${
                 isAnswerReveal
                   ? 'animate-pulse bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.95)]'
                   : 'bg-red-400'
@@ -135,11 +135,11 @@ export function MiniMap() {
           className="flex items-center justify-center"
           transform={`translate(-50%, -50%) rotate(${arrowRotation}rad)`}
         >
-          <div className="h-0 w-0 border-x-[8px] border-b-[14px] border-x-transparent border-b-white drop-shadow md:border-x-[8px] md:border-b-[14px]" />
+          <div className="h-0 w-0 border-x-[8px] border-b-[14px] border-x-transparent border-b-white drop-shadow lg:border-x-[8px] lg:border-b-[14px]" />
         </MapMarker>
       </div>
 
-      <p className="mt-1 hidden text-sm font-bold text-neutral-200 md:block">
+      <p className="mt-1 hidden text-sm font-bold text-neutral-200 lg:block">
         {isAnswerReveal ? 'Find the glow' : 'You are here'}
       </p>
     </aside>

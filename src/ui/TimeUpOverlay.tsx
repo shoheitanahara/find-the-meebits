@@ -8,6 +8,38 @@ import { SP_MINI_MAP_BOTTOM_OFFSET, SP_MINI_MAP_LEFT_OFFSET, SP_MINI_MAP_OUTER_W
 import { TargetPreview } from './TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
+function getTimeUpPreviewLayout(targetCount: number) {
+  if (targetCount >= 5) {
+    return {
+      previewSize: 'h-[4.5rem] w-[4.5rem] rounded-xl',
+      gridClass: 'grid grid-cols-3 gap-1.5',
+      containerClass: 'w-[14rem]',
+    }
+  }
+
+  if (targetCount >= 3) {
+    return {
+      previewSize: 'h-24 w-24 rounded-xl',
+      gridClass: 'grid grid-cols-2 gap-2',
+      containerClass: 'w-[12.5rem]',
+    }
+  }
+
+  if (targetCount >= 2) {
+    return {
+      previewSize: 'h-28 w-28 rounded-xl',
+      gridClass: 'flex flex-wrap gap-2',
+      containerClass: 'w-auto',
+    }
+  }
+
+  return {
+    previewSize: 'h-40 w-40',
+    gridClass: 'grid grid-cols-1',
+    containerClass: 'w-auto',
+  }
+}
+
 export function TimeUpOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
@@ -24,6 +56,8 @@ export function TimeUpOverlay() {
   const stageLabel = step ? getStageLabel(step) : 'Stage'
   const isVisible = gamePhase === 'timedOut' && targetNpcs.length > 0
   const targetNumbersLabel = targetNpcs.map((npc) => `#${npc.meebitNumber}`).join(', ')
+  const previewLayout = getTimeUpPreviewLayout(targetNpcs.length)
+  const useCompactPreviewGrid = targetNpcs.length >= 3
 
   const handleRetry = () => {
     unlockAudioIfNeeded()
@@ -69,7 +103,7 @@ export function TimeUpOverlay() {
   return (
     <>
       <div
-        className="pointer-events-none absolute z-40 md:hidden"
+        className="pointer-events-none absolute z-40 lg:hidden"
         style={{
           bottom: SP_MINI_MAP_BOTTOM_OFFSET,
           left: `calc(${SP_MINI_MAP_LEFT_OFFSET} + ${SP_MINI_MAP_OUTER_WIDTH} + 0.5rem)`,
@@ -102,16 +136,28 @@ export function TimeUpOverlay() {
         </section>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 hidden justify-center p-4 sm:p-6 md:flex">
-        <section className="pointer-events-auto grid w-full max-w-3xl gap-5 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-6 text-white shadow-2xl backdrop-blur-md sm:grid-cols-[auto_1fr]">
-          <div className="grid gap-2">
-            {targetNpcs.map((npc) => (
-              <TargetPreview
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 hidden justify-center p-4 sm:p-6 lg:flex">
+        <section className="pointer-events-auto grid w-full max-w-3xl items-start gap-4 rounded-[2rem] border border-amber-300/35 bg-neutral-950/92 p-5 text-white shadow-2xl backdrop-blur-md sm:grid-cols-[auto_1fr] sm:p-6">
+          <div className={`${previewLayout.gridClass} ${previewLayout.containerClass} shrink-0`}>
+            {targetNpcs.map((npc, index) => (
+              <div
                 key={npc.id}
-                meebitNumber={npc.meebitNumber}
-                modelScale={1.12}
-                sizeClassName="mx-auto h-40 w-40"
-              />
+                className={
+                  useCompactPreviewGrid &&
+                  targetNpcs.length % 2 === 1 &&
+                  index === targetNpcs.length - 1
+                    ? 'col-span-2 mx-auto'
+                    : ''
+                }
+              >
+                <TargetPreview
+                  meebitNumber={npc.meebitNumber}
+                  sizeClassName={`mx-auto ${previewLayout.previewSize}`}
+                />
+                {targetNpcs.length > 1 ? (
+                  <p className="mt-1 text-center text-xs font-black text-amber-200">#{npc.meebitNumber}</p>
+                ) : null}
+              </div>
             ))}
           </div>
           <div className="text-left">

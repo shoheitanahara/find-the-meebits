@@ -98,7 +98,7 @@ export function MobileTopBar() {
       : 'border-white/20 bg-neutral-950/90 text-white'
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 md:hidden">
+    <header className="pointer-events-none absolute inset-x-0 top-0 z-30 lg:hidden">
       <div className="px-2.5 pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div
           className={`${showTimer ? 'w-[min(54vw,22rem)]' : 'w-[min(42vw,16rem)]'} rounded-2xl border px-2.5 py-1.5 shadow-xl backdrop-blur-md ${barTone}`}

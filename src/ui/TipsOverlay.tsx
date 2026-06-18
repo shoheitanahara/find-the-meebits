@@ -41,11 +41,11 @@ export function TipsOverlay() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-[48] grid place-items-center bg-neutral-950/70 p-4 backdrop-blur-sm max-md:px-3 max-md:py-[max(1rem,env(safe-area-inset-top))]">
-      <section className="w-full max-w-lg rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-md:max-h-[calc(100dvh-2rem)] max-md:overflow-y-auto max-md:rounded-3xl max-md:p-4 md:p-7">
+    <div className="pointer-events-auto absolute inset-0 z-[48] grid place-items-center bg-neutral-950/70 p-4 backdrop-blur-sm max-lg:px-3 max-lg:py-[max(1rem,env(safe-area-inset-top))]">
+      <section className="w-full max-w-lg rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:rounded-3xl max-lg:p-4 lg:p-7">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Tips</p>
-        <h2 className="mt-2 text-2xl font-black tracking-tight md:text-3xl">Before you start</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600 max-md:text-xs">
+        <h2 className="mt-2 text-2xl font-black tracking-tight lg:text-3xl">Before you start</h2>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-600 max-lg:text-xs">
           A few things that help in the museum.
         </p>
 
@@ -53,7 +53,7 @@ export function TipsOverlay() {
           {GAME_TIPS.map((tip, index) => (
             <li
               key={tip.title}
-              className="flex gap-3 rounded-2xl border border-neutral-200 bg-white px-3.5 py-3 max-md:px-3 max-md:py-2.5"
+              className="flex gap-3 rounded-2xl border border-neutral-200 bg-white px-3.5 py-3 max-lg:px-3 max-lg:py-2.5"
             >
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
                 {index === 0 ? (
@@ -65,21 +65,21 @@ export function TipsOverlay() {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-black max-md:text-xs">{tip.title}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600 max-md:text-xs">{tip.body}</p>
+                <p className="text-sm font-black max-lg:text-xs">{tip.title}</p>
+                <p className="mt-1 text-sm leading-snug text-neutral-600 max-lg:text-xs">{tip.body}</p>
               </div>
             </li>
           ))}
         </ul>
 
-        <p className="mt-4 text-xs leading-relaxed text-neutral-500 max-md:text-[0.65rem]">
+        <p className="mt-4 text-xs leading-relaxed text-neutral-500 max-lg:text-[0.65rem]">
           <span className="font-semibold text-neutral-700">PC:</span> Press E to talk ·{' '}
           <span className="font-semibold text-neutral-700">Mobile:</span> Tap Inspect when nearby
         </p>
 
         <button
           type="button"
-          className="mt-5 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-neutral-700 max-md:py-3 max-md:text-xs"
+          className="mt-5 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-neutral-700 max-lg:py-3 max-lg:text-xs"
           onClick={() => {
             unlockAudioIfNeeded()
             playSfx('uiConfirm')

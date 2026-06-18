@@ -1,5 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
+import { isTouchUiMode } from '../game/perfConfig'
 import { getNpcById } from '../npc/npcData'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -20,15 +21,11 @@ const dialogueLookAtHeight = new Vector3(0, 1.55, 0)
 const mobileDialogueCameraHeight = new Vector3(0, 2.1, 0)
 const mobileDialogueLookAtHeight = new Vector3(0, 1.15, 0)
 
-function isMobileViewport() {
-  return window.innerWidth < 768
-}
-
 export function FollowCamera() {
   useFrame(({ camera }, delta) => {
     const { position } = usePlayerStore.getState()
     const dialogue = useDialogueStore.getState()
-    const isMobile = isMobileViewport()
+    const isMobile = isTouchUiMode()
 
     playerPosition.set(position[0], position[1], position[2])
 

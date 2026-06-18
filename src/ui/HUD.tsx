@@ -8,7 +8,7 @@ export function HUD() {
   const stageLabel = step ? getStageLabel(step) : 'Stage'
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 hidden p-5 sm:p-6 md:block">
+    <div className="pointer-events-none absolute inset-0 z-10 hidden p-5 sm:p-6 lg:block">
       <section className="w-fit rounded-3xl border border-white/40 bg-neutral-950/80 px-5 py-4 text-white shadow-xl shadow-black/20 backdrop-blur-md">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">Prototype</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">

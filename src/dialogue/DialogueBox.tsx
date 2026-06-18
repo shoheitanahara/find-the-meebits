@@ -43,8 +43,8 @@ export function DialogueBox() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-md:bottom-auto max-md:top-[max(6rem,env(safe-area-inset-top))] max-md:w-[calc(100%-0.75rem)]">
-      <div className="rounded-3xl border border-white/60 bg-white/90 px-5 py-4 shadow-2xl shadow-sky-900/15 backdrop-blur-md max-md:px-3.5 max-md:py-3 sm:px-6 sm:py-5">
+    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)]">
+      <div className="rounded-3xl border border-white/60 bg-white/90 px-5 py-4 shadow-2xl shadow-sky-900/15 backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
         <div className="hidden sm:grid sm:grid-cols-[auto_1fr] sm:gap-4">
           <div>
             <TargetPreview
@@ -165,7 +165,7 @@ function DialogueContent({
         <button
           type="button"
           className={`rounded-full bg-neutral-950 font-bold text-white transition hover:bg-neutral-700 ${
-            compact ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 text-sm max-md:px-6 max-md:py-3'
+            compact ? 'px-4 py-2 text-xs' : 'px-5 py-2.5 text-sm max-lg:px-6 max-lg:py-3'
           }`}
           onClick={onNext}
         >
