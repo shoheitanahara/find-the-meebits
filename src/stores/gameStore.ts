@@ -15,6 +15,7 @@ import { buildNpcProfiles } from '../npc/npcGeneration'
 import type { NPCProfile } from '../npc/npcTypes'
 import type { LoadingStatus } from '../types/game'
 import { useDialogueStore } from '../dialogue/dialogueStore'
+import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { useNpcStore } from './npcStore'
 import { usePlayerStore } from './playerStore'
 
@@ -119,54 +120,61 @@ export const useGameStore = create<GameState>((set, get) => ({
       preparedAt: null,
     })
   },
-  clearGame: (foundNpcId) =>
-    set((state) => {
-      if (
-        !state.targetNpcIds.includes(foundNpcId) ||
-        state.foundTargetNpcIds.includes(foundNpcId)
-      ) {
-        return state
+  clearGame: (foundNpcId) => {
+    const state = get()
+    if (
+      !state.targetNpcIds.includes(foundNpcId) ||
+      state.foundTargetNpcIds.includes(foundNpcId)
+    ) {
+      return
+    }
+
+    const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
+    const foundTargetNpcIds = [...state.foundTargetNpcIds, foundNpcId]
+    const hasRemainingTargets = state.targetNpcIds.some((id) => !foundTargetNpcIds.includes(id))
+    const isMultiTargetStage = state.targetNpcIds.length > 1
+
+    if (hasRemainingTargets) {
+      if (isMultiTargetStage) {
+        unlockAudioIfNeeded().then(() => playSfx('targetFound'))
       }
 
-      const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
-      const foundTargetNpcIds = [...state.foundTargetNpcIds, foundNpcId]
-      const hasRemainingTargets = state.targetNpcIds.some((id) => !foundTargetNpcIds.includes(id))
+      usePlayerStore.getState().setMovementLocked(false)
 
-      if (hasRemainingTargets) {
-        usePlayerStore.getState().setMovementLocked(false)
+      set({
+        foundTargetNpcIds,
+        clearedNpcId: foundNpcId,
+        gamePhase: 'playing' as const,
+      })
+      return
+    }
 
-        return {
-          foundTargetNpcIds,
-          clearedNpcId: foundNpcId,
-          gamePhase: 'playing' as const,
-        }
-      }
+    const nextIndex = state.progressionIndex + 1
+    const nextStep = getProgressionStep(nextIndex)
 
-      const nextIndex = state.progressionIndex + 1
-      const nextStep = getProgressionStep(nextIndex)
-
-      if (!nextStep) {
-        return {
-          gamePhase: 'conquered' as const,
-          foundTargetNpcIds,
-          targetNpcIds: [],
-          clearedNpcId: foundNpcId,
-          clearTimeSeconds,
-        }
-      }
-
-      return {
-        gamePhase: 'cleared' as const,
-        progressionIndex: nextIndex,
-        activeNpcCount: nextStep.npcCount,
-        stage: nextStep.stageNumber,
-        stageKind: nextStep.kind,
-        foundTargetNpcIds: [],
+    if (!nextStep) {
+      set({
+        gamePhase: 'conquered' as const,
+        foundTargetNpcIds,
         targetNpcIds: [],
         clearedNpcId: foundNpcId,
         clearTimeSeconds,
-      }
-    }),
+      })
+      return
+    }
+
+    set({
+      gamePhase: 'cleared' as const,
+      progressionIndex: nextIndex,
+      activeNpcCount: nextStep.npcCount,
+      stage: nextStep.stageNumber,
+      stageKind: nextStep.kind,
+      foundTargetNpcIds: [],
+      targetNpcIds: [],
+      clearedNpcId: foundNpcId,
+      clearTimeSeconds,
+    })
+  },
   timeUp: () => {
     if (!isTimedGameMode(get().gameMode)) {
       return

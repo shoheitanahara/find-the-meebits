@@ -1,4 +1,4 @@
-type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep' | 'timeUp'
+type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep' | 'timeUp' | 'targetFound'
 
 let audioContext: AudioContext | null = null
 
@@ -259,6 +259,31 @@ function playTimeUpFail(ctx: AudioContext) {
   buzz.stop(now + 1.25)
 }
 
+function playTargetFound(ctx: AudioContext) {
+  const now = ctx.currentTime
+  scheduleBeep(ctx, {
+    frequency: 523.25,
+    durationMs: 100,
+    type: 'sine',
+    gain: 0.07,
+    startTime: now,
+  })
+  scheduleBeep(ctx, {
+    frequency: 659.25,
+    durationMs: 130,
+    type: 'sine',
+    gain: 0.075,
+    startTime: now + 0.07,
+  })
+  scheduleBeep(ctx, {
+    frequency: 783.99,
+    durationMs: 160,
+    type: 'triangle',
+    gain: 0.065,
+    startTime: now + 0.14,
+  })
+}
+
 export function playSfx(kind: SfxKind) {
   const ctx = getAudioContext()
   if (!ctx) return
@@ -287,6 +312,11 @@ export function playSfx(kind: SfxKind) {
 
   if (kind === 'timeUp') {
     playTimeUpFail(ctx)
+    return
+  }
+
+  if (kind === 'targetFound') {
+    playTargetFound(ctx)
     return
   }
 
