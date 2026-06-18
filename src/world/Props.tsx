@@ -1,54 +1,85 @@
 import type { ReactNode } from 'react'
 import { Text } from '@react-three/drei'
+import {
+  BENCH_POSITIONS,
+  GOLDEN_TREE_POSITIONS,
+  SCULPTURE_POSITIONS,
+  WALL_PANEL_POSITIONS,
+} from './worldLandmarks'
 
-const treePositions: [number, number, number][] = [
-  [-22, 0, -15],
-  [-16, 0, 22],
-  [20, 0, -18],
-  [24, 0, 20],
-  [-44, 0, 3],
-  [44, 0, -5],
-]
+const treePositions = GOLDEN_TREE_POSITIONS
+const benchPositions = BENCH_POSITIONS
+const sculpturePositions = SCULPTURE_POSITIONS
+const wallPanelPositions = WALL_PANEL_POSITIONS
 
-const benchPositions: [number, number, number][] = [
-  [-14, 0.35, 12],
-  [14, 0.35, 12],
-  [-28, 0.35, -22],
-  [28, 0.35, 24],
-]
+function GoldenTree({
+  position,
+  variant = 0,
+}: {
+  position: [number, number, number]
+  variant?: number
+}) {
+  const goldMaterial = (
+    <meshStandardMaterial color="#d4af37" roughness={0.26} metalness={0.88} />
+  )
+  const goldTopMaterial = (
+    <meshStandardMaterial color="#e8c547" roughness={0.22} metalness={0.9} />
+  )
+  const barkMaterial = <meshStandardMaterial color="#1c1410" roughness={0.9} />
+  const barkLightMaterial = <meshStandardMaterial color="#3d2e22" roughness={0.84} />
 
-const sculpturePositions: [number, number, number][] = [
-  [-50, 0, -42],
-  [-28, 0, -50],
-  [18, 0, -52],
-  [48, 0, -36],
-  [-52, 0, 26],
-  [-24, 0, 50],
-  [22, 0, 52],
-  [52, 0, 30],
-]
-
-const wallPanelPositions: [number, number, number][] = [
-  [-54, 0.575, -10],
-  [-54, 0.575, 12],
-  [54, 0.575, -14],
-  [54, 0.575, 10],
-  [-12, 0.575, -54],
-  [14, 0.575, -54],
-  [-14, 0.575, 54],
-  [12, 0.575, 54],
-]
-
-function Tree({ position }: { position: [number, number, number] }) {
   return (
-    <group position={position}>
-      <mesh castShadow position={[0, 0.325, 0]}>
-        <boxGeometry args={[0.5, 0.65, 0.5]} />
-        <meshStandardMaterial color="#111111" roughness={0.8} />
+    <group position={position} rotation={[0, variant * 0.95, 0]}>
+      <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
+        <boxGeometry args={[0.62, 0.2, 0.62]} />
+        {barkMaterial}
       </mesh>
-      <mesh castShadow position={[0, 0.85, 0]}>
-        <boxGeometry args={[1.8, 0.9, 1.8]} />
-        <meshStandardMaterial color="#d4af37" roughness={0.28} metalness={0.85} />
+      <mesh castShadow position={[0, 0.48, 0]}>
+        <boxGeometry args={[0.44, 0.72, 0.44]} />
+        {barkMaterial}
+      </mesh>
+      <mesh castShadow position={[0, 0.92, 0]}>
+        <boxGeometry args={[0.36, 0.42, 0.36]} />
+        {barkLightMaterial}
+      </mesh>
+      <mesh castShadow position={[0.18, 1.08, 0]}>
+        <boxGeometry args={[0.22, 0.18, 0.22]} />
+        {barkLightMaterial}
+      </mesh>
+      <mesh castShadow position={[-0.16, 1.06, 0.14]}>
+        <boxGeometry args={[0.18, 0.16, 0.18]} />
+        {barkLightMaterial}
+      </mesh>
+
+      <mesh castShadow receiveShadow position={[0, 1.38, 0]}>
+        <boxGeometry args={[2, 0.52, 2]} />
+        {goldMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0.72, 1.34, 0.62]}>
+        <boxGeometry args={[0.55, 0.42, 0.55]} />
+        {goldMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[-0.68, 1.36, -0.58]}>
+        <boxGeometry args={[0.5, 0.4, 0.5]} />
+        {goldMaterial}
+      </mesh>
+
+      <mesh castShadow receiveShadow position={[0, 1.86, 0]}>
+        <boxGeometry args={[1.5, 0.48, 1.5]} />
+        {goldMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0.48, 1.82, -0.42]}>
+        <boxGeometry args={[0.42, 0.38, 0.42]} />
+        {goldMaterial}
+      </mesh>
+
+      <mesh castShadow receiveShadow position={[0, 2.28, 0]}>
+        <boxGeometry args={[0.95, 0.42, 0.95]} />
+        {goldTopMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 2.62, 0]}>
+        <boxGeometry args={[0.42, 0.3, 0.42]} />
+        {goldTopMaterial}
       </mesh>
     </group>
   )
@@ -73,26 +104,177 @@ function Bench({ position }: { position: [number, number, number] }) {
   )
 }
 
-function Sculpture({ position, index }: { position: [number, number, number]; index: number }) {
+function MonochromeSculpture({
+  position,
+  index,
+}: {
+  position: [number, number, number]
+  index: number
+}) {
   const isDark = index % 2 === 0
+  const variant = index % 3
+
+  const pedestalMaterial = (
+    <meshStandardMaterial color={isDark ? '#1c1917' : '#f5f5f4'} roughness={0.72} />
+  )
+  const plinthMaterial = (
+    <meshStandardMaterial color={isDark ? '#292524' : '#e7e5e4'} roughness={0.68} />
+  )
+  const statueMaterial = (
+    <meshStandardMaterial
+      color={isDark ? '#d4d4d4' : '#171717'}
+      roughness={isDark ? 0.2 : 0.52}
+      metalness={isDark ? 0.88 : 0}
+    />
+  )
+  const statueAccentMaterial = (
+    <meshStandardMaterial
+      color={isDark ? '#fafaf9' : '#404040'}
+      roughness={isDark ? 0.16 : 0.48}
+      metalness={isDark ? 0.92 : 0.05}
+    />
+  )
 
   return (
     <group position={position} rotation={[0, index * 0.7, 0]}>
-      <mesh castShadow receiveShadow position={[0, 0.125, 0]}>
-        <boxGeometry args={[2.4, 0.25, 2.4]} />
-        <meshStandardMaterial color={isDark ? '#1c1917' : '#f5f5f4'} roughness={0.7} />
+      <mesh castShadow receiveShadow position={[0, 0.09, 0]}>
+        <boxGeometry args={[2.6, 0.18, 2.6]} />
+        {pedestalMaterial}
       </mesh>
-      <mesh castShadow position={[0, 0.6, 0]}>
-        <boxGeometry args={[0.65, 0.95, 0.65]} />
-        <meshStandardMaterial
-          color={isDark ? '#c0c0c0' : '#1c1917'}
-          roughness={isDark ? 0.22 : 0.55}
-          metalness={isDark ? 0.9 : 0}
+      <mesh castShadow receiveShadow position={[0, 0.24, 0]}>
+        <boxGeometry args={[1.85, 0.16, 1.85]} />
+        {plinthMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 0.38, 0]}>
+        <boxGeometry args={[1.15, 0.12, 1.15]} />
+        {plinthMaterial}
+      </mesh>
+
+      {variant === 0 ? (
+        <StandingFigureSculpture
+          statueMaterial={statueMaterial}
+          statueAccentMaterial={statueAccentMaterial}
         />
+      ) : null}
+      {variant === 1 ? (
+        <SpiralColumnSculpture
+          statueMaterial={statueMaterial}
+          statueAccentMaterial={statueAccentMaterial}
+        />
+      ) : null}
+      {variant === 2 ? (
+        <ArchSculpture statueMaterial={statueMaterial} statueAccentMaterial={statueAccentMaterial} />
+      ) : null}
+    </group>
+  )
+}
+
+function StandingFigureSculpture({
+  statueMaterial,
+  statueAccentMaterial,
+}: {
+  statueMaterial: ReactNode
+  statueAccentMaterial: ReactNode
+}) {
+  return (
+    <group position={[0, 0.44, 0]}>
+      <mesh castShadow receiveShadow position={[-0.22, 0.18, 0]}>
+        <boxGeometry args={[0.28, 0.42, 0.32]} />
+        {statueMaterial}
       </mesh>
-      <mesh castShadow position={[0.58, 0.925, 0]}>
-        <boxGeometry args={[1.7, 0.17, 0.34]} />
-        <meshStandardMaterial color={isDark ? '#d6d3d1' : '#292524'} roughness={0.5} />
+      <mesh castShadow receiveShadow position={[0.22, 0.18, 0]}>
+        <boxGeometry args={[0.28, 0.42, 0.32]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 0.62, 0]}>
+        <boxGeometry args={[0.62, 0.58, 0.38]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 1.08, 0]}>
+        <boxGeometry args={[0.48, 0.52, 0.34]} />
+        {statueAccentMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 1.48, 0]}>
+        <boxGeometry args={[0.38, 0.36, 0.32]} />
+        {statueAccentMaterial}
+      </mesh>
+      <mesh castShadow position={[0.46, 0.78, 0]}>
+        <boxGeometry args={[0.72, 0.14, 0.22]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow position={[-0.42, 1.02, 0.08]}>
+        <boxGeometry args={[0.18, 0.14, 0.18]} />
+        {statueAccentMaterial}
+      </mesh>
+    </group>
+  )
+}
+
+function SpiralColumnSculpture({
+  statueMaterial,
+  statueAccentMaterial,
+}: {
+  statueMaterial: ReactNode
+  statueAccentMaterial: ReactNode
+}) {
+  return (
+    <group position={[0, 0.48, 0]}>
+      <mesh castShadow receiveShadow position={[0, 0.16, 0]}>
+        <boxGeometry args={[0.72, 0.32, 0.72]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0.18, 0.48, 0.12]}>
+        <boxGeometry args={[0.58, 0.28, 0.58]} />
+        {statueAccentMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[-0.14, 0.76, -0.1]}>
+        <boxGeometry args={[0.5, 0.26, 0.5]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0.1, 1.02, 0.14]}>
+        <boxGeometry args={[0.42, 0.24, 0.42]} />
+        {statueAccentMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[-0.08, 1.26, -0.08]}>
+        <boxGeometry args={[0.34, 0.22, 0.34]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 1.48, 0]}>
+        <boxGeometry args={[0.24, 0.18, 0.24]} />
+        {statueAccentMaterial}
+      </mesh>
+    </group>
+  )
+}
+
+function ArchSculpture({
+  statueMaterial,
+  statueAccentMaterial,
+}: {
+  statueMaterial: ReactNode
+  statueAccentMaterial: ReactNode
+}) {
+  return (
+    <group position={[0, 0.44, 0]}>
+      <mesh castShadow receiveShadow position={[-0.52, 0.42, 0]}>
+        <boxGeometry args={[0.34, 0.88, 0.34]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0.52, 0.42, 0]}>
+        <boxGeometry args={[0.34, 0.88, 0.34]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 0.92, 0]}>
+        <boxGeometry args={[1.55, 0.22, 0.38]} />
+        {statueAccentMaterial}
+      </mesh>
+      <mesh castShadow receiveShadow position={[0, 0.18, 0]}>
+        <boxGeometry args={[1.35, 0.18, 0.42]} />
+        {statueMaterial}
+      </mesh>
+      <mesh castShadow position={[0, 1.12, 0]}>
+        <boxGeometry args={[0.28, 0.28, 0.28]} />
+        {statueAccentMaterial}
       </mesh>
     </group>
   )
@@ -259,14 +441,14 @@ export function Props() {
       <Stage />
       <Signboard />
       <RuleBoard />
-      {treePositions.map((position) => (
-        <Tree key={position.join('-')} position={position} />
+      {treePositions.map((position, index) => (
+        <GoldenTree key={position.join('-')} position={position} variant={index} />
       ))}
       {benchPositions.map((position) => (
         <Bench key={position.join('-')} position={position} />
       ))}
       {sculpturePositions.map((position, index) => (
-        <Sculpture key={position.join('-')} index={index} position={position} />
+        <MonochromeSculpture key={position.join('-')} index={index} position={position} />
       ))}
       {wallPanelPositions.map((position, index) => (
         <WallPanel key={position.join('-')} index={index} position={position} />

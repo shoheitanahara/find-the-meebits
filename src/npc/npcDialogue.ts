@@ -7,7 +7,7 @@ import type { DialogueLine, NPCProfile } from './npcTypes'
 import { WANDERER_DIALOGUE_POOL } from './npcDialoguePool'
 import { buildTargetLocationHint } from './npcTargetHint'
 
-const TARGET_HINT_CHANCE = 0.2
+const TARGET_HINT_CHANCE = 0.15
 
 function seededIndex(seed: number, talkCount: number, length: number) {
   const value = Math.sin(seed * 12.9898 + talkCount * 78.233) * 43758.5453
