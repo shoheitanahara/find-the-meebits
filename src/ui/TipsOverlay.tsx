@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { GAME_TIPS } from './gameTips'
+import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 function RedMarkerIcon({ className = 'size-4' }: { className?: string }) {
   return (
@@ -79,7 +80,11 @@ export function TipsOverlay() {
         <button
           type="button"
           className="mt-5 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:bg-neutral-700 max-md:py-3 max-md:text-xs"
-          onClick={acknowledgeTips}
+          onClick={() => {
+            unlockAudioIfNeeded()
+            playSfx('uiConfirm')
+            acknowledgeTips()
+          }}
         >
           Got it
         </button>

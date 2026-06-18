@@ -5,6 +5,7 @@ import { getNpcById } from '../npc/npcData'
 import { getCurrentStageLabel, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from './TargetPreview'
+import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function ClearOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -21,6 +22,8 @@ export function ClearOverlay() {
   const nextStep = isConquered ? null : getProgressionStep(progressionIndex)
 
   const handleContinue = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiConfirm')
     usePlayerStore
       .getState()
       .setPlayerTransform(

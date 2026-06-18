@@ -5,6 +5,7 @@ import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
 import { usePlayerStore } from '../../stores/playerStore'
 import { loadSaveData, recordNpcTalk } from '../save/localStorage'
+import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 
 export function interactWithNearestNpc(): boolean {
   const dialogue = useDialogueStore.getState()
@@ -26,6 +27,9 @@ export function interactWithNearestNpc(): boolean {
   if (!npc) {
     return false
   }
+
+  unlockAudioIfNeeded()
+  playSfx('talk')
 
   if (
     game.targetNpcIds.includes(targetNpcId) &&

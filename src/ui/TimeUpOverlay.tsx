@@ -6,6 +6,7 @@ import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { SP_MINI_MAP_BOTTOM_OFFSET, SP_MINI_MAP_LEFT_OFFSET, SP_MINI_MAP_OUTER_WIDTH } from './MiniMap'
 import { TargetPreview } from './TargetPreview'
+import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function TimeUpOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -25,6 +26,8 @@ export function TimeUpOverlay() {
   const targetNumbersLabel = targetNpcs.map((npc) => `#${npc.meebitNumber}`).join(', ')
 
   const handleRetry = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiConfirm')
     usePlayerStore
       .getState()
       .setPlayerTransform(
@@ -36,6 +39,8 @@ export function TimeUpOverlay() {
   }
 
   const handleBackToTitle = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiClick')
     resetGame()
   }
 

@@ -9,6 +9,7 @@ import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from './TargetPreview'
+import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function StartScreen() {
   const [playerMeebitInput, setPlayerMeebitInput] = useState(String(DEFAULT_PLAYER_MEEBIT_ID))
@@ -36,6 +37,8 @@ export function StartScreen() {
   }
 
   const handleStart = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiConfirm')
     usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
     usePlayerStore
       .getState()
@@ -79,7 +82,11 @@ export function StartScreen() {
                         ? 'border-neutral-950 bg-neutral-950 text-white'
                         : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-neutral-400'
                     }`}
-                    onClick={() => setGameMode(mode)}
+                    onClick={() => {
+                      unlockAudioIfNeeded()
+                      playSfx('uiClick')
+                      setGameMode(mode)
+                    }}
                   >
                     <p className="text-sm font-black uppercase tracking-[0.12em] max-md:text-xs">
                       {getGameModeLabel(mode)}
@@ -114,7 +121,11 @@ export function StartScreen() {
               <button
                 type="button"
                 className="shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 max-md:px-2.5 max-md:py-1 max-md:text-[0.6rem]"
-                onClick={rerollTargets}
+                onClick={() => {
+                  unlockAudioIfNeeded()
+                  playSfx('uiClick')
+                  rerollTargets()
+                }}
               >
                 Random
               </button>
@@ -134,7 +145,11 @@ export function StartScreen() {
                   <button
                     type="button"
                     className="shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 max-md:px-2.5 max-md:py-1 max-md:text-[0.6rem]"
-                    onClick={() => setPlayerMeebitInput(String(getRandomMeebitNumber()))}
+                    onClick={() => {
+                      unlockAudioIfNeeded()
+                      playSfx('uiClick')
+                      setPlayerMeebitInput(String(getRandomMeebitNumber()))
+                    }}
                   >
                     Random
                   </button>
