@@ -37,7 +37,9 @@ type GameState = {
   npcLayoutVersion: number
   playerModelStatus: LoadingStatus
   playerModelError: string | null
+  tipsAcknowledged: boolean
   setGameMode: (gameMode: GameMode) => void
+  acknowledgeTips: () => void
   startGame: () => void
   beginPlaying: () => void
   clearGame: (foundNpcId: string) => void
@@ -81,12 +83,14 @@ function createInitialState() {
     npcLayoutVersion: 1,
     playerModelStatus: 'idle' as const,
     playerModelError: null,
+    tipsAcknowledged: true,
   }
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
   ...createInitialState(),
   setGameMode: (gameMode) => set({ gameMode }),
+  acknowledgeTips: () => set({ tipsAcknowledged: true }),
   startGame: () => {
     softResetForGameStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -96,6 +100,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     set({
       gamePhase: 'preparing',
+      tipsAcknowledged: false,
       clearedNpcId: null,
       clearTimeSeconds: null,
       startedAt: null,

@@ -6,6 +6,7 @@ import { GameTimer } from './ui/GameTimer'
 import { TimeUpOverlay } from './ui/TimeUpOverlay'
 import { ClearOverlay } from './ui/ClearOverlay'
 import { PrepareOverlay } from './ui/PrepareOverlay'
+import { TipsOverlay } from './ui/TipsOverlay'
 import { DialogueBox } from './dialogue/DialogueBox'
 import { DialogueSystem } from './dialogue/DialogueSystem'
 import { ErrorMessage } from './ui/ErrorMessage'
@@ -37,6 +38,7 @@ export default function App() {
       <LoadingScreen />
       <ErrorMessage />
       <StartScreen />
+      <TipsOverlay />
       <PrepareOverlay />
       <ClearOverlay />
       <TimeUpOverlay />

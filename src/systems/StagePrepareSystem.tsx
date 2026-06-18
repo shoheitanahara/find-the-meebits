@@ -11,7 +11,7 @@ export function StagePrepareSystem() {
     const intervalId = window.setInterval(() => {
       const game = useGameStore.getState()
 
-      if (game.gamePhase !== 'preparing' || game.preparedAt === null) {
+      if (game.gamePhase !== 'preparing' || game.preparedAt === null || !game.tipsAcknowledged) {
         return
       }
 

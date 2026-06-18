@@ -6,6 +6,7 @@ import { useGameStore } from '../stores/gameStore'
 export function PrepareOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const gameMode = useGameStore((state) => state.gameMode)
+  const tipsAcknowledged = useGameStore((state) => state.tipsAcknowledged)
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function PrepareOverlay() {
 
   const progress = getPrepareProgress()
 
-  if (gamePhase !== 'preparing' || !progress) {
+  if (gamePhase !== 'preparing' || !progress || !tipsAcknowledged) {
     return null
   }
 
