@@ -41,29 +41,59 @@ const creatorNpc: NPCProfile = {
   topics: ['creator', 'art', 'meebits', 'museum'],
   dialogues: [
     {
-      id: 'shawn-intro-1',
-      text: 'I am Shawn T. Art, the creator watching over this monochrome Meebits gallery.',
-      category: 'greeting',
-    },
-    {
-      id: 'shawn-intro-2',
-      text: 'This started as a small Meebits world, but the hunt turned it into a living museum.',
+      id: 'shawn-1',
+      text: 'I made this world because I love Meebits.',
       category: 'world',
     },
     {
-      id: 'shawn-art-1',
-      text: 'Twenty thousand avatars, one museum, zero agreed-upon lunch spot.',
+      id: 'shawn-2',
+      text: 'I wanted more people to see the quiet beauty inside each one.',
       category: 'meebits',
     },
     {
-      id: 'shawn-art-2',
-      text: 'Black, white, motion, and a hundred tiny identities. That is enough for a game.',
+      id: 'shawn-3',
+      text: 'Meebits are already metaverse-ready. I just wanted to create more places where they can be used, seen, and played with.',
       category: 'meebits',
     },
     {
-      id: 'shawn-hint-1',
-      text: 'If I knew where your target was, I would be playing too.',
-      category: 'joke',
+      id: 'shawn-4',
+      text: 'When I saw familiar avatars in Otherside, I felt something special. That feeling of "Hey, I know that one!" became the starting point for this game.',
+      category: 'world',
+    },
+    {
+      id: 'shawn-5',
+      text: 'This game started from one simple feeling: I wanted to meet more Meebits out in the wild.',
+      category: 'world',
+    },
+    {
+      id: 'shawn-6',
+      text: 'Meebits are not just collectibles. They are tiny identities, waiting for worlds to live in.',
+      category: 'meebits',
+    },
+    {
+      id: 'shawn-7',
+      text: 'I want anyone to use Meebits easily. No hard setup. No complicated tools. Just enter the world and play.',
+      category: 'world',
+    },
+    {
+      id: 'shawn-8',
+      text: 'Every Meebit has its own strange beauty. So I made a place where they can be seen, found, and remembered.',
+      category: 'meebits',
+    },
+    {
+      id: 'shawn-9',
+      text: 'When your Meebit can walk, talk, and be found by someone, it becomes more than just an image.',
+      category: 'meebits',
+    },
+    {
+      id: 'shawn-10',
+      text: 'I believe Meebits should appear in more worlds, more games, and more memories. This is my small first step.',
+      category: 'world',
+    },
+    {
+      id: 'shawn-11',
+      text: 'I made this because seeing a Meebit inside a world feels different. It feels like meeting someone you already know.',
+      category: 'world',
     },
   ],
 }
