@@ -63,9 +63,9 @@ export type HintLandmark = {
   phrases: string[]
 }
 
-/** index % 2 === 0 → dark pedestal / silver statue; odd → all-white light sculpture */
-const SCULPTURE_DARK_HINT = ['near a dark sculpture']
-const SCULPTURE_LIGHT_HINT = ['near a light sculpture']
+/** index % 2 === 0 → black sculpture; odd → white sculpture */
+const SCULPTURE_BLACK_HINT = ['near a black sculpture']
+const SCULPTURE_WHITE_HINT = ['near a white sculpture']
 const VRM_SCULPTURE_LIGHT_PEDESTAL_HINT = ['near a gray Meebit sculpture on a white pedestal']
 const VRM_SCULPTURE_DARK_PEDESTAL_HINT = ['near a gray Meebit sculpture on a black pedestal']
 
@@ -74,7 +74,7 @@ export function buildHintLandmarks(): HintLandmark[] {
     ...SCULPTURE_POSITIONS.map(([x, , z], index) => ({
       x,
       z,
-      phrases: index % 2 === 0 ? [...SCULPTURE_DARK_HINT] : [...SCULPTURE_LIGHT_HINT],
+      phrases: index % 2 === 0 ? [...SCULPTURE_BLACK_HINT] : [...SCULPTURE_WHITE_HINT],
     })),
     ...VRM_SCULPTURE_PLACEMENTS.map(({ position: [x, , z], pedestal }) => ({
       x,

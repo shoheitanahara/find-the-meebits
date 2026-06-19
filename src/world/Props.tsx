@@ -60,16 +60,16 @@ function MonochromeSculpture({
   )
   const statueMaterial = (
     <meshStandardMaterial
-      color={isDark ? '#d4d4d4' : '#ffffff'}
-      roughness={isDark ? 0.2 : 0.42}
-      metalness={isDark ? 0.88 : 0}
+      color={isDark ? '#0a0a0a' : '#ffffff'}
+      roughness={isDark ? 0.42 : 0.42}
+      metalness={0}
     />
   )
   const statueAccentMaterial = (
     <meshStandardMaterial
-      color={isDark ? '#fafaf9' : '#ffffff'}
-      roughness={isDark ? 0.16 : 0.38}
-      metalness={isDark ? 0.92 : 0}
+      color={isDark ? '#000000' : '#ffffff'}
+      roughness={isDark ? 0.38 : 0.38}
+      metalness={0}
     />
   )
 
