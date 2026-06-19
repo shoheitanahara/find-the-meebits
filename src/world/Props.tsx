@@ -92,16 +92,21 @@ function Bench({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[3.2, 0.28, 0.8]} />
         <meshStandardMaterial color="#292524" roughness={0.86} />
       </mesh>
-      <mesh castShadow position={[-1.1, -0.45, 0]}>
-        <boxGeometry args={[0.22, 0.9, 0.22]} />
+      <mesh castShadow position={[-1.1, -0.9, 0]}>
+        <boxGeometry args={[0.22, 1.8, 0.22]} />
         <meshStandardMaterial color="#0a0a0a" />
       </mesh>
-      <mesh castShadow position={[1.1, -0.45, 0]}>
-        <boxGeometry args={[0.22, 0.9, 0.22]} />
+      <mesh castShadow position={[1.1, -0.9, 0]}>
+        <boxGeometry args={[0.22, 1.8, 0.22]} />
         <meshStandardMaterial color="#0a0a0a" />
       </mesh>
     </group>
   )
+}
+
+function getSculptureFacing(position: [number, number, number]) {
+  const [x, , z] = position
+  return Math.atan2(-x, -z)
 }
 
 function MonochromeSculpture({
@@ -115,28 +120,34 @@ function MonochromeSculpture({
   const variant = index % 3
 
   const pedestalMaterial = (
-    <meshStandardMaterial color={isDark ? '#1c1917' : '#f5f5f4'} roughness={0.72} />
+    <meshStandardMaterial
+      color={isDark ? '#1c1917' : '#ffffff'}
+      roughness={isDark ? 0.72 : 0.48}
+    />
   )
   const plinthMaterial = (
-    <meshStandardMaterial color={isDark ? '#292524' : '#e7e5e4'} roughness={0.68} />
+    <meshStandardMaterial
+      color={isDark ? '#292524' : '#ffffff'}
+      roughness={isDark ? 0.68 : 0.44}
+    />
   )
   const statueMaterial = (
     <meshStandardMaterial
-      color={isDark ? '#d4d4d4' : '#171717'}
-      roughness={isDark ? 0.2 : 0.52}
+      color={isDark ? '#d4d4d4' : '#ffffff'}
+      roughness={isDark ? 0.2 : 0.42}
       metalness={isDark ? 0.88 : 0}
     />
   )
   const statueAccentMaterial = (
     <meshStandardMaterial
-      color={isDark ? '#fafaf9' : '#404040'}
-      roughness={isDark ? 0.16 : 0.48}
-      metalness={isDark ? 0.92 : 0.05}
+      color={isDark ? '#fafaf9' : '#ffffff'}
+      roughness={isDark ? 0.16 : 0.38}
+      metalness={isDark ? 0.92 : 0}
     />
   )
 
   return (
-    <group position={position} rotation={[0, index * 0.7, 0]}>
+    <group position={position} rotation={[0, getSculptureFacing(position), 0]}>
       <mesh castShadow receiveShadow position={[0, 0.09, 0]}>
         <boxGeometry args={[2.6, 0.18, 2.6]} />
         {pedestalMaterial}

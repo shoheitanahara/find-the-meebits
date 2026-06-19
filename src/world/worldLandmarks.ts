@@ -14,17 +14,20 @@ export const BENCH_POSITIONS = [
   [14, 0.35, 12],
   [-28, 0.35, -22],
   [28, 0.35, 24],
+  [-18, 0.35, -32],
+  [18, 0.35, -32],
 ] as const satisfies ReadonlyArray<[number, number, number]>
 
+/** Inset from the outer rim so sculptures read as gallery pieces, not perimeter clutter. */
 export const SCULPTURE_POSITIONS = [
-  [-50, 0, -42],
-  [-28, 0, -50],
-  [18, 0, -52],
-  [48, 0, -36],
-  [-52, 0, 26],
-  [-24, 0, 50],
-  [22, 0, 52],
-  [52, 0, 30],
+  [-36, 0, -38],
+  [-20, 0, -40],
+  [20, 0, -40],
+  [36, 0, -38],
+  [-40, 0, 18],
+  [-22, 0, 32],
+  [22, 0, 32],
+  [40, 0, 18],
 ] as const satisfies ReadonlyArray<[number, number, number]>
 
 export const WALL_PANEL_POSITIONS = [
@@ -44,7 +47,7 @@ export type HintLandmark = {
   phrases: string[]
 }
 
-/** index % 2 === 0 → dark pedestal / light statue */
+/** index % 2 === 0 → dark pedestal / silver statue; odd → all-white light sculpture */
 const SCULPTURE_DARK_HINT = ['near a dark sculpture']
 const SCULPTURE_LIGHT_HINT = ['near a light sculpture']
 
