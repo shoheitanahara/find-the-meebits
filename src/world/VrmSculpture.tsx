@@ -1,10 +1,12 @@
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { Mesh, MeshStandardMaterial } from 'three'
 import type { Object3D } from 'three'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { PLAYER_START_POSITION, VRM_WORLD_SCALE } from '../game/gameConfig'
+import type { VrmSculpturePedestal } from './worldLandmarks'
 
 /** NPC がプレイヤーを向くのと同じ式で、入口（開始位置）方向を向く */
 export function getEntranceFacingY(x: number, z: number) {
@@ -17,12 +19,29 @@ const SCULPTURE_PEDESTAL_TOP_Y = 0.44
 /** 台座サイズはそのまま、VRM 本体だけ約1.5倍 */
 const SCULPTURE_VRM_SCALE = VRM_WORLD_SCALE * 1.5
 
-const pedestalMaterial = (
+const lightPedestalMaterial = (
   <meshStandardMaterial color="#ffffff" roughness={0.55} metalness={0.05} />
 )
-const plinthMaterial = (
+const lightPlinthMaterial = (
   <meshStandardMaterial color="#ffffff" roughness={0.45} metalness={0.05} />
 )
+const darkPedestalMaterial = (
+  <meshStandardMaterial color="#1c1917" roughness={0.72} />
+)
+const darkPlinthMaterial = (
+  <meshStandardMaterial color="#292524" roughness={0.68} />
+)
+
+function getPedestalMaterials(pedestal: VrmSculpturePedestal): {
+  pedestalMaterial: ReactNode
+  plinthMaterial: ReactNode
+} {
+  if (pedestal === 'dark') {
+    return { pedestalMaterial: darkPedestalMaterial, plinthMaterial: darkPlinthMaterial }
+  }
+
+  return { pedestalMaterial: lightPedestalMaterial, plinthMaterial: lightPlinthMaterial }
+}
 
 function applyGraySculptureMaterials(root: Object3D) {
   const material = new MeshStandardMaterial({
@@ -38,7 +57,9 @@ function applyGraySculptureMaterials(root: Object3D) {
   })
 }
 
-function SculpturePedestal() {
+function SculpturePedestal({ pedestal }: { pedestal: VrmSculpturePedestal }) {
+  const { pedestalMaterial, plinthMaterial } = getPedestalMaterials(pedestal)
+
   return (
     <>
       <mesh castShadow receiveShadow position={[0, 0.09, 0]}>
@@ -60,17 +81,18 @@ function SculpturePedestal() {
 type VrmSculptureProps = {
   meebitId: number
   position: [number, number, number]
+  pedestal: VrmSculpturePedestal
   facingY?: number
 }
 
 export function VrmSculpture({
   meebitId,
   position,
+  pedestal,
   facingY,
 }: VrmSculptureProps) {
   const rotationY = facingY ?? getEntranceFacingY(position[0], position[2])
 
-  // Target preview capture と同じ: exclusive ロード + attention（I）ポーズ
   const { vrmRef, vrmScene, status } = useVRMModel(meebitId, true, -150, true, true)
   const hasPosedRef = useRef(false)
 
@@ -91,7 +113,7 @@ export function VrmSculpture({
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <SculpturePedestal />
+      <SculpturePedestal pedestal={pedestal} />
       {vrmScene ? (
         <group position={[0, SCULPTURE_PEDESTAL_TOP_Y, 0]}>
           <primitive object={vrmScene} scale={SCULPTURE_VRM_SCALE} />

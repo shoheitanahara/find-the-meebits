@@ -21,22 +21,25 @@ export const SCULPTURE_POSITIONS = [
   [40, 0, 18],
 ] as const satisfies ReadonlyArray<[number, number, number]>
 
+export type VrmSculpturePedestal = 'light' | 'dark'
+
 export type VrmSculpturePlacement = {
   meebitId: number
   position: readonly [number, number, number]
+  pedestal: VrmSculpturePedestal
 }
 
 /** Gray VRM statues on pedestals — face entrance from each position. */
 export const VRM_SCULPTURE_PLACEMENTS = [
-  { meebitId: 17600, position: [-7, 0, 50] },
-  { meebitId: 11143, position: [7, 0, 50] },
-  { meebitId: 8506, position: [12, 0, 8] },
-  { meebitId: 605, position: [-22, 0, -15] },
-  { meebitId: 10326, position: [-16, 0, 22] },
-  { meebitId: 11796, position: [20, 0, -18] },
-  { meebitId: 7347, position: [24, 0, 20] },
-  { meebitId: 3458, position: [-44, 0, 3] },
-  { meebitId: 8369, position: [44, 0, -5] },
+  { meebitId: 17600, position: [-7, 0, 50], pedestal: 'light' },
+  { meebitId: 11143, position: [7, 0, 50], pedestal: 'dark' },
+  { meebitId: 8506, position: [12, 0, 8], pedestal: 'light' },
+  { meebitId: 605, position: [-22, 0, -15], pedestal: 'dark' },
+  { meebitId: 10326, position: [-16, 0, 22], pedestal: 'light' },
+  { meebitId: 11796, position: [20, 0, -18], pedestal: 'dark' },
+  { meebitId: 7347, position: [24, 0, 20], pedestal: 'light' },
+  { meebitId: 3458, position: [-44, 0, 3], pedestal: 'dark' },
+  { meebitId: 8369, position: [44, 0, -5], pedestal: 'light' },
 ] as const satisfies ReadonlyArray<VrmSculpturePlacement>
 
 export function getVrmSculptureMeebitIds() {
@@ -63,7 +66,8 @@ export type HintLandmark = {
 /** index % 2 === 0 → dark pedestal / silver statue; odd → all-white light sculpture */
 const SCULPTURE_DARK_HINT = ['near a dark sculpture']
 const SCULPTURE_LIGHT_HINT = ['near a light sculpture']
-const VRM_SCULPTURE_HINT = ['near a gray Meebit sculpture']
+const VRM_SCULPTURE_LIGHT_PEDESTAL_HINT = ['near a gray Meebit sculpture on a white pedestal']
+const VRM_SCULPTURE_DARK_PEDESTAL_HINT = ['near a gray Meebit sculpture on a black pedestal']
 
 export function buildHintLandmarks(): HintLandmark[] {
   return [
@@ -72,10 +76,13 @@ export function buildHintLandmarks(): HintLandmark[] {
       z,
       phrases: index % 2 === 0 ? [...SCULPTURE_DARK_HINT] : [...SCULPTURE_LIGHT_HINT],
     })),
-    ...VRM_SCULPTURE_PLACEMENTS.map(({ position: [x, , z] }) => ({
+    ...VRM_SCULPTURE_PLACEMENTS.map(({ position: [x, , z], pedestal }) => ({
       x,
       z,
-      phrases: [...VRM_SCULPTURE_HINT],
+      phrases:
+        pedestal === 'light'
+          ? [...VRM_SCULPTURE_LIGHT_PEDESTAL_HINT]
+          : [...VRM_SCULPTURE_DARK_PEDESTAL_HINT],
     })),
     ...BENCH_POSITIONS.map(([x, , z]) => ({
       x,

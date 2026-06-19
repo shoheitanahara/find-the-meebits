@@ -389,6 +389,7 @@ export function Props() {
         <VrmSculpture
           key={`vrm-${placement.meebitId}-${placement.position.join('-')}`}
           meebitId={placement.meebitId}
+          pedestal={placement.pedestal}
           position={[placement.position[0], placement.position[1], placement.position[2]]}
         />
       ))}
