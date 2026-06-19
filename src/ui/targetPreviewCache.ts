@@ -105,3 +105,29 @@ export function failTargetPreviewCapture(meebitNumber: number) {
   notify(meebitNumber)
   drainQueue()
 }
+
+/** ステージ切替/リトライ時に、保持対象以外のプレビュー画像キャッシュを破棄する */
+export function clearTargetPreviewCacheExcept(keepMeebitIds: number[] = []) {
+  const keepKeys = new Set(keepMeebitIds.map((id) => cacheKey(id)))
+
+  for (const key of [...cache.keys()]) {
+    if (!keepKeys.has(key)) {
+      cache.delete(key)
+      listeners.delete(key)
+    }
+  }
+
+  for (let index = queue.length - 1; index >= 0; index -= 1) {
+    if (!keepKeys.has(cacheKey(queue[index]!))) {
+      queued.delete(cacheKey(queue[index]!))
+      queue.splice(index, 1)
+    }
+  }
+
+  if (activeMeebit !== null && !keepKeys.has(cacheKey(activeMeebit))) {
+    activeMeebit = null
+    processCapture?.(null)
+  }
+
+  drainQueue()
+}

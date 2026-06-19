@@ -11,6 +11,7 @@ import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameP
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
+import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
 import { buildNpcProfiles } from '../npc/npcGeneration'
 import type { NPCProfile } from '../npc/npcTypes'
 import type { LoadingStatus } from '../types/game'
@@ -357,6 +358,7 @@ function softResetForGameStart() {
 
 function resetStageRuntimeState(keepMeebitIds: number[] = []) {
   resetVrmInstancePoolForStageChange(keepMeebitIds)
+  clearTargetPreviewCacheExcept(keepMeebitIds)
   clearActiveVrmNpcIds()
   useDialogueStore.getState().closeDialogue()
   useNpcStore.setState({
