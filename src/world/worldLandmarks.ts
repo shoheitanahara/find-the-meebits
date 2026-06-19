@@ -1,14 +1,5 @@
 /** Shared prop positions for rendering, collision, and hint landmarks. */
 
-export const GOLDEN_TREE_POSITIONS = [
-  [-22, 0, -15],
-  [-16, 0, 22],
-  [20, 0, -18],
-  [24, 0, 20],
-  [-44, 0, 3],
-  [44, 0, -5],
-] as const satisfies ReadonlyArray<[number, number, number]>
-
 export const BENCH_POSITIONS = [
   [-14, 0.35, 12],
   [14, 0.35, 12],
@@ -30,6 +21,28 @@ export const SCULPTURE_POSITIONS = [
   [40, 0, 18],
 ] as const satisfies ReadonlyArray<[number, number, number]>
 
+export type VrmSculpturePlacement = {
+  meebitId: number
+  position: readonly [number, number, number]
+}
+
+/** Gray VRM statues on pedestals — face entrance from each position. */
+export const VRM_SCULPTURE_PLACEMENTS = [
+  { meebitId: 17600, position: [-7, 0, 50] },
+  { meebitId: 11143, position: [7, 0, 50] },
+  { meebitId: 8506, position: [12, 0, 8] },
+  { meebitId: 605, position: [-22, 0, -15] },
+  { meebitId: 10326, position: [-16, 0, 22] },
+  { meebitId: 11796, position: [20, 0, -18] },
+  { meebitId: 7347, position: [24, 0, 20] },
+  { meebitId: 3458, position: [-44, 0, 3] },
+  { meebitId: 8369, position: [44, 0, -5] },
+] as const satisfies ReadonlyArray<VrmSculpturePlacement>
+
+export function getVrmSculptureMeebitIds() {
+  return VRM_SCULPTURE_PLACEMENTS.map((placement) => placement.meebitId)
+}
+
 export const WALL_PANEL_POSITIONS = [
   [-54, 0.575, -10],
   [-54, 0.575, 12],
@@ -50,18 +63,19 @@ export type HintLandmark = {
 /** index % 2 === 0 → dark pedestal / silver statue; odd → all-white light sculpture */
 const SCULPTURE_DARK_HINT = ['near a dark sculpture']
 const SCULPTURE_LIGHT_HINT = ['near a light sculpture']
+const VRM_SCULPTURE_HINT = ['near a gray Meebit sculpture']
 
 export function buildHintLandmarks(): HintLandmark[] {
   return [
-    ...GOLDEN_TREE_POSITIONS.map(([x, , z]) => ({
-      x,
-      z,
-      phrases: ['near the golden trees'],
-    })),
     ...SCULPTURE_POSITIONS.map(([x, , z], index) => ({
       x,
       z,
       phrases: index % 2 === 0 ? [...SCULPTURE_DARK_HINT] : [...SCULPTURE_LIGHT_HINT],
+    })),
+    ...VRM_SCULPTURE_PLACEMENTS.map(({ position: [x, , z] }) => ({
+      x,
+      z,
+      phrases: [...VRM_SCULPTURE_HINT],
     })),
     ...BENCH_POSITIONS.map(([x, , z]) => ({
       x,

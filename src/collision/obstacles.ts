@@ -1,7 +1,7 @@
 import {
   BENCH_POSITIONS,
-  GOLDEN_TREE_POSITIONS,
   SCULPTURE_POSITIONS,
+  VRM_SCULPTURE_PLACEMENTS,
   WALL_PANEL_POSITIONS,
 } from '../world/worldLandmarks'
 
@@ -48,9 +48,9 @@ function splitBoxesFromCenter(
   ]
 }
 
-const treePositions = GOLDEN_TREE_POSITIONS
 const benchPositions = BENCH_POSITIONS
 const sculpturePositions = SCULPTURE_POSITIONS
+const vrmSculpturePlacements = VRM_SCULPTURE_PLACEMENTS
 const wallPanelPositions = WALL_PANEL_POSITIONS
 
 const buildingDefs: Array<{ position: [number, number, number]; size: [number, number, number] }> = [
@@ -80,9 +80,11 @@ export const WORLD_OBSTACLES: ObstacleBox[] = [
   ),
   ...splitBoxesFromCenter(-43, 28, 3.5, CENTER_CORRIDOR_GAP, 0.1),
   ...splitBoxesFromCenter(44, 28, 3.5, CENTER_CORRIDOR_GAP, 0.1),
-  ...treePositions.map((position) => boxFromCenter(position[0], position[2], 2.1, 2.1, 0.08)),
   ...benchPositions.map((position) => boxFromCenter(position[0], position[2], 3.2, 0.8, 0.05)),
   ...sculpturePositions.map((position) => boxFromCenter(position[0], position[2], 2.8, 2.8, 0.1)),
+  ...vrmSculpturePlacements.map(({ position }) =>
+    boxFromCenter(position[0], position[2], 2.8, 2.8, 0.1),
+  ),
   ...wallPanelPositions.map((position) => wallPanelBox(position)),
   ...splitBoxesFromCenter(-22, 14, 5, 5, 0.1),
   signboardBox(),

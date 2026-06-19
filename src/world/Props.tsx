@@ -2,88 +2,15 @@ import type { ReactNode } from 'react'
 import { Text } from '@react-three/drei'
 import {
   BENCH_POSITIONS,
-  GOLDEN_TREE_POSITIONS,
   SCULPTURE_POSITIONS,
+  VRM_SCULPTURE_PLACEMENTS,
   WALL_PANEL_POSITIONS,
 } from './worldLandmarks'
+import { VrmSculpture } from './VrmSculpture'
 
-const treePositions = GOLDEN_TREE_POSITIONS
 const benchPositions = BENCH_POSITIONS
 const sculpturePositions = SCULPTURE_POSITIONS
 const wallPanelPositions = WALL_PANEL_POSITIONS
-
-function GoldenTree({
-  position,
-  variant = 0,
-}: {
-  position: [number, number, number]
-  variant?: number
-}) {
-  const goldMaterial = (
-    <meshStandardMaterial color="#d4af37" roughness={0.26} metalness={0.88} />
-  )
-  const goldTopMaterial = (
-    <meshStandardMaterial color="#e8c547" roughness={0.22} metalness={0.9} />
-  )
-  const barkMaterial = <meshStandardMaterial color="#1c1410" roughness={0.9} />
-  const barkLightMaterial = <meshStandardMaterial color="#3d2e22" roughness={0.84} />
-
-  return (
-    <group position={position} rotation={[0, variant * 0.95, 0]}>
-      <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
-        <boxGeometry args={[0.62, 0.2, 0.62]} />
-        {barkMaterial}
-      </mesh>
-      <mesh castShadow position={[0, 0.48, 0]}>
-        <boxGeometry args={[0.44, 0.72, 0.44]} />
-        {barkMaterial}
-      </mesh>
-      <mesh castShadow position={[0, 0.92, 0]}>
-        <boxGeometry args={[0.36, 0.42, 0.36]} />
-        {barkLightMaterial}
-      </mesh>
-      <mesh castShadow position={[0.18, 1.08, 0]}>
-        <boxGeometry args={[0.22, 0.18, 0.22]} />
-        {barkLightMaterial}
-      </mesh>
-      <mesh castShadow position={[-0.16, 1.06, 0.14]}>
-        <boxGeometry args={[0.18, 0.16, 0.18]} />
-        {barkLightMaterial}
-      </mesh>
-
-      <mesh castShadow receiveShadow position={[0, 1.38, 0]}>
-        <boxGeometry args={[2, 0.52, 2]} />
-        {goldMaterial}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0.72, 1.34, 0.62]}>
-        <boxGeometry args={[0.55, 0.42, 0.55]} />
-        {goldMaterial}
-      </mesh>
-      <mesh castShadow receiveShadow position={[-0.68, 1.36, -0.58]}>
-        <boxGeometry args={[0.5, 0.4, 0.5]} />
-        {goldMaterial}
-      </mesh>
-
-      <mesh castShadow receiveShadow position={[0, 1.86, 0]}>
-        <boxGeometry args={[1.5, 0.48, 1.5]} />
-        {goldMaterial}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0.48, 1.82, -0.42]}>
-        <boxGeometry args={[0.42, 0.38, 0.42]} />
-        {goldMaterial}
-      </mesh>
-
-      <mesh castShadow receiveShadow position={[0, 2.28, 0]}>
-        <boxGeometry args={[0.95, 0.42, 0.95]} />
-        {goldTopMaterial}
-      </mesh>
-      <mesh castShadow receiveShadow position={[0, 2.62, 0]}>
-        <boxGeometry args={[0.42, 0.3, 0.42]} />
-        {goldTopMaterial}
-      </mesh>
-    </group>
-  )
-}
 
 function Bench({ position }: { position: [number, number, number] }) {
   return (
@@ -452,14 +379,18 @@ export function Props() {
       <Stage />
       <Signboard />
       <RuleBoard />
-      {treePositions.map((position, index) => (
-        <GoldenTree key={position.join('-')} position={position} variant={index} />
-      ))}
       {benchPositions.map((position) => (
         <Bench key={position.join('-')} position={position} />
       ))}
       {sculpturePositions.map((position, index) => (
         <MonochromeSculpture key={position.join('-')} index={index} position={position} />
+      ))}
+      {VRM_SCULPTURE_PLACEMENTS.map((placement) => (
+        <VrmSculpture
+          key={`vrm-${placement.meebitId}-${placement.position.join('-')}`}
+          meebitId={placement.meebitId}
+          position={[placement.position[0], placement.position[1], placement.position[2]]}
+        />
       ))}
       {wallPanelPositions.map((position, index) => (
         <WallPanel key={position.join('-')} index={index} position={position} />
