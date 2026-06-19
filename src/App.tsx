@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { GameCanvas } from './game/GameCanvas'
 import { GameTimerSystem } from './systems/GameTimerSystem'
 import { FootstepAudioSystem } from './systems/FootstepAudioSystem'
@@ -46,6 +47,7 @@ export default function App() {
       <PrepareOverlay />
       <ClearOverlay />
       <TimeUpOverlay />
+      <Analytics />
     </main>
   )
 }
