@@ -9,14 +9,6 @@ import { TargetPreview } from './TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 function getTimeUpPreviewLayout(targetCount: number) {
-  if (targetCount >= 5) {
-    return {
-      previewSize: 'h-[4.5rem] w-[4.5rem] rounded-xl',
-      gridClass: 'grid grid-cols-3 gap-1.5',
-      containerClass: 'w-[14rem]',
-    }
-  }
-
   if (targetCount >= 3) {
     return {
       previewSize: 'h-24 w-24 rounded-xl',

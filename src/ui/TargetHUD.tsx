@@ -4,10 +4,6 @@ import { FoundTargetIcon } from './FoundTargetIcon'
 import { TargetPreview } from './TargetPreview'
 
 function getTargetPreviewSize(targetCount: number) {
-  if (targetCount >= 5) {
-    return 'h-24 w-24'
-  }
-
   if (targetCount >= 3) {
     return 'h-28 w-28'
   }
@@ -35,9 +31,7 @@ export function TargetHUD() {
 
   return (
     <aside
-      className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:block ${
-        targetCount >= 5 ? 'w-[13.5rem]' : 'w-auto'
-      } ${
+      className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
         isAnswerReveal
           ? 'border-amber-300/40 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'
@@ -61,12 +55,12 @@ export function TargetHUD() {
             key={npc.id}
             className={`min-w-0 ${
               useCompactGrid && targetCount % 2 === 1 && index === targetCount - 1
-                ? 'col-span-2 mx-auto w-[6rem]'
+                ? 'col-span-2 mx-auto w-28'
                 : ''
             } ${isFound ? 'opacity-80' : ''}`}
           >
             <p
-              className={`font-black ${targetCount >= 5 ? 'text-sm' : 'text-base'} ${
+              className={`font-black text-base ${
                 isAnswerReveal ? 'text-amber-100' : isFound ? 'text-emerald-300' : ''
               }`}
             >
@@ -75,12 +69,12 @@ export function TargetHUD() {
             <div className="relative mt-0.5">
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
-                modelScale={targetCount >= 5 ? 1.02 : 1.06}
+                modelScale={1.06}
                 sizeClassName={`${previewSize} ${isFound ? 'opacity-55' : ''}`}
               />
               {isFound ? (
                 <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-500/15">
-                  <FoundTargetIcon className={`text-emerald-300 ${targetCount >= 5 ? 'size-6' : 'size-7'}`} />
+                  <FoundTargetIcon className="size-7 text-emerald-300" />
                 </span>
               ) : null}
             </div>
