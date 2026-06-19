@@ -13,19 +13,46 @@ const sculpturePositions = SCULPTURE_POSITIONS
 const wallPanelPositions = WALL_PANEL_POSITIONS
 
 function Bench({ position }: { position: [number, number, number] }) {
+  const seatMaterial = <meshStandardMaterial color="#4a3f35" roughness={0.86} />
+  const legMaterial = <meshStandardMaterial color="#141414" roughness={0.72} metalness={0.12} />
+
+  const seatW = 3.2
+  const seatD = 0.82
+  const seatH = 0.14
+  const legH = 3.6
+  const legSize = 0.18
+  const legInsetX = seatW / 2 - 0.26
+  const legInsetZ = seatD / 2 - 0.14
+  const legY = -seatH / 2 - legH / 2
+
+  const legPositions: Array<[number, number]> = [
+    [-legInsetX, legInsetZ],
+    [legInsetX, legInsetZ],
+    [-legInsetX, -legInsetZ],
+    [legInsetX, -legInsetZ],
+  ]
+
   return (
     <group position={position}>
       <mesh castShadow receiveShadow>
-        <boxGeometry args={[3.2, 0.28, 0.8]} />
-        <meshStandardMaterial color="#292524" roughness={0.86} />
+        <boxGeometry args={[seatW, seatH, seatD]} />
+        {seatMaterial}
       </mesh>
-      <mesh castShadow position={[-1.1, -0.9, 0]}>
-        <boxGeometry args={[0.22, 1.8, 0.22]} />
-        <meshStandardMaterial color="#0a0a0a" />
+
+      {legPositions.map(([lx, lz]) => (
+        <mesh key={`${lx}-${lz}`} castShadow position={[lx, legY, lz]}>
+          <boxGeometry args={[legSize, legH, legSize]} />
+          {legMaterial}
+        </mesh>
+      ))}
+
+      <mesh castShadow position={[0, legY + legH * 0.32, legInsetZ - 0.02]}>
+        <boxGeometry args={[seatW - 0.55, 0.1, 0.1]} />
+        {legMaterial}
       </mesh>
-      <mesh castShadow position={[1.1, -0.9, 0]}>
-        <boxGeometry args={[0.22, 1.8, 0.22]} />
-        <meshStandardMaterial color="#0a0a0a" />
+      <mesh castShadow position={[0, legY + legH * 0.32, -legInsetZ + 0.02]}>
+        <boxGeometry args={[seatW - 0.55, 0.1, 0.1]} />
+        {legMaterial}
       </mesh>
     </group>
   )

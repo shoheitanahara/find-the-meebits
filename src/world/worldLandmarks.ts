@@ -1,12 +1,12 @@
 /** Shared prop positions for rendering, collision, and hint landmarks. */
 
 export const BENCH_POSITIONS = [
-  [-14, 0.35, 12],
-  [14, 0.35, 12],
-  [-28, 0.35, -22],
-  [28, 0.35, 24],
-  [-18, 0.35, -32],
-  [18, 0.35, -32],
+  [-14, 0.5, 12],
+  [14, 0.5, 12],
+  [-28, 0.5, -22],
+  [28, 0.5, 24],
+  [-18, 0.5, -32],
+  [18, 0.5, -32],
 ] as const satisfies ReadonlyArray<[number, number, number]>
 
 /** Inset from the outer rim so sculptures read as gallery pieces, not perimeter clutter. */
