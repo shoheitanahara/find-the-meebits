@@ -3,10 +3,12 @@ import { Ground } from './Ground'
 import { Ocean } from './Ocean'
 import { Plaza } from './Plaza'
 import { Props } from './Props'
+import { VrmSculpturePreloader } from './VrmSculpturePreloader'
 
 export function WorldRoot() {
   return (
     <group>
+      <VrmSculpturePreloader />
       <Ocean />
       <Ground />
       <Plaza />

@@ -1,11 +1,11 @@
-import { useFrame } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Mesh, MeshStandardMaterial } from 'three'
-import type { Object3D } from 'three'
-import { useVRMModel } from '../avatar/useVRMModel'
-import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
+import { Group } from 'three'
 import { PLAYER_START_POSITION, VRM_WORLD_SCALE } from '../game/gameConfig'
+import {
+  acquireVrmSculptureScene,
+  releaseVrmSculptureScene,
+} from './vrmSculptureCache'
 import type { VrmSculpturePedestal } from './worldLandmarks'
 
 /** NPC がプレイヤーを向くのと同じ式で、入口（開始位置）方向を向く */
@@ -17,7 +17,7 @@ export function getEntranceFacingY(x: number, z: number) {
 
 const SCULPTURE_PEDESTAL_TOP_Y = 0.44
 /** 台座サイズはそのまま、VRM 本体だけ約1.5倍 */
-const SCULPTURE_VRM_SCALE = VRM_WORLD_SCALE * 1.5
+export const SCULPTURE_VRM_SCALE = VRM_WORLD_SCALE * 1.5
 
 const lightPedestalMaterial = (
   <meshStandardMaterial color="#ffffff" roughness={0.55} metalness={0.05} />
@@ -41,20 +41,6 @@ function getPedestalMaterials(pedestal: VrmSculpturePedestal): {
   }
 
   return { pedestalMaterial: lightPedestalMaterial, plinthMaterial: lightPlinthMaterial }
-}
-
-function applyGraySculptureMaterials(root: Object3D) {
-  const material = new MeshStandardMaterial({
-    color: '#a8a29e',
-    roughness: 0.52,
-    metalness: 0.12,
-  })
-
-  root.traverse((object) => {
-    if (object instanceof Mesh) {
-      object.material = material
-    }
-  })
 }
 
 function SculpturePedestal({ pedestal }: { pedestal: VrmSculpturePedestal }) {
@@ -92,31 +78,37 @@ export function VrmSculpture({
   facingY,
 }: VrmSculptureProps) {
   const rotationY = facingY ?? getEntranceFacingY(position[0], position[2])
-
-  const { vrmRef, vrmScene, status } = useVRMModel(meebitId, true, -150, true, true)
-  const hasPosedRef = useRef(false)
+  const [sculptureScene, setSculptureScene] = useState<Group | null>(null)
 
   useEffect(() => {
-    hasPosedRef.current = false
-  }, [meebitId])
+    let activeScene: Group | null = null
+    let cancelled = false
 
-  useFrame(() => {
-    if (hasPosedRef.current || status !== 'ready' || !vrmRef.current || !vrmScene) {
-      return
+    acquireVrmSculptureScene(meebitId).then((scene) => {
+      if (cancelled) {
+        releaseVrmSculptureScene(meebitId, scene)
+        return
+      }
+
+      activeScene = scene
+      setSculptureScene(scene)
+    })
+
+    return () => {
+      cancelled = true
+      if (activeScene) {
+        releaseVrmSculptureScene(meebitId, activeScene)
+      }
+      setSculptureScene(null)
     }
-
-    applyVRMAttentionPose(vrmRef.current)
-    vrmRef.current.update(0)
-    applyGraySculptureMaterials(vrmScene)
-    hasPosedRef.current = true
-  })
+  }, [meebitId])
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
       <SculpturePedestal pedestal={pedestal} />
-      {vrmScene ? (
+      {sculptureScene ? (
         <group position={[0, SCULPTURE_PEDESTAL_TOP_Y, 0]}>
-          <primitive object={vrmScene} scale={SCULPTURE_VRM_SCALE} />
+          <primitive object={sculptureScene} scale={SCULPTURE_VRM_SCALE} />
         </group>
       ) : null}
     </group>
