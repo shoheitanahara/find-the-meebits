@@ -4,7 +4,7 @@ import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 
-const PREPARE_TIMEOUT_MS = 12_000
+const PREPARE_TIMEOUT_MS = 18_000
 
 export function StagePrepareSystem() {
   useEffect(() => {

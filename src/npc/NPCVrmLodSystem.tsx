@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
-import { CREATOR_NPC_ID, NPC_VRM_ALWAYS_LOAD_DISTANCE, PLAYER_START_POSITION } from '../game/gameConfig'
-import { getNpcMaxConcurrentVrm } from '../game/perfConfig'
+import { CREATOR_NPC_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import { getNpcMaxConcurrentVrm, getWarmupLoadDistance } from '../game/perfConfig'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -108,8 +108,8 @@ export function NPCVrmLodSystem() {
         continue
       }
 
-      // スタート前/準備中は「近場優先」しないとロードキューが散って ready が増えにくい。
-      if (isWarmupPhase && !isForced && distance > NPC_VRM_ALWAYS_LOAD_DISTANCE) {
+      // スタート前/準備中は近場を広めに先読みして、開始直後の見た目を安定させる。
+      if (isWarmupPhase && !isForced && distance > getWarmupLoadDistance()) {
         continue
       }
 

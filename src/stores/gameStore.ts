@@ -3,9 +3,9 @@ import {
   CREATOR_NPC_ID,
   DEFAULT_PLAYER_MEEBIT_ID,
   GAME_TIME_LIMIT_SECONDS,
-  NPC_VRM_ALWAYS_LOAD_DISTANCE,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
+import { getWarmupLoadDistance } from '../game/perfConfig'
 import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
@@ -334,7 +334,7 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
   nextIds.add(CREATOR_NPC_ID)
 
   for (const npc of sorted) {
-    if (npc.distance > NPC_VRM_ALWAYS_LOAD_DISTANCE) break
+    if (npc.distance > getWarmupLoadDistance()) break
     nextIds.add(npc.id)
   }
 
