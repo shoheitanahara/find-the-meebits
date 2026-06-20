@@ -1,9 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/vrm/:path*",
-      "destination": "https://files.meebits.app/vrm/:path*"
-    }
-  ]
-}
-

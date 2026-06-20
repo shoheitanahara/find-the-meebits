@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Cloudflare Worker local state
+.wrangler/
+**/.wrangler/
+
+# OS / editor
+.DS_Store
+*.log
+
+# Vite
+*.local

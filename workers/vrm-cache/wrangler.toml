@@ -1,0 +1,16 @@
+name = "find-the-meebits-vrm"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[[r2_buckets]]
+binding = "VRM_BUCKET"
+bucket_name = "meebits-vrm"
+
+[vars]
+UPSTREAM_ORIGIN = "https://files.meebits.app"
+ALLOWED_ORIGINS = "https://find-the-meebits.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+
+# カスタムドメインを使う場合（Cloudflare DNS 管理下）:
+# [[routes]]
+# pattern = "vrm.yourdomain.com/*"
+# zone_name = "yourdomain.com"

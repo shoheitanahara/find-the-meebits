@@ -6,10 +6,13 @@ import { DEFAULT_PLAYER_MEEBIT_ID, VRM_FEET_Y_OFFSET, VRM_WORLD_SCALE } from '..
 
 export const DEFAULT_MEEBIT_ID = DEFAULT_PLAYER_MEEBIT_ID
 
+const VRM_BASE_URL = (import.meta.env.VITE_VRM_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+
 export function getMeebitVrmUrl(meebitId: number = DEFAULT_MEEBIT_ID) {
-  // Vercel 本番では外部配信元の CORS で VRM 読み込みが失敗しやすいので、
-  // 同一オリジンの API 経由でプロキシして読み込む。
-  return `/api/vrm/${meebitId}`
+  // Production: Cloudflare Worker + R2 (CORS enabled).
+  // Dev: leave VITE_VRM_BASE_URL empty — Vite proxies /vrm/* to wrangler dev.
+  const path = `/vrm/${meebitId}.vrm`
+  return VRM_BASE_URL ? `${VRM_BASE_URL}${path}` : path
 }
 
 export function loadVRM(url: string): Promise<VRM> {
