@@ -15,7 +15,9 @@ const defaultSaveData: SaveData = {
   lastPlayerPosition: [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
 }
 
-export function loadSaveData(): SaveData {
+let cachedSaveData: SaveData | null = null
+
+function readSaveDataFromStorage(): SaveData {
   if (typeof window === 'undefined') {
     return defaultSaveData
   }
@@ -43,7 +45,18 @@ export function loadSaveData(): SaveData {
   }
 }
 
+export function loadSaveData(): SaveData {
+  if (cachedSaveData) {
+    return cachedSaveData
+  }
+
+  cachedSaveData = readSaveDataFromStorage()
+  return cachedSaveData
+}
+
 export function saveSaveData(data: SaveData) {
+  cachedSaveData = data
+
   if (typeof window === 'undefined') {
     return
   }
@@ -77,6 +90,15 @@ export function recordNpcTalk(npcId: string, playerPosition: Vector3Tuple): Save
 
 export function savePlayerPosition(position: Vector3Tuple) {
   const current = loadSaveData()
+  const previous = current.lastPlayerPosition
+
+  if (
+    Math.abs(previous[0] - position[0]) < 0.15 &&
+    Math.abs(previous[2] - position[2]) < 0.15
+  ) {
+    return
+  }
+
   saveSaveData({
     ...current,
     lastPlayerPosition: position,

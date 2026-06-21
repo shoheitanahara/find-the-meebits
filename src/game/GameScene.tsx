@@ -3,7 +3,6 @@ import { PlayerAvatar } from '../avatar/PlayerAvatar'
 import { FollowCamera } from '../camera/FollowCamera'
 import { NPCVrmLodSystem } from '../npc/NPCVrmLodSystem'
 import { NPCManager } from '../npc/NPCManager'
-import { InteractionSystem } from '../systems/interaction/InteractionSystem'
 import { WorldRoot } from '../world/WorldRoot'
 import { Lighting } from '../world/Lighting'
 
@@ -19,7 +18,6 @@ export function GameScene() {
       <PlayerAvatar />
       <AvatarController />
       <FollowCamera />
-      <InteractionSystem />
     </>
   )
 }

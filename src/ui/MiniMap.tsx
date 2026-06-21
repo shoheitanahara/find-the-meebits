@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { WORLD_RADIUS } from '../game/gameConfig'
 import { getNpcById } from '../npc/npcData'
 import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
@@ -55,24 +55,16 @@ export const SP_MINI_MAP_BOTTOM_OFFSET = '9.5rem'
 export const SP_MINI_MAP_LEFT_OFFSET = '0.75rem'
 export const SP_MINI_MAP_OUTER_WIDTH = '7.5rem'
 
+const EMPTY_NPC_POSITIONS: Record<string, Vector3Tuple> = {}
+
 export function MiniMap() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const position = usePlayerStore((state) => state.position)
   const rotationY = usePlayerStore((state) => state.rotationY)
-  const npcPositions = useNpcStore((state) => state.npcPositions)
-  const [, setTick] = useState(0)
   const isAnswerReveal = gamePhase === 'timedOut'
-
-  useEffect(() => {
-    if (gamePhase !== 'playing' && !isAnswerReveal) {
-      return
-    }
-
-    const intervalId = window.setInterval(() => setTick((value) => value + 1), 100)
-    return () => window.clearInterval(intervalId)
-  }, [gamePhase, isAnswerReveal])
+  const npcPositions = useNpcStore((state) => (isAnswerReveal ? state.npcPositions : EMPTY_NPC_POSITIONS))
 
   if (gamePhase !== 'playing' && !isAnswerReveal) {
     return null

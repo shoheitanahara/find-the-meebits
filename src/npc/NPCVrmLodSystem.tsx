@@ -1,5 +1,9 @@
 import { useFrame } from '@react-three/fiber'
-import { CREATOR_NPC_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import {
+  CREATOR_NPC_ID,
+  INTERACTION_DISTANCE,
+  PLAYER_START_POSITION,
+} from '../game/gameConfig'
 import { getNpcMaxConcurrentVrm, getWarmupLoadDistance } from '../game/perfConfig'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useGameStore } from '../stores/gameStore'
@@ -7,10 +11,17 @@ import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getActiveVrmNpcIdsSnapshot, setActiveVrmNpcIds } from './vrmLodState'
 import { isNpcWithinVrmRange } from './vrmLodUtils'
+import type { Vector3Tuple } from '../types/game'
 
 type LodCandidate = {
   id: string
   distance: number
+}
+
+type NpcDistanceEntry = {
+  id: string
+  distance: number
+  position: Vector3Tuple
 }
 
 function isForcedVrmNpc(
@@ -72,9 +83,11 @@ function selectActiveVrmNpcIds(
 export function NPCVrmLodSystem() {
   useFrame(() => {
     const gamePhase = useGameStore.getState().gamePhase
+    const isDialogueOpen = useDialogueStore.getState().isOpen
 
     if (gamePhase !== 'intro' && gamePhase !== 'preparing' && gamePhase !== 'playing' && gamePhase !== 'timedOut') {
       setActiveVrmNpcIds([])
+      useNpcStore.getState().setNearestNpcId(null)
       return
     }
 
@@ -89,31 +102,54 @@ export function NPCVrmLodSystem() {
     const npcProfiles = useGameStore.getState().npcProfiles
     const targetNpcIds = useGameStore.getState().targetNpcIds
     const dialogueNpcId = useDialogueStore.getState().activeNpcId
-    const nearestNpcId = useNpcStore.getState().nearestNpcId
     const npcPositions = useNpcStore.getState().npcPositions
     const previousActiveIds = getActiveVrmNpcIdsSnapshot()
-    const eligibleCandidates: LodCandidate[] = []
     const isWarmupPhase = gamePhase === 'intro' || gamePhase === 'preparing'
+    const canDetectInteraction = gamePhase === 'playing' && !isDialogueOpen
+    const distanceEntries: NpcDistanceEntry[] = []
 
     for (const npc of npcProfiles) {
       const npcPosition = npcPositions[npc.id] ?? npc.position
       const dx = playerPosition[0] - npcPosition[0]
       const dz = playerPosition[2] - npcPosition[2]
-      const distance = Math.hypot(dx, dz)
-      const wasActive = previousActiveIds.has(npc.id)
-      const isForced = isForcedVrmNpc(npc.id, dialogueNpcId, targetNpcIds, nearestNpcId)
-      const inRange = isNpcWithinVrmRange(distance, playerPosition, npcPosition, wasActive)
+
+      distanceEntries.push({
+        id: npc.id,
+        distance: Math.hypot(dx, dz),
+        position: npcPosition,
+      })
+    }
+
+    let nearestNpcId: string | null = null
+    let nearestDistance = Infinity
+
+    if (canDetectInteraction) {
+      for (const entry of distanceEntries) {
+        if (entry.distance <= INTERACTION_DISTANCE && entry.distance < nearestDistance) {
+          nearestDistance = entry.distance
+          nearestNpcId = entry.id
+        }
+      }
+    }
+
+    useNpcStore.getState().setNearestNpcId(nearestNpcId)
+
+    const eligibleCandidates: LodCandidate[] = []
+
+    for (const entry of distanceEntries) {
+      const wasActive = previousActiveIds.has(entry.id)
+      const isForced = isForcedVrmNpc(entry.id, dialogueNpcId, targetNpcIds, nearestNpcId)
+      const inRange = isNpcWithinVrmRange(entry.distance, playerPosition, entry.position, wasActive)
 
       if (!inRange && !isForced) {
         continue
       }
 
-      // スタート前/準備中は近場を広めに先読みして、開始直後の見た目を安定させる。
-      if (isWarmupPhase && !isForced && distance > getWarmupLoadDistance()) {
+      if (isWarmupPhase && !isForced && entry.distance > getWarmupLoadDistance()) {
         continue
       }
 
-      eligibleCandidates.push({ id: npc.id, distance })
+      eligibleCandidates.push({ id: entry.id, distance: entry.distance })
     }
 
     const forcedNpcIds = [
