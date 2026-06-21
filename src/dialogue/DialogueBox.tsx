@@ -3,6 +3,7 @@ import { advanceDialogue } from './advanceDialogue'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from '../ui/TargetPreview'
+import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { useDialogueStore } from './dialogueStore'
 
 export function DialogueBox() {
@@ -102,6 +103,20 @@ function DialogueContent({
   onNext,
   compact = false,
 }: DialogueContentProps) {
+  const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
+  const setMeebitNumber = usePlayerStore((state) => state.setMeebitNumber)
+  const isCurrentAvatar = playerMeebitNumber === npc.meebitNumber
+
+  const handleUseAvatar = () => {
+    if (isCurrentAvatar) {
+      return
+    }
+
+    unlockAudioIfNeeded()
+    playSfx('uiConfirm')
+    setMeebitNumber(npc.meebitNumber)
+  }
+
   return (
     <div>
       <div className="flex items-start justify-between gap-3">
@@ -116,9 +131,30 @@ function DialogueContent({
           <h2 className={`mt-0.5 font-black text-slate-950 ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
             {npc.name}
           </h2>
-          <p className={`font-semibold text-slate-500 ${compact ? 'text-xs' : 'text-sm'}`}>
-            Meebit #{npc.meebitNumber}
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className={`font-semibold text-slate-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+              Meebit #{npc.meebitNumber}
+            </p>
+            {isCurrentAvatar ? (
+              <span
+                className={`rounded-full bg-slate-100 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-slate-500 ${
+                  compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                }`}
+              >
+                Your Avatar
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={`rounded-full border border-slate-300 bg-white px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-slate-600 transition hover:border-slate-950 hover:text-slate-950 ${
+                  compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                }`}
+                onClick={handleUseAvatar}
+              >
+                Use This Avatar
+              </button>
+            )}
+          </div>
         </div>
         <button
           type="button"
