@@ -11,7 +11,7 @@ type LocomotionOptions = {
 }
 
 /** NPC 用の歩行タイミングずらし（同じモーション、3 パターンの位相） */
-const NPC_WALK_PHASE_OFFSETS = [0, Math.PI * 0.5, Math.PI] as const
+const NPC_WALK_PHASE_OFFSETS = [0, Math.PI / 3, (Math.PI * 2) / 3] as const
 
 export function getNpcWalkPhaseOffset(meebitNumber: number) {
   const index = Math.abs(meebitNumber * 7) % NPC_WALK_PHASE_OFFSETS.length
