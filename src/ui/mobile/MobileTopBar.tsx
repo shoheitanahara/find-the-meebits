@@ -7,6 +7,7 @@ import { getGameModeLabel } from '../../game/gameMode'
 import { FoundTargetIcon } from '../FoundTargetIcon'
 import { StageRetryButton } from '../StageRetryButton'
 import { TargetPreview } from '../TargetPreview'
+import { PlayerMeebitLabel } from '../PlayerMeebitLabel'
 
 function getTargetStackLayout(targetCount: number) {
   if (targetCount >= 5) {
@@ -115,6 +116,7 @@ export function MobileTopBar() {
                 {stageLabel}
               </p>
               <p className="truncate text-[0.65rem] font-bold text-neutral-300">{activeNpcCount} Meebits</p>
+              <PlayerMeebitLabel className="mt-0.5 text-[0.6rem] font-bold text-neutral-200" />
               {!showTimer ? (
                 <p className="mt-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                   {getGameModeLabel(gameMode)}

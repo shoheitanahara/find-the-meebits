@@ -1,5 +1,6 @@
 import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { useGameStore } from '../stores/gameStore'
+import { PlayerMeebitLabel } from './PlayerMeebitLabel'
 
 export function HUD() {
   const progressionIndex = useGameStore((state) => state.progressionIndex)
@@ -17,6 +18,7 @@ export function HUD() {
         <p className="mt-2 text-sm font-bold text-neutral-300">
           {stageLabel} / {activeNpcCount} Meebits
         </p>
+        <PlayerMeebitLabel className="mt-1 text-xs font-bold text-neutral-200" />
         <div className="mt-4 space-y-1 text-sm font-medium text-neutral-300">
           <p>WASD: Move</p>
           <p>E: Inspect</p>
