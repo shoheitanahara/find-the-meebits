@@ -266,9 +266,15 @@ function InteractionPin() {
 
   return (
     <group ref={pinRef} position={[0, 2.35, 0]}>
-      <mesh castShadow>
+      <mesh>
         <sphereGeometry args={[0.16, 16, 16]} />
-        <meshStandardMaterial color="#b91c1c" emissive="#450a0a" emissiveIntensity={0.28} roughness={0.5} />
+        <meshStandardMaterial
+          color="#b91c1c"
+          roughness={0.92}
+          metalness={0}
+          transparent
+          opacity={0.82}
+        />
       </mesh>
     </group>
   )
