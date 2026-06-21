@@ -10,7 +10,8 @@
 | 3D | Three.js + React Three Fiber + Drei |
 | アバター | `@pixiv/three-vrm` |
 | 状態管理 | Zustand |
-| デプロイ | Vercel（静的サイト + Serverless Function） |
+| ゲーム本体ホスティング | **Vercel**（静的サイトのみ） |
+| **VRM 配信** | **Cloudflare R2 + Worker** |
 | 分析 | `@vercel/analytics/react`（`App.tsx`） |
 
 **Next.js ではない。** Analytics は `@vercel/analytics/next` ではなく `/react` を使う。
@@ -18,17 +19,71 @@
 ## 開発コマンド
 
 ```bash
-npm run dev      # 開発サーバー
-npm run build    # tsc -b && vite build
-npm run preview  # プレビュー
+npm run dev              # Vite + VRM Worker 同時起動（concurrently）
+npm run dev:vite         # Vite のみ
+npm run build            # tsc -b && vite build
+npm run preview          # プレビュー
+npm run vrm-worker:dev   # Worker のみ（wrangler dev）
+npm run vrm-worker:deploy
+npm run vrm:seed         # 彫刻9体+デフォルトプレイヤーを R2 に事前アップロード
 ```
 
-## VRM 配信
+## VRM 配信（Cloudflare R2 + Worker）
 
-- 本番 URL: `/api/vrm/{meebitId}`（`VRMLoader.ts` → `getMeebitVrmUrl`）
-- 実装: `api/vrm/[id].ts` が `https://files.meebits.app/vrm/{id}.vrm` をプロキシ
-- キャッシュ: `Cache-Control: public, max-age=86400, s-maxage=86400, immutable`
-- `vercel.json` に `/vrm/:path*` → files.meebits.app の rewrite もある（CORS 回避用）
+### なぜ Vercel 外か
+
+- `files.meebits.app` 直リンクは **CORS 不可**
+- Vercel `/api/vrm` プロキシや rewrite は **Fast Data / Origin Transfer が TB 級**になり得た
+- R2 は **egress 無料**。Worker が CORS 付きで配信
+
+### アーキテクチャ
+
+```
+本番:
+  ブラウザ → Cloudflare Worker (/vrm/{id}.vrm)
+           → R2 キャッシュヒット → 返却（CORS 付き）
+           → ミス → files.meebits.app から取得 → R2 保存 → 返却
+
+  ゲーム本体 → Vercel（HTML / JS / CSS のみ）
+```
+
+### 主要ファイル
+
+| 用途 | パス |
+|------|------|
+| URL 生成 | `src/avatar/VRMLoader.ts` → `getMeebitVrmUrl()` |
+| Worker | `workers/vrm-cache/src/index.ts` |
+| Worker 設定 | `workers/vrm-cache/wrangler.toml` |
+| R2 シード | `scripts/seed-vrm-sculptures.mjs` |
+| 環境変数例 | `.env.example` |
+
+### 本番 URL
+
+- Worker: `https://find-the-meebits-vrm.find-the-meebits-vrm.workers.dev`
+- Vercel 環境変数: `VITE_VRM_BASE_URL`（末尾スラッシュなし）
+- 生成 URL 形式: `{VITE_VRM_BASE_URL}/vrm/{meebitId}.vrm`
+
+### ローカル開発
+
+- `VITE_VRM_BASE_URL` 未設定時: `getMeebitVrmUrl` は `/vrm/{id}.vrm`（相対パス）
+- Vite が `/vrm/*` を `http://127.0.0.1:8787`（wrangler dev）へプロキシ（`vite.config.ts`）
+- `npm run dev` で Vite + Worker を同時起動
+
+### Worker 設定メモ
+
+- R2 バケット: `meebits-vrm`、キー: `vrm/{id}.vrm`
+- `ALLOWED_ORIGINS`: 本番 Vercel URL + localhost
+- `Cache-Control: public, max-age=31536000, immutable`
+
+### 削除済み（Vercel VRM 経路）
+
+- `api/vrm/[id].ts`（Serverless プロキシ）
+- `vercel.json`（`/vrm/*` rewrite）
+
+## Git / リポジトリ
+
+- `.gitignore`: `node_modules/`, `dist/`, `.wrangler/`, `.env`
+- **`node_modules` と `dist` は Git 管理外**（Vercel がビルド）
 
 ## 静的アセット
 
@@ -37,20 +92,35 @@ npm run preview  # プレビュー
 
 ## パフォーマンス設計（ブラウザ側がボトルネック）
 
-ゲーム処理は **すべてクライアント**。アクセス増でサーバー CPU はほぼ増えない。
+ゲーム処理は **すべてクライアント**。VRM バイト転送は **Vercel 帯域に乗らない**。
 
 ### PC（`perfConfig.ts` / `gameConfig.ts`）
 
 - 同時 VRM 上限: 300
 - 同時ロード数: 24
-- ステージ準備完了の最小 ready 数: 24
+- ステージ準備完了の最小 ready 数: **36**
+- ウォームアップ先読み距離: **60m**（intro/preparing）
+- 準備タイムアウト: **18秒**（`StagePrepareSystem`）
 
 ### モバイル・タブレット（幅 ≤ 1023px）
 
 - NPC 数は PC の半分（`gameProgression.ts`）
 - 同時 VRM 上限: 100
-- 同時ロード数: 8
-- ステージ準備完了の最小 ready 数: 12
+- 同時ロード数: **12**
+- ステージ準備完了の最小 ready 数: **18**
+- ウォームアップ先読み距離: **50m**
+
+### 準備完了条件（`vrmLodState.ts`）
+
+- `readyCount >= getStageReadyMinCount()`
+- active の **85%** 以上 ready
+- **40m 以内**（`NPC_VRM_ALWAYS_LOAD_DISTANCE`）の NPC が全員 ready
+- または 18 秒タイムアウト
+
+### VRM 彫刻キャッシュ（ワールド固定）
+
+- `src/world/vrmSculptureCache.ts` — 9 体専用、NPC プールと分離
+- `VrmSculpturePreloader.tsx` — 起動時 preload
 
 ### VRM プール（`vrmInstancePool.ts`）
 
@@ -74,11 +144,13 @@ npm run preview  # プレビュー
 - `PREVIEW_RENDER_VERSION` を上げるとキャッシュ無効化
 - カメラ: 左斜前、Z=4 付近、足元が切れないフレーミング
 
-## Vercel Hobby 制限（参考）
+## コスト（参考）
 
-- 帯域 ~100GB/月、Function 呼び出し ~100 万/月
-- Hobby は **非商用・個人利用** が規約上の前提
-- 重いのはクライアント。VRM プロキシの転送量と Function 回数だけサーバー負荷
+| サービス | 役割 | 帯域 |
+|---------|------|------|
+| Vercel PRO | ゲーム本体 | JS/CSS のみ（小） |
+| Cloudflare R2 | VRM 保存 | egress **$0** |
+| Cloudflare Worker | CORS + キャッシュミス時 fetch | 無料枠 10万 req/日、超過 $5/月 程度 |
 
 ## レスポンシブ
 

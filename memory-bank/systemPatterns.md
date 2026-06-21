@@ -7,7 +7,7 @@ src/
 ├── App.tsx                 # ルート UI、Analytics
 ├── main.tsx
 ├── avatar/                 # VRM ロード・プレイヤー・プール
-│   ├── VRMLoader.ts        # getMeebitVrmUrl, alignVrmFeetToGround
+│   ├── VRMLoader.ts        # getMeebitVrmUrl → Worker URL
 │   ├── vrmInstancePool.ts  # テンプレートキャッシュ・ステージリセット
 │   ├── vrmLoadQueue.ts     # 同時ロード数制限
 │   ├── useVRMModel.ts      # exclusive フラグでプレイヤー/キャプチャ分岐
@@ -16,39 +16,60 @@ src/
 │   ├── GameCanvas.tsx      # R3F Canvas
 │   ├── gameConfig.ts       # 定数（WORLD_RADIUS, VRM 距離など）
 │   ├── gameProgression.ts  # 8 ステージ定義
-│   └── perfConfig.ts       # モバイル/PC 性能分岐
+│   └── perfConfig.ts       # モバイル/PC 性能分岐・ウォームアップ距離
 ├── npc/
 │   ├── NPC.tsx             # 個別 NPC（VRM LOD, 徘徊 AI）
 │   ├── NPCManager.tsx      # layout key + finalizeVrmInstancePoolEviction
+│   ├── NPCVrmLodSystem.tsx # LOD 選択・ウォームアップ距離
 │   ├── npcGeneration.ts    # プロファイル生成、Shawn セリフ
 │   ├── npcDialogue.ts      # 会話選択、ヒント確率
-│   ├── npcDialoguePool.ts  # 一般 NPC セリフプール
 │   ├── npcTargetHint.ts    # 3 段階ヒント、6 エリア
-│   └── vrmLodState.ts      # アクティブ VRM NPC セット
+│   └── vrmLodState.ts      # アクティブ VRM NPC セット・準備完了判定
 ├── stores/
-│   ├── gameStore.ts        # ゲームフェーズ、ステージ、retry/continue
-│   ├── npcStore.ts         # NPC 位置、nearest
+│   ├── gameStore.ts        # ゲームフェーズ、warmStartActiveVrmNpcIds
+│   ├── npcStore.ts
 │   └── playerStore.ts
 ├── world/
-│   ├── worldLandmarks.ts   # オブジェクト座標（描画・当たり・ヒント共有）
-│   ├── Props.tsx           # 3D プロップ（木・ベンチ・彫刻）
+│   ├── worldLandmarks.ts   # 座標（描画・当たり・ヒント共有）
+│   ├── Props.tsx           # ベンチ・ブロック彫刻
+│   ├── VrmSculpture.tsx    # VRM 彫刻 9 体
+│   ├── vrmSculptureCache.ts
+│   ├── VrmSculpturePreloader.tsx
 │   ├── Buildings.tsx
-│   └── Plaza.tsx           # 床タイル、ギャラリーフレーム 34m
+│   └── Plaza.tsx
 ├── collision/
-│   ├── obstacles.ts        # worldLandmarks から当たり判定生成
+│   ├── obstacles.ts
 │   └── spawnValidation.ts
 ├── ui/
-│   ├── TargetHUD.tsx       # PC 右上ターゲット一覧
-│   ├── TargetPreview.tsx
-│   ├── TargetPreviewCapture.tsx
-│   ├── targetPreviewCache.ts
-│   ├── mobile/             # SP/タブレット UI
-│   └── ...
-└── systems/                # 非表示ロジックコンポーネント
+│   ├── TargetHUD.tsx
+│   ├── PrepareOverlay.tsx  # 準備中 UI（near 40m / preload 60m）
+│   └── mobile/
+└── systems/
+    ├── StagePrepareSystem.tsx  # 18秒タイムアウト
+    └── TargetVrmPreloader.tsx
 
-api/vrm/[id].ts               # Vercel Serverless VRM プロキシ
+workers/vrm-cache/
+├── src/index.ts            # R2 キャッシュ + upstream fetch + CORS
+└── wrangler.toml
+
+scripts/seed-vrm-sculptures.mjs
+.env.example
+.gitignore
 public/favicon.jpg
-vercel.json
+```
+
+## VRM 配信フロー
+
+```
+getMeebitVrmUrl(id)
+  → 本番: ${VITE_VRM_BASE_URL}/vrm/{id}.vrm
+  → 開発: /vrm/{id}.vrm → Vite proxy → wrangler dev
+
+Worker:
+  GET /vrm/{id}.vrm
+  → R2 get → ヒットなら返却
+  → ミス → files.meebits.app fetch → R2 put → 返却
+  → Access-Control-Allow-Origin（ALLOWED_ORIGINS 一致時）
 ```
 
 ## ゲームフェーズ（`gameStore`）
@@ -57,9 +78,10 @@ vercel.json
 intro → preparing → playing → cleared | timedOut | conquered
 ```
 
-- `preparing`: VRM ロード待ち + Tips 確認 → `StagePrepareSystem` が `beginPlaying`
+- `intro`: スタート画面、バックグラウンド VRM ロード開始
+- `preparing`: VRM ロード待ち + Tips → `StagePrepareSystem` が `beginPlaying`
+- `warmStartActiveVrmNpcIds`: 開始位置から `getWarmupLoadDistance()` 以内を先読み
 - `continueToNextStage` / `retryStage`: 同じリセット経路（`resetStageRuntimeState`）
-- `retryStage`: ターゲットは前回と被らないよう `pickRandomTargetNpcIds(..., exclude)`
 
 ## NPC レイアウト再生成
 
@@ -74,36 +96,42 @@ createNpcLayout(npcCount, npcLayoutVersion)
 
 **オブジェクト位置は `worldLandmarks.ts` に集約。**
 
-- `Props.tsx` — 描画
+- `Props.tsx` / `VrmSculpture.tsx` — 描画
 - `obstacles.ts` — 当たり判定
 - `npcTargetHint.ts` — `buildHintLandmarks()` 経由でヒント
 
-座標を変えるときは必ずこのファイルを更新。
+## ブロック彫刻（MonochromeSculpture）
 
-## 彫刻（MonochromeSculpture）
+- `SCULPTURE_POSITIONS` 8 体、ギャラリー内側
+- **偶数 index**: dark — 黒土台 + シルバー彫刻
+- **奇数 index**: light — 白土台 + 白彫刻（`#ffffff`, metalness 0）
+- 回転: `getSculptureFacing(position)` で中心向き
 
-- `SCULPTURE_POSITIONS` 8 体、ギャラリー内側（外周 50m → 32–40m に移動済み）
-- **偶数 index**: dark sculpture — 黒土台 + シルバー彫刻
-- **奇数 index**: light sculpture — **土台・彫刻とも `#ffffff` マット白**（metalness 0）
-- 回転: `getSculptureFacing(position)` でギャラリー中心 `(0,0)` を正面に向ける（ランダム回転なし）
+## VRM 彫刻（VrmSculpture）
+
+- `VRM_SCULPTURE_PLACEMENTS` **9 体**
+- グレー Meebit、I ポーズ、1.5× スケール、入口（+Z）向き
+- 台座: `light` = 白 / `dark` = 黒
+- 専用キャッシュ（`vrmSculptureCache.ts`）、NPC プールと独立
+- ID 例: 17600, 11143, 8506, 605, 10326, 11796, 7347, 3458, 8369
 
 ## ベンチ
 
-- 6 箇所（`BENCH_POSITIONS`）
-- 足の高さ 1.8（座面から、元 0.9 の 2 倍）
+- 6 箇所（`BENCH_POSITIONS`）、`y: 0.5`
+- 背もたれなし、4 脚 + 横棒、脚長 3.6
 
 ## ヒントシステム（3 段階）
 
 | 距離 | 内容 |
 |------|------|
 | ≤ 14m | 「すぐ近く」 |
-| ≤ 10m（ランドマーク） | golden trees / dark or light sculpture / bench |
+| ≤ 10m（ランドマーク） | dark/light sculpture / **VRM 彫刻（台座色）** / bench |
 | それ以外 | 6 エリア（entrance, front, center, back, west, east） |
 | ≥ 48m かつ別ゾーン | `far toward the ...` でぼかし |
 
-- **8 方向（NE 等）は使わない**（単独ヒントでは易しすぎ）
-- 東西 + 前後の組み合わせで絞るのは OK
-- ヒント確率: `TARGET_HINT_CHANCE` in `npcDialogue.ts`（コード上は **0.15**。過去に 0.25 の議論あり）
+- **8 方向（NE 等）は使わない**
+- ヒント確率: `TARGET_HINT_CHANCE = 0.25`（`npcDialogue.ts`）
+- Golden Tree ヒントは **削除済み**
 
 ## ゾーン境界（`classifyZone`）
 
@@ -118,12 +146,12 @@ else    → center
 
 ## UI パターン
 
-- PC ターゲット HUD: `TargetHUD.tsx`（`lg:block`）、3 体以上は `h-28 w-28` 2 列グリッド（5 体も同サイズ）
-- SP: `MobileTopBar.tsx`（5 体レイアウトは PC とは別実装）
-- タイムアップ: `TimeUpOverlay.tsx`（複数ターゲット時コンパクトグリッド）
+- PC ターゲット HUD: `TargetHUD.tsx`（`lg:block`）、3 体以上は `h-28 w-28` 2 列グリッド
+- SP: `MobileTopBar.tsx`
+- 準備中: `PrepareOverlay.tsx` — near 40m / preload 60m（PC）表示
 
 ## 影・VRM 接地
 
 - `VRMLoader.ts`: `alignVrmFeetToGround()`, `VRM_FEET_Y_OFFSET = 0.06`
-- NPC/プレイヤー: `receiveShadow = false`（足元の不自然な影防止）
+- NPC/プレイヤー: `receiveShadow = false`
 - `Lighting.tsx`: `shadow-normalBias` 調整済み

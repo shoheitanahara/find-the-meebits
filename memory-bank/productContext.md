@@ -24,9 +24,14 @@
 
 - 単独で 8 方向は出さない
 - 東西 + 奥/前の組み合わせは OK
-- ランドマーク: golden trees、bench、sculpture（dark/light の色のみ）
+- ランドマーク:
+  - ブロック彫刻: `near a black sculpture` / `near a white sculpture`
+  - **VRM 彫刻**: `near a gray Meebit sculpture on a white/black pedestal`
+  - ベンチ: `near a bench`
+- Golden Tree ヒントは **削除済み**
 - 壁アート・看板・ステージ等のピンポイントヒントは削除済み
 - 遠距離はエリア名をぼかす
+- ヒント確率: **0.25**
 
 ### ターゲットプレビュー
 
@@ -41,9 +46,16 @@
 
 ### ワールドオブジェクト
 
-- Sculpture は美術館**内側**に配置（外周に寄せすぎない）
-- Sculpture は正面をギャラリー中心に向ける（斜めランダム回転なし）
+- Sculpture は美術館**内側**に配置
+- Sculpture は正面をギャラリー中心に向ける
 - light sculpture は白土台 + 白彫刻で dark と明確に区別
+- **VRM 彫刻**はグレー Meebit + 白/黒台座（Golden Tree の代替）
+
+### インフラ方針
+
+- **VRM は Vercel 経由にしない**（帯域コスト）
+- Cloudflare R2 + Worker で CORS 付き配信
+- ゲーム本体は Vercel のまま
 
 ### 一般 NPC セリフ（`npcDialoguePool.ts`）
 
@@ -53,7 +65,7 @@
 
 ### Shawn T. Art セリフ
 
-- `npcGeneration.ts` にユーザー指定 11 件（旧 5 件は削除済み）
+- `npcGeneration.ts` にユーザー指定 11 件
 
 ## コミット・PR
 
