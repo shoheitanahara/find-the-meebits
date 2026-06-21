@@ -1,5 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
+import { getPlayerWorldState } from '../avatar/playerWorldState'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
@@ -10,10 +11,11 @@ export function FootstepAudioSystem() {
   const stepTimerRef = useRef(0)
 
   useFrame((_, delta) => {
-    const { isMoving, movementLocked } = usePlayerStore.getState()
+    const world = getPlayerWorldState()
+    const { movementLocked } = usePlayerStore.getState()
     const { gamePhase } = useGameStore.getState()
     const canStep =
-      isMoving &&
+      world.isMoving &&
       !movementLocked &&
       (gamePhase === 'playing' || gamePhase === 'timedOut')
 

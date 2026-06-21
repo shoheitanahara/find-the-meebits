@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import {
   getGameModeDescription,
   getGameModeLabel,
@@ -40,12 +41,10 @@ export function StartScreen() {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
     usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
-    usePlayerStore
-      .getState()
-      .setPlayerTransform(
-        [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
-        Math.PI,
-      )
+    resetPlayerWorldState(
+      [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+      Math.PI,
+    )
     usePlayerStore.getState().setMovementLocked(true)
     startGame()
   }

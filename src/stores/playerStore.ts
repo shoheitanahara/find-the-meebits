@@ -23,7 +23,25 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   isRunning: false,
   movementLocked: false,
   setMeebitNumber: (meebitNumber) => set({ meebitNumber }),
-  setPlayerTransform: (position, rotationY) => set({ position, rotationY }),
-  setMovementState: (isMoving, isRunning) => set({ isMoving, isRunning }),
+  setPlayerTransform: (position, rotationY) =>
+    set((state) => {
+      if (
+        Math.abs(state.position[0] - position[0]) < 0.02 &&
+        Math.abs(state.position[2] - position[2]) < 0.02 &&
+        Math.abs(state.rotationY - rotationY) < 0.02
+      ) {
+        return state
+      }
+
+      return { position, rotationY }
+    }),
+  setMovementState: (isMoving, isRunning) =>
+    set((state) => {
+      if (state.isMoving === isMoving && state.isRunning === isRunning) {
+        return state
+      }
+
+      return { isMoving, isRunning }
+    }),
   setMovementLocked: (movementLocked) => set({ movementLocked }),
 }))

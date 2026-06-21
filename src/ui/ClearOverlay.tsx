@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
+import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { getProgressionStep, getStageDescription, getStageLabel, getChallengeNpcCount } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { getCurrentStageLabel, useGameStore } from '../stores/gameStore'
@@ -34,12 +35,10 @@ export function ClearOverlay() {
   const handleContinue = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    usePlayerStore
-      .getState()
-      .setPlayerTransform(
-        [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
-        Math.PI,
-      )
+    resetPlayerWorldState(
+      [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+      Math.PI,
+    )
     usePlayerStore.getState().setMovementLocked(false)
 
     if (isConquered) {

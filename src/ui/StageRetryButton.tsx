@@ -1,4 +1,5 @@
 import { PLAYER_START_POSITION } from '../game/gameConfig'
+import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
@@ -20,12 +21,10 @@ export function StageRetryButton({ className = '', compact = false }: StageRetry
   const handleRetry = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    usePlayerStore
-      .getState()
-      .setPlayerTransform(
-        [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
-        Math.PI,
-      )
+    resetPlayerWorldState(
+      [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+      Math.PI,
+    )
     usePlayerStore.getState().setMovementLocked(false)
     retryStage()
   }

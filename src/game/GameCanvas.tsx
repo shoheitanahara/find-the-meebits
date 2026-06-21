@@ -6,7 +6,7 @@ export function GameCanvas() {
     <Canvas
       camera={{ position: [12, 10, 14], fov: 45, near: 0.1, far: 260 }}
       shadows
-      gl={{ antialias: true, preserveDrawingBuffer: true }}
+      gl={{ antialias: true }}
     >
       <GameScene />
     </Canvas>

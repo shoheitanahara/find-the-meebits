@@ -4,6 +4,7 @@ import type { MutableRefObject } from 'react'
 import { Group, Vector3 } from 'three'
 import { FallbackMeebit } from '../avatar/FallbackMeebit'
 import { applyVRMLocomotion } from '../avatar/VRMLocomotion'
+import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { collidesWithObstacles, NPC_COLLISION_RADIUS } from '../collision/collision'
@@ -11,7 +12,6 @@ import { INTERACTION_DISTANCE, NPC_FAR_UPDATE_DISTANCE, VRM_WORLD_SCALE, WORLD_R
 import { isNpcVrmActive, setNpcVrmReady } from './vrmLodState'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
-import { usePlayerStore } from '../stores/playerStore'
 import type { NPCProfile } from './npcTypes'
 import { TargetAnswerGlow } from './TargetAnswerGlow'
 
@@ -79,7 +79,7 @@ export function NPC({ profile }: NPCProps) {
     const wantsVrm = isNpcVrmActive(profile.id)
     shouldLoadVRMRef.current = wantsVrm
     if (wantsVrm) {
-      const playerPosition = usePlayerStore.getState().position
+      const playerPosition = getPlayerWorldPosition()
       const distance = Math.hypot(
         playerPosition[0] - profile.position[0],
         playerPosition[2] - profile.position[2],
@@ -105,7 +105,7 @@ export function NPC({ profile }: NPCProps) {
 
     const gamePhase = useGameStore.getState().gamePhase
     const currentPosition = currentPositionRef.current
-    const playerPosition = usePlayerStore.getState().position
+    const playerPosition = getPlayerWorldPosition()
     const dx = playerPosition[0] - currentPosition.x
     const dz = playerPosition[2] - currentPosition.z
     const distance = Math.hypot(dx, dz)

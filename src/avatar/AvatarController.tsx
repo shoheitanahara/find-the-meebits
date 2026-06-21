@@ -4,6 +4,13 @@ import { PLAYER_COLLISION_RADIUS, resolveMovement } from '../collision/collision
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { useTouchControlsStore } from '../stores/touchControlsStore'
+import {
+  getPlayerWorldState,
+  setPlayerWorldMovement,
+  setPlayerWorldTransform,
+  syncPlayerWorldStateToStore,
+  tickPlayerWorldStoreSync,
+} from './playerWorldState'
 import { useKeyboardControls } from './useKeyboardControls'
 
 const MOVE_SPEED = 7
@@ -17,11 +24,15 @@ export function AvatarController() {
     const controls = controlsRef.current
     const gamePhase = useGameStore.getState().gamePhase
     const player = usePlayerStore.getState()
+    const world = getPlayerWorldState()
 
     const canMove = gamePhase === 'playing' || gamePhase === 'timedOut'
 
     if (player.movementLocked || !canMove) {
-      player.setMovementState(false, false)
+      if (world.isMoving || world.isRunning) {
+        setPlayerWorldMovement(false, false)
+        syncPlayerWorldStateToStore(true)
+      }
       return
     }
 
@@ -40,25 +51,23 @@ export function AvatarController() {
     const isMoving = moveVector.lengthSq() > 0
 
     if (!isMoving) {
-      player.setMovementState(false, false)
+      if (world.isMoving || world.isRunning) {
+        setPlayerWorldMovement(false, false)
+        syncPlayerWorldStateToStore(true)
+      }
       return
     }
 
     moveVector.normalize()
 
-    const nextX = player.position[0] + moveVector.x * MOVE_SPEED * delta
-    const nextZ = player.position[2] + moveVector.y * MOVE_SPEED * delta
-    const resolved = resolveMovement(
-      player.position[0],
-      player.position[2],
-      nextX,
-      nextZ,
-      PLAYER_COLLISION_RADIUS,
-    )
+    const nextX = world.x + moveVector.x * MOVE_SPEED * delta
+    const nextZ = world.z + moveVector.y * MOVE_SPEED * delta
+    const resolved = resolveMovement(world.x, world.z, nextX, nextZ, PLAYER_COLLISION_RADIUS)
     const rotationY = Math.atan2(moveVector.x, moveVector.y)
 
-    player.setPlayerTransform([resolved.x, 0, resolved.z], rotationY)
-    player.setMovementState(true, true)
+    setPlayerWorldTransform(resolved.x, resolved.z, rotationY)
+    setPlayerWorldMovement(true, true)
+    tickPlayerWorldStoreSync(delta)
   })
 
   return null

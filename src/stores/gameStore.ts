@@ -11,6 +11,7 @@ import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameP
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
+import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
 import { getVrmSculptureMeebitIds } from '../world/worldLandmarks'
 import { buildNpcProfiles } from '../npc/npcGeneration'
@@ -342,13 +343,10 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
 }
 
 function resetPlayerPositionToStart() {
-  usePlayerStore
-    .getState()
-    .setPlayerTransform(
-      [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
-      Math.PI,
-    )
-  usePlayerStore.getState().setMovementState(false, false)
+  resetPlayerWorldState(
+    [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+    Math.PI,
+  )
   usePlayerStore.getState().setMovementLocked(false)
 }
 

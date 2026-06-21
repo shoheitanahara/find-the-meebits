@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react'
 import { Group } from 'three'
 import { FallbackMeebit } from './FallbackMeebit'
 import { applyVRMLocomotion } from './VRMLocomotion'
+import { getPlayerWorldState } from './playerWorldState'
 import { useVRMModel } from './useVRMModel'
 import { useGameStore } from '../stores/gameStore'
 import { VRM_WORLD_SCALE } from '../game/gameConfig'
@@ -49,19 +50,19 @@ export function PlayerAvatar() {
 
   useFrame((state, delta) => {
     const root = rootRef.current
-    const { isMoving, isRunning, position, rotationY } = usePlayerStore.getState()
+    const world = getPlayerWorldState()
 
     if (root) {
-      root.position.set(position[0], position[1], position[2])
-      root.rotation.y = rotationY
-      root.position.y += isMoving ? Math.abs(Math.sin(state.clock.elapsedTime * 10.5)) * 0.025 : 0
+      root.position.set(world.x, world.y, world.z)
+      root.rotation.y = world.rotationY
+      root.position.y += world.isMoving ? Math.abs(Math.sin(state.clock.elapsedTime * 10.5)) * 0.025 : 0
     }
 
     if (shouldLoadPlayerVrm) {
       applyVRMLocomotion(vrmRef.current, {
         elapsedTime: state.clock.elapsedTime,
-        isMoving,
-        isRunning,
+        isMoving: world.isMoving,
+        isRunning: world.isRunning,
       })
       update(delta)
     }
@@ -70,7 +71,7 @@ export function PlayerAvatar() {
       positionSaveTimer += delta
       if (positionSaveTimer >= 2) {
         positionSaveTimer = 0
-        savePlayerPosition(position)
+        savePlayerPosition([world.x, world.y, world.z])
       }
     }
   })

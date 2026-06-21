@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
+import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
@@ -54,12 +55,10 @@ export function TimeUpOverlay() {
   const handleRetry = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    usePlayerStore
-      .getState()
-      .setPlayerTransform(
-        [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
-        Math.PI,
-      )
+    resetPlayerWorldState(
+      [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+      Math.PI,
+    )
     usePlayerStore.getState().setMovementLocked(false)
     retryStage()
   }

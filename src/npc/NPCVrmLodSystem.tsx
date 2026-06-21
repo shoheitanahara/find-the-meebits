@@ -5,10 +5,10 @@ import {
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
 import { getNpcMaxConcurrentVrm, getWarmupLoadDistance } from '../game/perfConfig'
+import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
-import { usePlayerStore } from '../stores/playerStore'
 import { getActiveVrmNpcIdsSnapshot, setActiveVrmNpcIds } from './vrmLodState'
 import { isNpcWithinVrmRange } from './vrmLodUtils'
 import type { Vector3Tuple } from '../types/game'
@@ -98,7 +98,7 @@ export function NPCVrmLodSystem() {
             PLAYER_START_POSITION[1],
             PLAYER_START_POSITION[2],
           ] as [number, number, number])
-        : usePlayerStore.getState().position
+        : getPlayerWorldPosition()
     const npcProfiles = useGameStore.getState().npcProfiles
     const targetNpcIds = useGameStore.getState().targetNpcIds
     const dialogueNpcId = useDialogueStore.getState().activeNpcId
