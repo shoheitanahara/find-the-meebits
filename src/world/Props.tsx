@@ -358,16 +358,24 @@ function Signboard() {
 }
 
 function RuleBoard() {
-  const { wingWidth, offsetX } = getSplitWingOffsets(7.4, 4)
+  const totalWidth = 7.4
+  const gap = 4
+  const boardHeight = 1.2
+  const legHeight = 1.25
+  const legSize = 0.18
+  const { wingWidth, offsetX } = getSplitWingOffsets(totalWidth, gap)
+  const legX = offsetX + wingWidth / 2 - legSize / 2
+  const boardBottomY = -boardHeight / 2
+  const legCenterY = boardBottomY - legHeight / 2
 
   return (
     <group position={[0, 0.9, 52]}>
-      <mesh castShadow position={[-3.3, -0.425, 0]}>
-        <boxGeometry args={[0.18, 1.25, 0.18]} />
+      <mesh castShadow position={[-legX, legCenterY, 0]}>
+        <boxGeometry args={[legSize, legHeight, legSize]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
-      <mesh castShadow position={[3.3, -0.425, 0]}>
-        <boxGeometry args={[0.18, 1.25, 0.18]} />
+      <mesh castShadow position={[legX, legCenterY, 0]}>
+        <boxGeometry args={[legSize, legHeight, legSize]} />
         <meshStandardMaterial color="#111111" />
       </mesh>
       <mesh castShadow receiveShadow position={[-offsetX, 0, 0]}>

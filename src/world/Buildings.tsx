@@ -1,3 +1,9 @@
+import {
+  getShelfDecorCount,
+  getShelfDecorPlacement,
+  MiniSculpture,
+} from './MiniSculpture'
+
 type Building = {
   position: [number, number, number]
   size: [number, number, number]
@@ -36,6 +42,11 @@ const buildings: Building[] = [
 ]
 
 function BuildingMesh({ building }: { building: Building }) {
+  const buildingKey = building.position.join('-')
+  const decorCount = getShelfDecorCount(building.size[0])
+  const shelfTopY = building.size[1] / 2 + 0.12
+  const halfWidth = building.size[0] / 2 - 0.55
+
   return (
     <group position={building.position}>
       <mesh castShadow receiveShadow>
@@ -46,6 +57,18 @@ function BuildingMesh({ building }: { building: Building }) {
         <boxGeometry args={[building.size[0] + 0.4, 0.12, building.size[2] + 0.4]} />
         <meshStandardMaterial color={building.roofColor} roughness={0.75} />
       </mesh>
+      {Array.from({ length: decorCount }, (_, index) => {
+        const decor = getShelfDecorPlacement(buildingKey, index, decorCount, halfWidth)
+        return (
+          <group
+            key={`${buildingKey}-decor-${index}`}
+            position={[decor.x, shelfTopY, decor.z]}
+            rotation={[0, decor.rotationY, 0]}
+          >
+            <MiniSculpture variant={decor.variant} tone="light" />
+          </group>
+        )
+      })}
     </group>
   )
 }
