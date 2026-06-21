@@ -11,8 +11,8 @@ export const INTERACTION_DISTANCE = 2.7
 /** この距離以内は方向に関係なく常に VRM 候補 */
 export const NPC_VRM_ALWAYS_LOAD_DISTANCE = 40
 /** カメラ側（FollowCamera が常にいる +Z 側）の VRM 距離 */
-export const NPC_VRM_LOAD_DISTANCE_CAMERA_SIDE = 5
-export const NPC_VRM_UNLOAD_DISTANCE_CAMERA_SIDE = 7
+export const NPC_VRM_LOAD_DISTANCE_CAMERA_SIDE = 10
+export const NPC_VRM_UNLOAD_DISTANCE_CAMERA_SIDE = 12
 /** 画面中央からの左右幅。この外側はカメラ側と同じ短距離 LOD */
 export const NPC_VRM_LATERAL_SPAN = 40
 /** 画面奥（カメラの反対側・-Z 方向）の VRM 距離 */
