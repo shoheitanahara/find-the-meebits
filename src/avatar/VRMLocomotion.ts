@@ -6,6 +6,16 @@ type LocomotionOptions = {
   isMoving: boolean
   isRunning?: boolean
   idleOffset?: number
+  /** 歩行サイクルの開始タイミングずらし（同じ速さで位相だけずらす） */
+  walkPhaseOffset?: number
+}
+
+/** NPC 用の歩行タイミングずらし（同じモーション、3 パターンの位相） */
+const NPC_WALK_PHASE_OFFSETS = [0, Math.PI * 0.5, Math.PI] as const
+
+export function getNpcWalkPhaseOffset(meebitNumber: number) {
+  const index = Math.abs(meebitNumber * 7) % NPC_WALK_PHASE_OFFSETS.length
+  return NPC_WALK_PHASE_OFFSETS[index]
 }
 
 const armRestZ = {
@@ -60,8 +70,9 @@ export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) 
   }
 
   const speed = options.isRunning ? 12 : 7
-  const stride = Math.sin(options.elapsedTime * speed)
-  const counterStride = Math.sin(options.elapsedTime * speed + Math.PI)
+  const phase = options.walkPhaseOffset ?? 0
+  const stride = Math.sin(options.elapsedTime * speed + phase)
+  const counterStride = Math.sin(options.elapsedTime * speed + phase + Math.PI)
   const idle = Math.sin(options.elapsedTime * 1.8 + (options.idleOffset ?? 0))
   const movementWeight = options.isMoving ? 1 : 0
   const idleWeight = 1 - movementWeight

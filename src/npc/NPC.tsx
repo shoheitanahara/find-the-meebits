@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { Group, Vector3 } from 'three'
 import { FallbackMeebit } from '../avatar/FallbackMeebit'
-import { applyVRMLocomotion } from '../avatar/VRMLocomotion'
+import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { useDialogueStore } from '../dialogue/dialogueStore'
@@ -68,6 +68,7 @@ export function NPC({ profile }: NPCProps) {
     true,
     true,
   )
+  const walkPhaseOffset = getNpcWalkPhaseOffset(profile.meebitNumber)
   const farUpdatePhaseRef = useRef(profile.meebitNumber % getNpcFarUpdateSkipDivisor())
 
   useLayoutEffect(() => {
@@ -196,6 +197,7 @@ export function NPC({ profile }: NPCProps) {
         elapsedTime: state.clock.elapsedTime,
         isMoving: isWalking,
         idleOffset: profile.position[0] + profile.position[2],
+        walkPhaseOffset,
       })
       update(delta)
     }
@@ -206,7 +208,7 @@ export function NPC({ profile }: NPCProps) {
       root.rotation.y = directionRef.current
     }
 
-    const bob = Math.sin(state.clock.elapsedTime * 1.6 + profile.position[0]) * 0.03
+    const bob = Math.sin(state.clock.elapsedTime * 1.6 + walkPhaseOffset) * 0.03
     root.position.set(currentPosition.x, profile.position[1] + bob, currentPosition.z)
 
     storeUpdateTimerRef.current += delta
