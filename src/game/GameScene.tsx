@@ -1,6 +1,7 @@
 import { AvatarController } from '../avatar/AvatarController'
 import { PlayerAvatar } from '../avatar/PlayerAvatar'
 import { FollowCamera } from '../camera/FollowCamera'
+import { FootstepAudioSystem } from '../systems/FootstepAudioSystem'
 import { NPCVrmLodSystem } from '../npc/NPCVrmLodSystem'
 import { NPCManager } from '../npc/NPCManager'
 import { WorldRoot } from '../world/WorldRoot'
@@ -17,6 +18,7 @@ export function GameScene() {
       <NPCManager />
       <PlayerAvatar />
       <AvatarController />
+      <FootstepAudioSystem />
       <FollowCamera />
     </>
   )

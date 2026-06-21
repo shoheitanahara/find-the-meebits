@@ -1,7 +1,6 @@
 import { Analytics } from '@vercel/analytics/react'
 import { GameCanvas } from './game/GameCanvas'
 import { GameTimerSystem } from './systems/GameTimerSystem'
-import { FootstepAudioSystem } from './systems/FootstepAudioSystem'
 import { StagePrepareSystem } from './systems/StagePrepareSystem'
 import { TargetVrmPreloader } from './systems/TargetVrmPreloader'
 import { GameTimer } from './ui/GameTimer'
@@ -27,7 +26,6 @@ export default function App() {
     <main className="relative h-dvh w-dvw overflow-hidden bg-neutral-100 text-slate-950">
       <GameCanvas />
       <GameTimerSystem />
-      <FootstepAudioSystem />
       <StagePrepareSystem />
       <TargetVrmPreloader />
       <TargetPreviewCapture />

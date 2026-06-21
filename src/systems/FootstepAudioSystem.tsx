@@ -1,37 +1,35 @@
-import { useEffect } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
 
-const FOOTSTEP_INTERVAL_MS = 250
+const FOOTSTEP_INTERVAL_SEC = 0.25
 
 export function FootstepAudioSystem() {
-  useEffect(() => {
-    let lastStepAt = 0
+  const stepTimerRef = useRef(0)
 
-    const intervalId = window.setInterval(() => {
-      const { isMoving, movementLocked } = usePlayerStore.getState()
-      const { gamePhase } = useGameStore.getState()
-      const canStep =
-        isMoving &&
-        !movementLocked &&
-        (gamePhase === 'playing' || gamePhase === 'timedOut')
+  useFrame((_, delta) => {
+    const { isMoving, movementLocked } = usePlayerStore.getState()
+    const { gamePhase } = useGameStore.getState()
+    const canStep =
+      isMoving &&
+      !movementLocked &&
+      (gamePhase === 'playing' || gamePhase === 'timedOut')
 
-      if (!canStep) {
-        return
-      }
+    if (!canStep) {
+      stepTimerRef.current = 0
+      return
+    }
 
-      const now = Date.now()
-      if (now - lastStepAt < FOOTSTEP_INTERVAL_MS) {
-        return
-      }
+    stepTimerRef.current += delta
+    if (stepTimerRef.current < FOOTSTEP_INTERVAL_SEC) {
+      return
+    }
 
-      lastStepAt = now
-      playSfx('footstep')
-    }, 60)
-
-    return () => window.clearInterval(intervalId)
-  }, [])
+    stepTimerRef.current -= FOOTSTEP_INTERVAL_SEC
+    playSfx('footstep')
+  })
 
   return null
 }

@@ -158,12 +158,7 @@ function playFootstepTap(ctx: AudioContext) {
   const pitch = 0.88 + Math.random() * 0.22
   const volume = 3
 
-  const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * duration))
-  const buffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
-  const data = buffer.getChannelData(0)
-  for (let i = 0; i < noiseLength; i += 1) {
-    data[i] = Math.random() * 2 - 1
-  }
+  const buffer = getFootstepNoiseBuffer(ctx)
 
   const noise = ctx.createBufferSource()
   noise.buffer = buffer
@@ -198,6 +193,26 @@ function playFootstepTap(ctx: AudioContext) {
   thump.start(now)
   noise.stop(now + duration + 0.01)
   thump.stop(now + duration + 0.01)
+}
+
+let footstepNoiseBuffer: AudioBuffer | null = null
+
+function getFootstepNoiseBuffer(ctx: AudioContext) {
+  const duration = 0.055
+
+  if (footstepNoiseBuffer && footstepNoiseBuffer.sampleRate === ctx.sampleRate) {
+    return footstepNoiseBuffer
+  }
+
+  const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * duration))
+  const buffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < noiseLength; i += 1) {
+    data[i] = Math.random() * 2 - 1
+  }
+
+  footstepNoiseBuffer = buffer
+  return buffer
 }
 
 function playClearFanfare(ctx: AudioContext) {
