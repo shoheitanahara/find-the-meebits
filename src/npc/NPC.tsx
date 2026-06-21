@@ -51,6 +51,7 @@ export function NPC({ profile }: NPCProps) {
       state.targetNpcIds.includes(profile.id) &&
       !state.foundTargetNpcIds.includes(profile.id),
   )
+  const npcResetVersion = useGameStore((state) => state.npcResetVersion)
   const [shouldLoadVRM, setShouldLoadVRM] = useState(() => isNpcVrmActive(profile.id))
   const [loadPriority, setLoadPriority] = useState(9999)
   const shouldLoadVRMRef = useRef(shouldLoadVRM)
@@ -87,7 +88,7 @@ export function NPC({ profile }: NPCProps) {
       setLoadPriority(distance)
     }
     setShouldLoadVRM(wantsVrm)
-  }, [profile.id, profile.meebitNumber, profile.position, profile.rotation])
+  }, [profile.id, profile.meebitNumber, profile.position, profile.rotation, npcResetVersion])
 
   useEffect(() => {
     if (shouldLoadVRM && status === 'ready') {

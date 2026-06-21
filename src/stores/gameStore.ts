@@ -10,7 +10,7 @@ import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameM
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
-import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
+import { preloadVrm, finalizeVrmInstancePoolEviction, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
 import { getVrmSculptureMeebitIds } from '../world/worldLandmarks'
@@ -39,6 +39,7 @@ type GameState = {
   clearTimeSeconds: number | null
   npcProfiles: NPCProfile[]
   npcLayoutVersion: number
+  npcResetVersion: number
   playerModelStatus: LoadingStatus
   playerModelError: string | null
   tipsAcknowledged: boolean
@@ -85,6 +86,7 @@ function createInitialState() {
     clearTimeSeconds: null,
     npcProfiles,
     npcLayoutVersion: 1,
+    npcResetVersion: 0,
     playerModelStatus: 'idle' as const,
     playerModelError: null,
     tipsAcknowledged: true,
@@ -221,17 +223,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     const step = getProgressionStep(state.progressionIndex)
     if (!step) return
 
-    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
-    const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount, state.targetNpcIds)
-    resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
-    seedNpcPositions(npcLayout.npcProfiles)
+    const targetNpcIds = pickRandomTargetNpcIds(state.npcProfiles, step.targetCount, state.targetNpcIds)
+    resetStageRuntimeStateForRetry(collectKeepMeebitIds(state.npcProfiles, targetNpcIds))
+    seedNpcPositions(state.npcProfiles)
     resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
-    preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
+    preloadTargetVrms(state.npcProfiles, targetNpcIds)
 
     set({
       gamePhase: 'preparing',
-      ...npcLayout,
       activeNpcCount: step.npcCount,
       targetNpcIds,
       foundTargetNpcIds: [],
@@ -241,6 +241,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       preparedAt: Date.now(),
       stage: step.stageNumber,
       stageKind: step.kind,
+      npcResetVersion: state.npcResetVersion + 1,
     })
   },
   resetGame: () => {
@@ -368,6 +369,16 @@ function resetStageRuntimeState(keepMeebitIds: number[] = []) {
     nearestNpcId: null,
     npcPositions: {},
   })
+}
+
+/** リトライ: NPC 配置は維持し、ターゲット差し替え分だけ VRM プールを整理する */
+function resetStageRuntimeStateForRetry(keepMeebitIds: number[] = []) {
+  resetVrmInstancePoolForStageChange(keepMeebitIds)
+  finalizeVrmInstancePoolEviction()
+  clearTargetPreviewCacheExcept(keepMeebitIds)
+  clearActiveVrmNpcIds()
+  useDialogueStore.getState().closeDialogue()
+  useNpcStore.setState({ nearestNpcId: null })
 }
 
 export function getRemainingTargetNpcIds(targetNpcIds: string[], foundTargetNpcIds: string[]) {
