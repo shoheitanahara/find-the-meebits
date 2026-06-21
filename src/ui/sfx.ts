@@ -156,6 +156,7 @@ function playFootstepTap(ctx: AudioContext) {
   const now = ctx.currentTime
   const duration = 0.055
   const pitch = 0.88 + Math.random() * 0.22
+  const volume = 3
 
   const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * duration))
   const buffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
@@ -174,7 +175,7 @@ function playFootstepTap(ctx: AudioContext) {
 
   const gain = ctx.createGain()
   gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(0.14, now + 0.004)
+  gain.gain.linearRampToValueAtTime(0.14 * volume, now + 0.004)
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
 
   const thump = ctx.createOscillator()
@@ -184,7 +185,7 @@ function playFootstepTap(ctx: AudioContext) {
 
   const thumpGain = ctx.createGain()
   thumpGain.gain.setValueAtTime(0, now)
-  thumpGain.gain.linearRampToValueAtTime(0.1, now + 0.003)
+  thumpGain.gain.linearRampToValueAtTime(0.1 * volume, now + 0.003)
   thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
 
   noise.connect(filter)
