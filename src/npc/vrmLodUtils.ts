@@ -1,13 +1,13 @@
-import type { Vector3Tuple } from '../types/game'
 import {
-  CAMERA_FOLLOW_OFFSET_XZ,
-  NPC_VRM_ALWAYS_LOAD_DISTANCE,
-  NPC_VRM_LATERAL_SPAN,
-  NPC_VRM_LOAD_DISTANCE_CAMERA_SIDE,
-  NPC_VRM_LOAD_DISTANCE_VIEW_AHEAD,
-  NPC_VRM_UNLOAD_DISTANCE_CAMERA_SIDE,
-  NPC_VRM_UNLOAD_DISTANCE_VIEW_AHEAD,
-} from '../game/gameConfig'
+  getNpcVrmAlwaysLoadDistance,
+  getNpcVrmCameraSideLoadDistance,
+  getNpcVrmCameraSideUnloadDistance,
+  getNpcVrmLateralSpan,
+  getNpcVrmViewAheadLoadDistance,
+  getNpcVrmViewAheadUnloadDistance,
+} from '../game/perfConfig'
+import type { Vector3Tuple } from '../types/game'
+import { CAMERA_FOLLOW_OFFSET_XZ } from '../game/gameConfig'
 
 /**
  * カメラ側（FollowCamera の固定オフセット方向）にいるか。
@@ -21,7 +21,7 @@ export function isNpcOnCameraSide(playerPosition: Vector3Tuple, npcPosition: Vec
 
 /** 画面の左右外（プレイヤー正面ラインから横に離れすぎ）か */
 export function isNpcOutsideLateralSpan(playerPosition: Vector3Tuple, npcPosition: Vector3Tuple) {
-  return Math.abs(npcPosition[0] - playerPosition[0]) > NPC_VRM_LATERAL_SPAN
+  return Math.abs(npcPosition[0] - playerPosition[0]) > getNpcVrmLateralSpan()
 }
 
 export function usesShortVrmLodRange(playerPosition: Vector3Tuple, npcPosition: Vector3Tuple) {
@@ -34,10 +34,10 @@ export function getNpcVrmDistanceThreshold(
   wasActive: boolean,
 ) {
   if (usesShortVrmLodRange(playerPosition, npcPosition)) {
-    return wasActive ? NPC_VRM_UNLOAD_DISTANCE_CAMERA_SIDE : NPC_VRM_LOAD_DISTANCE_CAMERA_SIDE
+    return wasActive ? getNpcVrmCameraSideUnloadDistance() : getNpcVrmCameraSideLoadDistance()
   }
 
-  return wasActive ? NPC_VRM_UNLOAD_DISTANCE_VIEW_AHEAD : NPC_VRM_LOAD_DISTANCE_VIEW_AHEAD
+  return wasActive ? getNpcVrmViewAheadUnloadDistance() : getNpcVrmViewAheadLoadDistance()
 }
 
 export function isNpcWithinVrmRange(
@@ -47,8 +47,9 @@ export function isNpcWithinVrmRange(
   wasActive: boolean,
 ) {
   const shortRange = usesShortVrmLodRange(playerPosition, npcPosition)
+  const alwaysLoadDistance = getNpcVrmAlwaysLoadDistance()
 
-  if (!shortRange && distance <= NPC_VRM_ALWAYS_LOAD_DISTANCE) {
+  if (!shortRange && distance <= alwaysLoadDistance) {
     return true
   }
 

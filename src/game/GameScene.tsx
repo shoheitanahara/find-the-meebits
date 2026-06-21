@@ -6,12 +6,15 @@ import { NPCVrmLodSystem } from '../npc/NPCVrmLodSystem'
 import { NPCManager } from '../npc/NPCManager'
 import { WorldRoot } from '../world/WorldRoot'
 import { Lighting } from '../world/Lighting'
+import { getFogDistances } from './perfConfig'
 
 export function GameScene() {
+  const fog = getFogDistances()
+
   return (
     <>
       <color attach="background" args={['#e7e5e4']} />
-      <fog attach="fog" args={['#e7e5e4', 70, 150]} />
+      <fog attach="fog" args={['#e7e5e4', fog.near, fog.far]} />
       <Lighting />
       <WorldRoot />
       <NPCVrmLodSystem />

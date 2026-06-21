@@ -8,7 +8,13 @@ import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { collidesWithObstacles, NPC_COLLISION_RADIUS } from '../collision/collision'
-import { INTERACTION_DISTANCE, NPC_FAR_UPDATE_DISTANCE, VRM_WORLD_SCALE, WORLD_RADIUS } from '../game/gameConfig'
+import { INTERACTION_DISTANCE, VRM_WORLD_SCALE, WORLD_RADIUS } from '../game/gameConfig'
+import {
+  getNpcFarUpdateDistance,
+  getNpcFarUpdateSkipDivisor,
+  shouldNpcCastShadow,
+} from '../game/perfConfig'
+import { setVrmCastShadow } from '../avatar/VRMLoader'
 import { isNpcVrmActive, setNpcVrmReady } from './vrmLodState'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -62,7 +68,7 @@ export function NPC({ profile }: NPCProps) {
     true,
     true,
   )
-  const farUpdatePhaseRef = useRef(profile.meebitNumber % 3)
+  const farUpdatePhaseRef = useRef(profile.meebitNumber % getNpcFarUpdateSkipDivisor())
 
   useLayoutEffect(() => {
     currentPositionRef.current.set(profile.position[0], profile.position[1], profile.position[2])
@@ -92,13 +98,16 @@ export function NPC({ profile }: NPCProps) {
 
   useEffect(() => {
     if (shouldLoadVRM && status === 'ready') {
+      if (vrmScene) {
+        setVrmCastShadow(vrmScene, shouldNpcCastShadow())
+      }
       setNpcVrmReady(profile.id, true)
       return () => setNpcVrmReady(profile.id, false)
     }
 
     setNpcVrmReady(profile.id, false)
     return () => setNpcVrmReady(profile.id, false)
-  }, [profile.id, shouldLoadVRM, status])
+  }, [profile.id, shouldLoadVRM, status, vrmScene])
 
   useFrame((state, delta) => {
     const root = rootRef.current
@@ -130,10 +139,13 @@ export function NPC({ profile }: NPCProps) {
       setShouldLoadVRM(wantsVrm)
     }
 
-    const isFarNpc = distance > NPC_FAR_UPDATE_DISTANCE
+    const isFarNpc = distance > getNpcFarUpdateDistance()
+    const farUpdateSkipDivisor = getNpcFarUpdateSkipDivisor()
     const frameBucket = Math.floor(state.clock.elapsedTime * 20)
     const skipDetailedUpdate =
-      isFarNpc && frameBucket % 3 !== farUpdatePhaseRef.current && !isAnswerRevealed
+      isFarNpc &&
+      frameBucket % farUpdateSkipDivisor !== farUpdatePhaseRef.current &&
+      !isAnswerRevealed
 
     if (skipDetailedUpdate) {
       root.position.set(currentPosition.x, profile.position[1], currentPosition.z)
@@ -198,7 +210,7 @@ export function NPC({ profile }: NPCProps) {
     root.position.set(currentPosition.x, profile.position[1] + bob, currentPosition.z)
 
     storeUpdateTimerRef.current += delta
-    const positionStoreInterval = isFarNpc ? 0.5 : 0.25
+    const positionStoreInterval = isFarNpc ? (farUpdateSkipDivisor >= 5 ? 0.75 : 0.5) : 0.25
     if (isAnswerRevealed || storeUpdateTimerRef.current >= positionStoreInterval) {
       storeUpdateTimerRef.current = 0
       useNpcStore.getState().setNpcPosition(profile.id, [currentPosition.x, 0, currentPosition.z])

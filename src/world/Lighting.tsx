@@ -1,4 +1,8 @@
+import { getShadowMapSize } from '../game/perfConfig'
+
 export function Lighting() {
+  const shadowMapSize = getShadowMapSize()
+
   return (
     <>
       <ambientLight intensity={0.82} />
@@ -15,8 +19,8 @@ export function Lighting() {
         shadow-camera-near={1}
         shadow-camera-right={90}
         shadow-camera-top={90}
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
       />
     </>
   )

@@ -1,13 +1,10 @@
-import { NPC_VRM_ALWAYS_LOAD_DISTANCE } from '../game/gameConfig'
-import { getStageReadyMinCount } from '../game/perfConfig'
+import { getNpcVrmAlwaysLoadDistance, getStageReadyMinCount, getStageReadyRatio } from '../game/perfConfig'
 import { isNpcWithinVrmRange } from './vrmLodUtils'
 import type { NPCProfile } from './npcTypes'
 import type { Vector3Tuple } from '../types/game'
 
 const activeVrmNpcIds = new Set<string>()
 const readyVrmNpcIds = new Set<string>()
-
-const STAGE_READY_RATIO = 0.85
 
 export function getActiveVrmNpcIdsSnapshot() {
   return new Set(activeVrmNpcIds)
@@ -60,7 +57,7 @@ export function getStageVrmReadiness(
     nearReady: nearRing.nearReady,
     isReady:
       readyCount >= getStageReadyMinCount() &&
-      ratio >= STAGE_READY_RATIO &&
+      ratio >= getStageReadyRatio() &&
       nearRing.isComplete,
   }
 }
@@ -84,7 +81,7 @@ export function getNearRingVrmReadiness(
       playerPosition[2] - npcPosition[2],
     )
 
-    if (distance > NPC_VRM_ALWAYS_LOAD_DISTANCE) {
+    if (distance > getNpcVrmAlwaysLoadDistance()) {
       continue
     }
 

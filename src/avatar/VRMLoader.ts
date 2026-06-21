@@ -55,9 +55,15 @@ function alignVrmFeetToGround(scene: Object3D) {
 }
 
 function enableShadows(root: Object3D) {
+  setVrmCastShadow(root, true)
   root.traverse((object) => {
-    object.castShadow = true
     // 足を浮かせた状態で receiveShadow すると、足元に不自然な影が乗りやすい
     object.receiveShadow = false
+  })
+}
+
+export function setVrmCastShadow(root: Object3D, castShadow: boolean) {
+  root.traverse((object) => {
+    object.castShadow = castShadow
   })
 }

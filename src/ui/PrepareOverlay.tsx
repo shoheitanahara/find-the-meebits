@@ -1,5 +1,4 @@
-import { NPC_VRM_ALWAYS_LOAD_DISTANCE } from '../game/gameConfig'
-import { getWarmupLoadDistance } from '../game/perfConfig'
+import { getNpcVrmAlwaysLoadDistance, getWarmupLoadDistance } from '../game/perfConfig'
 import { useEffect, useState } from 'react'
 import { isTimedGameMode } from '../game/gameMode'
 import { getPrepareProgress } from '../systems/StagePrepareSystem'
@@ -32,7 +31,7 @@ export function PrepareOverlay() {
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">Preparing Stage</p>
         <h2 className="mt-3 text-3xl font-black">Loading the museum</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-          Nearby Meebits: {progress.nearReady}/{progress.nearCount} (within {NPC_VRM_ALWAYS_LOAD_DISTANCE}m)
+          Nearby Meebits: {progress.nearReady}/{progress.nearCount} (within {getNpcVrmAlwaysLoadDistance()}m)
         </p>
         <p className="mt-1 text-xs text-neutral-400">
           Preloading: {progress.readyCount}/{progress.activeCount} (within {getWarmupLoadDistance()}m)
