@@ -1,12 +1,17 @@
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
+import { CAMERA_FOLLOW_OFFSET_XZ } from '../game/gameConfig'
 import { isTouchUiMode } from '../game/perfConfig'
 import { getPlayerWorldState } from '../avatar/playerWorldState'
 import { getNpcById } from '../npc/npcData'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { useNpcStore } from '../stores/npcStore'
 
-const cameraOffset = new Vector3(0, 6.5, 10)
+const cameraOffset = new Vector3(
+  CAMERA_FOLLOW_OFFSET_XZ[0],
+  6.5,
+  CAMERA_FOLLOW_OFFSET_XZ[1],
+)
 const desiredPosition = new Vector3()
 const lookAtTarget = new Vector3()
 const playerPosition = new Vector3()

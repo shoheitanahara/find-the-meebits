@@ -1,5 +1,6 @@
 import { NPC_VRM_ALWAYS_LOAD_DISTANCE } from '../game/gameConfig'
 import { getStageReadyMinCount } from '../game/perfConfig'
+import { isNpcWithinVrmRange } from './vrmLodUtils'
 import type { NPCProfile } from './npcTypes'
 import type { Vector3Tuple } from '../types/game'
 
@@ -84,6 +85,10 @@ export function getNearRingVrmReadiness(
     )
 
     if (distance > NPC_VRM_ALWAYS_LOAD_DISTANCE) {
+      continue
+    }
+
+    if (!isNpcWithinVrmRange(distance, playerPosition, npcPosition, false)) {
       continue
     }
 
