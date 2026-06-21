@@ -5,7 +5,7 @@ import {
   getGameModeDescription,
   getGameModeLabel,
 } from '../game/gameMode'
-import { getProgressionStep, getProgressionSummary, getStageDescription } from '../game/gameProgression'
+import { getProgressionStep, getProgressionSummary, getStageDescription, getStageLabel } from '../game/gameProgression'
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -17,12 +17,13 @@ export function StartScreen() {
   const gamePhase = useGameStore((state) => state.gamePhase)
   const gameMode = useGameStore((state) => state.gameMode)
   const setGameMode = useGameStore((state) => state.setGameMode)
+  const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const startGame = useGameStore((state) => state.startGame)
   const rerollTargets = useGameStore((state) => state.rerollTargets)
   const firstTargetNpc = getNpcById(targetNpcIds[0] ?? '')
-  const firstStep = getProgressionStep(0)
+  const currentStep = getProgressionStep(progressionIndex)
   const playerMeebitNumber = normalizeMeebitNumber(playerMeebitInput)
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function StartScreen() {
     usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
   }, [gamePhase, playerMeebitNumber])
 
-  if (gamePhase !== 'intro' || !firstTargetNpc || !firstStep) {
+  if (gamePhase !== 'intro' || !firstTargetNpc || !currentStep) {
     return null
   }
 
@@ -63,7 +64,7 @@ export function StartScreen() {
             Find the Meebit
           </h1>
           <p className="mt-4 text-base leading-relaxed text-neutral-600 max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug">
-            {getStageDescription(firstStep)} · {getProgressionSummary()}.
+            {getStageDescription(currentStep)} · {getProgressionSummary()}.
           </p>
 
           <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-lg:mt-2 max-lg:p-2.5">
@@ -111,7 +112,9 @@ export function StartScreen() {
                 sizeClassName="h-20 w-20 shrink-0 lg:hidden"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-neutral-500 max-lg:text-xs">Stage 1 Target</p>
+                <p className="text-sm font-semibold text-neutral-500 max-lg:text-xs">
+                  {getStageLabel(currentStep)} Target{currentStep.targetCount > 1 ? 's' : ''}
+                </p>
                 <p className="text-3xl font-black max-lg:text-xl">Meebit #{firstTargetNpc.meebitNumber}</p>
                 <p className="mt-1 text-xs font-medium text-neutral-500 max-lg:mt-0 max-lg:text-[0.65rem]">
                   {activeNpcCount} Meebits in the museum

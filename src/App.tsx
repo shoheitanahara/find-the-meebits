@@ -17,6 +17,7 @@ import { LoadingScreen } from './ui/LoadingScreen'
 import { MiniMap } from './ui/MiniMap'
 import { MobileControls } from './ui/mobile/MobileControls'
 import { MobileTopBar } from './ui/mobile/MobileTopBar'
+import { DevBootstrapBanner } from './ui/DevBootstrapBanner'
 import { StartScreen } from './ui/StartScreen'
 import { TargetHUD } from './ui/TargetHUD'
 import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
@@ -45,6 +46,7 @@ export default function App() {
       <PrepareOverlay />
       <ClearOverlay />
       <TimeUpOverlay />
+      <DevBootstrapBanner />
       <Analytics />
     </main>
   )

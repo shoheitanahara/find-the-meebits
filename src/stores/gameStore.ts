@@ -7,6 +7,7 @@ import {
 } from '../game/gameConfig'
 import { getWarmupLoadDistance } from '../game/perfConfig'
 import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
+import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
@@ -60,10 +61,11 @@ type GameState = {
 }
 
 function createInitialState() {
-  const progressionIndex = 0
+  const dev = getDevBootstrapConfig()
+  const progressionIndex = dev?.progressionIndex ?? 0
   const step = getProgressionStep(progressionIndex)
   if (!step) {
-    throw new Error('Progression step 0 is missing.')
+    throw new Error(`Progression step ${progressionIndex} is missing.`)
   }
 
   const activeNpcCount = step.npcCount
@@ -71,25 +73,98 @@ function createInitialState() {
   resetPlayerToStart()
   seedNpcPositions(npcProfiles)
 
-  return {
-    gameMode: DEFAULT_GAME_MODE,
-    gamePhase: 'intro' as const,
+  const targetNpcIds = pickRandomTargetNpcIds(npcProfiles, step.targetCount)
+  const foundTargetNpcIds = pickFoundTargetNpcIds(targetNpcIds, dev?.foundCount ?? 0)
+
+  const base = {
+    gameMode: dev?.gameMode ?? DEFAULT_GAME_MODE,
     progressionIndex,
     activeNpcCount,
     stage: step.stageNumber,
     stageKind: step.kind,
-    targetNpcIds: pickRandomTargetNpcIds(npcProfiles, step.targetCount),
-    foundTargetNpcIds: [] as string[],
-    clearedNpcId: null,
-    startedAt: null,
-    preparedAt: null,
-    clearTimeSeconds: null,
+    targetNpcIds,
+    foundTargetNpcIds,
+    clearedNpcId: null as string | null,
+    startedAt: null as number | null,
+    preparedAt: null as number | null,
+    clearTimeSeconds: null as number | null,
     npcProfiles,
     npcLayoutVersion: 1,
     npcResetVersion: 0,
     playerModelStatus: 'idle' as const,
     playerModelError: null,
-    tipsAcknowledged: true,
+    tipsAcknowledged: dev?.tipsAcknowledged ?? true,
+  }
+
+  if (!dev) {
+    return {
+      ...base,
+      gamePhase: 'intro' as const,
+    }
+  }
+
+  switch (dev.phase) {
+    case 'preparing':
+      return {
+        ...base,
+        gamePhase: 'preparing' as const,
+        preparedAt: Date.now(),
+      }
+    case 'playing':
+      return {
+        ...base,
+        gamePhase: 'playing' as const,
+        startedAt: Date.now(),
+      }
+    case 'timedout':
+      return {
+        ...base,
+        gamePhase: 'timedOut' as const,
+        startedAt: Date.now() - 180_000,
+        clearTimeSeconds: GAME_TIME_LIMIT_SECONDS,
+      }
+    case 'cleared': {
+      const clearedProgressionIndex = progressionIndex + 1
+      const nextStep = getProgressionStep(clearedProgressionIndex)
+
+      if (!nextStep) {
+        return {
+          ...base,
+          gamePhase: 'conquered' as const,
+          clearedNpcId: targetNpcIds[targetNpcIds.length - 1] ?? null,
+          foundTargetNpcIds: targetNpcIds,
+          targetNpcIds: [],
+          clearTimeSeconds: 72.4,
+        }
+      }
+
+      return {
+        ...base,
+        gamePhase: 'cleared' as const,
+        progressionIndex: clearedProgressionIndex,
+        activeNpcCount: nextStep.npcCount,
+        stage: nextStep.stageNumber,
+        stageKind: nextStep.kind,
+        clearedNpcId: targetNpcIds[targetNpcIds.length - 1] ?? null,
+        foundTargetNpcIds: [],
+        targetNpcIds: [],
+        clearTimeSeconds: 72.4,
+      }
+    }
+    case 'conquered':
+      return {
+        ...base,
+        gamePhase: 'conquered' as const,
+        clearedNpcId: targetNpcIds[targetNpcIds.length - 1] ?? null,
+        foundTargetNpcIds: targetNpcIds,
+        targetNpcIds: [],
+        clearTimeSeconds: 142.8,
+      }
+    default:
+      return {
+        ...base,
+        gamePhase: 'intro' as const,
+      }
   }
 }
 
@@ -274,6 +349,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   setPlayerModelReady: () => set({ playerModelStatus: 'ready', playerModelError: null }),
   setPlayerModelError: (message) => set({ playerModelStatus: 'error', playerModelError: message }),
 }))
+
+function pickFoundTargetNpcIds(targetNpcIds: string[], foundCount: number) {
+  if (foundCount <= 0) {
+    return []
+  }
+
+  return targetNpcIds.slice(0, Math.min(foundCount, targetNpcIds.length))
+}
 
 function createNpcLayout(activeNpcCount: number, currentLayoutVersion: number) {
   return {
