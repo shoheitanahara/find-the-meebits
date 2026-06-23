@@ -110,7 +110,7 @@ export function NPC({ profile }: NPCProps) {
 
     setNpcVrmReady(profile.id, false)
     return () => setNpcVrmReady(profile.id, false)
-  }, [profile.id, shouldLoadVRM, status, vrmScene])
+  }, [profile.id, shouldLoadVRM, status, vrmScene, npcResetVersion])
 
   useFrame((state, delta) => {
     const root = rootRef.current

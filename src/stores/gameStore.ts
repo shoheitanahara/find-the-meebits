@@ -12,7 +12,7 @@ import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameP
 import type { VenueId } from '../game/venueConfig'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
-import { preloadVrm, finalizeVrmInstancePoolEviction, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
+import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
 import { getDecorMeebitIdsForVenue } from '../world/worldLandmarks'
@@ -531,8 +531,6 @@ function resetStageRuntimeState(keepMeebitIds: number[] = []) {
 }
 
 function resetStageRuntimeStateForRetry(keepMeebitIds: number[] = []) {
-  resetVrmInstancePoolForStageChange(keepMeebitIds)
-  finalizeVrmInstancePoolEviction()
   clearTargetPreviewCacheExcept(keepMeebitIds)
   clearActiveVrmNpcIds()
   useDialogueStore.getState().closeDialogue()
