@@ -2,7 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { Group, Vector3 } from 'three'
-import { FallbackMeebit } from '../avatar/FallbackMeebit'
+import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useVRMModel } from '../avatar/useVRMModel'
@@ -229,48 +229,8 @@ export function NPC({ profile }: NPCProps) {
   return (
     <group ref={rootRef} rotation={[0, profile.rotation[1], 0]}>
       {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : <MeebitSilhouette />}
-      {status === 'error' ? <FallbackMeebit /> : null}
       {isNearest ? <InteractionPin /> : null}
       {isAnswerRevealed ? <TargetAnswerGlow /> : null}
-    </group>
-  )
-}
-
-function MeebitSilhouette() {
-  return (
-    <group scale={0.52}>
-      <mesh receiveShadow position={[0, 0.28, -0.04]}>
-        <boxGeometry args={[0.78, 0.56, 0.5]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[-0.24, 0.95, 0]}>
-        <boxGeometry args={[0.28, 1.2, 0.34]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[0.24, 0.95, 0]}>
-        <boxGeometry args={[0.28, 1.2, 0.34]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[0, 1.75, 0]}>
-        <boxGeometry args={[0.9, 1.25, 0.48]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[-0.58, 1.72, 0]}>
-        <boxGeometry args={[0.28, 1.12, 0.28]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[0.58, 1.72, 0]}>
-        <boxGeometry args={[0.28, 1.12, 0.28]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[0, 2.55, 0]}>
-        <boxGeometry args={[1.08, 0.82, 0.72]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
-      <mesh receiveShadow position={[0, 3.02, -0.03]}>
-        <boxGeometry args={[1.2, 0.34, 0.78]} />
-        <meshStandardMaterial color="#050505" roughness={0.72} />
-      </mesh>
     </group>
   )
 }

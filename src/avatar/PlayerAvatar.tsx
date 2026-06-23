@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { Group } from 'three'
-import { FallbackMeebit } from './FallbackMeebit'
+import { MeebitSilhouette } from './MeebitSilhouette'
 import { applyVRMLocomotion } from './VRMLocomotion'
 import { getPlayerWorldState } from './playerWorldState'
 import { useVRMModel } from './useVRMModel'
@@ -78,8 +78,7 @@ export function PlayerAvatar() {
 
   return (
     <group ref={rootRef}>
-      {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : null}
-      {status === 'error' ? <FallbackMeebit /> : null}
+      {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : <MeebitSilhouette />}
     </group>
   )
 }

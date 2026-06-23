@@ -190,7 +190,13 @@ function createInitialState() {
 export const useGameStore = create<GameState>((set, get) => ({
   ...createInitialState(),
   setGameMode: (gameMode) => set({ gameMode }),
-  acknowledgeTips: () => set({ tipsAcknowledged: true }),
+  acknowledgeTips: () => {
+    const state = get()
+    set({
+      tipsAcknowledged: true,
+      preparedAt: state.preparedAt ?? Date.now(),
+    })
+  },
   acknowledgeAfterHoursUnlock: () => set({ afterHoursUnlockPending: false }),
   startAfterHours: () => {
     if (!isAfterHoursUnlocked()) {
@@ -198,10 +204,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     const nextLayoutVersion = get().npcLayoutVersion + 1
-    resetStageRuntimeState()
     const newState = createVenueIntroState('club', null)
     const keepMeebitIds = collectKeepMeebitIds('club', newState.npcProfiles, newState.targetNpcIds)
-    resetVrmInstancePoolForStageChange(keepMeebitIds)
+    resetStageRuntimeState(keepMeebitIds)
+    seedNpcPositions(newState.npcProfiles)
     preloadTargetVrms(newState.npcProfiles, newState.targetNpcIds)
 
     set({
@@ -215,8 +221,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
 
-    const keepMeebitIds = collectKeepMeebitIds(state.venueId, state.npcProfiles, state.targetNpcIds)
-    resetStageRuntimeStateForRetry(keepMeebitIds)
+    useDialogueStore.getState().closeDialogue()
     seedNpcPositions(state.npcProfiles)
     resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -228,7 +233,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       clearedNpcId: null,
       clearTimeSeconds: null,
       startedAt: null,
-      preparedAt: Date.now(),
+      preparedAt: null,
       stage: step.stageNumber,
       stageKind: step.kind,
       foundTargetNpcIds: [],
@@ -491,6 +496,13 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
   }
 
   setActiveVrmNpcIds(nextIds)
+
+  for (const npcId of nextIds) {
+    const npc = profiles.find((profile) => profile.id === npcId)
+    if (npc) {
+      preloadVrm(npc.meebitNumber, -150)
+    }
+  }
 }
 
 function resetPlayerPositionToStart() {

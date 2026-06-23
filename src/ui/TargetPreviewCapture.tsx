@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Vector3 } from 'three'
-import { FallbackMeebit } from '../avatar/FallbackMeebit'
+import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { useVRMModel } from '../avatar/useVRMModel'
 import {
@@ -127,8 +127,7 @@ function CaptureScene({
 
   return (
     <group position={[0, MODEL_Y_OFFSET, 0]}>
-      {vrmScene ? <primitive object={vrmScene} scale={MODEL_SCALE} /> : null}
-      {status === 'error' ? <FallbackMeebit /> : null}
+      {vrmScene ? <primitive object={vrmScene} scale={MODEL_SCALE} /> : <MeebitSilhouette scale={0.57} />}
     </group>
   )
 }
