@@ -6,6 +6,7 @@ import { interactWithNearestNpc } from '../../systems/interaction/interactWithNe
 import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
 import { useTouchControlsStore } from '../../stores/touchControlsStore'
+import { DoneIcon, InspectIcon, NextIcon } from './MobileActionIcons'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -32,7 +33,7 @@ export function MobileControls() {
             advanceDialogue()
           }}
         >
-          <span className="text-2xl leading-none">→</span>
+          {isLastLine ? <DoneIcon /> : <NextIcon />}
           <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
             {isLastLine ? 'Done' : 'Next'}
           </span>
@@ -57,7 +58,7 @@ export function MobileControls() {
             interactWithNearestNpc()
           }}
         >
-          <span className="text-2xl leading-none">💬</span>
+          <InspectIcon />
           <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">Inspect</span>
         </button>
       ) : (
