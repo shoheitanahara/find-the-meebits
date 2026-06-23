@@ -15,6 +15,7 @@ import {
   shouldNpcCastShadow,
 } from '../game/perfConfig'
 import { setVrmCastShadow } from '../avatar/VRMLoader'
+import { getNpcVrmLoadPriority } from './vrmLodUtils'
 import { isNpcVrmActive, setNpcVrmReady } from './vrmLodState'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -87,12 +88,13 @@ export function NPC({ profile }: NPCProps) {
     const wantsVrm = isNpcVrmActive(profile.id)
     shouldLoadVRMRef.current = wantsVrm
     if (wantsVrm) {
+      const gamePhase = useGameStore.getState().gamePhase
       const playerPosition = getPlayerWorldPosition()
       const distance = Math.hypot(
         playerPosition[0] - profile.position[0],
         playerPosition[2] - profile.position[2],
       )
-      setLoadPriority(distance)
+      setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase))
     }
     setShouldLoadVRM(wantsVrm)
   }, [profile.id, profile.meebitNumber, profile.position, profile.rotation, npcResetVersion])
@@ -134,7 +136,7 @@ export function NPC({ profile }: NPCProps) {
 
     if (wantsVrm !== shouldLoadVRMRef.current) {
       if (wantsVrm) {
-        setLoadPriority(distance)
+        setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase))
       }
       shouldLoadVRMRef.current = wantsVrm
       setShouldLoadVRM(wantsVrm)

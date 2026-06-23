@@ -70,7 +70,11 @@ type GameState = {
   setPlayerModelError: (message: string) => void
 }
 
-function createVenueIntroState(venueId: VenueId, devOverride?: ReturnType<typeof getDevBootstrapConfig> | null) {
+function createVenueIntroState(
+  venueId: VenueId,
+  devOverride?: ReturnType<typeof getDevBootstrapConfig> | null,
+  options?: { preservePlayer?: boolean },
+) {
   const dev = devOverride === undefined ? getDevBootstrapConfig() : devOverride
   const effectiveVenueId = dev?.venueId ?? venueId
   const progressionIndex = dev?.progressionIndex ?? 0
@@ -81,7 +85,9 @@ function createVenueIntroState(venueId: VenueId, devOverride?: ReturnType<typeof
 
   const activeNpcCount = step.npcCount
   const npcProfiles = buildNpcProfiles(activeNpcCount, effectiveVenueId)
-  resetPlayerToStart()
+  if (!options?.preservePlayer) {
+    resetPlayerToStart()
+  }
   seedNpcPositions(npcProfiles)
 
   const targetNpcIds = pickRandomTargetNpcIds(npcProfiles, step.targetCount)
@@ -204,7 +210,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     const nextLayoutVersion = get().npcLayoutVersion + 1
-    const newState = createVenueIntroState('club', null)
+    const newState = createVenueIntroState('club', null, { preservePlayer: true })
+    resetPlayerPositionToStart()
     const keepMeebitIds = collectKeepMeebitIds('club', newState.npcProfiles, newState.targetNpcIds)
     resetStageRuntimeState(keepMeebitIds)
     seedNpcPositions(newState.npcProfiles)
@@ -212,6 +219,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     set({
       ...newState,
+      playerModelStatus: 'loading',
       afterHoursUnlockPending: false,
       npcLayoutVersion: nextLayoutVersion,
     })
@@ -496,13 +504,6 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
   }
 
   setActiveVrmNpcIds(nextIds)
-
-  for (const npcId of nextIds) {
-    const npc = profiles.find((profile) => profile.id === npcId)
-    if (npc) {
-      preloadVrm(npc.meebitNumber, -150)
-    }
-  }
 }
 
 function resetPlayerPositionToStart() {

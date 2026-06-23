@@ -133,3 +133,6 @@ export function getFogDistances() {
 export function getMaxVrmTemplateCache() {
   return getNpcMaxConcurrentVrm() + 12
 }
+
+/** プレイヤー VRM は NPC の warmup より常に先にロードキューへ入れる */
+export const PLAYER_VRM_LOAD_PRIORITY = -2000

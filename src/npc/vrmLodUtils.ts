@@ -55,3 +55,15 @@ export function isNpcWithinVrmRange(
 
   return distance <= getNpcVrmDistanceThreshold(playerPosition, npcPosition, wasActive)
 }
+
+/** intro / preparing 中は近い NPC を preload より先にキューへ入れる */
+export function getNpcVrmLoadPriority(
+  distance: number,
+  gamePhase: 'intro' | 'preparing' | 'playing' | 'timedOut' | 'cleared' | 'conquered',
+) {
+  if (gamePhase === 'intro' || gamePhase === 'preparing') {
+    return -700 + Math.min(distance, 250)
+  }
+
+  return distance
+}

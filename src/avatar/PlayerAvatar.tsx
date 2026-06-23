@@ -7,6 +7,7 @@ import { getPlayerWorldState } from './playerWorldState'
 import { useVRMModel } from './useVRMModel'
 import { useGameStore } from '../stores/gameStore'
 import { VRM_WORLD_SCALE } from '../game/gameConfig'
+import { PLAYER_VRM_LOAD_PRIORITY } from '../game/perfConfig'
 import { usePlayerStore } from '../stores/playerStore'
 import { savePlayerPosition } from '../systems/save/localStorage'
 
@@ -24,7 +25,7 @@ export function PlayerAvatar() {
   const { vrmRef, vrmScene, status, update } = useVRMModel(
     meebitNumber,
     shouldLoadPlayerVrm,
-    -100,
+    PLAYER_VRM_LOAD_PRIORITY,
     true,
     true,
   )

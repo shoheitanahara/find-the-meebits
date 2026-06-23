@@ -22,7 +22,11 @@ export function StagePrepareSystem() {
       const npcReadiness = getStageVrmReadiness(playerPosition, game.npcProfiles, npcPositions)
       const timedOut = Date.now() - game.preparedAt >= PREPARE_TIMEOUT_MS
 
-      if (timedOut || (playerReady && npcReadiness.isReady)) {
+      if (!playerReady) {
+        return
+      }
+
+      if (timedOut || npcReadiness.isReady) {
         useGameStore.getState().beginPlaying()
       }
     }, 150)
