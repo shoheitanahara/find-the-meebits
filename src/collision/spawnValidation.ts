@@ -1,5 +1,6 @@
 import { NPC_COLLISION_RADIUS, collidesWithObstacles } from './collision'
 import { PLAYER_START_POSITION, WORLD_RADIUS } from '../game/gameConfig'
+import type { VenueId } from '../game/venueConfig'
 
 const SPAWN_RADIUS = WORLD_RADIUS * 0.72
 const WORLD_EDGE_MARGIN = 6
@@ -11,8 +12,9 @@ export function isValidNpcSpawn(
   x: number,
   z: number,
   existingSpawns: Array<[number, number]> = [],
+  venueId: VenueId = 'museum',
 ): boolean {
-  if (collidesWithObstacles(x, z, SPAWN_CHECK_RADIUS)) {
+  if (collidesWithObstacles(x, z, SPAWN_CHECK_RADIUS, venueId)) {
     return false
   }
 
@@ -40,6 +42,7 @@ export function isValidNpcSpawn(
 
 export function generateRandomNpcSpawnPosition(
   existingSpawns: Array<[number, number]>,
+  venueId: VenueId = 'museum',
 ): [number, number] {
   for (let attempt = 0; attempt < 128; attempt++) {
     const angle = Math.random() * Math.PI * 2
@@ -47,7 +50,7 @@ export function generateRandomNpcSpawnPosition(
     const x = Math.cos(angle) * radius
     const z = Math.sin(angle) * radius
 
-    if (isValidNpcSpawn(x, z, existingSpawns)) {
+    if (isValidNpcSpawn(x, z, existingSpawns, venueId)) {
       return [round(x), round(z)]
     }
   }
@@ -58,7 +61,7 @@ export function generateRandomNpcSpawnPosition(
   const fallbackX = Math.cos(fallbackAngle) * fallbackRadius
   const fallbackZ = Math.sin(fallbackAngle) * fallbackRadius
 
-  if (isValidNpcSpawn(fallbackX, fallbackZ, existingSpawns)) {
+  if (isValidNpcSpawn(fallbackX, fallbackZ, existingSpawns, venueId)) {
     return [round(fallbackX), round(fallbackZ)]
   }
 

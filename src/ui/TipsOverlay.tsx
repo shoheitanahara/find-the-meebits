@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
-import { GAME_TIPS } from './gameTips'
+import { getGameTipsForVenue } from './gameTips'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 function RedMarkerIcon({ className = 'size-4' }: { className?: string }) {
@@ -14,9 +14,12 @@ function RedMarkerIcon({ className = 'size-4' }: { className?: string }) {
 
 export function TipsOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const venueId = useGameStore((state) => state.venueId)
   const tipsAcknowledged = useGameStore((state) => state.tipsAcknowledged)
   const acknowledgeTips = useGameStore((state) => state.acknowledgeTips)
   const isVisible = gamePhase === 'preparing' && !tipsAcknowledged
+  const isClubVenue = venueId === 'club'
+  const gameTips = getGameTipsForVenue(venueId)
 
   useEffect(() => {
     if (!isVisible) {
@@ -46,11 +49,11 @@ export function TipsOverlay() {
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Tips</p>
         <h2 className="mt-2 text-2xl font-black tracking-tight lg:text-3xl">Before you start</h2>
         <p className="mt-2 text-sm leading-relaxed text-neutral-600 max-lg:text-xs">
-          A few things that help in the museum.
+          {isClubVenue ? 'A few things that help in After Hours.' : 'A few things that help in the museum.'}
         </p>
 
         <ul className="mt-5 space-y-3">
-          {GAME_TIPS.map((tip, index) => (
+          {gameTips.map((tip, index) => (
             <li
               key={tip.title}
               className="flex gap-3 rounded-2xl border border-neutral-200 bg-white px-3.5 py-3 max-lg:px-3 max-lg:py-2.5"

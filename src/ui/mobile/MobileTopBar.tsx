@@ -57,6 +57,7 @@ function getTargetStackLayout(targetCount: number) {
 export function MobileTopBar() {
   const gameMode = useGameStore((state) => state.gameMode)
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const venueId = useGameStore((state) => state.venueId)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
@@ -82,7 +83,7 @@ export function MobileTopBar() {
     return null
   }
 
-  const step = getProgressionStep(progressionIndex)
+  const step = getProgressionStep(progressionIndex, venueId)
   const stageLabel = step ? getStageLabel(step) : 'Stage'
   const targetNpcs = targetNpcIds
     .map((id) => getNpcById(id))

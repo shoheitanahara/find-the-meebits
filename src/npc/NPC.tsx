@@ -185,7 +185,14 @@ export function NPC({ profile }: NPCProps) {
       currentPosition.z += Math.cos(directionRef.current) * WALK_SPEED * delta
       clampToGallerySquare(currentPosition, directionRef)
 
-      if (collidesWithObstacles(currentPosition.x, currentPosition.z, NPC_COLLISION_RADIUS)) {
+      if (
+        collidesWithObstacles(
+          currentPosition.x,
+          currentPosition.z,
+          NPC_COLLISION_RADIUS,
+          useGameStore.getState().venueId,
+        )
+      ) {
         currentPosition.x = previousX
         currentPosition.z = previousZ
         directionRef.current += Math.PI * 0.55 + seededNoise(profile.meebitNumber + state.clock.elapsedTime) * 0.9

@@ -1,4 +1,13 @@
-type SfxKind = 'uiClick' | 'uiConfirm' | 'talk' | 'clear' | 'footstep' | 'timeUp' | 'targetFound'
+type SfxKind =
+  | 'uiClick'
+  | 'uiConfirm'
+  | 'talk'
+  | 'clear'
+  | 'footstep'
+  | 'timeUp'
+  | 'targetFound'
+  | 'unlock'
+  | 'timerStart'
 
 let audioContext: AudioContext | null = null
 
@@ -275,6 +284,31 @@ function playTimeUpFail(ctx: AudioContext) {
   buzz.stop(now + 1.25)
 }
 
+function playTimerStart(ctx: AudioContext) {
+  const now = ctx.currentTime
+  scheduleBeep(ctx, {
+    frequency: 523.25,
+    durationMs: 55,
+    type: 'triangle',
+    gain: 0.065,
+    startTime: now,
+  })
+  scheduleBeep(ctx, {
+    frequency: 523.25,
+    durationMs: 55,
+    type: 'triangle',
+    gain: 0.065,
+    startTime: now + 0.1,
+  })
+  scheduleBeep(ctx, {
+    frequency: 880,
+    durationMs: 220,
+    type: 'triangle',
+    gain: 0.1,
+    startTime: now + 0.2,
+  })
+}
+
 function playTargetFound(ctx: AudioContext) {
   const now = ctx.currentTime
   scheduleBeep(ctx, {
@@ -336,5 +370,36 @@ export function playSfx(kind: SfxKind) {
     return
   }
 
+  if (kind === 'timerStart') {
+    playTimerStart(ctx)
+    return
+  }
+
+  if (kind === 'unlock') {
+    playUnlockFanfare(ctx)
+    return
+  }
+
   playTalkMurmur(ctx)
+}
+
+function playUnlockFanfare(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const notes = [
+    { frequency: 392.0, offsetMs: 0, durationMs: 120, gain: 0.06 },
+    { frequency: 523.25, offsetMs: 90, durationMs: 130, gain: 0.065 },
+    { frequency: 659.25, offsetMs: 180, durationMs: 150, gain: 0.07 },
+    { frequency: 783.99, offsetMs: 280, durationMs: 180, gain: 0.075 },
+    { frequency: 987.77, offsetMs: 400, durationMs: 320, gain: 0.08 },
+  ]
+
+  for (const note of notes) {
+    scheduleBeep(ctx, {
+      frequency: note.frequency,
+      durationMs: note.durationMs,
+      type: 'triangle',
+      gain: note.gain,
+      startTime: now + note.offsetMs / 1000,
+    })
+  }
 }

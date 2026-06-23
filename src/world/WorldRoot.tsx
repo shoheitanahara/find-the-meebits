@@ -1,19 +1,11 @@
-import { Buildings } from './Buildings'
-import { Ground } from './Ground'
-import { Ocean } from './Ocean'
-import { Plaza } from './Plaza'
-import { Props } from './Props'
-import { VrmSculpturePreloader } from './VrmSculpturePreloader'
+import type { VenueId } from '../game/venueConfig'
+import { ClubWorld } from './ClubWorld'
+import { MuseumWorld } from './MuseumWorld'
 
-export function WorldRoot() {
-  return (
-    <group>
-      <VrmSculpturePreloader />
-      <Ocean />
-      <Ground />
-      <Plaza />
-      <Buildings />
-      <Props />
-    </group>
-  )
+type WorldRootProps = {
+  venueId: VenueId
+}
+
+export function WorldRoot({ venueId }: WorldRootProps) {
+  return venueId === 'club' ? <ClubWorld /> : <MuseumWorld />
 }

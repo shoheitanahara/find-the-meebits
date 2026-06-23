@@ -4,6 +4,7 @@ import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getNpcById } from './npcData'
 import type { DialogueLine, NPCProfile } from './npcTypes'
+import { CLUB_CREATOR_DIALOGUE_LINES, CLUB_WANDERER_DIALOGUE_POOL } from './npcClubDialogue'
 import { WANDERER_DIALOGUE_POOL } from './npcDialoguePool'
 import { buildTargetLocationHint } from './npcTargetHint'
 
@@ -62,14 +63,18 @@ function maybeBuildTargetHintLine(npc: NPCProfile, talkCount: number): DialogueL
     playerPosition,
     targetPosition,
     talkCount + hintTargetId.length + npc.meebitNumber,
+    useGameStore.getState().venueId,
   )
 
   return toDialogueLine(npc.id, talkCount, -1, text, 'hint')
 }
 
 export function selectDialogueLines(npc: NPCProfile, talkCount: number): DialogueLine[] {
+  const venueId = useGameStore.getState().venueId
+
   if (npc.id === CREATOR_NPC_ID) {
-    return [pickOneLine(npc.dialogues, npc.meebitNumber, talkCount)]
+    const creatorLines = venueId === 'club' ? CLUB_CREATOR_DIALOGUE_LINES : npc.dialogues
+    return [pickOneLine(creatorLines, npc.meebitNumber, talkCount)]
   }
 
   const hintLine = maybeBuildTargetHintLine(npc, talkCount)
@@ -77,8 +82,9 @@ export function selectDialogueLines(npc: NPCProfile, talkCount: number): Dialogu
     return [hintLine]
   }
 
-  const poolIndex = seededIndex(npc.meebitNumber + npc.id.length, talkCount, WANDERER_DIALOGUE_POOL.length)
-  const text = WANDERER_DIALOGUE_POOL[poolIndex]
+  const wandererPool = venueId === 'club' ? CLUB_WANDERER_DIALOGUE_POOL : WANDERER_DIALOGUE_POOL
+  const poolIndex = seededIndex(npc.meebitNumber + npc.id.length, talkCount, wandererPool.length)
+  const text = wandererPool[poolIndex]
 
   return [toDialogueLine(npc.id, talkCount, poolIndex, text)]
 }

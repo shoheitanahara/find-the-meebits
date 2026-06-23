@@ -2,6 +2,7 @@ import {
   CREATOR_MEEBIT_ID,
   CREATOR_NPC_ID,
 } from '../game/gameConfig'
+import type { VenueId } from '../game/venueConfig'
 import { generateRandomNpcSpawnPosition } from '../collision/spawnValidation'
 import type { NPCProfile } from './npcTypes'
 
@@ -98,11 +99,11 @@ const creatorNpc: NPCProfile = {
   ],
 }
 
-export function buildNpcProfiles(wanderingNpcCount: number): NPCProfile[] {
+export function buildNpcProfiles(wanderingNpcCount: number, venueId: VenueId = 'museum'): NPCProfile[] {
   const meebitNumbers = pickRandomMeebitNumbers(wanderingNpcCount)
   const existingSpawns: Array<[number, number]> = [[creatorNpc.position[0], creatorNpc.position[2]]]
   const wanderingNpcs = meebitNumbers.map((meebitNumber, index) =>
-    createNpcProfile(index, meebitNumber, existingSpawns),
+    createNpcProfile(index, meebitNumber, existingSpawns, venueId),
   )
 
   return [creatorNpc, ...wanderingNpcs]
@@ -116,12 +117,14 @@ function createNpcProfile(
   index: number,
   meebitNumber: number,
   existingSpawns: Array<[number, number]>,
+  venueId: VenueId,
 ): NPCProfile {
   const id = `npc-${String(index + 1).padStart(3, '0')}`
-  const [x, z] = generateRandomNpcSpawnPosition(existingSpawns)
+  const [x, z] = generateRandomNpcSpawnPosition(existingSpawns, venueId)
   existingSpawns.push([x, z])
   const personality = personalities[Math.floor(Math.random() * personalities.length)]
   const role = roles[Math.floor(Math.random() * roles.length)]
+  const isClubVenue = venueId === 'club'
 
   return {
     id,
@@ -131,8 +134,8 @@ function createNpcProfile(
     rotation: [0, Math.random() * Math.PI * 2, 0],
     personality,
     role,
-    catchphrase: 'Find me if you can.',
-    topics: ['search', 'gallery', 'meebits'],
+    catchphrase: isClubVenue ? 'Find me in the crowd.' : 'Find me if you can.',
+    topics: isClubVenue ? ['search', 'club', 'meebits'] : ['search', 'gallery', 'meebits'],
     dialogues: [],
   }
 }

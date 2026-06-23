@@ -3,9 +3,10 @@ import { useGameStore } from '../stores/gameStore'
 import { PlayerMeebitLabel } from './PlayerMeebitLabel'
 
 export function HUD() {
+  const venueId = useGameStore((state) => state.venueId)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
-  const step = getProgressionStep(progressionIndex)
+  const step = getProgressionStep(progressionIndex, venueId)
   const stageLabel = step ? getStageLabel(step) : 'Stage'
 
   return (

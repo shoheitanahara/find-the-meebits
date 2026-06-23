@@ -1,16 +1,25 @@
+import type { VenueId } from '../game/venueConfig'
 import { getShadowMapSize } from '../game/perfConfig'
+import { getVenueTheme } from '../game/venueConfig'
 
-export function Lighting() {
+type LightingProps = {
+  venueId: VenueId
+}
+
+export function Lighting({ venueId }: LightingProps) {
+  const theme = getVenueTheme(venueId)
   const shadowMapSize = getShadowMapSize()
 
   return (
     <>
-      <ambientLight intensity={0.82} />
-      <hemisphereLight args={['#ffffff', '#d6d3d1', 0.9]} />
+      <ambientLight intensity={theme.ambientIntensity} />
+      <hemisphereLight
+        args={[theme.hemisphereSky, theme.hemisphereGround, theme.hemisphereIntensity]}
+      />
       <directionalLight
         castShadow
-        intensity={1.45}
-        position={[18, 24, 12]}
+        intensity={theme.directionalIntensity}
+        position={theme.directionalPosition}
         shadow-bias={-0.0001}
         shadow-normalBias={0.025}
         shadow-camera-bottom={-90}
@@ -22,6 +31,15 @@ export function Lighting() {
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
       />
+      {theme.pointLights.map((light, index) => (
+        <pointLight
+          key={`${index}-${light.color}-${light.position.join('-')}`}
+          color={light.color}
+          distance={light.distance}
+          intensity={light.intensity}
+          position={light.position}
+        />
+      ))}
     </>
   )
 }

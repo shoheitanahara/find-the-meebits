@@ -18,9 +18,27 @@ import { MiniMap } from './ui/MiniMap'
 import { MobileControls } from './ui/mobile/MobileControls'
 import { MobileTopBar } from './ui/mobile/MobileTopBar'
 import { DevBootstrapBanner } from './ui/DevBootstrapBanner'
+import { AfterHoursUnlockOverlay } from './ui/AfterHoursUnlockOverlay'
 import { StartScreen } from './ui/StartScreen'
 import { TargetHUD } from './ui/TargetHUD'
 import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
+import { useGameStore } from './stores/gameStore'
+
+function AfterHoursUnlockGate() {
+  const gamePhase = useGameStore((state) => state.gamePhase)
+  const venueId = useGameStore((state) => state.venueId)
+  const afterHoursUnlockPending = useGameStore((state) => state.afterHoursUnlockPending)
+  const acknowledgeAfterHoursUnlock = useGameStore((state) => state.acknowledgeAfterHoursUnlock)
+  const startAfterHours = useGameStore((state) => state.startAfterHours)
+  const isVisible = gamePhase === 'intro' && venueId === 'museum' && afterHoursUnlockPending
+
+  const handleComplete = () => {
+    acknowledgeAfterHoursUnlock()
+    startAfterHours()
+  }
+
+  return <AfterHoursUnlockOverlay isVisible={isVisible} onComplete={handleComplete} />
+}
 
 export default function App() {
   return (
@@ -42,6 +60,7 @@ export default function App() {
       <LoadingScreen />
       <ErrorMessage />
       <StartScreen />
+      <AfterHoursUnlockGate />
       <TipsOverlay />
       <PrepareOverlay />
       <ClearOverlay />

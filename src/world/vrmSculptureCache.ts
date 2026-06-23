@@ -6,6 +6,8 @@ import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.j
 import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { getMeebitVrmUrl, loadVRM } from '../avatar/VRMLoader'
 import { enqueueVrmLoad } from '../avatar/vrmLoadQueue'
+import type { VenueId } from '../game/venueConfig'
+import { getClubVrmSculptureMeebitIds } from './clubLandmarks'
 import { getVrmSculptureMeebitIds } from './worldLandmarks'
 
 const SCULPTURE_GRAY_MATERIAL = new MeshStandardMaterial({
@@ -84,8 +86,15 @@ export function releaseVrmSculptureScene(meebitId: number, scene: Group) {
   }
 }
 
-export function preloadVrmSculptures() {
-  for (const meebitId of getVrmSculptureMeebitIds()) {
+export function preloadVrmSculpturesForVenue(venueId: VenueId = 'museum') {
+  const meebitIds =
+    venueId === 'club' ? getClubVrmSculptureMeebitIds() : getVrmSculptureMeebitIds()
+
+  for (const meebitId of meebitIds) {
     void ensureMasterScene(meebitId)
   }
+}
+
+export function preloadVrmSculptures() {
+  preloadVrmSculpturesForVenue('museum')
 }

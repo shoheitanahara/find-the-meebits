@@ -35,3 +35,91 @@ canvas {
   display: block;
   touch-action: none;
 }
+
+@keyframes after-hours-unlock-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(24px);
+  }
+
+  70% {
+    transform: scale(1.03) translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes after-hours-unlock-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes after-hours-unlock-orb {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+.after-hours-unlock-pop {
+  animation: after-hours-unlock-pop 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.after-hours-unlock-pop-delay {
+  animation: after-hours-unlock-pop 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.after-hours-unlock-rise {
+  animation: after-hours-unlock-rise 600ms ease-out both;
+}
+
+.after-hours-unlock-rise-delay {
+  animation: after-hours-unlock-rise 700ms ease-out 260ms both;
+}
+
+.after-hours-unlock-orb {
+  animation: after-hours-unlock-orb 2.8s ease-in-out infinite;
+}
+
+.after-hours-unlock-orb-left {
+  animation-delay: 0ms;
+}
+
+.after-hours-unlock-orb-center {
+  animation-delay: 400ms;
+}
+
+.after-hours-unlock-orb-right {
+  animation-delay: 800ms;
+}
+
+.after-hours-enter-pulse {
+  animation: after-hours-enter-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes after-hours-enter-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(192, 132, 252, 0.22);
+  }
+}

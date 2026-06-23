@@ -1,5 +1,8 @@
 /** Shared prop positions for rendering, collision, and hint landmarks. */
 
+import type { VenueId } from '../game/venueConfig'
+import { getClubDecorMeebitIds, buildClubHintLandmarks } from './clubLandmarks'
+
 export const BENCH_POSITIONS = [
   [-14, 0.5, 12],
   [14, 0.5, 12],
@@ -70,6 +73,10 @@ const VRM_SCULPTURE_LIGHT_PEDESTAL_HINT = ['near a gray Meebit sculpture on a wh
 const VRM_SCULPTURE_DARK_PEDESTAL_HINT = ['near a gray Meebit sculpture on a black pedestal']
 
 export function buildHintLandmarks(): HintLandmark[] {
+  return buildMuseumHintLandmarks()
+}
+
+export function buildMuseumHintLandmarks(): HintLandmark[] {
   return [
     ...SCULPTURE_POSITIONS.map(([x, , z], index) => ({
       x,
@@ -90,4 +97,12 @@ export function buildHintLandmarks(): HintLandmark[] {
       phrases: ['near a bench'],
     })),
   ]
+}
+
+export function buildHintLandmarksForVenue(venueId: VenueId): HintLandmark[] {
+  return venueId === 'club' ? buildClubHintLandmarks() : buildMuseumHintLandmarks()
+}
+
+export function getDecorMeebitIdsForVenue(venueId: VenueId) {
+  return venueId === 'club' ? getClubDecorMeebitIds() : getVrmSculptureMeebitIds()
 }

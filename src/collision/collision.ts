@@ -1,5 +1,6 @@
 import { WORLD_RADIUS } from '../game/gameConfig'
-import { WORLD_OBSTACLES, type ObstacleBox } from './obstacles'
+import type { VenueId } from '../game/venueConfig'
+import { getWorldObstacles, type ObstacleBox } from './obstacles'
 
 export const PLAYER_COLLISION_RADIUS = 0.45
 export const NPC_COLLISION_RADIUS = 0.35
@@ -22,8 +23,9 @@ export function collidesWithObstacles(
   centerX: number,
   centerZ: number,
   radius: number,
-  obstacles: ObstacleBox[] = WORLD_OBSTACLES,
+  venueId: VenueId = 'museum',
 ): boolean {
+  const obstacles = getWorldObstacles(venueId)
   for (const obstacle of obstacles) {
     if (circleIntersectsBox(centerX, centerZ, radius, obstacle)) {
       return true
@@ -46,22 +48,23 @@ export function resolveMovement(
   nextX: number,
   nextZ: number,
   radius: number,
+  venueId: VenueId = 'museum',
 ): { x: number; z: number } {
   const clamped = clampToWorldBounds(nextX, nextZ)
   let x = clamped.x
   let z = clamped.z
 
-  if (!collidesWithObstacles(x, z, radius)) {
+  if (!collidesWithObstacles(x, z, radius, venueId)) {
     return { x, z }
   }
 
   const slideX = clampToWorldBounds(nextX, currentZ)
-  if (!collidesWithObstacles(slideX.x, slideX.z, radius)) {
+  if (!collidesWithObstacles(slideX.x, slideX.z, radius, venueId)) {
     return { x: slideX.x, z: slideX.z }
   }
 
   const slideZ = clampToWorldBounds(currentX, nextZ)
-  if (!collidesWithObstacles(slideZ.x, slideZ.z, radius)) {
+  if (!collidesWithObstacles(slideZ.x, slideZ.z, radius, venueId)) {
     return { x: slideZ.x, z: slideZ.z }
   }
 

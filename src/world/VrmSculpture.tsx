@@ -1,12 +1,31 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Group } from 'three'
+import { VRMUtils } from '@pixiv/three-vrm'
+import { Group, Mesh, MeshStandardMaterial } from 'three'
+import type { Object3D } from 'three'
+import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { PLAYER_START_POSITION, VRM_WORLD_SCALE } from '../game/gameConfig'
 import {
   acquireVrmSculptureScene,
   releaseVrmSculptureScene,
 } from './vrmSculptureCache'
 import type { VrmSculpturePedestal } from './worldLandmarks'
+
+export type SculptureTone = 'museum' | 'club'
+
+const CLUB_SCULPTURE_MATERIAL = new MeshStandardMaterial({
+  color: '#27272a',
+  roughness: 0.42,
+  metalness: 0.22,
+})
+
+function applyClubSculptureTone(root: Object3D) {
+  root.traverse((object) => {
+    if (object instanceof Mesh) {
+      object.material = CLUB_SCULPTURE_MATERIAL
+    }
+  })
+}
 
 /** NPC がプレイヤーを向くのと同じ式で、入口（開始位置）方向を向く */
 export function getEntranceFacingY(x: number, z: number) {
@@ -69,6 +88,7 @@ type VrmSculptureProps = {
   position: [number, number, number]
   pedestal: VrmSculpturePedestal
   facingY?: number
+  sculptureTone?: SculptureTone
 }
 
 export function VrmSculpture({
@@ -76,32 +96,51 @@ export function VrmSculpture({
   position,
   pedestal,
   facingY,
+  sculptureTone = 'museum',
 }: VrmSculptureProps) {
   const rotationY = facingY ?? getEntranceFacingY(position[0], position[2])
   const [sculptureScene, setSculptureScene] = useState<Group | null>(null)
 
   useEffect(() => {
     let activeScene: Group | null = null
+    let ownsPoolRef = false
     let cancelled = false
 
-    acquireVrmSculptureScene(meebitId).then((scene) => {
+    acquireVrmSculptureScene(meebitId).then((acquired) => {
       if (cancelled) {
-        releaseVrmSculptureScene(meebitId, scene)
+        releaseVrmSculptureScene(meebitId, acquired)
         return
       }
 
-      activeScene = scene
-      setSculptureScene(scene)
+      if (sculptureTone === 'club') {
+        const clone = cloneSkeleton(acquired) as Group
+        applyClubSculptureTone(clone)
+        releaseVrmSculptureScene(meebitId, acquired)
+        activeScene = clone
+        ownsPoolRef = false
+      } else {
+        activeScene = acquired
+        ownsPoolRef = true
+      }
+
+      setSculptureScene(activeScene)
     })
 
     return () => {
       cancelled = true
-      if (activeScene) {
-        releaseVrmSculptureScene(meebitId, activeScene)
+      if (!activeScene) {
+        return
       }
+
+      if (ownsPoolRef) {
+        releaseVrmSculptureScene(meebitId, activeScene)
+      } else {
+        VRMUtils.deepDispose(activeScene)
+      }
+
       setSculptureScene(null)
     }
-  }, [meebitId])
+  }, [meebitId, sculptureTone])
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>

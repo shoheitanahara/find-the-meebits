@@ -62,7 +62,14 @@ export function AvatarController() {
 
     const nextX = world.x + moveVector.x * MOVE_SPEED * delta
     const nextZ = world.z + moveVector.y * MOVE_SPEED * delta
-    const resolved = resolveMovement(world.x, world.z, nextX, nextZ, PLAYER_COLLISION_RADIUS)
+    const resolved = resolveMovement(
+      world.x,
+      world.z,
+      nextX,
+      nextZ,
+      PLAYER_COLLISION_RADIUS,
+      useGameStore.getState().venueId,
+    )
     const rotationY = Math.atan2(moveVector.x, moveVector.y)
 
     setPlayerWorldTransform(resolved.x, resolved.z, rotationY)

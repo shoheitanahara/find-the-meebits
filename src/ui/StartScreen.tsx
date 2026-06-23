@@ -5,8 +5,15 @@ import {
   getGameModeDescription,
   getGameModeLabel,
 } from '../game/gameMode'
-import { getProgressionStep, getProgressionSummary, getStageDescription, getStageLabel } from '../game/gameProgression'
+import {
+  getProgressionStep,
+  getProgressionSummary,
+  getStageDescription,
+  getStageLabel,
+} from '../game/gameProgression'
+import { getVenueLabel } from '../game/venueConfig'
 import { getNpcById } from '../npc/npcData'
+import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from './TargetPreview'
@@ -14,17 +21,22 @@ import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function StartScreen() {
   const [playerMeebitInput, setPlayerMeebitInput] = useState(String(DEFAULT_PLAYER_MEEBIT_ID))
+  const [afterHoursUnlocked, setAfterHoursUnlocked] = useState(false)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const gameMode = useGameStore((state) => state.gameMode)
+  const venueId = useGameStore((state) => state.venueId)
   const setGameMode = useGameStore((state) => state.setGameMode)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const startGame = useGameStore((state) => state.startGame)
+  const startAfterHours = useGameStore((state) => state.startAfterHours)
+  const resetGame = useGameStore((state) => state.resetGame)
   const rerollTargets = useGameStore((state) => state.rerollTargets)
   const firstTargetNpc = getNpcById(targetNpcIds[0] ?? '')
-  const currentStep = getProgressionStep(progressionIndex)
+  const currentStep = getProgressionStep(progressionIndex, venueId)
   const playerMeebitNumber = normalizeMeebitNumber(playerMeebitInput)
+  const isClubVenue = venueId === 'club'
 
   useEffect(() => {
     if (gamePhase !== 'intro') {
@@ -33,6 +45,14 @@ export function StartScreen() {
 
     usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
   }, [gamePhase, playerMeebitNumber])
+
+  useEffect(() => {
+    if (gamePhase !== 'intro') {
+      return
+    }
+
+    setAfterHoursUnlocked(isAfterHoursUnlocked())
+  }, [gamePhase])
 
   if (gamePhase !== 'intro' || !firstTargetNpc || !currentStep) {
     return null
@@ -50,25 +70,62 @@ export function StartScreen() {
     startGame()
   }
 
+  const handleEnterAfterHours = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiConfirm')
+    usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
+    startAfterHours()
+  }
+
+  const handleBackToMuseum = () => {
+    unlockAudioIfNeeded()
+    playSfx('uiClick')
+    resetGame()
+  }
+
   return (
-    <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-neutral-950/80 p-4 backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:p-3 max-lg:py-[max(0.5rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6">
-      <section className="grid w-full max-w-4xl gap-6 rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-lg:max-h-[calc(100dvh-1rem)] max-lg:max-w-none max-lg:gap-3 max-lg:rounded-3xl max-lg:p-3 lg:grid-cols-[auto_1fr] lg:p-8">
+    <div
+      className={`pointer-events-auto absolute inset-0 z-40 overflow-y-auto p-4 backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:p-3 max-lg:py-[max(0.5rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6 ${
+        isClubVenue ? 'bg-violet-950/85' : 'bg-neutral-950/80'
+      }`}
+    >
+      <section
+        className={`grid w-full max-w-4xl gap-6 rounded-[2rem] border p-5 shadow-2xl max-lg:max-h-[calc(100dvh-1rem)] max-lg:max-w-none max-lg:gap-3 max-lg:rounded-3xl max-lg:p-3 lg:grid-cols-[auto_1fr] lg:p-8 ${
+          isClubVenue
+            ? 'border-fuchsia-400/40 bg-neutral-950 text-white'
+            : 'border-white/15 bg-neutral-50 text-neutral-950'
+        }`}
+      >
         <div className="max-lg:hidden">
           <TargetPreview meebitNumber={firstTargetNpc.meebitNumber} sizeClassName="h-40 w-40" />
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500 max-lg:text-[0.6rem] max-lg:tracking-[0.25em]">
-            Meebits Museum Hunt
+          <p
+            className={`text-xs font-semibold uppercase tracking-[0.35em] max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
+              isClubVenue ? 'text-fuchsia-300' : 'text-neutral-500'
+            }`}
+          >
+            {isClubVenue ? 'After Hours' : 'Meebits Museum Hunt'}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
-            Find the Meebit
+            {isClubVenue ? 'Find them in the dark.' : 'Find the Meebit'}
           </h1>
-          <p className="mt-4 text-base leading-relaxed text-neutral-600 max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug">
-            {getStageDescription(currentStep)} · {getProgressionSummary()}.
+          <p
+            className={`mt-4 text-base leading-relaxed max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug ${
+              isClubVenue ? 'text-neutral-300' : 'text-neutral-600'
+            }`}
+          >
+            {getStageDescription(currentStep)} · {getProgressionSummary(venueId)}.
           </p>
 
-          <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-lg:mt-2 max-lg:p-2.5">
-            <p className="text-sm font-semibold text-neutral-500 max-lg:text-xs">Game Mode</p>
+          <div
+            className={`mt-5 rounded-2xl border p-4 max-lg:mt-2 max-lg:p-2.5 ${
+              isClubVenue ? 'border-fuchsia-400/30 bg-violet-950/50' : 'border-neutral-200 bg-white'
+            }`}
+          >
+            <p className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
+              Game Mode
+            </p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {(['challenge', 'enjoy'] as const).map((mode) => {
                 const isSelected = gameMode === mode
@@ -79,8 +136,12 @@ export function StartScreen() {
                     type="button"
                     className={`rounded-xl border px-3 py-2.5 text-left transition max-lg:px-2.5 max-lg:py-2 ${
                       isSelected
-                        ? 'border-neutral-950 bg-neutral-950 text-white'
-                        : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-neutral-400'
+                        ? isClubVenue
+                          ? 'border-fuchsia-300 bg-fuchsia-500 text-white'
+                          : 'border-neutral-950 bg-neutral-950 text-white'
+                        : isClubVenue
+                          ? 'border-fuchsia-400/25 bg-neutral-950 text-neutral-300 hover:border-fuchsia-300'
+                          : 'border-neutral-200 bg-neutral-50 text-neutral-700 hover:border-neutral-400'
                     }`}
                     onClick={() => {
                       unlockAudioIfNeeded()
@@ -93,7 +154,13 @@ export function StartScreen() {
                     </p>
                     <p
                       className={`mt-1 text-xs leading-snug max-lg:text-[0.65rem] ${
-                        isSelected ? 'text-neutral-300' : 'text-neutral-500'
+                        isSelected
+                          ? isClubVenue
+                            ? 'text-fuchsia-100'
+                            : 'text-neutral-300'
+                          : isClubVenue
+                            ? 'text-neutral-400'
+                            : 'text-neutral-500'
                       }`}
                     >
                       {getGameModeDescription(mode)}
@@ -104,7 +171,11 @@ export function StartScreen() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-lg:mt-2 max-lg:p-2.5">
+          <div
+            className={`mt-5 rounded-2xl border p-4 max-lg:mt-2 max-lg:p-2.5 ${
+              isClubVenue ? 'border-fuchsia-400/30 bg-violet-950/50' : 'border-neutral-200 bg-white'
+            }`}
+          >
             <div className="flex items-center gap-3">
               <TargetPreview
                 meebitNumber={firstTargetNpc.meebitNumber}
@@ -112,17 +183,25 @@ export function StartScreen() {
                 sizeClassName="h-20 w-20 shrink-0 lg:hidden"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-neutral-500 max-lg:text-xs">
+                <p className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
                   {getStageLabel(currentStep)} Target{currentStep.targetCount > 1 ? 's' : ''}
                 </p>
                 <p className="text-3xl font-black max-lg:text-xl">Meebit #{firstTargetNpc.meebitNumber}</p>
-                <p className="mt-1 text-xs font-medium text-neutral-500 max-lg:mt-0 max-lg:text-[0.65rem]">
-                  {activeNpcCount} Meebits in the museum
+                <p
+                  className={`mt-1 text-xs font-medium max-lg:mt-0 max-lg:text-[0.65rem] ${
+                    isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
+                  }`}
+                >
+                  {activeNpcCount} Meebits in the {isClubVenue ? 'club' : 'museum'}
                 </p>
               </div>
               <button
                 type="button"
-                className="shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 max-lg:px-2.5 max-lg:py-1 max-lg:text-[0.6rem]"
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] transition max-lg:px-2.5 max-lg:py-1 max-lg:text-[0.6rem] ${
+                  isClubVenue
+                    ? 'border-fuchsia-400/40 text-fuchsia-100 hover:border-fuchsia-300 hover:text-white'
+                    : 'border-neutral-300 text-neutral-700 hover:border-neutral-950 hover:text-neutral-950'
+                }`}
                 onClick={() => {
                   unlockAudioIfNeeded()
                   playSfx('uiClick')
@@ -134,7 +213,11 @@ export function StartScreen() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-2xl border border-neutral-200 bg-white p-4 max-lg:mt-2 max-lg:p-2.5">
+          <div
+            className={`mt-5 rounded-2xl border p-4 max-lg:mt-2 max-lg:p-2.5 ${
+              isClubVenue ? 'border-fuchsia-400/30 bg-violet-950/50' : 'border-neutral-200 bg-white'
+            }`}
+          >
             <div className="flex items-center gap-3">
               <TargetPreview
                 meebitNumber={playerMeebitNumber}
@@ -143,10 +226,16 @@ export function StartScreen() {
               />
               <label className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-neutral-500 max-lg:text-xs">Your Meebit</span>
+                  <span className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
+                    Your Meebit
+                  </span>
                   <button
                     type="button"
-                    className="shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 max-lg:px-2.5 max-lg:py-1 max-lg:text-[0.6rem]"
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] transition max-lg:px-2.5 max-lg:py-1 max-lg:text-[0.6rem] ${
+                      isClubVenue
+                        ? 'border-fuchsia-400/40 text-fuchsia-100 hover:border-fuchsia-300 hover:text-white'
+                        : 'border-neutral-300 text-neutral-700 hover:border-neutral-950 hover:text-neutral-950'
+                    }`}
                     onClick={() => {
                       unlockAudioIfNeeded()
                       playSfx('uiClick')
@@ -157,7 +246,11 @@ export function StartScreen() {
                   </button>
                 </div>
                 <input
-                  className="mt-1.5 w-full rounded-xl border border-neutral-300 bg-neutral-50 px-3 py-2 text-xl font-black outline-none transition focus:border-neutral-950 max-lg:py-1.5 max-lg:text-lg"
+                  className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-xl font-black outline-none transition max-lg:py-1.5 max-lg:text-lg ${
+                    isClubVenue
+                      ? 'border-fuchsia-400/30 bg-neutral-950 text-white focus:border-fuchsia-300'
+                      : 'border-neutral-300 bg-neutral-50 focus:border-neutral-950'
+                  }`}
                   inputMode="numeric"
                   max={20000}
                   min={1}
@@ -165,7 +258,11 @@ export function StartScreen() {
                   value={playerMeebitInput}
                   onChange={(event) => setPlayerMeebitInput(event.target.value)}
                 />
-                <span className="mt-1 block text-xs font-medium text-neutral-500 max-lg:text-[0.65rem]">
+                <span
+                  className={`mt-1 block text-xs font-medium max-lg:text-[0.65rem] ${
+                    isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
+                  }`}
+                >
                   #{DEFAULT_PLAYER_MEEBIT_ID} default · 1–20000
                 </span>
               </label>
@@ -174,11 +271,33 @@ export function StartScreen() {
 
           <button
             type="button"
-            className="mt-6 w-full rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-black uppercase tracking-[0.25em] text-white transition hover:bg-neutral-700 max-lg:mt-2.5 max-lg:py-3 max-lg:text-xs"
+            className={`mt-6 w-full rounded-full px-6 py-3.5 text-sm font-black uppercase tracking-[0.25em] transition max-lg:mt-2.5 max-lg:py-3 max-lg:text-xs ${
+              isClubVenue
+                ? 'bg-fuchsia-500 text-white hover:bg-fuchsia-400'
+                : 'bg-neutral-950 text-white hover:bg-neutral-700'
+            }`}
             onClick={handleStart}
           >
-            Start
+            Start {getVenueLabel(venueId)}
           </button>
+
+          {isClubVenue ? (
+            <button
+              type="button"
+              className="mt-3 w-full rounded-full border border-fuchsia-400/35 px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-fuchsia-100 transition hover:border-fuchsia-300 hover:text-white max-lg:py-2.5"
+              onClick={handleBackToMuseum}
+            >
+              Back to Museum
+            </button>
+          ) : afterHoursUnlocked ? (
+            <button
+              type="button"
+              className="after-hours-enter-pulse mt-3 w-full rounded-full border border-violet-400/40 bg-violet-950/40 px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-violet-100 transition hover:border-violet-300 hover:bg-violet-900/50 max-lg:py-2.5"
+              onClick={handleEnterAfterHours}
+            >
+              Enter After Hours
+            </button>
+          ) : null}
         </div>
       </section>
     </div>

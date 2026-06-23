@@ -35,6 +35,7 @@ function getTimeUpPreviewLayout(targetCount: number) {
 
 export function TimeUpOverlay() {
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const venueId = useGameStore((state) => state.venueId)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
@@ -45,7 +46,7 @@ export function TimeUpOverlay() {
   const targetNpcs = remainingTargetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
-  const step = getProgressionStep(progressionIndex)
+  const step = getProgressionStep(progressionIndex, venueId)
   const stageLabel = step ? getStageLabel(step) : 'Stage'
   const isVisible = gamePhase === 'timedOut' && targetNpcs.length > 0
   const targetNumbersLabel = targetNpcs.map((npc) => `#${npc.meebitNumber}`).join(', ')

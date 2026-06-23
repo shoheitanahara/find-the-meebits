@@ -2,17 +2,17 @@ import { usePlayerStore } from '../stores/playerStore'
 import type { GameMode } from './gameMode'
 import { getProgressionStep, getStageLabel } from './gameProgression'
 
+import type { VenueId } from './venueConfig'
+
 /**
  * 開発ビルド専用の URL ブートストラップ（本番では無効）。
  *
  * 例:
- * - `?stage=grandfinal` — Grand Final のタイトル画面から開始
- * - `?stage=8&phase=playing` — Grand Final を即プレイ
- * - `?stage=final&phase=cleared` — Final クリア後の続行画面
- * - `?stage=grandfinal&phase=conquered` — 全制覇画面
- * - `?stage=semifinal&phase=timedout&found=1` — Semifinal で 1 体発見後にタイムアップ
- * - `?mode=enjoy` — タイマーなし
- * - `?tips=0` — preparing 時に Tips を表示
+ * - `?unlock=afterhours` — タイトルで After Hours ボタンを表示（localStorage 不要）
+ * - `?stage=grandfinal&phase=conquered&unlock=afterhours` — 全制覇画面 → タイトルで After Hours
+ * - `?venue=club&stage=1&phase=playing` — After Hours を即プレイ
+ * - `?venue=club&stage=lastcall&phase=playing` — Last Call（5体）
+ * - `?stage=grandfinal&phase=conquered` — Museum 全制覇画面
  */
 export type DevBootstrapPhase =
   | 'intro'
@@ -23,6 +23,7 @@ export type DevBootstrapPhase =
   | 'conquered'
 
 export type DevBootstrapConfig = {
+  venueId: VenueId
   progressionIndex: number
   phase: DevBootstrapPhase
   gameMode?: GameMode
@@ -30,7 +31,13 @@ export type DevBootstrapConfig = {
   tipsAcknowledged: boolean
 }
 
+export type DevUnlockOverride = {
+  hasConqueredMuseum: boolean
+  hasConqueredClub: boolean
+}
+
 let cachedConfig: DevBootstrapConfig | null | undefined
+let cachedUnlockOverride: DevUnlockOverride | null | undefined
 
 export function getDevBootstrapConfig(): DevBootstrapConfig | null {
   if (cachedConfig !== undefined) {
@@ -43,14 +50,23 @@ export function getDevBootstrapConfig(): DevBootstrapConfig | null {
   }
 
   const params = new URLSearchParams(window.location.search)
+  const venueId = parseVenueId(params.get('venue'))
   const stageParam = params.get('stage')
+  const phaseParam = params.get('phase')
+  const unlockParam = params.get('unlock')
 
-  if (!stageParam) {
+  if (!stageParam && !phaseParam && !unlockParam) {
     cachedConfig = null
     return null
   }
 
-  const progressionIndex = resolveProgressionIndexFromParam(stageParam)
+  if (!stageParam && !phaseParam) {
+    cachedConfig = null
+    return null
+  }
+
+  const resolvedStage = stageParam ?? '1'
+  const progressionIndex = resolveProgressionIndexFromParam(resolvedStage, venueId)
   if (progressionIndex === null) {
     console.warn(`[devBootstrap] Unknown stage param: "${stageParam}"`)
     cachedConfig = null
@@ -63,6 +79,7 @@ export function getDevBootstrapConfig(): DevBootstrapConfig | null {
   const tipsAcknowledged = params.get('tips') !== '0'
 
   const config: DevBootstrapConfig = {
+    venueId,
     progressionIndex,
     phase,
     gameMode,
@@ -70,9 +87,9 @@ export function getDevBootstrapConfig(): DevBootstrapConfig | null {
     tipsAcknowledged,
   }
 
-  const step = getProgressionStep(progressionIndex)
+  const step = getProgressionStep(progressionIndex, venueId)
   console.info(
-    `[devBootstrap] ${getStageLabel(step!)} (index ${progressionIndex}) · phase=${phase}` +
+    `[devBootstrap] ${venueId} · ${getStageLabel(step!)} (index ${progressionIndex}) · phase=${phase}` +
       (gameMode ? ` · mode=${gameMode}` : '') +
       (foundCount > 0 ? ` · found=${foundCount}` : ''),
   )
@@ -81,9 +98,39 @@ export function getDevBootstrapConfig(): DevBootstrapConfig | null {
   return config
 }
 
+export function getDevUnlockOverride(): DevUnlockOverride | null {
+  if (cachedUnlockOverride !== undefined) {
+    return cachedUnlockOverride
+  }
+
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
+    cachedUnlockOverride = null
+    return null
+  }
+
+  cachedUnlockOverride = parseDevUnlockOverride(new URLSearchParams(window.location.search).get('unlock'))
+  return cachedUnlockOverride
+}
+
+export function formatDevUnlockHint(override: DevUnlockOverride) {
+  const unlocked: string[] = []
+  if (override.hasConqueredMuseum) {
+    unlocked.push('After Hours')
+  }
+  if (override.hasConqueredClub) {
+    unlocked.push('Club')
+  }
+
+  return unlocked.length > 0 ? `DEV · unlock: ${unlocked.join(' + ')}` : 'DEV · unlock'
+}
+
 export function formatDevBootstrapHint(config: DevBootstrapConfig) {
-  const step = getProgressionStep(config.progressionIndex)
-  return step ? `DEV · ${getStageLabel(step)} · ${config.phase}` : 'DEV bootstrap'
+  const step = getProgressionStep(config.progressionIndex, config.venueId)
+  const unlock = getDevUnlockOverride()
+  const stageHint = step ? `${config.venueId} · ${getStageLabel(step)} · ${config.phase}` : 'bootstrap'
+  const unlockHint = unlock ? ` · ${formatDevUnlockHint(unlock).replace('DEV · ', '')}` : ''
+
+  return `DEV · ${stageHint}${unlockHint}`
 }
 
 export function applyDevBootstrapSideEffects(phase: DevBootstrapPhase) {
@@ -92,8 +139,29 @@ export function applyDevBootstrapSideEffects(phase: DevBootstrapPhase) {
   usePlayerStore.getState().setMovementLocked(shouldLockMovement)
 }
 
-export function resolveProgressionIndexFromParam(value: string) {
+function parseVenueId(value: string | null): VenueId {
+  return value?.trim().toLowerCase() === 'club' ? 'club' : 'museum'
+}
+
+export function resolveProgressionIndexFromParam(value: string, venueId: VenueId = 'museum') {
   const normalized = value.trim().toLowerCase().replace(/[\s_-]/g, '')
+
+  if (venueId === 'club') {
+    const clubAliases: Record<string, number> = {
+      lastcall: 4,
+    }
+
+    if (normalized in clubAliases) {
+      return clubAliases[normalized]
+    }
+
+    const stageNumber = Number(value)
+    if (Number.isInteger(stageNumber) && stageNumber >= 1 && stageNumber <= 5) {
+      return stageNumber - 1
+    }
+
+    return null
+  }
 
   const aliases: Record<string, number> = {
     semi: 5,
@@ -165,4 +233,33 @@ function parseFoundCount(value: string | null) {
   }
 
   return parsed
+}
+
+function parseDevUnlockOverride(value: string | null): DevUnlockOverride | null {
+  if (!value?.trim()) {
+    return null
+  }
+
+  const tokens = value
+    .trim()
+    .toLowerCase()
+    .split(/[,+\s]+/)
+    .map((token) => token.replace(/[\s_-]/g, ''))
+    .filter(Boolean)
+
+  if (tokens.length === 0) {
+    return null
+  }
+
+  const hasConqueredMuseum = tokens.some((token) =>
+    token === 'museum' || token === 'afterhours' || token === 'afterhour' || token === 'all',
+  )
+  const hasConqueredClub = tokens.some((token) => token === 'club' || token === 'all')
+
+  if (!hasConqueredMuseum && !hasConqueredClub) {
+    console.warn(`[devBootstrap] Unknown unlock param: "${value}"`)
+    return null
+  }
+
+  return { hasConqueredMuseum, hasConqueredClub }
 }

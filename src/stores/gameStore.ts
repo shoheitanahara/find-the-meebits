@@ -5,27 +5,34 @@ import {
   GAME_TIME_LIMIT_SECONDS,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
-import { getWarmupLoadDistance } from '../game/perfConfig'
+import { getNpcMaxConcurrentVrm, getWarmupLoadDistance } from '../game/perfConfig'
 import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
 import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
+import type { VenueId } from '../game/venueConfig'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, finalizeVrmInstancePoolEviction, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
-import { getVrmSculptureMeebitIds } from '../world/worldLandmarks'
+import { getDecorMeebitIdsForVenue } from '../world/worldLandmarks'
 import { buildNpcProfiles } from '../npc/npcGeneration'
 import type { NPCProfile } from '../npc/npcTypes'
 import type { LoadingStatus } from '../types/game'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
+import {
+  isAfterHoursUnlocked,
+  markClubConquered,
+  markMuseumConquered,
+} from '../systems/save/unlockProgress'
 import { useNpcStore } from './npcStore'
 import { usePlayerStore } from './playerStore'
 
 type GamePhase = 'intro' | 'preparing' | 'playing' | 'cleared' | 'timedOut' | 'conquered'
 
 type GameState = {
+  venueId: VenueId
   gameMode: GameMode
   gamePhase: GamePhase
   progressionIndex: number
@@ -44,9 +51,12 @@ type GameState = {
   playerModelStatus: LoadingStatus
   playerModelError: string | null
   tipsAcknowledged: boolean
+  afterHoursUnlockPending: boolean
   setGameMode: (gameMode: GameMode) => void
   acknowledgeTips: () => void
+  acknowledgeAfterHoursUnlock: () => void
   startGame: () => void
+  startAfterHours: () => void
   beginPlaying: () => void
   clearGame: (foundNpcId: string) => void
   timeUp: () => void
@@ -60,16 +70,17 @@ type GameState = {
   setPlayerModelError: (message: string) => void
 }
 
-function createInitialState() {
-  const dev = getDevBootstrapConfig()
+function createVenueIntroState(venueId: VenueId, devOverride?: ReturnType<typeof getDevBootstrapConfig> | null) {
+  const dev = devOverride === undefined ? getDevBootstrapConfig() : devOverride
+  const effectiveVenueId = dev?.venueId ?? venueId
   const progressionIndex = dev?.progressionIndex ?? 0
-  const step = getProgressionStep(progressionIndex)
+  const step = getProgressionStep(progressionIndex, effectiveVenueId)
   if (!step) {
-    throw new Error(`Progression step ${progressionIndex} is missing.`)
+    throw new Error(`Progression step 0 is missing for venue ${venueId}.`)
   }
 
   const activeNpcCount = step.npcCount
-  const npcProfiles = buildNpcProfiles(activeNpcCount)
+  const npcProfiles = buildNpcProfiles(activeNpcCount, effectiveVenueId)
   resetPlayerToStart()
   seedNpcPositions(npcProfiles)
 
@@ -77,6 +88,7 @@ function createInitialState() {
   const foundTargetNpcIds = pickFoundTargetNpcIds(targetNpcIds, dev?.foundCount ?? 0)
 
   const base = {
+    venueId: effectiveVenueId,
     gameMode: dev?.gameMode ?? DEFAULT_GAME_MODE,
     progressionIndex,
     activeNpcCount,
@@ -94,6 +106,7 @@ function createInitialState() {
     playerModelStatus: 'idle' as const,
     playerModelError: null,
     tipsAcknowledged: dev?.tipsAcknowledged ?? true,
+    afterHoursUnlockPending: false,
   }
 
   if (!dev) {
@@ -125,7 +138,7 @@ function createInitialState() {
       }
     case 'cleared': {
       const clearedProgressionIndex = progressionIndex + 1
-      const nextStep = getProgressionStep(clearedProgressionIndex)
+      const nextStep = getProgressionStep(clearedProgressionIndex, effectiveVenueId)
 
       if (!nextStep) {
         return {
@@ -135,6 +148,7 @@ function createInitialState() {
           foundTargetNpcIds: targetNpcIds,
           targetNpcIds: [],
           clearTimeSeconds: 72.4,
+          afterHoursUnlockPending: effectiveVenueId === 'museum',
         }
       }
 
@@ -159,6 +173,7 @@ function createInitialState() {
         foundTargetNpcIds: targetNpcIds,
         targetNpcIds: [],
         clearTimeSeconds: 142.8,
+        afterHoursUnlockPending: effectiveVenueId === 'museum',
       }
     default:
       return {
@@ -168,16 +183,44 @@ function createInitialState() {
   }
 }
 
+function createInitialState() {
+  return createVenueIntroState('museum')
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
   ...createInitialState(),
   setGameMode: (gameMode) => set({ gameMode }),
   acknowledgeTips: () => set({ tipsAcknowledged: true }),
-  startGame: () => {
-    softResetForGameStart()
-    usePlayerStore.getState().setMovementLocked(true)
+  acknowledgeAfterHoursUnlock: () => set({ afterHoursUnlockPending: false }),
+  startAfterHours: () => {
+    if (!isAfterHoursUnlocked()) {
+      return
+    }
 
-    const step = getProgressionStep(get().progressionIndex)
+    const nextLayoutVersion = get().npcLayoutVersion + 1
+    resetStageRuntimeState()
+    const newState = createVenueIntroState('club', null)
+    const keepMeebitIds = collectKeepMeebitIds('club', newState.npcProfiles, newState.targetNpcIds)
+    resetVrmInstancePoolForStageChange(keepMeebitIds)
+    preloadTargetVrms(newState.npcProfiles, newState.targetNpcIds)
+
+    set({
+      ...newState,
+      afterHoursUnlockPending: false,
+      npcLayoutVersion: nextLayoutVersion,
+    })
+  },
+  startGame: () => {
+    const state = get()
+    const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
+
+    const keepMeebitIds = collectKeepMeebitIds(state.venueId, state.npcProfiles, state.targetNpcIds)
+    resetStageRuntimeStateForRetry(keepMeebitIds)
+    seedNpcPositions(state.npcProfiles)
+    resetPlayerPositionToStart()
+    usePlayerStore.getState().setMovementLocked(true)
+    preloadTargetVrms(state.npcProfiles, state.targetNpcIds)
 
     set({
       gamePhase: 'preparing',
@@ -194,11 +237,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   beginPlaying: () => {
     usePlayerStore.getState().setMovementLocked(false)
 
+    const gameMode = get().gameMode
     set({
       gamePhase: 'playing',
       startedAt: Date.now(),
       preparedAt: null,
     })
+
+    if (isTimedGameMode(gameMode)) {
+      unlockAudioIfNeeded().then(() => playSfx('timerStart'))
+    }
   },
   clearGame: (foundNpcId) => {
     const state = get()
@@ -230,15 +278,22 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     const nextIndex = state.progressionIndex + 1
-    const nextStep = getProgressionStep(nextIndex)
+    const nextStep = getProgressionStep(nextIndex, state.venueId)
 
     if (!nextStep) {
+      if (state.venueId === 'museum') {
+        markMuseumConquered()
+      } else {
+        markClubConquered()
+      }
+
       set({
         gamePhase: 'conquered' as const,
         foundTargetNpcIds,
         targetNpcIds: [],
         clearedNpcId: foundNpcId,
         clearTimeSeconds,
+        afterHoursUnlockPending: state.venueId === 'museum',
       })
       return
     }
@@ -268,12 +323,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   continueToNextStage: () => {
     const state = get()
-    const step = getProgressionStep(state.progressionIndex)
+    const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
 
-    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion)
+    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion, state.venueId)
     const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount)
-    resetStageRuntimeState(collectKeepMeebitIds(npcLayout.npcProfiles, targetNpcIds))
+    resetStageRuntimeState(collectKeepMeebitIds(state.venueId, npcLayout.npcProfiles, targetNpcIds))
     seedNpcPositions(npcLayout.npcProfiles)
     resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -295,11 +350,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   retryStage: () => {
     const state = get()
-    const step = getProgressionStep(state.progressionIndex)
+    const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
 
     const targetNpcIds = pickRandomTargetNpcIds(state.npcProfiles, step.targetCount, state.targetNpcIds)
-    resetStageRuntimeStateForRetry(collectKeepMeebitIds(state.npcProfiles, targetNpcIds))
+    resetStageRuntimeStateForRetry(collectKeepMeebitIds(state.venueId, state.npcProfiles, targetNpcIds))
     seedNpcPositions(state.npcProfiles)
     resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
@@ -320,12 +375,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     })
   },
   resetGame: () => {
+    const afterHoursUnlockPending = get().afterHoursUnlockPending
     resetStageRuntimeState()
-    set(createInitialState())
+    set({
+      ...createVenueIntroState('museum', null),
+      afterHoursUnlockPending,
+    })
   },
   rerollTargets: () =>
     set((state) => {
-      const step = getProgressionStep(state.progressionIndex)
+      const step = getProgressionStep(state.progressionIndex, state.venueId)
       if (!step) return state
 
       const targetNpcIds = pickRandomTargetNpcIds(
@@ -358,9 +417,9 @@ function pickFoundTargetNpcIds(targetNpcIds: string[], foundCount: number) {
   return targetNpcIds.slice(0, Math.min(foundCount, targetNpcIds.length))
 }
 
-function createNpcLayout(activeNpcCount: number, currentLayoutVersion: number) {
+function createNpcLayout(activeNpcCount: number, currentLayoutVersion: number, venueId: VenueId) {
   return {
-    npcProfiles: buildNpcProfiles(activeNpcCount),
+    npcProfiles: buildNpcProfiles(activeNpcCount, venueId),
     npcLayoutVersion: currentLayoutVersion + 1,
   }
 }
@@ -374,7 +433,7 @@ function preloadTargetVrms(profiles: NPCProfile[], targetNpcIds: string[]) {
   }
 }
 
-function collectKeepMeebitIds(profiles: NPCProfile[], targetNpcIds: string[]) {
+function collectKeepMeebitIds(venueId: VenueId, profiles: NPCProfile[], targetNpcIds: string[]) {
   const keepIds = new Set<number>([usePlayerStore.getState().meebitNumber])
 
   for (const targetNpcId of targetNpcIds) {
@@ -384,7 +443,7 @@ function collectKeepMeebitIds(profiles: NPCProfile[], targetNpcIds: string[]) {
     }
   }
 
-  for (const meebitId of getVrmSculptureMeebitIds()) {
+  for (const meebitId of getDecorMeebitIdsForVenue(venueId)) {
     keepIds.add(meebitId)
   }
 
@@ -416,10 +475,18 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
     .sort((a, b) => a.distance - b.distance)
 
   const nextIds = new Set<string>()
+  const maxWarmup = getNpcMaxConcurrentVrm()
   nextIds.add(CREATOR_NPC_ID)
 
   for (const npc of sorted) {
-    if (npc.distance > getWarmupLoadDistance()) break
+    if (nextIds.size >= maxWarmup) {
+      break
+    }
+
+    if (npc.distance > getWarmupLoadDistance()) {
+      break
+    }
+
     nextIds.add(npc.id)
   }
 
@@ -439,10 +506,6 @@ function resetPlayerToStart() {
   resetPlayerPositionToStart()
 }
 
-function softResetForGameStart() {
-  useNpcStore.setState({ nearestNpcId: null })
-}
-
 function resetStageRuntimeState(keepMeebitIds: number[] = []) {
   resetVrmInstancePoolForStageChange(keepMeebitIds)
   clearTargetPreviewCacheExcept(keepMeebitIds)
@@ -454,7 +517,6 @@ function resetStageRuntimeState(keepMeebitIds: number[] = []) {
   })
 }
 
-/** リトライ: NPC 配置は維持し、ターゲット差し替え分だけ VRM プールを整理する */
 function resetStageRuntimeStateForRetry(keepMeebitIds: number[] = []) {
   resetVrmInstancePoolForStageChange(keepMeebitIds)
   finalizeVrmInstancePoolEviction()
@@ -480,7 +542,7 @@ export function getRemainingSeconds(startedAt: number | null) {
   return Math.max(0, GAME_TIME_LIMIT_SECONDS - getElapsedSeconds(startedAt))
 }
 
-export function getCurrentStageLabel(progressionIndex: number) {
-  const step = getProgressionStep(progressionIndex)
+export function getCurrentStageLabel(progressionIndex: number, venueId: VenueId = 'museum') {
+  const step = getProgressionStep(progressionIndex, venueId)
   return step ? getStageLabel(step) : 'Stage'
 }

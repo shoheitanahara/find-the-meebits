@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
-import { preloadVrmSculptures } from './vrmSculptureCache'
+import type { VenueId } from '../game/venueConfig'
+import { preloadVrmSculpturesForVenue } from './vrmSculptureCache'
 
-export function VrmSculpturePreloader() {
+type VrmSculpturePreloaderProps = {
+  venueId?: VenueId
+}
+
+export function VrmSculpturePreloader({ venueId = 'museum' }: VrmSculpturePreloaderProps) {
   useEffect(() => {
-    preloadVrmSculptures()
-  }, [])
+    preloadVrmSculpturesForVenue(venueId)
+  }, [venueId])
 
   return null
 }

@@ -11,7 +11,8 @@ export function getNpcById(id: string) {
 }
 
 export function ensureNpcProfiles(count: number) {
-  const profiles = buildNpcProfiles(count)
+  const venueId = useGameStore.getState().venueId
+  const profiles = buildNpcProfiles(count, venueId)
   useGameStore.getState().setNpcProfiles(profiles)
   return profiles
 }

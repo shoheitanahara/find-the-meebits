@@ -1,5 +1,6 @@
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { getNpcById } from '../../npc/npcData'
+import { CLUB_TARGET_FOUND_LINES } from '../../npc/npcClubDialogue'
 import { selectDialogueLines } from '../../npc/npcDialogue'
 import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
@@ -37,12 +38,16 @@ export function interactWithNearestNpc(): boolean {
   ) {
     recordNpcTalk(targetNpcId, usePlayerStore.getState().position)
     usePlayerStore.getState().setMovementLocked(true)
+    const foundLine =
+      game.venueId === 'club'
+        ? `Meebit #${npc.meebitNumber}: ${CLUB_TARGET_FOUND_LINES[npc.meebitNumber % CLUB_TARGET_FOUND_LINES.length]}`
+        : `Meebit #${npc.meebitNumber}: You found me. Nice eye.`
     dialogue.openDialogue(
       targetNpcId,
       [
         {
           id: `${targetNpcId}-target-found`,
-          text: `Meebit #${npc.meebitNumber}: You found me. Nice eye.`,
+          text: foundLine,
           category: 'greeting',
         },
       ],
