@@ -219,6 +219,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     set({
       ...newState,
+      gameMode: get().gameMode,
       playerModelStatus: 'loading',
       afterHoursUnlockPending: false,
       npcLayoutVersion: nextLayoutVersion,
@@ -389,10 +390,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   resetGame: () => {
     const afterHoursUnlockPending = get().afterHoursUnlockPending
+    const gameMode = get().gameMode
     resetStageRuntimeState()
+    resetPlayerPositionToStart()
     set({
-      ...createVenueIntroState('museum', null),
+      ...createVenueIntroState('museum', null, { preservePlayer: true }),
       afterHoursUnlockPending,
+      gameMode,
     })
   },
   rerollTargets: () =>

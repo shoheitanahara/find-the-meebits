@@ -43,8 +43,8 @@ export function StartScreen() {
       return
     }
 
-    usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
-  }, [gamePhase, playerMeebitNumber])
+    setPlayerMeebitInput(String(usePlayerStore.getState().meebitNumber))
+  }, [gamePhase, venueId])
 
   useEffect(() => {
     if (gamePhase !== 'intro') {
@@ -256,7 +256,11 @@ export function StartScreen() {
                   min={1}
                   type="number"
                   value={playerMeebitInput}
-                  onChange={(event) => setPlayerMeebitInput(event.target.value)}
+                  onChange={(event) => {
+                    const next = event.target.value
+                    setPlayerMeebitInput(next)
+                    usePlayerStore.getState().setMeebitNumber(normalizeMeebitNumber(next))
+                  }}
                 />
                 <span
                   className={`mt-1 block text-xs font-medium max-lg:text-[0.65rem] ${
