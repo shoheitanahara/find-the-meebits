@@ -108,7 +108,7 @@ export function StartScreen() {
             {isClubVenue ? 'After Hours' : 'Meebits Museum Hunt'}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
-            {isClubVenue ? 'Find them in the dark.' : 'Find the Meebit'}
+            Find the Meebit
           </h1>
           <p
             className={`mt-4 text-base leading-relaxed max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug ${
