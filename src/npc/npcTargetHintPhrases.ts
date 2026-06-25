@@ -47,8 +47,8 @@ const CLUB_HINT_PHRASES: VenueHintPhrases = {
     front: ['on the front of the dance floor', 'near the front lights'],
     center: ['in the middle of the dance floor', 'under the center spotlight'],
     back: ['near the DJ booth', 'in the back by the decks'],
-    west: ['on the west side of the club', 'near the west VIP lounge'],
-    east: ['on the east side of the club', 'near the east VIP lounge'],
+    west: ['on the west side of the club', 'in the west wing'],
+    east: ['on the east side of the club', 'in the east wing'],
   },
   sameZone: {
     entrance: ['in this entrance area with you. Keep looking'],
@@ -63,8 +63,8 @@ const CLUB_HINT_PHRASES: VenueHintPhrases = {
     front: ['far toward the front of the dance floor'],
     center: ['far toward the center lights'],
     back: ['far toward the DJ booth'],
-    west: ['far toward the west bar and VIP side'],
-    east: ['far toward the east bar and VIP side'],
+    west: ['far toward the west side of the club'],
+    east: ['far toward the east side of the club'],
   },
 }
 

@@ -155,7 +155,7 @@ export function buildClubHintLandmarks(): HintLandmark[] {
       z,
       phrases: ['near the bar', 'by the glowing bar counter'],
     })),
-    ...CLUB_NEON_PLACEMENTS.map(({ position: [x, , z] }) => ({
+    ...CLUB_NEON_PLACEMENTS.filter(({ position: [, , z] }) => z > -46).map(({ position: [x, , z] }) => ({
       x,
       z,
       phrases:
@@ -174,23 +174,21 @@ export function buildClubHintLandmarks(): HintLandmark[] {
     {
       x: CLUB_DJ_BOOTH_POSITION[0],
       z: CLUB_DJ_BOOTH_POSITION[2],
-      phrases: ['near the DJ booth', 'by the decks and mixer'],
+      phrases: ['near the DJ booth', 'by the decks and mixer', 'in the back by the DJ booth'],
     },
-    ...CLUB_SPOTLIGHT_PLACEMENTS.map(({ x, z, id }) => ({
+    ...CLUB_SPOTLIGHT_PLACEMENTS.filter(({ id }) => id !== 'dj').map(({ x, z, id }) => ({
       x,
       z,
       phrases:
         id === 'bar-left' || id === 'bar-right'
-          ? ['in the bar spotlight', 'near the bar lights']
-          : id === 'dance-floor'
+          ? ['near the bar lights', 'under the bar spotlight']
+            : id === 'dance-floor'
               ? ['under the dance floor lights']
               : id === 'entrance'
                 ? ['in the entrance spotlight']
-                : id === 'dj'
-                  ? ['in the DJ booth spotlight']
-                  : id === 'sculpture-left' || id === 'sculpture-right'
-                    ? ['in the Meebit statue spotlight', 'near a spotlighted Meebit statue']
-                    : ['under a club spotlight'],
+                : id === 'sculpture-left' || id === 'sculpture-right'
+                  ? ['in the Meebit statue spotlight', 'near a spotlighted Meebit statue']
+                  : ['under a club spotlight'],
     })),
   ]
 }
