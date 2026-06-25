@@ -4,7 +4,7 @@ type MeebitSilhouetteProps = {
 
 export function MeebitSilhouette({ scale = 0.52 }: MeebitSilhouetteProps) {
   return (
-    <group scale={scale}>
+    <group rotation={[0, Math.PI, 0]} scale={scale}>
       <mesh receiveShadow position={[0, 0.28, -0.04]}>
         <boxGeometry args={[0.78, 0.56, 0.5]} />
         <meshStandardMaterial color="#050505" roughness={0.72} />
