@@ -1,6 +1,7 @@
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
 import { FoundTargetIcon } from './FoundTargetIcon'
+import { TARGET_HUD_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
 
 function getTargetPreviewSize(targetCount: number) {
@@ -69,6 +70,7 @@ export function TargetHUD() {
             <div className="relative mt-0.5">
               <TargetPreview
                 meebitNumber={npc.meebitNumber}
+                capturePriority={TARGET_HUD_PREVIEW_PRIORITY}
                 modelScale={1.06}
                 sizeClassName={`${previewSize} ${isFound ? 'opacity-55' : ''}`}
               />

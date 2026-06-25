@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  DEFAULT_PREVIEW_PRIORITY,
   getTargetPreviewImage,
   isTargetPreviewError,
   isTargetPreviewPending,
@@ -10,6 +11,7 @@ import {
 type TargetPreviewProps = {
   meebitNumber: number
   sizeClassName?: string
+  capturePriority?: number
   /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
   modelScale?: number
   /** @deprecated 静止画キャプチャでは未使用（互換のため残す） */
@@ -23,15 +25,16 @@ type TargetPreviewProps = {
 export function TargetPreview({
   meebitNumber,
   sizeClassName = 'h-44 w-44',
+  capturePriority = DEFAULT_PREVIEW_PRIORITY,
 }: TargetPreviewProps) {
   const [, refresh] = useState(0)
 
   useEffect(() => {
-    requestTargetPreview(meebitNumber)
+    requestTargetPreview(meebitNumber, capturePriority)
     return subscribeTargetPreview(meebitNumber, () => {
       refresh((value) => value + 1)
     })
-  }, [meebitNumber])
+  }, [capturePriority, meebitNumber])
 
   const imageSrc = getTargetPreviewImage(meebitNumber)
   const isPending = isTargetPreviewPending(meebitNumber)

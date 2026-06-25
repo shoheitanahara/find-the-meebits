@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
+import { TARGET_VRM_PRELOAD_PRIORITY } from '../game/perfConfig'
 import { preloadVrm } from '../avatar/vrmInstancePool'
 import { getNpcById } from '../npc/npcData'
 import { useGameStore } from '../stores/gameStore'
-
-const TARGET_PRELOAD_PRIORITY = -300
+import { requestTargetPreviews, TARGET_HUD_PREVIEW_PRIORITY } from '../ui/targetPreviewCache'
 
 export function TargetVrmPreloader() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -24,8 +24,9 @@ export function TargetVrmPreloader() {
       gamePhase === 'timedOut'
     ) {
       for (const meebitNumber of targetMeebitNumbers) {
-        preloadVrm(meebitNumber, TARGET_PRELOAD_PRIORITY)
+        preloadVrm(meebitNumber, TARGET_VRM_PRELOAD_PRIORITY)
       }
+      requestTargetPreviews(targetMeebitNumbers, TARGET_HUD_PREVIEW_PRIORITY)
     }
   }, [gamePhase, targetMeebitNumbers.join(',')])
 

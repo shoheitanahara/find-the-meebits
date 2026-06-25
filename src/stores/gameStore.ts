@@ -5,7 +5,7 @@ import {
   GAME_TIME_LIMIT_SECONDS,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
-import { getNpcMaxConcurrentVrm, getWarmupLoadDistance } from '../game/perfConfig'
+import { getNpcMaxConcurrentVrm, getWarmupLoadDistance, TARGET_VRM_PRELOAD_PRIORITY } from '../game/perfConfig'
 import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
 import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
@@ -14,7 +14,7 @@ import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
-import { clearTargetPreviewCacheExcept } from '../ui/targetPreviewCache'
+import { clearTargetPreviewCacheExcept, requestTargetPreview, TARGET_HUD_PREVIEW_PRIORITY } from '../ui/targetPreviewCache'
 import { getDecorMeebitIdsForVenue } from '../world/worldLandmarks'
 import { buildNpcProfiles } from '../npc/npcGeneration'
 import type { NPCProfile } from '../npc/npcTypes'
@@ -446,7 +446,8 @@ function preloadTargetVrms(profiles: NPCProfile[], targetNpcIds: string[]) {
   for (const targetNpcId of targetNpcIds) {
     const targetNpc = profiles.find((npc) => npc.id === targetNpcId)
     if (targetNpc) {
-      preloadVrm(targetNpc.meebitNumber, -300)
+      preloadVrm(targetNpc.meebitNumber, TARGET_VRM_PRELOAD_PRIORITY)
+      requestTargetPreview(targetNpc.meebitNumber, TARGET_HUD_PREVIEW_PRIORITY)
     }
   }
 }

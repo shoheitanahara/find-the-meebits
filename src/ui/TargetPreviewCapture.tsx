@@ -4,6 +4,7 @@ import { Vector3 } from 'three'
 import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { useVRMModel } from '../avatar/useVRMModel'
+import { TARGET_PREVIEW_CAPTURE_VRM_PRIORITY } from '../game/perfConfig'
 import {
   completeTargetPreviewCapture,
   failTargetPreviewCapture,
@@ -95,7 +96,13 @@ function CaptureScene({
   onFailed: () => void
 }) {
   const { gl, invalidate } = useThree()
-  const { vrmRef, vrmScene, status } = useVRMModel(meebitNumber, true, -250, true, true)
+  const { vrmRef, vrmScene, status } = useVRMModel(
+    meebitNumber,
+    true,
+    TARGET_PREVIEW_CAPTURE_VRM_PRIORITY,
+    true,
+    true,
+  )
   const hasFinishedRef = useRef(false)
 
   useEffect(() => {

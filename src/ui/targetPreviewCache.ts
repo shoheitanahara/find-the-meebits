@@ -1,14 +1,28 @@
 const PREVIEW_RENDER_VERSION = 5
 
+/** 右上ターゲット HUD — キャプチャキュー最優先 */
+export const TARGET_HUD_PREVIEW_PRIORITY = 0
+/** スタート画面のターゲットプレビュー */
+export const START_SCREEN_TARGET_PREVIEW_PRIORITY = 5
+/** プレイヤーアバターなど */
+export const DEFAULT_PREVIEW_PRIORITY = 50
+
 type PreviewCacheEntry = string | 'error'
+
+type PreviewQueueEntry = {
+  meebitNumber: number
+  priority: number
+  seq: number
+}
 
 const cache = new Map<string, PreviewCacheEntry>()
 const listeners = new Map<string, Set<() => void>>()
-const queue: number[] = []
+const queue: PreviewQueueEntry[] = []
 const queued = new Set<string>()
 
 let activeMeebit: number | null = null
 let processCapture: ((meebitNumber: number | null) => void) | null = null
+let enqueueSeq = 0
 
 function cacheKey(meebitNumber: number) {
   return `${PREVIEW_RENDER_VERSION}:${meebitNumber}`
@@ -20,19 +34,40 @@ function notify(meebitNumber: number) {
   }
 }
 
+function sortPreviewQueue() {
+  queue.sort((left, right) => left.priority - right.priority || left.seq - right.seq)
+}
+
+function enqueuePreview(meebitNumber: number, priority: number) {
+  const key = cacheKey(meebitNumber)
+  const existing = queue.find((entry) => entry.meebitNumber === meebitNumber)
+
+  if (existing) {
+    if (priority < existing.priority) {
+      existing.priority = priority
+      sortPreviewQueue()
+    }
+    return
+  }
+
+  queue.push({ meebitNumber, priority, seq: enqueueSeq++ })
+  queued.add(key)
+  sortPreviewQueue()
+}
+
 function drainQueue() {
   if (activeMeebit !== null || !processCapture) {
     return
   }
 
   const next = queue.shift()
-  if (next === undefined) {
+  if (!next) {
     processCapture(null)
     return
   }
 
-  activeMeebit = next
-  processCapture(next)
+  activeMeebit = next.meebitNumber
+  processCapture(next.meebitNumber)
 }
 
 /** 進行中キャプチャを中断し、同じ Meebit を再度キューに載せられるようにする */
@@ -63,7 +98,10 @@ export function isTargetPreviewPending(meebitNumber: number) {
   return !cache.has(cacheKey(meebitNumber))
 }
 
-export function requestTargetPreview(meebitNumber: number) {
+export function requestTargetPreview(
+  meebitNumber: number,
+  priority = DEFAULT_PREVIEW_PRIORITY,
+) {
   const key = cacheKey(meebitNumber)
   if (cache.get(key) === 'error') {
     cache.delete(key)
@@ -73,13 +111,21 @@ export function requestTargetPreview(meebitNumber: number) {
     return
   }
 
-  if (queued.has(key) || activeMeebit === meebitNumber) {
+  if (activeMeebit === meebitNumber) {
     return
   }
 
-  queue.push(meebitNumber)
-  queued.add(key)
+  enqueuePreview(meebitNumber, priority)
   drainQueue()
+}
+
+export function requestTargetPreviews(
+  meebitNumbers: number[],
+  priority = TARGET_HUD_PREVIEW_PRIORITY,
+) {
+  for (const meebitNumber of meebitNumbers) {
+    requestTargetPreview(meebitNumber, priority)
+  }
 }
 
 export function subscribeTargetPreview(meebitNumber: number, listener: () => void) {
@@ -133,8 +179,9 @@ export function clearTargetPreviewCacheExcept(keepMeebitIds: number[] = []) {
   }
 
   for (let index = queue.length - 1; index >= 0; index -= 1) {
-    if (!keepKeys.has(cacheKey(queue[index]!))) {
-      queued.delete(cacheKey(queue[index]!))
+    const entry = queue[index]!
+    if (!keepKeys.has(cacheKey(entry.meebitNumber))) {
+      queued.delete(cacheKey(entry.meebitNumber))
       queue.splice(index, 1)
     }
   }

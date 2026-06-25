@@ -136,3 +136,9 @@ export function getMaxVrmTemplateCache() {
 
 /** プレイヤー VRM は NPC の warmup より常に先にロードキューへ入れる */
 export const PLAYER_VRM_LOAD_PRIORITY = -2000
+
+/** ターゲット VRM テンプレートのプリロード（NPC より先） */
+export const TARGET_VRM_PRELOAD_PRIORITY = -300
+
+/** ターゲット静止画キャプチャ用 VRM ロード（テンプレートプリロードより少し後） */
+export const TARGET_PREVIEW_CAPTURE_VRM_PRIORITY = -350

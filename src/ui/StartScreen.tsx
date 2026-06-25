@@ -16,6 +16,7 @@ import { getNpcById } from '../npc/npcData'
 import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { START_SCREEN_TARGET_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
@@ -97,7 +98,11 @@ export function StartScreen() {
         }`}
       >
         <div className="max-lg:hidden">
-          <TargetPreview meebitNumber={firstTargetNpc.meebitNumber} sizeClassName="h-40 w-40" />
+          <TargetPreview
+            capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
+            meebitNumber={firstTargetNpc.meebitNumber}
+            sizeClassName="h-40 w-40"
+          />
         </div>
         <div>
           <p
@@ -178,6 +183,7 @@ export function StartScreen() {
           >
             <div className="flex items-center gap-3">
               <TargetPreview
+                capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
                 meebitNumber={firstTargetNpc.meebitNumber}
                 modelScale={1}
                 sizeClassName="h-20 w-20 shrink-0 lg:hidden"

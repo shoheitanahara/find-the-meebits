@@ -6,6 +6,7 @@ import { getTimerDisplay, shouldShowGameTimer } from '../gameTimerDisplay'
 import { getGameModeLabel } from '../../game/gameMode'
 import { FoundTargetIcon } from '../FoundTargetIcon'
 import { StageRetryButton } from '../StageRetryButton'
+import { TARGET_HUD_PREVIEW_PRIORITY } from '../targetPreviewCache'
 import { TargetPreview } from '../TargetPreview'
 import { PlayerMeebitLabel } from '../PlayerMeebitLabel'
 
@@ -175,6 +176,7 @@ export function MobileTopBar() {
               <div className="relative shrink-0">
                 <TargetPreview
                   meebitNumber={npc.meebitNumber}
+                  capturePriority={TARGET_HUD_PREVIEW_PRIORITY}
                   modelScale={targetLayout.modelScale}
                   cameraDistance={targetLayout.cameraDistance}
                   cameraY={targetLayout.cameraY}
