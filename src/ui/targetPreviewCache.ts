@@ -35,6 +35,17 @@ function drainQueue() {
   processCapture(next)
 }
 
+/** 進行中キャプチャを中断し、同じ Meebit を再度キューに載せられるようにする */
+function abortActiveTargetPreviewCapture() {
+  if (activeMeebit === null) {
+    return
+  }
+
+  queued.delete(cacheKey(activeMeebit))
+  activeMeebit = null
+  processCapture?.(null)
+}
+
 export function getTargetPreviewImage(meebitNumber: number) {
   const entry = cache.get(cacheKey(meebitNumber))
   if (!entry || entry === 'error') {
@@ -54,6 +65,10 @@ export function isTargetPreviewPending(meebitNumber: number) {
 
 export function requestTargetPreview(meebitNumber: number) {
   const key = cacheKey(meebitNumber)
+  if (cache.get(key) === 'error') {
+    cache.delete(key)
+  }
+
   if (cache.has(key)) {
     return
   }
@@ -125,8 +140,7 @@ export function clearTargetPreviewCacheExcept(keepMeebitIds: number[] = []) {
   }
 
   if (activeMeebit !== null && !keepKeys.has(cacheKey(activeMeebit))) {
-    activeMeebit = null
-    processCapture?.(null)
+    abortActiveTargetPreviewCapture()
   }
 
   drainQueue()

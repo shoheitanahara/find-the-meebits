@@ -35,7 +35,7 @@ export function StartScreen() {
   const rerollTargets = useGameStore((state) => state.rerollTargets)
   const firstTargetNpc = getNpcById(targetNpcIds[0] ?? '')
   const currentStep = getProgressionStep(progressionIndex, venueId)
-  const playerMeebitNumber = normalizeMeebitNumber(playerMeebitInput)
+  const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const isClubVenue = venueId === 'club'
 
   useEffect(() => {
@@ -239,7 +239,9 @@ export function StartScreen() {
                     onClick={() => {
                       unlockAudioIfNeeded()
                       playSfx('uiClick')
-                      setPlayerMeebitInput(String(getRandomMeebitNumber()))
+                      const next = getRandomMeebitNumber()
+                      setPlayerMeebitInput(String(next))
+                      usePlayerStore.getState().setMeebitNumber(next)
                     }}
                   >
                     Random
@@ -296,7 +298,7 @@ export function StartScreen() {
           ) : afterHoursUnlocked ? (
             <button
               type="button"
-              className="after-hours-enter-pulse mt-3 w-full rounded-full border border-violet-400/40 bg-violet-950/40 px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-violet-100 transition hover:border-violet-300 hover:bg-violet-900/50 max-lg:py-2.5"
+              className="after-hours-enter-pulse mt-3 w-full rounded-full border-2 border-violet-700 bg-gradient-to-r from-violet-700 via-fuchsia-600 to-violet-700 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-violet-600/40 transition hover:from-violet-600 hover:via-fuchsia-500 hover:to-violet-600 max-lg:py-3 max-lg:text-xs"
               onClick={handleEnterAfterHours}
             >
               Enter After Hours

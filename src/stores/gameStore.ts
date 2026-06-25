@@ -220,7 +220,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       ...newState,
       gameMode: get().gameMode,
-      playerModelStatus: 'loading',
       afterHoursUnlockPending: false,
       npcLayoutVersion: nextLayoutVersion,
     })
@@ -391,10 +390,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   resetGame: () => {
     const afterHoursUnlockPending = get().afterHoursUnlockPending
     const gameMode = get().gameMode
-    resetStageRuntimeState()
+    const newState = createVenueIntroState('museum', null, { preservePlayer: true })
+    const keepMeebitIds = collectKeepMeebitIds('museum', newState.npcProfiles, newState.targetNpcIds)
+    resetStageRuntimeState(keepMeebitIds)
     resetPlayerPositionToStart()
     set({
-      ...createVenueIntroState('museum', null, { preservePlayer: true }),
+      ...newState,
       afterHoursUnlockPending,
       gameMode,
     })

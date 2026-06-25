@@ -17,6 +17,8 @@ export function PlayerAvatar() {
   const rootRef = useRef<Group>(null)
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const gamePhase = useGameStore((state) => state.gamePhase)
+  const venueId = useGameStore((state) => state.venueId)
+  const npcLayoutVersion = useGameStore((state) => state.npcLayoutVersion)
   const shouldLoadPlayerVrm =
     gamePhase === 'intro' ||
     gamePhase === 'preparing' ||
@@ -38,15 +40,27 @@ export function PlayerAvatar() {
       return
     }
 
-    if (status === 'loading') setPlayerModelLoading()
-    if (status === 'ready') setPlayerModelReady()
-    if (status === 'error') setPlayerModelError('Could not load this Meebit model.')
+    if (status === 'loading') {
+      setPlayerModelLoading()
+      return
+    }
+
+    if (status === 'ready') {
+      setPlayerModelReady()
+      return
+    }
+
+    if (status === 'error') {
+      setPlayerModelError('Could not load this Meebit model.')
+    }
   }, [
+    npcLayoutVersion,
     setPlayerModelError,
     setPlayerModelLoading,
     setPlayerModelReady,
     shouldLoadPlayerVrm,
     status,
+    venueId,
   ])
 
   useFrame((state, delta) => {
