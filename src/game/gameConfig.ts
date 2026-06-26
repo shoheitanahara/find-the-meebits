@@ -21,7 +21,7 @@ export const NPC_VRM_UNLOAD_DISTANCE_VIEW_AHEAD = 110
 /** FollowCamera の XZ オフセット（カメラ側判定用・アバター向きとは無関係） */
 export const CAMERA_FOLLOW_OFFSET_XZ = [0, 10] as const
 export const NPC_FAR_UPDATE_DISTANCE = 50
-export const NPC_MAX_CONCURRENT_VRM = 150
+export const NPC_MAX_CONCURRENT_VRM = 100
 export const DEFAULT_PLAYER_MEEBIT_ID = 4274
 export const VRM_WORLD_SCALE = 1.05
 /** 足元を地面に合わせたあと、わずかに持ち上げる（Z-fighting 防止） */

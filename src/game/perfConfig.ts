@@ -10,8 +10,8 @@ import {
 } from './gameConfig'
 
 /** スマホ・タブレット（1024px 未満）向け */
-const MOBILE_MAX_CONCURRENT_VRM = 50
-const MOBILE_MAX_CONCURRENT_LOADS = 8
+const MOBILE_MAX_CONCURRENT_VRM = 38
+const MOBILE_MAX_CONCURRENT_LOADS = 6
 const MOBILE_STAGE_READY_MIN_COUNT = 12
 const MOBILE_STAGE_READY_RATIO = 0.75
 const MOBILE_WARMUP_LOAD_DISTANCE = 40
@@ -30,6 +30,7 @@ const MOBILE_FOG_NEAR = 58
 const MOBILE_FOG_FAR = 130
 
 /** PC 向け */
+const PC_MAX_CONCURRENT_LOADS = 16
 const PC_STAGE_READY_MIN_COUNT = 36
 const PC_STAGE_READY_RATIO = 0.85
 const PC_WARMUP_LOAD_DISTANCE = 60
@@ -60,7 +61,7 @@ export function getNpcMaxConcurrentVrm() {
 }
 
 export function getMaxConcurrentVrmLoads() {
-  return isMobilePerfMode() ? MOBILE_MAX_CONCURRENT_LOADS : 24
+  return isMobilePerfMode() ? MOBILE_MAX_CONCURRENT_LOADS : PC_MAX_CONCURRENT_LOADS
 }
 
 export function getStageReadyMinCount() {
