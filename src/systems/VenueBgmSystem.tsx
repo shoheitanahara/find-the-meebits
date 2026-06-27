@@ -1,27 +1,38 @@
 import { useEffect, useRef } from 'react'
-import { CLUB_BGM_URL, CLUB_BGM_VOLUME, isClubBgmPlaybackPhase } from '../audio/clubAudioConfig'
+import {
+  isVenueBgmPlaybackPhase,
+  resolveVenueBgmUrl,
+  VENUE_BGM,
+} from '../audio/venueAudioConfig'
 import { isMobilePerfMode } from '../game/perfConfig'
+import type { VenueId } from '../game/venueConfig'
 import { useGameStore } from '../stores/gameStore'
 import { unlockAudioIfNeeded } from '../ui/sfx'
 
-export function ClubBgmSystem() {
+function getVenueBgmVolume(venueId: VenueId) {
+  const base = VENUE_BGM[venueId].volume
+  return isMobilePerfMode() ? base * 0.9 : base
+}
+
+export function VenueBgmSystem() {
   const venueId = useGameStore((state) => state.venueId)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const activeVenueRef = useRef<VenueId | null>(null)
 
-  const shouldPlay = venueId === 'club' && isClubBgmPlaybackPhase(gamePhase)
+  const shouldPlay = isVenueBgmPlaybackPhase(gamePhase)
 
   useEffect(() => {
-    const audio = new Audio(CLUB_BGM_URL)
+    const audio = new Audio()
     audio.loop = true
     audio.preload = 'auto'
-    audio.volume = isMobilePerfMode() ? CLUB_BGM_VOLUME * 0.9 : CLUB_BGM_VOLUME
     audioRef.current = audio
 
     return () => {
       audio.pause()
       audio.src = ''
       audioRef.current = null
+      activeVenueRef.current = null
     }
   }, [])
 
@@ -34,6 +45,13 @@ export function ClubBgmSystem() {
     if (!shouldPlay || document.visibilityState === 'hidden') {
       audio.pause()
       return
+    }
+
+    if (activeVenueRef.current !== venueId) {
+      audio.pause()
+      audio.src = resolveVenueBgmUrl(venueId)
+      audio.volume = getVenueBgmVolume(venueId)
+      activeVenueRef.current = venueId
     }
 
     let cancelled = false
@@ -55,7 +73,7 @@ export function ClubBgmSystem() {
     return () => {
       cancelled = true
     }
-  }, [shouldPlay])
+  }, [shouldPlay, venueId])
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -66,13 +84,18 @@ export function ClubBgmSystem() {
 
       const state = useGameStore.getState()
       const canPlay =
-        state.venueId === 'club' &&
-        isClubBgmPlaybackPhase(state.gamePhase) &&
-        document.visibilityState === 'visible'
+        isVenueBgmPlaybackPhase(state.gamePhase) && document.visibilityState === 'visible'
 
       if (!canPlay) {
         audio.pause()
         return
+      }
+
+      if (activeVenueRef.current !== state.venueId) {
+        audio.pause()
+        audio.src = resolveVenueBgmUrl(state.venueId)
+        audio.volume = getVenueBgmVolume(state.venueId)
+        activeVenueRef.current = state.venueId
       }
 
       void audio.play().catch(() => {})

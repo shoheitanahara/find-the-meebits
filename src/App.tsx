@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/react'
 import { GameCanvas } from './game/GameCanvas'
-import { ClubBgmSystem } from './systems/ClubBgmSystem'
+import { VenueBgmSystem } from './systems/VenueBgmSystem'
 import { GameTimerSystem } from './systems/GameTimerSystem'
 import { StagePrepareSystem } from './systems/StagePrepareSystem'
 import { TargetVrmPreloader } from './systems/TargetVrmPreloader'
@@ -45,7 +45,7 @@ export default function App() {
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-neutral-100 text-slate-950">
       <GameCanvas />
-      <ClubBgmSystem />
+      <VenueBgmSystem />
       <GameTimerSystem />
       <StagePrepareSystem />
       <TargetVrmPreloader />
