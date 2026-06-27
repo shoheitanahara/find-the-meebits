@@ -2,20 +2,24 @@ import { PLAYER_START_POSITION } from '../../game/gameConfig'
 import type { Vector3Tuple } from '../../types/game'
 
 export type SaveData = {
-  visitedNPCIds: string[]
-  talkedCountByNPC: Record<string, number>
+  visitedMeebitNumbers: number[]
+  talkedCountByMeebit: Record<string, number>
   lastPlayerPosition: Vector3Tuple
 }
 
-const STORAGE_KEY = 'meebits-world-save-v1'
+const STORAGE_KEY = 'meebits-world-save-v2'
 
 const defaultSaveData: SaveData = {
-  visitedNPCIds: [],
-  talkedCountByNPC: {},
+  visitedMeebitNumbers: [],
+  talkedCountByMeebit: {},
   lastPlayerPosition: [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
 }
 
 let cachedSaveData: SaveData | null = null
+
+function meebitTalkKey(meebitNumber: number) {
+  return String(meebitNumber)
+}
 
 function readSaveDataFromStorage(): SaveData {
   if (typeof window === 'undefined') {
@@ -31,10 +35,12 @@ function readSaveDataFromStorage(): SaveData {
 
     const parsed = JSON.parse(raw) as Partial<SaveData>
     return {
-      visitedNPCIds: Array.isArray(parsed.visitedNPCIds) ? parsed.visitedNPCIds : [],
-      talkedCountByNPC:
-        parsed.talkedCountByNPC && typeof parsed.talkedCountByNPC === 'object'
-          ? parsed.talkedCountByNPC
+      visitedMeebitNumbers: Array.isArray(parsed.visitedMeebitNumbers)
+        ? parsed.visitedMeebitNumbers.filter((value) => typeof value === 'number')
+        : [],
+      talkedCountByMeebit:
+        parsed.talkedCountByMeebit && typeof parsed.talkedCountByMeebit === 'object'
+          ? parsed.talkedCountByMeebit
           : {},
       lastPlayerPosition: isVector3Tuple(parsed.lastPlayerPosition)
         ? parsed.lastPlayerPosition
@@ -74,18 +80,23 @@ export function resetNpcTalkSaveData() {
   })
 }
 
-export function recordNpcTalk(npcId: string, playerPosition: Vector3Tuple): SaveData {
+export function getMeebitTalkCount(meebitNumber: number) {
+  return loadSaveData().talkedCountByMeebit[meebitTalkKey(meebitNumber)] ?? 0
+}
+
+export function recordMeebitTalk(meebitNumber: number, playerPosition: Vector3Tuple): SaveData {
   const current = loadSaveData()
-  const talkedCount = (current.talkedCountByNPC[npcId] ?? 0) + 1
-  const visitedNPCIds = current.visitedNPCIds.includes(npcId)
-    ? current.visitedNPCIds
-    : [...current.visitedNPCIds, npcId]
+  const key = meebitTalkKey(meebitNumber)
+  const talkedCount = (current.talkedCountByMeebit[key] ?? 0) + 1
+  const visitedMeebitNumbers = current.visitedMeebitNumbers.includes(meebitNumber)
+    ? current.visitedMeebitNumbers
+    : [...current.visitedMeebitNumbers, meebitNumber]
 
   const next: SaveData = {
-    visitedNPCIds,
-    talkedCountByNPC: {
-      ...current.talkedCountByNPC,
-      [npcId]: talkedCount,
+    visitedMeebitNumbers,
+    talkedCountByMeebit: {
+      ...current.talkedCountByMeebit,
+      [key]: talkedCount,
     },
     lastPlayerPosition: playerPosition,
   }

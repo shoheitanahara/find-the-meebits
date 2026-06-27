@@ -6,7 +6,7 @@ import { selectDialogueLines } from '../../npc/npcDialogue'
 import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
 import { usePlayerStore } from '../../stores/playerStore'
-import { loadSaveData, recordNpcTalk } from '../save/localStorage'
+import { getMeebitTalkCount, recordMeebitTalk } from '../save/localStorage'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 
 export function interactWithNearestNpc(): boolean {
@@ -37,7 +37,7 @@ export function interactWithNearestNpc(): boolean {
     game.targetNpcIds.includes(targetNpcId) &&
     !game.foundTargetNpcIds.includes(targetNpcId)
   ) {
-    recordNpcTalk(targetNpcId, usePlayerStore.getState().position)
+    recordMeebitTalk(npc.meebitNumber, usePlayerStore.getState().position)
     usePlayerStore.getState().setMovementLocked(true)
     const foundLines = game.venueId === 'club' ? CLUB_TARGET_FOUND_LINES : MUSEUM_TARGET_FOUND_LINES
     const foundLine = foundLines[npc.meebitNumber % foundLines.length]
@@ -55,12 +55,11 @@ export function interactWithNearestNpc(): boolean {
     return true
   }
 
-  const saveData = loadSaveData()
-  const talkCount = saveData.talkedCountByNPC[targetNpcId] ?? 0
+  const talkCount = getMeebitTalkCount(npc.meebitNumber)
   const lines = selectDialogueLines(npc, talkCount)
   const playerPosition = usePlayerStore.getState().position
 
-  recordNpcTalk(targetNpcId, playerPosition)
+  recordMeebitTalk(npc.meebitNumber, playerPosition)
   usePlayerStore.getState().setMovementLocked(true)
   dialogue.openDialogue(targetNpcId, lines)
   return true
