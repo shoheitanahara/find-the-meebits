@@ -13,13 +13,13 @@ import {
   getNpcFarUpdateDistance,
   getNpcFarUpdateSkipDivisor,
   shouldNpcCastShadow,
-  clampFrameDelta,
 } from '../game/perfConfig'
 import { setVrmCastShadow } from '../avatar/VRMLoader'
 import { getNpcVrmLoadPriority } from './vrmLodUtils'
 import { isNpcVrmActive, setNpcVrmReady } from './vrmLodState'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
+import { clampFrameDeltaAfterTabResume, getTabResumeGeneration } from '../systems/tabPause'
 import type { NPCProfile } from './npcTypes'
 import { TargetAnswerGlow } from './TargetAnswerGlow'
 
@@ -47,6 +47,7 @@ export function NPC({ profile }: NPCProps) {
   const pauseUntilRef = useRef(0)
   const playerPauseUntilRef = useRef(0)
   const storeUpdateTimerRef = useRef(0)
+  const tabResumeGenerationRef = useRef(getTabResumeGeneration())
   const isNearest = useNpcStore((state) => state.nearestNpcId === profile.id)
   const isDialogueActive = useDialogueStore((state) => state.activeNpcId === profile.id)
   const isTarget = useGameStore(
@@ -117,7 +118,13 @@ export function NPC({ profile }: NPCProps) {
     const root = rootRef.current
     if (!root) return
 
-    const frameDelta = clampFrameDelta(delta)
+    const tabResumeGeneration = getTabResumeGeneration()
+    if (tabResumeGeneration !== tabResumeGenerationRef.current) {
+      tabResumeGenerationRef.current = tabResumeGeneration
+      pauseUntilRef.current = 0
+    }
+
+    const frameDelta = clampFrameDeltaAfterTabResume(delta)
 
     const gamePhase = useGameStore.getState().gamePhase
     const currentPosition = currentPositionRef.current

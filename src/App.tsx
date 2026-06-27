@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react'
 import { GameCanvas } from './game/GameCanvas'
+import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
 import { GameTimerSystem } from './systems/GameTimerSystem'
 import { StagePrepareSystem } from './systems/StagePrepareSystem'
@@ -45,6 +46,7 @@ export default function App() {
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-neutral-100 text-slate-950">
       <GameCanvas />
+      <TabPauseSystem />
       <VenueBgmSystem />
       <GameTimerSystem />
       <StagePrepareSystem />

@@ -27,6 +27,7 @@ import {
   markMuseumConquered,
 } from '../systems/save/unlockProgress'
 import { resetNpcTalkSaveData } from '../systems/save/localStorage'
+import { resetTabPauseClock, getTabPausedMs } from '../systems/tabPause'
 import { useNpcStore } from './npcStore'
 import { usePlayerStore } from './playerStore'
 
@@ -250,6 +251,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   beginPlaying: () => {
     usePlayerStore.getState().setMovementLocked(false)
+    resetTabPauseClock()
 
     const gameMode = get().gameMode
     set({
@@ -271,7 +273,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       return
     }
 
-    const clearTimeSeconds = state.startedAt ? (Date.now() - state.startedAt) / 1000 : null
+    const clearTimeSeconds = state.startedAt ? getElapsedSeconds(state.startedAt) : null
     const foundTargetNpcIds = [...state.foundTargetNpcIds, foundNpcId]
     const hasRemainingTargets = state.targetNpcIds.some((id) => !foundTargetNpcIds.includes(id))
     const isMultiTargetStage = state.targetNpcIds.length > 1
@@ -332,7 +334,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     usePlayerStore.getState().setMovementLocked(false)
     set((state) => ({
       gamePhase: 'timedOut',
-      clearTimeSeconds: state.startedAt ? (Date.now() - state.startedAt) / 1000 : GAME_TIME_LIMIT_SECONDS,
+      clearTimeSeconds: state.startedAt ? getElapsedSeconds(state.startedAt) : GAME_TIME_LIMIT_SECONDS,
     }))
   },
   continueToNextStage: () => {
@@ -392,6 +394,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const afterHoursUnlockPending = get().afterHoursUnlockPending
     const gameMode = get().gameMode
     resetNpcTalkSaveData()
+    resetTabPauseClock()
     const newState = createVenueIntroState('museum', null, { preservePlayer: true })
     const keepMeebitIds = collectKeepMeebitIds('museum', newState.npcProfiles, newState.targetNpcIds)
     resetStageRuntimeState(keepMeebitIds)
@@ -554,7 +557,7 @@ export function getElapsedSeconds(startedAt: number | null) {
     return 0
   }
 
-  return (Date.now() - startedAt) / 1000
+  return (Date.now() - startedAt - getTabPausedMs()) / 1000
 }
 
 export function getRemainingSeconds(startedAt: number | null) {

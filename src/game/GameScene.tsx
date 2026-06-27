@@ -2,6 +2,7 @@ import type { VenueId } from './venueConfig'
 import { AvatarController } from '../avatar/AvatarController'
 import { PlayerAvatar } from '../avatar/PlayerAvatar'
 import { FollowCamera } from '../camera/FollowCamera'
+import { TabResumeInvalidator } from '../systems/TabResumeInvalidator'
 import { FootstepAudioSystem } from '../systems/FootstepAudioSystem'
 import { NPCVrmLodSystem } from '../npc/NPCVrmLodSystem'
 import { NPCManager } from '../npc/NPCManager'
@@ -19,6 +20,7 @@ export function GameScene({ venueId }: GameSceneProps) {
   return (
     <>
       <VenueAtmosphere venueId={venueId} />
+      <TabResumeInvalidator />
       <Lighting venueId={venueId} />
       {venueId === 'club' && <ClubSpotlights />}
       {venueId === 'club' && <ClubMirrorBall />}
