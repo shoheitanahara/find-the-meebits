@@ -7,6 +7,7 @@ import { NPCVrmLodSystem } from '../npc/NPCVrmLodSystem'
 import { NPCManager } from '../npc/NPCManager'
 import { WorldRoot } from '../world/WorldRoot'
 import { ClubSpotlights } from '../world/ClubSpotlights'
+import { ClubMirrorBall } from '../world/ClubMirrorBall'
 import { Lighting } from '../world/Lighting'
 import { VenueAtmosphere } from '../world/VenueAtmosphere'
 
@@ -20,6 +21,7 @@ export function GameScene({ venueId }: GameSceneProps) {
       <VenueAtmosphere venueId={venueId} />
       <Lighting venueId={venueId} />
       {venueId === 'club' && <ClubSpotlights />}
+      {venueId === 'club' && <ClubMirrorBall />}
       <WorldRoot venueId={venueId} />
       <NPCVrmLodSystem />
       <NPCManager />
