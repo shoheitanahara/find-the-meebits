@@ -4,8 +4,15 @@ import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getNpcById } from './npcData'
 import type { DialogueLine, NPCProfile } from './npcTypes'
-import { CLUB_CREATOR_DIALOGUE_LINES, CLUB_WANDERER_DIALOGUE_POOL } from './npcClubDialogue'
-import { WANDERER_DIALOGUE_POOL } from './npcDialoguePool'
+import {
+  CLUB_CREATOR_DIALOGUE_LINES,
+  CLUB_FIRST_MEETING_DIALOGUE,
+  CLUB_RETURNING_DIALOGUE,
+} from './npcClubDialogue'
+import {
+  MUSEUM_FIRST_MEETING_DIALOGUE,
+  MUSEUM_RETURNING_DIALOGUE,
+} from './npcDialoguePool'
 import { buildTargetLocationHint } from './npcTargetHint'
 
 const TARGET_HINT_CHANCE = 0.25
@@ -31,11 +38,26 @@ function toDialogueLine(
 
 function pickOneLine(lines: DialogueLine[], seed: number, talkCount: number): DialogueLine {
   if (lines.length === 0) {
-    return toDialogueLine('npc-unknown', talkCount, 0, 'Not your target.')
+    return toDialogueLine('npc-unknown', talkCount, 0, 'I do not think I am your target, but hello anyway.')
   }
 
   const index = seededIndex(seed, talkCount, lines.length)
   return lines[index]
+}
+
+function pickWandererLine(npc: NPCProfile, talkCount: number, venueId: 'museum' | 'club'): string {
+  const isFirstMeeting = talkCount === 0
+  const pool =
+    venueId === 'club'
+      ? isFirstMeeting
+        ? CLUB_FIRST_MEETING_DIALOGUE
+        : CLUB_RETURNING_DIALOGUE
+      : isFirstMeeting
+        ? MUSEUM_FIRST_MEETING_DIALOGUE
+        : MUSEUM_RETURNING_DIALOGUE
+
+  const index = seededIndex(npc.meebitNumber + npc.id.length, talkCount, pool.length)
+  return pool[index]
 }
 
 function maybeBuildTargetHintLine(npc: NPCProfile, talkCount: number): DialogueLine | null {
@@ -82,9 +104,8 @@ export function selectDialogueLines(npc: NPCProfile, talkCount: number): Dialogu
     return [hintLine]
   }
 
-  const wandererPool = venueId === 'club' ? CLUB_WANDERER_DIALOGUE_POOL : WANDERER_DIALOGUE_POOL
-  const poolIndex = seededIndex(npc.meebitNumber + npc.id.length, talkCount, wandererPool.length)
-  const text = wandererPool[poolIndex]
+  const poolIndex = seededIndex(npc.meebitNumber + npc.id.length, talkCount, 10_000)
+  const text = pickWandererLine(npc, talkCount, venueId)
 
   return [toDialogueLine(npc.id, talkCount, poolIndex, text)]
 }

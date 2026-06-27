@@ -68,6 +68,12 @@ export function saveSaveData(data: SaveData) {
   }
 }
 
+export function resetNpcTalkSaveData() {
+  saveSaveData({
+    ...defaultSaveData,
+  })
+}
+
 export function recordNpcTalk(npcId: string, playerPosition: Vector3Tuple): SaveData {
   const current = loadSaveData()
   const talkedCount = (current.talkedCountByNPC[npcId] ?? 0) + 1

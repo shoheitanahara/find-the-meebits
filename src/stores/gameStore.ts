@@ -26,6 +26,7 @@ import {
   markClubConquered,
   markMuseumConquered,
 } from '../systems/save/unlockProgress'
+import { resetNpcTalkSaveData } from '../systems/save/localStorage'
 import { useNpcStore } from './npcStore'
 import { usePlayerStore } from './playerStore'
 
@@ -390,6 +391,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   resetGame: () => {
     const afterHoursUnlockPending = get().afterHoursUnlockPending
     const gameMode = get().gameMode
+    resetNpcTalkSaveData()
     const newState = createVenueIntroState('museum', null, { preservePlayer: true })
     const keepMeebitIds = collectKeepMeebitIds('museum', newState.npcProfiles, newState.targetNpcIds)
     resetStageRuntimeState(keepMeebitIds)

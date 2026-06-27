@@ -11,7 +11,13 @@ type VenueHintPhrases = {
 }
 
 const MUSEUM_HINT_PHRASES: VenueHintPhrases = {
-  prefixes: ['Hint:'],
+  prefixes: [
+    'Between us,',
+    'Hey —',
+    'I probably should not say this, but',
+    'Someone told me —',
+    'If it helps,',
+  ],
   veryClose: ['somewhere near you. Keep looking'],
   zone: {
     entrance: ['near the entrance', 'in the entrance area'],
@@ -40,7 +46,13 @@ const MUSEUM_HINT_PHRASES: VenueHintPhrases = {
 }
 
 const CLUB_HINT_PHRASES: VenueHintPhrases = {
-  prefixes: ['Hint:', 'Word on the floor:'],
+  prefixes: [
+    'Keep this quiet, but',
+    'Hey —',
+    'I overheard —',
+    'Word on the floor:',
+    'Between us,',
+  ],
   veryClose: ['right nearby on the dance floor. Keep looking', 'somewhere close in this crowd. Keep looking'],
   zone: {
     entrance: ['near the entrance arch', 'by the front doors'],
