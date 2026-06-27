@@ -20,6 +20,8 @@ const midpoint = new Vector3()
 const dialogueDirection = new Vector3()
 const dialogueSide = new Vector3()
 const dialogueCameraDirection = new Vector3()
+const dialogueCameraDirectionAlt = new Vector3()
+const dialogueCandidatePosition = new Vector3()
 const lookAtOffset = new Vector3(0, 1.4, 0)
 const dialogueCameraHeight = new Vector3(0, 2.35, 0)
 const dialogueLookAtHeight = new Vector3(0, 1.55, 0)
@@ -49,17 +51,39 @@ export function FollowCamera() {
 
         dialogueDirection.normalize()
         dialogueSide.set(-dialogueDirection.z, 0, dialogueDirection.x).normalize()
-        dialogueCameraDirection
-          .copy(dialogueSide)
-          .multiplyScalar(isMobile ? 0.55 : 0.72)
-          .addScaledVector(dialogueDirection, isMobile ? 0.35 : 0.48)
-          .normalize()
 
+        const sideScale = isMobile ? 0.55 : 0.72
+        const forwardScale = isMobile ? 0.35 : 0.48
         const cameraDistance = isMobile ? 5.8 : 4.6
         const cameraHeight = isMobile ? mobileDialogueCameraHeight : dialogueCameraHeight
         const lookAtHeight = isMobile ? mobileDialogueLookAtHeight : dialogueLookAtHeight
 
-        desiredPosition.copy(midpoint).addScaledVector(dialogueCameraDirection, cameraDistance).add(cameraHeight)
+        let bestScore = Number.POSITIVE_INFINITY
+
+        for (const sideSign of [-1, 1] as const) {
+          dialogueCameraDirectionAlt
+            .copy(dialogueSide)
+            .multiplyScalar(sideSign * sideScale)
+            .addScaledVector(dialogueDirection, forwardScale)
+            .normalize()
+
+          dialogueCandidatePosition
+            .copy(midpoint)
+            .addScaledVector(dialogueCameraDirectionAlt, cameraDistance)
+            .add(cameraHeight)
+
+          const travelCost = dialogueCandidatePosition.distanceToSquared(camera.position)
+          const cameraSideBias =
+            dialogueCandidatePosition.z < midpoint.z ? 18 : dialogueCandidatePosition.z > midpoint.z ? -2 : 0
+          const score = travelCost + cameraSideBias
+
+          if (score < bestScore) {
+            bestScore = score
+            dialogueCameraDirection.copy(dialogueCameraDirectionAlt)
+            desiredPosition.copy(dialogueCandidatePosition)
+          }
+        }
+
         lookAtTarget.copy(midpoint).add(lookAtHeight)
 
         camera.position.lerp(desiredPosition, 1 - Math.exp(-delta * 8))
