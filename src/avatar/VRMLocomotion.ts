@@ -64,6 +64,60 @@ export function applyVRMAttentionPose(vrm: VRM | null) {
   setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
 }
 
+export function applyVRMDjPose(
+  vrm: VRM | null,
+  options: {
+    elapsedTime: number
+    idleOffset?: number
+  },
+) {
+  if (!vrm) {
+    return
+  }
+
+  const t = options.elapsedTime + (options.idleOffset ?? 0) * 0.07
+  const beatStep = Math.floor(t * 2.6)
+  const beatFlip = beatStep % 2 === 0 ? 1 : -0.55
+  const microStep = Math.floor(t * 5.2) % 3
+  const headJag = [0.05, -0.025, 0.035][microStep] * beatFlip
+  const headTurn = (beatStep % 4 < 2 ? 0.04 : -0.03) + Math.sin(t * 4.1) * 0.012
+
+  const hips = getBone(vrm, VRMHumanBoneName.Hips)
+  const spine = getBone(vrm, VRMHumanBoneName.Spine)
+  const chest = getBone(vrm, VRMHumanBoneName.Chest)
+  const head = getBone(vrm, VRMHumanBoneName.Head)
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  const sideLean = Math.sin(t * 1.35) * 0.02
+
+  setRotation(hips, { y: sideLean * 0.6, z: sideLean })
+  setRotation(spine, { x: 0.05 + headJag * 0.15, y: sideLean * 0.5 })
+  setRotation(chest, { x: 0.03, y: -sideLean * 0.35 })
+  setRotation(head, { x: headJag, y: headTurn, z: sideLean * 0.35 })
+
+  setRotation(leftUpperArm, { z: armRestZ.left })
+  setRotation(rightUpperArm, { z: armRestZ.right })
+  setRotation(leftLowerArm, { x: elbowBaseBend, z: 0 })
+  setRotation(rightLowerArm, { x: elbowBaseBend, z: 0 })
+
+  const stepPhase = Math.sin(t * 1.35)
+  setRotation(leftUpperLeg, { x: stepPhase * 0.05, z: -stepPhase * 0.03 })
+  setRotation(rightUpperLeg, { x: -stepPhase * 0.05, z: stepPhase * 0.03 })
+  setRotation(leftLowerLeg, { x: kneeBaseBend - Math.max(0, stepPhase) * 0.08 })
+  setRotation(rightLowerLeg, { x: kneeBaseBend - Math.max(0, -stepPhase) * 0.08 })
+  setRotation(leftFoot, { x: 0.05 + Math.max(0, stepPhase) * 0.06 })
+  setRotation(rightFoot, { x: 0.05 + Math.max(0, -stepPhase) * 0.06 })
+}
+
 export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) {
   if (!vrm) {
     return

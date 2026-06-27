@@ -78,6 +78,17 @@ export const CLUB_NEON_PLACEMENTS = [
 
 export const CLUB_DJ_BOOTH_POSITION: [number, number, number] = [0, 0, -42]
 
+/** Shawn T. — in the alcove behind the decks, facing the dance floor */
+export const CLUB_CREATOR_DJ_POSITION: [number, number, number] = [0, 0.06, -42.62]
+export const CLUB_CREATOR_DJ_ROTATION: [number, number, number] = [0, 0, 0]
+
+/** Local offsets from CLUB_DJ_BOOTH_POSITION — keep collision in sync with ClubProps */
+export const CLUB_DJ_BOOTH_LAYOUT = {
+  counter: { offsetZ: 0.95, width: 7.8, height: 0.76, depth: 1.45 },
+  platform: { offsetZ: -1.18, width: 3.4, height: 0.06, depth: 2.1 },
+  sideCabinet: { offsetX: 3.75, offsetZ: -0.12, width: 0.72, height: 1.45, depth: 1.25 },
+} as const
+
 export type ClubSpotlightPlacement = {
   id: string
   x: number
@@ -93,7 +104,7 @@ export type ClubSpotlightPlacement = {
 /** Downward spot pools at key club landmarks (entrance, bars, DJ, VIP, dance floor). */
 export const CLUB_SPOTLIGHT_PLACEMENTS = [
   { id: 'entrance', x: 0, z: 52, color: '#fbcfe8', height: 6.8, poolRadius: 9.5, beamRadius: 38 },
-  { id: 'dj', x: 0, z: -42, color: '#c4b5fd', height: 6.4, poolRadius: 11, beamRadius: 42 },
+  { id: 'dj', x: 0, z: -42.5, color: '#c4b5fd', height: 6.4, poolRadius: 11, beamRadius: 42 },
   { id: 'bar-left', x: -28, z: -38, color: '#f9a8d4', height: 5.4, poolRadius: 8, beamRadius: 34 },
   { id: 'bar-right', x: 28, z: -38, color: '#93c5fd', height: 5.4, poolRadius: 8, beamRadius: 34 },
   { id: 'dance-floor', x: 0, z: 2, color: '#e9d5ff', height: 8.2, poolRadius: 14, beamRadius: 48 },
@@ -172,8 +183,8 @@ export function buildClubHintLandmarks(): HintLandmark[] {
           : [...CLUB_VRM_SCULPTURE_HINT, 'near a spotlighted Meebit statue'],
     })),
     {
-      x: CLUB_DJ_BOOTH_POSITION[0],
-      z: CLUB_DJ_BOOTH_POSITION[2],
+      x: CLUB_CREATOR_DJ_POSITION[0],
+      z: CLUB_CREATOR_DJ_POSITION[2],
       phrases: ['near the DJ booth', 'by the decks and mixer', 'in the back by the DJ booth'],
     },
     ...CLUB_SPOTLIGHT_PLACEMENTS.filter(({ id }) => id !== 'dj').map(({ x, z, id }) => ({
@@ -199,7 +210,7 @@ export function getClubDecorMeebitIds() {
 
 /** Collision footprint per prop type — kept in sync with ClubProps geometry. */
 export const CLUB_COLLISION = {
-  djBooth: { width: 8.2, depth: 2.8 },
+  djBooth: CLUB_DJ_BOOTH_LAYOUT,
   sculpture: { width: 2.8, depth: 2.8 },
 } as const
 

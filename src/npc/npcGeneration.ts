@@ -3,6 +3,7 @@ import {
   CREATOR_NPC_ID,
 } from '../game/gameConfig'
 import type { VenueId } from '../game/venueConfig'
+import { CLUB_CREATOR_DJ_POSITION, CLUB_CREATOR_DJ_ROTATION } from '../world/clubLandmarks'
 import { generateRandomNpcSpawnPosition } from '../collision/spawnValidation'
 import type { NPCProfile } from './npcTypes'
 
@@ -101,16 +102,31 @@ const creatorNpc: NPCProfile = {
 
 export function buildNpcProfiles(wanderingNpcCount: number, venueId: VenueId = 'museum'): NPCProfile[] {
   const meebitNumbers = pickRandomMeebitNumbers(wanderingNpcCount)
-  const existingSpawns: Array<[number, number]> = [[creatorNpc.position[0], creatorNpc.position[2]]]
+  const creator = getCreatorNpcForVenue(venueId)
+  const existingSpawns: Array<[number, number]> = [[creator.position[0], creator.position[2]]]
   const wanderingNpcs = meebitNumbers.map((meebitNumber, index) =>
     createNpcProfile(index, meebitNumber, existingSpawns, venueId),
   )
 
-  return [creatorNpc, ...wanderingNpcs]
+  return [creator, ...wanderingNpcs]
 }
 
-export function getCreatorNpc() {
+function getCreatorNpcForVenue(venueId: VenueId): NPCProfile {
+  if (venueId === 'club') {
+    return {
+      ...creatorNpc,
+      position: [...CLUB_CREATOR_DJ_POSITION],
+      rotation: [...CLUB_CREATOR_DJ_ROTATION],
+      role: 'dj',
+      topics: ['creator', 'art', 'meebits', 'club'],
+    }
+  }
+
   return creatorNpc
+}
+
+export function getCreatorNpc(venueId: VenueId = 'museum') {
+  return getCreatorNpcForVenue(venueId)
 }
 
 function createNpcProfile(

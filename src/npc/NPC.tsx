@@ -3,12 +3,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { Group, Vector3 } from 'three'
 import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
-import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
+import { applyVRMDjPose, applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { getPlayerWorldPosition } from '../avatar/playerWorldState'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { collidesWithObstacles, NPC_COLLISION_RADIUS } from '../collision/collision'
-import { INTERACTION_DISTANCE, VRM_WORLD_SCALE, WORLD_RADIUS } from '../game/gameConfig'
+import { CREATOR_NPC_ID, INTERACTION_DISTANCE, VRM_WORLD_SCALE, WORLD_RADIUS } from '../game/gameConfig'
 import {
   getNpcFarUpdateDistance,
   getNpcFarUpdateSkipDivisor,
@@ -34,6 +34,8 @@ const MAX_RANDOM_PAUSE_SECONDS = 3.3
 const PLAYER_STOP_DISTANCE = INTERACTION_DISTANCE + 1
 const MIN_PLAYER_PAUSE_SECONDS = 2.2
 const MAX_PLAYER_PAUSE_SECONDS = 4.2
+const CLUB_DJ_SIDE_STEP_AMPLITUDE = 0.13
+const CLUB_DJ_SIDE_STEP_SPEED = 1.35
 
 type NPCProps = {
   profile: NPCProfile
@@ -126,6 +128,8 @@ export function NPC({ profile }: NPCProps) {
 
     const frameDelta = clampFrameDeltaAfterTabResume(delta)
 
+    const venueId = useGameStore.getState().venueId
+    const isClubDj = profile.id === CREATOR_NPC_ID && venueId === 'club'
     const gamePhase = useGameStore.getState().gamePhase
     const currentPosition = currentPositionRef.current
     const playerPosition = getPlayerWorldPosition()
@@ -140,8 +144,10 @@ export function NPC({ profile }: NPCProps) {
       meebitNumber: profile.meebitNumber,
       playerPauseUntilRef,
     })
-    const isWalking = gamePhase === 'playing' && !isPaused && !isStoppedForPlayer
-    const shouldFacePlayer = isStoppedForPlayer || (gamePhase === 'timedOut' && isTarget)
+    const isWalking =
+      gamePhase === 'playing' && !isPaused && !isStoppedForPlayer && !isClubDj
+    const shouldFacePlayer =
+      isStoppedForPlayer || (gamePhase === 'timedOut' && isTarget) || (isClubDj && isDialogueActive)
     const wantsVrm = isNpcVrmActive(profile.id)
 
     if (wantsVrm !== shouldLoadVRMRef.current) {
@@ -156,6 +162,7 @@ export function NPC({ profile }: NPCProps) {
     const farUpdateSkipDivisor = getNpcFarUpdateSkipDivisor()
     const frameBucket = Math.floor(state.clock.elapsedTime * 20)
     const skipDetailedUpdate =
+      !isClubDj &&
       isFarNpc &&
       frameBucket % farUpdateSkipDivisor !== farUpdatePhaseRef.current &&
       !isAnswerRevealed
@@ -168,7 +175,12 @@ export function NPC({ profile }: NPCProps) {
       return
     }
 
-    if (isWalking) {
+    if (isClubDj) {
+      const sideStep = Math.sin(state.clock.elapsedTime * CLUB_DJ_SIDE_STEP_SPEED + walkPhaseOffset) *
+        CLUB_DJ_SIDE_STEP_AMPLITUDE
+      currentPosition.x = profile.position[0] + sideStep
+      currentPosition.z = profile.position[2]
+    } else if (isWalking) {
       if (state.clock.elapsedTime >= nextTurnAtRef.current) {
         const actionSeed = seededNoise(profile.meebitNumber * 1.71 + state.clock.elapsedTime * 0.93)
         const turnSeed = seededNoise(profile.meebitNumber * 2.31 + state.clock.elapsedTime * 1.37)
@@ -212,22 +224,33 @@ export function NPC({ profile }: NPCProps) {
     }
 
     if (shouldLoadVRMRef.current) {
-      applyVRMLocomotion(vrmRef.current, {
-        elapsedTime: state.clock.elapsedTime,
-        isMoving: isWalking,
-        idleOffset: profile.position[0] + profile.position[2],
-        walkPhaseOffset,
-      })
+      if (isClubDj) {
+        applyVRMDjPose(vrmRef.current, {
+          elapsedTime: state.clock.elapsedTime,
+          idleOffset: profile.position[0] + profile.position[2],
+        })
+      } else {
+        applyVRMLocomotion(vrmRef.current, {
+          elapsedTime: state.clock.elapsedTime,
+          isMoving: isWalking,
+          idleOffset: profile.position[0] + profile.position[2],
+          walkPhaseOffset,
+        })
+      }
       update(frameDelta)
     }
 
     if (shouldFacePlayer) {
       root.rotation.y = Math.atan2(dx, dz)
+    } else if (isClubDj) {
+      root.rotation.y = profile.rotation[1]
     } else {
       root.rotation.y = directionRef.current
     }
 
-    const bob = Math.sin(state.clock.elapsedTime * 1.6 + walkPhaseOffset) * 0.03
+    const bob = isClubDj
+      ? Math.sin(state.clock.elapsedTime * CLUB_DJ_SIDE_STEP_SPEED + walkPhaseOffset) * 0.012
+      : Math.sin(state.clock.elapsedTime * 1.6 + walkPhaseOffset) * 0.03
     root.position.set(currentPosition.x, profile.position[1] + bob, currentPosition.z)
 
     storeUpdateTimerRef.current += frameDelta

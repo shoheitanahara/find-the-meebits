@@ -1,6 +1,8 @@
 import {
   CLUB_BAR_PLACEMENTS,
+  CLUB_COLLISION,
   CLUB_COUCH_PLACEMENTS,
+  CLUB_DJ_BOOTH_LAYOUT,
   CLUB_DJ_BOOTH_POSITION,
   CLUB_NEON_PLACEMENTS,
   CLUB_PARTITION_PLACEMENTS,
@@ -500,7 +502,7 @@ function DjMixer() {
   const knobZs = [-0.18, 0.08] as const
 
   return (
-    <group position={[0, 0.64, 0.2]}>
+    <group position={[0, 0.12, 0.04]}>
       <mesh castShadow>
         <boxGeometry args={[1.05, 0.22, 1.1]} />
         <meshStandardMaterial color="#27272a" roughness={0.65} metalness={0.2} />
@@ -535,22 +537,46 @@ function DjMixer() {
 
 function DjBooth() {
   const [x, y, z] = CLUB_DJ_BOOTH_POSITION
+  const layout = CLUB_DJ_BOOTH_LAYOUT
+  const counterY = layout.counter.height / 2
+  const platformY = layout.platform.height / 2
+  const cabinetY = layout.sideCabinet.height / 2
 
   return (
     <group position={[x, y, z]}>
-      <mesh castShadow receiveShadow position={[0, 0.22, 0]}>
-        <boxGeometry args={[8, 0.44, 2.6]} />
+      <mesh receiveShadow position={[0, platformY, layout.platform.offsetZ]}>
+        <boxGeometry args={[layout.platform.width, layout.platform.height, layout.platform.depth]} />
+        <meshStandardMaterial color="#1f1230" roughness={0.9} />
+      </mesh>
+
+      <mesh castShadow receiveShadow position={[0, counterY, layout.counter.offsetZ]}>
+        <boxGeometry args={[layout.counter.width, layout.counter.height, layout.counter.depth]} />
         <meshStandardMaterial color="#2a1a3a" roughness={0.84} />
       </mesh>
-      <PropEdge position={[0, 0.46, 0]} size={[8.05, 0.05, 2.62]} />
+      <PropEdge
+        position={[0, layout.counter.height + 0.01, layout.counter.offsetZ]}
+        size={[layout.counter.width + 0.05, 0.05, layout.counter.depth + 0.02]}
+      />
 
-      <mesh castShadow position={[0, 0.58, -0.55]}>
-        <boxGeometry args={[7.4, 0.5, 0.18]} />
-        <meshStandardMaterial color="#312e81" emissive="#6366f1" emissiveIntensity={0.25} roughness={0.7} />
-      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh
+          key={`cabinet-${side}`}
+          castShadow
+          position={[
+            side * layout.sideCabinet.offsetX,
+            cabinetY,
+            layout.sideCabinet.offsetZ,
+          ]}
+        >
+          <boxGeometry
+            args={[layout.sideCabinet.width, layout.sideCabinet.height, layout.sideCabinet.depth]}
+          />
+          <meshStandardMaterial color="#241733" roughness={0.86} />
+        </mesh>
+      ))}
 
       {[-1.5, 1.5].map((offsetX) => (
-        <group key={offsetX} position={[offsetX, 0.62, 0.15]}>
+        <group key={offsetX} position={[offsetX, layout.counter.height + 0.04, layout.counter.offsetZ + 0.08]}>
           <mesh castShadow>
             <cylinderGeometry args={[0.55, 0.55, 0.06, 24]} />
             <meshStandardMaterial color="#18181b" roughness={0.55} metalness={0.35} />
@@ -562,10 +588,16 @@ function DjBooth() {
         </group>
       ))}
 
-      <DjMixer />
+      <group position={[0, layout.counter.height, layout.counter.offsetZ + 0.02]}>
+        <DjMixer />
+      </group>
 
       {[-3.1, 3.1].map((offsetX) => (
-        <group key={offsetX} position={[offsetX, 0.72, -0.1]} rotation={[0, offsetX > 0 ? -0.35 : 0.35, 0]}>
+        <group
+          key={offsetX}
+          position={[offsetX, layout.counter.height + 0.16, layout.counter.offsetZ - 0.02]}
+          rotation={[0, offsetX > 0 ? -0.35 : 0.35, 0]}
+        >
           <mesh castShadow position={[0, 0.18, 0]}>
             <boxGeometry args={[0.55, 0.36, 0.42]} />
             <meshStandardMaterial color="#18181b" roughness={0.8} />
@@ -577,10 +609,6 @@ function DjBooth() {
         </group>
       ))}
 
-      <mesh position={[0, 0.86, -0.62]}>
-        <boxGeometry args={[6.8, 0.22, 0.08]} />
-        <meshStandardMaterial color="#f0abfc" emissive="#e879f9" emissiveIntensity={0.85} />
-      </mesh>
     </group>
   )
 }

@@ -89,6 +89,35 @@ function clubOrientedObstacle(
   return boxFromCenter(centerX, centerZ, width, depth, padding)
 }
 
+function buildClubDjBoothObstacles(): ObstacleBox[] {
+  const [centerX, , centerZ] = CLUB_DJ_BOOTH_POSITION
+  const layout = CLUB_COLLISION.djBooth
+
+  return [
+    boxFromCenter(
+      centerX,
+      centerZ + layout.counter.offsetZ,
+      layout.counter.width,
+      layout.counter.depth,
+      0.08,
+    ),
+    boxFromCenter(
+      centerX - layout.sideCabinet.offsetX,
+      centerZ + layout.sideCabinet.offsetZ,
+      layout.sideCabinet.width,
+      layout.sideCabinet.depth,
+      0.06,
+    ),
+    boxFromCenter(
+      centerX + layout.sideCabinet.offsetX,
+      centerZ + layout.sideCabinet.offsetZ,
+      layout.sideCabinet.width,
+      layout.sideCabinet.depth,
+      0.06,
+    ),
+  ]
+}
+
 function buildClubObstacles(): ObstacleBox[] {
   return [
     ...CLUB_PARTITION_PLACEMENTS.map(({ position, size }) =>
@@ -106,13 +135,7 @@ function buildClubObstacles(): ObstacleBox[] {
     ...CLUB_VRM_SCULPTURE_PLACEMENTS.map(({ position }) =>
       boxFromCenter(position[0], position[2], CLUB_COLLISION.sculpture.width, CLUB_COLLISION.sculpture.depth, 0.1),
     ),
-    boxFromCenter(
-      CLUB_DJ_BOOTH_POSITION[0],
-      CLUB_DJ_BOOTH_POSITION[2],
-      CLUB_COLLISION.djBooth.width,
-      CLUB_COLLISION.djBooth.depth,
-      0.1,
-    ),
+    ...buildClubDjBoothObstacles(),
   ]
 }
 
