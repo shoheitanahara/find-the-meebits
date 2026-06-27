@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { Vector2 } from 'three'
 import { PLAYER_COLLISION_RADIUS, resolveMovement } from '../collision/collision'
+import { clampFrameDelta } from '../game/perfConfig'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { useTouchControlsStore } from '../stores/touchControlsStore'
@@ -21,6 +22,7 @@ export function AvatarController() {
   const controlsRef = useKeyboardControls()
 
   useFrame((_, delta) => {
+    const frameDelta = clampFrameDelta(delta)
     const controls = controlsRef.current
     const gamePhase = useGameStore.getState().gamePhase
     const player = usePlayerStore.getState()
@@ -60,8 +62,8 @@ export function AvatarController() {
 
     moveVector.normalize()
 
-    const nextX = world.x + moveVector.x * MOVE_SPEED * delta
-    const nextZ = world.z + moveVector.y * MOVE_SPEED * delta
+    const nextX = world.x + moveVector.x * MOVE_SPEED * frameDelta
+    const nextZ = world.z + moveVector.y * MOVE_SPEED * frameDelta
     const resolved = resolveMovement(
       world.x,
       world.z,
@@ -74,7 +76,7 @@ export function AvatarController() {
 
     setPlayerWorldTransform(resolved.x, resolved.z, rotationY)
     setPlayerWorldMovement(true, true)
-    tickPlayerWorldStoreSync(delta)
+    tickPlayerWorldStoreSync(frameDelta)
   })
 
   return null

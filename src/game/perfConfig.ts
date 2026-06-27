@@ -143,3 +143,10 @@ export const TARGET_VRM_PRELOAD_PRIORITY = -300
 
 /** ターゲット静止画キャプチャ用 VRM ロード（テンプレートプリロードより少し後） */
 export const TARGET_PREVIEW_CAPTURE_VRM_PRIORITY = -350
+
+/** タブ非表示復帰などで delta が跳ねるのを抑える（約 3 フレーム分上限） */
+const MAX_FRAME_DELTA_SEC = 1 / 20
+
+export function clampFrameDelta(delta: number) {
+  return Math.min(Math.max(delta, 0), MAX_FRAME_DELTA_SEC)
+}

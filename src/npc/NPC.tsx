@@ -13,6 +13,7 @@ import {
   getNpcFarUpdateDistance,
   getNpcFarUpdateSkipDivisor,
   shouldNpcCastShadow,
+  clampFrameDelta,
 } from '../game/perfConfig'
 import { setVrmCastShadow } from '../avatar/VRMLoader'
 import { getNpcVrmLoadPriority } from './vrmLodUtils'
@@ -116,6 +117,8 @@ export function NPC({ profile }: NPCProps) {
     const root = rootRef.current
     if (!root) return
 
+    const frameDelta = clampFrameDelta(delta)
+
     const gamePhase = useGameStore.getState().gamePhase
     const currentPosition = currentPositionRef.current
     const playerPosition = getPlayerWorldPosition()
@@ -183,8 +186,8 @@ export function NPC({ profile }: NPCProps) {
 
       const previousX = currentPosition.x
       const previousZ = currentPosition.z
-      currentPosition.x += Math.sin(directionRef.current) * WALK_SPEED * delta
-      currentPosition.z += Math.cos(directionRef.current) * WALK_SPEED * delta
+      currentPosition.x += Math.sin(directionRef.current) * WALK_SPEED * frameDelta
+      currentPosition.z += Math.cos(directionRef.current) * WALK_SPEED * frameDelta
       clampToGallerySquare(currentPosition, directionRef)
 
       if (
@@ -208,7 +211,7 @@ export function NPC({ profile }: NPCProps) {
         idleOffset: profile.position[0] + profile.position[2],
         walkPhaseOffset,
       })
-      update(delta)
+      update(frameDelta)
     }
 
     if (shouldFacePlayer) {
@@ -220,7 +223,7 @@ export function NPC({ profile }: NPCProps) {
     const bob = Math.sin(state.clock.elapsedTime * 1.6 + walkPhaseOffset) * 0.03
     root.position.set(currentPosition.x, profile.position[1] + bob, currentPosition.z)
 
-    storeUpdateTimerRef.current += delta
+    storeUpdateTimerRef.current += frameDelta
     const positionStoreInterval = isFarNpc ? (farUpdateSkipDivisor >= 5 ? 0.75 : 0.5) : 0.25
     if (isAnswerRevealed || storeUpdateTimerRef.current >= positionStoreInterval) {
       storeUpdateTimerRef.current = 0
