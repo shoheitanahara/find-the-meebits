@@ -6,6 +6,10 @@ import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.j
 import { applyVRMAttentionPose } from '../avatar/VRMLocomotion'
 import { getMeebitVrmUrl, loadVRM } from '../avatar/VRMLoader'
 import { enqueueVrmLoad } from '../avatar/vrmLoadQueue'
+import {
+  CLUB_SCULPTURE_VRM_LOAD_PRIORITY,
+  MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY,
+} from '../game/perfConfig'
 import type { VenueId } from '../game/venueConfig'
 import { getClubVrmSculptureMeebitIds } from './clubLandmarks'
 import { getVrmSculptureMeebitIds } from './worldLandmarks'
@@ -37,7 +41,10 @@ function freezeVrmAsSculpture(vrm: VRM): Group {
   return vrm.scene as Group
 }
 
-async function ensureMasterScene(meebitId: number): Promise<Group> {
+async function ensureMasterScene(
+  meebitId: number,
+  priority = MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY,
+): Promise<Group> {
   const cached = masterScenes.get(meebitId)
   if (cached) {
     return cached
@@ -45,7 +52,7 @@ async function ensureMasterScene(meebitId: number): Promise<Group> {
 
   let pending = inflight.get(meebitId)
   if (!pending) {
-    pending = enqueueVrmLoad(() => loadVRM(getMeebitVrmUrl(meebitId)), -250).then((vrm) => {
+    pending = enqueueVrmLoad(() => loadVRM(getMeebitVrmUrl(meebitId)), priority).then((vrm) => {
       inflight.delete(meebitId)
       const master = freezeVrmAsSculpture(vrm)
       masterScenes.set(meebitId, master)
@@ -89,9 +96,11 @@ export function releaseVrmSculptureScene(meebitId: number, scene: Group) {
 export function preloadVrmSculpturesForVenue(venueId: VenueId = 'museum') {
   const meebitIds =
     venueId === 'club' ? getClubVrmSculptureMeebitIds() : getVrmSculptureMeebitIds()
+  const priority =
+    venueId === 'club' ? CLUB_SCULPTURE_VRM_LOAD_PRIORITY : MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY
 
   for (const meebitId of meebitIds) {
-    void ensureMasterScene(meebitId)
+    void ensureMasterScene(meebitId, priority)
   }
 }
 

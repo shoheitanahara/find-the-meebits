@@ -1,10 +1,16 @@
 import { create } from 'zustand'
 import {
+  CREATOR_MEEBIT_ID,
   CREATOR_NPC_ID,
   GAME_TIME_LIMIT_SECONDS,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
-import { getNpcMaxConcurrentVrm, getWarmupLoadDistance, TARGET_VRM_PRELOAD_PRIORITY } from '../game/perfConfig'
+import {
+  CREATOR_VRM_LOAD_PRIORITY,
+  getNpcMaxConcurrentVrm,
+  getWarmupLoadDistance,
+  TARGET_VRM_PRELOAD_PRIORITY,
+} from '../game/perfConfig'
 import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameMode'
 import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
@@ -481,7 +487,12 @@ function seedNpcPositions(profiles: NPCProfile[]) {
   }
 
   useNpcStore.setState({ nearestNpcId: null, npcPositions })
+  preloadCreatorVrm()
   warmStartActiveVrmNpcIds(profiles)
+}
+
+function preloadCreatorVrm() {
+  preloadVrm(CREATOR_MEEBIT_ID, CREATOR_VRM_LOAD_PRIORITY)
 }
 
 function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {

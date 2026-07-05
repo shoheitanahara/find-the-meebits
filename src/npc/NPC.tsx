@@ -13,6 +13,7 @@ import {
   getNpcFarUpdateDistance,
   getNpcFarUpdateSkipDivisor,
   shouldNpcCastShadow,
+  CREATOR_VRM_LOAD_PRIORITY,
 } from '../game/perfConfig'
 import { setVrmCastShadow } from '../avatar/VRMLoader'
 import { getNpcVrmLoadPriority } from './vrmLodUtils'
@@ -63,8 +64,13 @@ export function NPC({ profile }: NPCProps) {
       !state.foundTargetNpcIds.includes(profile.id),
   )
   const npcResetVersion = useGameStore((state) => state.npcResetVersion)
+  const venueId = useGameStore((state) => state.venueId)
+  const isCreatorNpc = profile.id === CREATOR_NPC_ID
+  const isClubDjNpc = isCreatorNpc && venueId === 'club'
   const [shouldLoadVRM, setShouldLoadVRM] = useState(() => isNpcVrmActive(profile.id))
-  const [loadPriority, setLoadPriority] = useState(9999)
+  const [loadPriority, setLoadPriority] = useState(() =>
+    isCreatorNpc ? CREATOR_VRM_LOAD_PRIORITY : 9999,
+  )
   const shouldLoadVRMRef = useRef(shouldLoadVRM)
   const { vrmRef, vrmScene, status, update } = useVRMModel(
     profile.meebitNumber,
@@ -98,10 +104,10 @@ export function NPC({ profile }: NPCProps) {
         playerPosition[0] - profile.position[0],
         playerPosition[2] - profile.position[2],
       )
-      setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase))
+      setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase, isCreatorNpc))
     }
     setShouldLoadVRM(wantsVrm)
-  }, [profile.id, profile.meebitNumber, profile.position, profile.rotation, npcResetVersion])
+  }, [profile.id, profile.meebitNumber, profile.position, profile.rotation, npcResetVersion, isCreatorNpc])
 
   useEffect(() => {
     if (shouldLoadVRM && status === 'ready') {
@@ -128,8 +134,7 @@ export function NPC({ profile }: NPCProps) {
 
     const frameDelta = clampFrameDeltaAfterTabResume(delta)
 
-    const venueId = useGameStore.getState().venueId
-    const isClubDj = profile.id === CREATOR_NPC_ID && venueId === 'club'
+    const isClubDj = isClubDjNpc
     const gamePhase = useGameStore.getState().gamePhase
     const currentPosition = currentPositionRef.current
     const playerPosition = getPlayerWorldPosition()
@@ -152,7 +157,7 @@ export function NPC({ profile }: NPCProps) {
 
     if (wantsVrm !== shouldLoadVRMRef.current) {
       if (wantsVrm) {
-        setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase))
+        setLoadPriority(getNpcVrmLoadPriority(distance, gamePhase, isCreatorNpc))
       }
       shouldLoadVRMRef.current = wantsVrm
       setShouldLoadVRM(wantsVrm)
@@ -263,7 +268,11 @@ export function NPC({ profile }: NPCProps) {
 
   return (
     <group ref={rootRef} rotation={[0, profile.rotation[1], 0]}>
-      {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : <MeebitSilhouette />}
+      {vrmScene ? (
+        <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
+      ) : (
+        <MeebitSilhouette tone={isClubDjNpc ? 'club' : 'default'} />
+      )}
       {isNearest ? <InteractionPin /> : null}
       {isAnswerRevealed ? <TargetAnswerGlow /> : null}
     </group>

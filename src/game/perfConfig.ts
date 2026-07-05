@@ -138,6 +138,15 @@ export function getMaxVrmTemplateCache() {
 /** プレイヤー VRM は NPC の warmup より常に先にロードキューへ入れる */
 export const PLAYER_VRM_LOAD_PRIORITY = -2000
 
+/** Shawn T. Art — 遠方でも最優先で VRM を取得 */
+export const CREATOR_VRM_LOAD_PRIORITY = -900
+
+/** Club 常設彫刻 — NPC warmup（-700 台）より先 */
+export const CLUB_SCULPTURE_VRM_LOAD_PRIORITY = -850
+
+/** Museum 常設彫刻 */
+export const MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY = -250
+
 /** ターゲット VRM テンプレートのプリロード（NPC より先） */
 export const TARGET_VRM_PRELOAD_PRIORITY = -300
 

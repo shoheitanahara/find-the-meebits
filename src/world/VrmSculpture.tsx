@@ -14,9 +14,11 @@ import type { VrmSculpturePedestal } from './worldLandmarks'
 export type SculptureTone = 'museum' | 'club'
 
 const CLUB_SCULPTURE_MATERIAL = new MeshStandardMaterial({
-  color: '#27272a',
+  color: '#52525b',
   roughness: 0.42,
   metalness: 0.22,
+  emissive: '#27272a',
+  emissiveIntensity: 0.35,
 })
 
 function applyClubSculptureTone(root: Object3D) {

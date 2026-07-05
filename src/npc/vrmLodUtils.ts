@@ -5,6 +5,7 @@ import {
   getNpcVrmLateralSpan,
   getNpcVrmViewAheadLoadDistance,
   getNpcVrmViewAheadUnloadDistance,
+  CREATOR_VRM_LOAD_PRIORITY,
 } from '../game/perfConfig'
 import type { Vector3Tuple } from '../types/game'
 import { CAMERA_FOLLOW_OFFSET_XZ } from '../game/gameConfig'
@@ -60,7 +61,12 @@ export function isNpcWithinVrmRange(
 export function getNpcVrmLoadPriority(
   distance: number,
   gamePhase: 'intro' | 'preparing' | 'playing' | 'timedOut' | 'cleared' | 'conquered',
+  isCreator = false,
 ) {
+  if (isCreator) {
+    return CREATOR_VRM_LOAD_PRIORITY
+  }
+
   if (gamePhase === 'intro' || gamePhase === 'preparing') {
     return -700 + Math.min(distance, 250)
   }
