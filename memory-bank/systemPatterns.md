@@ -4,73 +4,103 @@
 
 ```
 src/
-├── App.tsx                 # ルート UI、Analytics
-├── main.tsx
-├── avatar/                 # VRM ロード・プレイヤー・プール
-│   ├── VRMLoader.ts        # getMeebitVrmUrl → Worker URL
-│   ├── vrmInstancePool.ts  # テンプレートキャッシュ・ステージリセット
-│   ├── vrmLoadQueue.ts     # 同時ロード数制限
-│   ├── useVRMModel.ts      # exclusive フラグでプレイヤー/キャプチャ分岐
-│   └── PlayerAvatar.tsx
+├── App.tsx                 # TabPauseSystem, VenueBgmSystem, Analytics
+├── avatar/
+│   ├── VRMLoader.ts
+│   ├── VRMLocomotion.ts    # applyVRMLocomotion, applyVRMDjPose, applyVRMAttentionPose
+│   ├── AvatarController.tsx
+│   └── vrmInstancePool.ts
 ├── game/
-│   ├── GameCanvas.tsx      # R3F Canvas
-│   ├── gameConfig.ts       # 定数（WORLD_RADIUS, VRM 距離など）
-│   ├── gameProgression.ts  # 8 ステージ定義
-│   └── perfConfig.ts       # モバイル/PC 性能分岐・ウォームアップ距離
+│   ├── GameCanvas.tsx      # frameloop タブ連動
+│   ├── GameScene.tsx       # venueId で Club/Museum コンポーネント分岐
+│   ├── gameProgression.ts  # Museum 8 + Club 5 ステップ
+│   ├── venueConfig.ts      # VenueId, テーマ, After Hours ラベル
+│   └── perfConfig.ts
 ├── npc/
-│   ├── NPC.tsx             # 個別 NPC（VRM LOD, 徘徊 AI）
-│   ├── NPCManager.tsx      # layout key + finalizeVrmInstancePoolEviction
-│   ├── NPCVrmLodSystem.tsx # LOD 選択・ウォームアップ距離
-│   ├── npcGeneration.ts    # プロファイル生成、Shawn セリフ
-│   ├── npcDialogue.ts      # 会話選択、ヒント確率
-│   ├── npcTargetHint.ts    # 3 段階ヒント、6 エリア
-│   └── vrmLodState.ts      # アクティブ VRM NPC セット・準備完了判定
+│   ├── NPC.tsx             # isClubDj 分岐, タブ復帰処理
+│   ├── npcGeneration.ts    # getCreatorNpcForVenue (club DJ 位置)
+│   ├── npcClubDialogue.ts  # Club セリフプール
+│   └── npcDialogue.ts      # talkCount, ヒント
 ├── stores/
-│   ├── gameStore.ts        # ゲームフェーズ、warmStartActiveVrmNpcIds
-│   ├── npcStore.ts
-│   └── playerStore.ts
+│   └── gameStore.ts        # venueId, getElapsedSeconds + tab pause
 ├── world/
-│   ├── worldLandmarks.ts   # 座標（描画・当たり・ヒント共有）
-│   ├── Props.tsx           # ベンチ・ブロック彫刻
-│   ├── VrmSculpture.tsx    # VRM 彫刻 9 体
-│   ├── vrmSculptureCache.ts
-│   ├── VrmSculpturePreloader.tsx
-│   ├── Buildings.tsx
-│   └── Plaza.tsx
+│   ├── worldLandmarks.ts   # Museum 座標
+│   ├── clubLandmarks.ts    # Club 座標, DJ ブース, Shawn 位置
+│   ├── ClubProps.tsx       # DjBooth, バー, VIP 等
+│   ├── ClubMirrorBall.tsx
+│   ├── ClubSpotlights.tsx
+│   ├── ClubWorld.tsx
+│   └── WorldRoot.tsx       # venueId → ClubWorld | MuseumWorld
 ├── collision/
-│   ├── obstacles.ts
-│   └── spawnValidation.ts
-├── ui/
-│   ├── TargetHUD.tsx
-│   ├── PrepareOverlay.tsx  # 準備中 UI（near 40m / preload 60m）
-│   └── mobile/
+│   └── obstacles.ts        # getWorldObstacles(venueId)
+├── audio/
+│   └── venueAudioConfig.ts
 └── systems/
-    ├── StagePrepareSystem.tsx  # 18秒タイムアウト
-    └── TargetVrmPreloader.tsx
+    ├── tabPause.ts
+    ├── TabPauseSystem.tsx
+    ├── TabResumeInvalidator.tsx
+    ├── VenueBgmSystem.tsx
+    └── save/localStorage.ts  # meebits-world-save-v2, talkedCountByMeebit
 
 workers/vrm-cache/
-├── src/index.ts            # R2 キャッシュ + upstream fetch + CORS
-└── wrangler.toml
-
-scripts/seed-vrm-sculptures.mjs
-.env.example
-.gitignore
-public/favicon.jpg
+public/audio/               # museum-bgm.mp3, club-bgm.mp3
 ```
 
-## VRM 配信フロー
+## 会場（Venue）パターン
+
+```ts
+type VenueId = 'museum' | 'club'
+```
+
+| 会場 | 表示名 | 座標ソース | ワールド |
+|------|--------|-----------|---------|
+| museum | Museum | `worldLandmarks.ts` | MuseumWorld |
+| club | After Hours | `clubLandmarks.ts` | ClubWorld |
+
+- `gameStore.venueId` が描画・collision・BGM・NPC 生成を駆動
+- `buildNpcProfiles(count, venueId)` — Shawn 位置は会場で上書き
+
+## Shawn T. Art（CREATOR_NPC_ID）
+
+| 会場 | 位置 | 挙動 |
+|------|------|------|
+| museum | `[-10, 0, -14]` | 通常 NPC 徘徊 |
+| club | `[0, 0.06, -42.62]` rotation `0` | DJ 固定、`applyVRMDjPose` |
+
+- VRM LOD では常に forced（`NPCVrmLodSystem`）
+- ターゲット選択から除外（`targetSelection.ts`）
+
+## DJ ブース（Club）
+
+- 基準: `CLUB_DJ_BOOTH_POSITION = [0, 0, -42]`
+- レイアウト: `CLUB_DJ_BOOTH_LAYOUT` — counter / platform / sideCabinet
+- 描画: `ClubProps.tsx` → `DjBooth()`
+- 当たり: `buildClubDjBoothObstacles()` — counter + cabinets（platform は通過可）
+
+## タブ一時停止
 
 ```
-getMeebitVrmUrl(id)
-  → 本番: ${VITE_VRM_BASE_URL}/vrm/{id}.vrm
-  → 開発: /vrm/{id}.vrm → Vite proxy → wrangler dev
+visibility hidden:
+  GameCanvas frameloop = "never"
+  tabPause.noteTabHidden() → タイマー除外開始
+  VenueBgmSystem pause
 
-Worker:
-  GET /vrm/{id}.vrm
-  → R2 get → ヒットなら返却
-  → ミス → files.meebits.app fetch → R2 put → 返却
-  → Access-Control-Allow-Origin（ALLOWED_ORIGINS 一致時）
+visibility visible:
+  noteTabVisible() → tabResumeGeneration++
+  frameloop = "always"
+  TabResumeInvalidator.invalidate()
+  clampFrameDeltaAfterTabResume (80ms)
+  NPC: pauseUntilRef = 0
 ```
+
+- `getElapsedSeconds(startedAt)` = `(Date.now() - startedAt - getTabPausedMs()) / 1000`
+- `resetTabPauseClock()` on `beginPlaying` / `resetGame`
+
+## BGM
+
+- `VenueBgmSystem` — `venueId` + `gamePhase` + `document.visibilityState`
+- 再生フェーズ: preparing, playing, timedOut, cleared
+- URL: `resolveVenueBgmUrl()` — ローカル `/audio/` or `VITE_BGM_BASE_URL`
 
 ## ゲームフェーズ（`gameStore`）
 
@@ -78,80 +108,31 @@ Worker:
 intro → preparing → playing → cleared | timedOut | conquered
 ```
 
-- `intro`: スタート画面、バックグラウンド VRM ロード開始
-- `preparing`: VRM ロード待ち + Tips → `StagePrepareSystem` が `beginPlaying`
-- `warmStartActiveVrmNpcIds`: 開始位置から `getWarmupLoadDistance()` 以内を先読み
-- `continueToNextStage` / `retryStage`: 同じリセット経路（`resetStageRuntimeState`）
-
-## NPC レイアウト再生成
-
-```ts
-createNpcLayout(npcCount, npcLayoutVersion)
-// → npcProfiles 再生成, npcLayoutVersion++
-```
-
-`NPCManager` の `key={layout-${npcLayoutVersion}}` で React ツリー全体を差し替え。
+- Museum conquered → `afterHoursUnlockPending` → Club intro 可能
+- Club 進行は `getClubProgressionSteps()` 独立
 
 ## 座標の単一ソース
 
-**オブジェクト位置は `worldLandmarks.ts` に集約。**
+| 会場 | ファイル |
+|------|---------|
+| Museum | `worldLandmarks.ts` |
+| Club | `clubLandmarks.ts` |
 
-- `Props.tsx` / `VrmSculpture.tsx` — 描画
-- `obstacles.ts` — 当たり判定
-- `npcTargetHint.ts` — `buildHintLandmarks()` 経由でヒント
+描画・collision・ヒントは各 landmarks から参照。
 
-## ブロック彫刻（MonochromeSculpture）
+## 会話記憶
 
-- `SCULPTURE_POSITIONS` 8 体、ギャラリー内側
-- **偶数 index**: dark — 黒土台 + シルバー彫刻
-- **奇数 index**: light — 白土台 + 白彫刻（`#ffffff`, metalness 0）
-- 回転: `getSculptureFacing(position)` で中心向き
+- キー: `meebitTalkKey(meebitNumber)` — NPC ID ではない
+- ストレージ: `meebits-world-save-v2`
+- `selectDialogueLines` — talkCount で初回/再会
 
-## VRM 彫刻（VrmSculpture）
-
-- `VRM_SCULPTURE_PLACEMENTS` **9 体**
-- グレー Meebit、I ポーズ、1.5× スケール、入口（+Z）向き
-- 台座: `light` = 白 / `dark` = 黒
-- 専用キャッシュ（`vrmSculptureCache.ts`）、NPC プールと独立
-- ID 例: 17600, 11143, 8506, 605, 10326, 11796, 7347, 3458, 8369
-
-## ベンチ
-
-- 6 箇所（`BENCH_POSITIONS`）、`y: 0.5`
-- 背もたれなし、4 脚 + 横棒、脚長 3.6
-
-## ヒントシステム（3 段階）
-
-| 距離 | 内容 |
-|------|------|
-| ≤ 14m | 「すぐ近く」 |
-| ≤ 10m（ランドマーク） | dark/light sculpture / **VRM 彫刻（台座色）** / bench |
-| それ以外 | 6 エリア（entrance, front, center, back, west, east） |
-| ≥ 48m かつ別ゾーン | `far toward the ...` でぼかし |
-
-- **8 方向（NE 等）は使わない**
-- ヒント確率: `TARGET_HINT_CHANCE = 0.25`（`npcDialogue.ts`）
-- Golden Tree ヒントは **削除済み**
-
-## ゾーン境界（`classifyZone`）
+## VRM 配信フロー（変更なし）
 
 ```
-x < -26 → west
-x > 26  → east
-z > 36  → entrance
-z < -26 → back
-z > 6   → front
-else    → center
+getMeebitVrmUrl(id) → Worker / R2 → CORS 付き返却
 ```
 
-## UI パターン
+## ヒント（Club）
 
-- PC ターゲット HUD: `TargetHUD.tsx`（`lg:block`）、3 体以上は `h-28 w-28` 2 列グリッド
-- SP: `MobileTopBar.tsx`
-- 準備中: `PrepareOverlay.tsx` — near 40m / preload 60m（PC）表示
-
-## 影・VRM 接地
-
-- `VRMLoader.ts`: `alignVrmFeetToGround()`, `VRM_FEET_Y_OFFSET = 0.06`
-- NPC/プレイヤー: `receiveShadow = false`
-- `Lighting.tsx`: `shadow-normalBias` 調整済み
+- `buildClubHintLandmarks()` — バー, VIP, DJ, 彫刻, スポットライト等
+- DJ ヒント座標: `CLUB_CREATOR_DJ_POSITION`

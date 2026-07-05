@@ -4,8 +4,10 @@
 
 ### コアゲーム
 
-- [x] 8 ステージ進行（regular ×5 + semifinal / final / grandfinal）
-- [x] PC / モバイル NPC 数分岐
+- [x] Museum 8 ステージ進行（regular ×5 + semifinal / final / grandfinal）
+- [x] **After Hours（Club）5 ステージ**（afterhours ×4 + lastcall）
+- [x] Museum クリア後 Club アンロック
+- [x] PC / モバイル NPC 数分岐（会場別）
 - [x] 複数ターゲット（最大 5）の発見・クリアフロー
 - [x] タイムアタック 180 秒
 - [x] 会話システム（E キー / モバイルインタラクト）
@@ -16,75 +18,81 @@
 - [x] VRM インスタンスプール + LRU キャッシュ
 - [x] LOD（距離ベース VRM ロード/アンロード）
 - [x] ステージ切替時の安全なメモリ回収
-- [x] RETRY 時のメモリリーク修正（finalize eviction + preview cache clear）
-- [x] **Cloudflare R2 + Worker による VRM 配信**（CORS + オンデマンドキャッシュ）
-- [x] VRM 彫刻 9 体（専用キャッシュ、Golden Tree 廃止）
-- [x] ウォームアップ距離・準備 ready 数の引き上げ
+- [x] RETRY 時のメモリリーク修正
+- [x] Cloudflare R2 + Worker による VRM 配信
+- [x] Museum VRM 彫刻 9 体 / Club VRM 彫刻 6 体
+- [x] モバイル DPR=1、同時 VRM 上限調整
+
+### After Hours（Club）
+
+- [x] Club ワールド（床・ネオン・VIP・バー・スピーカー・パーティション）
+- [x] DJ ブース（カウンター + デッキ + ミキサー、バックパネル・ピンク棒なし）
+- [x] **Shawn T. Art DJ 固定配置 + `applyVRMDjPose`**
+- [x] Club スポットライト
+- [x] ミラーボール + 床ディスコ光
+- [x] Club 当たり判定・ヒントランドマーク
+
+### オーディオ
+
+- [x] 会場別 BGM（Museum / Club MP3）
+- [x] `VenueBgmSystem` — フェーズ・タブ visibility 連動
+- [x] 任意 `VITE_BGM_BASE_URL`
+
+### タブ・パフォーマンス
+
+- [x] **タブ非表示: レンダー停止 + タイマー停止 + BGM 一時停止**
+- [x] タブ復帰: invalidate + 復帰直後 delta クランプ + ランダム停止リセット
+- [x] 常時 delta クランプ削除（ガタつき対策）
+
+### 会話・コンテンツ
+
+- [x] 初回/再会セリフ分割（Museum / Club）
+- [x] 会話記憶 **Meebit 番号単位**（`meebits-world-save-v2`）
+- [x] 会話カメラ 2 候補（FollowCamera）
+- [x] Shawn Museum 11 件 + Club 専用セリフ
 
 ### インフラ・開発体験
 
-- [x] Vercel Serverless VRM プロキシ廃止（帯域削減）
+- [x] Vercel Serverless VRM プロキシ廃止
 - [x] `npm run dev` で Vite + Worker 同時起動
-- [x] `.gitignore`（node_modules / dist / .wrangler）
-- [x] VRM シードスクリプト（`npm run vrm:seed`）
+- [x] Vercel Analytics
 
 ### UI・UX
 
-- [x] モバイル UI（TopBar, Controls, ジョイスティック）
-- [x] タブレット = SP 設定（1024px → 1023px ブレークポイント）
-- [x] ターゲット静止画プレビュー（全ステージ）
-- [x] PC TargetHUD 5 体サイズ統一
-- [x] TimeUpOverlay 複数ターゲット対応
+- [x] モバile UI（Lucide アイコン、ジョイスティック）
+- [x] タブレット = SP 設定
+- [x] ターゲット静止画プレビュー
 - [x] favicon
-- [x] Vercel Analytics 組み込み
 
-### ワールド
+### Museum ワールド
 
-- [x] MonochromeSculpture 3 バリエーション（像・アーチ・螺旋）8 体
-- [x] **VRM 彫刻 9 体**（グレー Meebit + 白/黒台座）
-- [x] Sculpture 内側配置・正面向き
-- [x] light/dark sculpture の色分け
-- [x] ベンチ 6 箇所（背もたれなし、脚 3.6）
+- [x] MonochromeSculpture 8 体、VRM 彫刻 9 体、ベンチ 6
 - [x] 当たり判定とヒント座標の共通化
-
-### コンテンツ
-
-- [x] ヒント 3 段階 + 6 エリア（8 方向削除）
-- [x] VRM 彫刻ヒント（台座色: white / black pedestal）
-- [x] `TARGET_HINT_CHANCE = 0.25`
-- [x] 一般 NPC セリフプール整理
-- [x] Shawn T. Art セリフ差し替え（11 件）
-
-### 影
-
-- [x] receiveShadow オフ（VRM 足元）
-- [x] shadow-normalBias 調整
 
 ## 既知の課題・制約
 
 | 項目 | 内容 |
 |------|------|
-| Final 400 体 | 端末によっては重い（クライアント GPU/メモリ限界） |
-| Worker 無料枠 | 10 万 req/日。超過時 Workers Paid $5/月 程度 |
-| Meebits 利用許諾 | R2 への再配信が許されているかは別途確認 |
-| Worker URL | `find-the-meebits-vrm.find-the-meebits-vrm.workers.dev`（見た目冗長だが問題なし） |
-| SP 5 体 HUD | `MobileTopBar` は PC `TargetHUD` とは別レイアウト |
+| Final / Club 400 体 | 端末によっては重い |
+| Worker 無料枠 | 10 万 req/日 |
+| BGM ファイル | `public/audio/` に配置。本番 CDN は任意 |
+| SP 5 体 HUD | PC `TargetHUD` とは別レイアウト |
+| Shawn DJ 位置 | 微調整は `CLUB_CREATOR_DJ_POSITION` の z のみ |
 
 ## 未着手・任意改善
 
-- [ ] `TimeUpOverlay` の 5 体プレビューサイズを TargetHUD に完全統一
-- [ ] Worker カスタムドメイン（例: `vrm.example.com`）
-- [ ] README.md（リポジトリに未作成）
-- [ ] favicon を真の PNG/ICO + 複数サイズに最適化
-- [ ] Vercel Hobby にダウングレード可能か（VRM 帯域削減後）Usage 確認
+- [ ] `TimeUpOverlay` プレビューサイズ完全統一
+- [ ] Worker カスタムドメイン
+- [ ] README.md
+- [ ] BGM を R2 に置いて `VITE_BGM_BASE_URL` 本番設定
+- [ ] アバター変更時の会話リセット（スタート時 Meebit 変更のみ、等）
 
 ## テスト観点（手動）
 
-1. ステージ進行後も FPS が落ち続けないか
-2. RETRY 5 回以上繰り返しても重くならないか
-3. Grand Final 5 体 HUD（PC / SP）
-4. VRM 彫刻 / light・dark ブロック彫刻のヒント区別
-5. モバイルジョイスティック + 縦画面
-6. **本番**: VRM が Worker URL から 200 + CORS OK
-7. **本番**: Vercel Usage で Fast Data Transfer が VRM 移行前より低下
-8. `npm run dev` 単一コマンドでローカルプレイ可能
+1. Museum → Grand Final クリア → After Hours 遷移
+2. Club DJ ブース: Shawn がカウンター向こうに見える、DJ モーション
+3. タブ切替: タイマー止まる / 復帰ですぐ歩き再開
+4. BGM: 会場切替・タブ非表示で pause
+5. 会話: 初回/再会セリフ、Meebit 番号で記憶
+6. RETRY 後メモリ・FPS
+7. 本番 VRM Worker 200 + CORS

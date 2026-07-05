@@ -1,78 +1,91 @@
 # Product Context
 
+## 会場
+
+| ID | 表示名 | 解放 |
+|----|--------|------|
+| museum | Museum | 初期 |
+| club | After Hours | Museum Grand Final クリア後 |
+
 ## ステージ進行（`gameProgression.ts`）
 
-### PC
+### Museum — PC
 
 | # | 種別 | NPC 数 | ターゲット |
 |---|------|--------|-----------|
-| 1–5 | regular | 200→250→300→350→400 | 1 |
-| 6 | semifinal | 400 | 2 |
-| 7 | final | 400 | 3 |
-| 8 | grandfinal | 400 | 5 |
+| 1–5 | regular | 200→400 | 1 |
+| 6–8 | challenge | 400 | 2 / 3 / 5 |
 
-### モバイル・タブレット（≤1023px）
+### Museum — モバイル（≤1023px）
 
-| # | 種別 | NPC 数 | ターゲット |
+| # | NPC 数 | ターゲット |
+|---|--------|-----------|
+| 1–5 | 100→200 | 1 |
+| 6–8 | 200 | 2 / 3 / 5 |
+
+### After Hours（Club）— PC
+
+| # | kind | NPC 数 | ターゲット |
 |---|------|--------|-----------|
-| 1–5 | regular | 100→125→150→175→200 | 1 |
-| 6–8 | challenge | 200 | 2 / 3 / 5 |
+| 1–3 | afterhours | 300→400 | 2 |
+| 4 | afterhours | 400 | 3 |
+| 5 | lastcall | 400 | 5 |
 
-## ユーザー嗜好（会話で確定した方針）
+### After Hours — モバイル
 
-### ヒント
+| # | NPC 数 | ターゲット |
+|---|--------|-----------|
+| 1–3 | 150→200 | 2 |
+| 4–5 | 200 | 3 / 5 |
 
-- 単独で 8 方向は出さない
-- 東西 + 奥/前の組み合わせは OK
-- ランドマーク:
-  - ブロック彫刻: `near a black sculpture` / `near a white sculpture`
-  - **VRM 彫刻**: `near a gray Meebit sculpture on a white/black pedestal`
-  - ベンチ: `near a bench`
-- Golden Tree ヒントは **削除済み**
-- 壁アート・看板・ステージ等のピンポイントヒントは削除済み
-- 遠距離はエリア名をぼかす
-- ヒント確率: **0.25**
+## Shawn T. Art
 
-### ターゲットプレビュー
+- **Museum**: ギャラリー内クリエイター NPC、11 件専用セリフ（温かいトーン）
+- **Club**: DJ ブース固定、Club 専用セリフ（`CLUB_CREATOR_DIALOGUE_LINES`）
+- 会話は Meebit **#11143 番号単位**で回数記憶（会場共通）
 
-- **常に静止画**（3D ライブプレビューは使わない）
-- 共有 1 Canvas でキャプチャ（パフォーマンス重視）
+## 会話方針
 
-### UI
+- 初回 / 再会でセリフプールを分ける（Museum / Club 各）
+- 温かく親しみやすいトーン
+- Museum の Shawn セリフ内容はユーザー指定 11 件を維持
 
-- タブレットはスマホと同じ UI・操作（ストティック必須）
-- PC の Grand Final（5 体）HUD は 3 体版と同じ `h-28 w-28` サイズ
-- ゲーム内 UI テキストは英語
+## ヒント
 
-### ワールドオブジェクト
+- Museum: 6 エリア + 彫刻/ベンチ/VRM 彫刻
+- Club: バー, VIP, DJ, 彫刻, スポットライト等（`clubLandmarks.ts`）
+- 確率: `TARGET_HINT_CHANCE = 0.25`
+- 8 方向（NE 等）は使わない
 
-- Sculpture は美術館**内側**に配置
-- Sculpture は正面をギャラリー中心に向ける
-- light sculpture は白土台 + 白彫刻で dark と明確に区別
-- **VRM 彫刻**はグレー Meebit + 白/黒台座（Golden Tree の代替）
+## Club 演出
 
-### インフラ方針
+- ダークパープル会場、ネオン、スポットライト
+- ミラーボール + 床ディスコ光（ダンスフロア）
+- DJ ブース奥に Shawn — 頭うなずき + 横ステップ、腕は下ろす
 
-- **VRM は Vercel 経由にしない**（帯域コスト）
-- Cloudflare R2 + Worker で CORS 付き配信
-- ゲーム本体は Vercel のまま
+## タブ・BGM
 
-### 一般 NPC セリフ（`npcDialoguePool.ts`）
+- タブ非表示 = **全部止める**（レンダー・タイマー・BGM）
+- 復帰後すぐ動き再開（ランダム停止はリセット）
+- BGM: Museum 控えめ / Club さらに控えめ（vol 0.11）
 
-- 英検準 2 級程度の簡単英語
-- 嘘の方向・ヒントっぽい台詞は削除
-- Meebits 世界観の台詞を増やす方向
+## UI
 
-### Shawn T. Art セリフ
+- タブレット = スマホ UI
+- ゲーム内テキストは英語
+- Lucide アイコン（モバイル UI）
 
-- `npcGeneration.ts` にユーザー指定 11 件
+## インフラ方針
+
+- VRM: Cloudflare R2 + Worker（Vercel 経由しない）
+- BGM: デフォルト `public/audio/`、任意 CDN `VITE_BGM_BASE_URL`
+- ゲーム本体: Vercel
 
 ## コミット・PR
 
-- ユーザーが明示依頼するまで **git commit / push / PR 作成しない**
-- コミットメッセージは why 重視、1–2 文
+- ユーザー明示依頼まで commit / push / PR しない
 
 ## 言語
 
-- ユーザーとの会話: **日本語**
-- ゲーム内テキスト: 英語
+- ユーザー会話: **日本語**
+- ゲーム内: 英語
