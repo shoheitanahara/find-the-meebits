@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import { getSavedPlayerMeebitNumber, normalizePlayerMeebitNumber } from '../systems/save/localStorage'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import {
   getGameModeDescription,
@@ -21,7 +22,9 @@ import { TargetPreview } from './TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function StartScreen() {
-  const [playerMeebitInput, setPlayerMeebitInput] = useState(String(DEFAULT_PLAYER_MEEBIT_ID))
+  const [playerMeebitInput, setPlayerMeebitInput] = useState(() =>
+    String(getSavedPlayerMeebitNumber()),
+  )
   const [afterHoursUnlocked, setAfterHoursUnlocked] = useState(false)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const gameMode = useGameStore((state) => state.gameMode)
@@ -317,13 +320,7 @@ export function StartScreen() {
 }
 
 function normalizeMeebitNumber(value: string) {
-  const parsed = Number(value)
-
-  if (!Number.isFinite(parsed)) {
-    return DEFAULT_PLAYER_MEEBIT_ID
-  }
-
-  return Math.max(1, Math.min(20000, Math.trunc(parsed)))
+  return normalizePlayerMeebitNumber(value)
 }
 
 function getRandomMeebitNumber() {

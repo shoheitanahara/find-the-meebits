@@ -1,10 +1,11 @@
-import { PLAYER_START_POSITION } from '../../game/gameConfig'
+import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../../game/gameConfig'
 import type { Vector3Tuple } from '../../types/game'
 
 export type SaveData = {
   visitedMeebitNumbers: number[]
   talkedCountByMeebit: Record<string, number>
   lastPlayerPosition: Vector3Tuple
+  playerMeebitNumber: number
 }
 
 const STORAGE_KEY = 'meebits-world-save-v2'
@@ -13,6 +14,7 @@ const defaultSaveData: SaveData = {
   visitedMeebitNumbers: [],
   talkedCountByMeebit: {},
   lastPlayerPosition: [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
+  playerMeebitNumber: DEFAULT_PLAYER_MEEBIT_ID,
 }
 
 let cachedSaveData: SaveData | null = null
@@ -45,6 +47,7 @@ function readSaveDataFromStorage(): SaveData {
       lastPlayerPosition: isVector3Tuple(parsed.lastPlayerPosition)
         ? parsed.lastPlayerPosition
         : defaultSaveData.lastPlayerPosition,
+      playerMeebitNumber: normalizePlayerMeebitNumber(parsed.playerMeebitNumber),
     }
   } catch {
     return defaultSaveData
@@ -75,9 +78,41 @@ export function saveSaveData(data: SaveData) {
 }
 
 export function resetNpcTalkSaveData() {
+  const current = loadSaveData()
   saveSaveData({
     ...defaultSaveData,
+    playerMeebitNumber: current.playerMeebitNumber,
   })
+}
+
+export function normalizePlayerMeebitNumber(value: unknown) {
+  const parsed = typeof value === 'number' ? value : Number(value)
+
+  if (!Number.isFinite(parsed)) {
+    return DEFAULT_PLAYER_MEEBIT_ID
+  }
+
+  return Math.max(1, Math.min(20000, Math.trunc(parsed)))
+}
+
+export function getSavedPlayerMeebitNumber() {
+  return loadSaveData().playerMeebitNumber
+}
+
+export function savePlayerMeebitNumber(meebitNumber: number) {
+  const normalized = normalizePlayerMeebitNumber(meebitNumber)
+  const current = loadSaveData()
+
+  if (current.playerMeebitNumber === normalized) {
+    return normalized
+  }
+
+  saveSaveData({
+    ...current,
+    playerMeebitNumber: normalized,
+  })
+
+  return normalized
 }
 
 export function getMeebitTalkCount(meebitNumber: number) {
@@ -99,6 +134,7 @@ export function recordMeebitTalk(meebitNumber: number, playerPosition: Vector3Tu
       [key]: talkedCount,
     },
     lastPlayerPosition: playerPosition,
+    playerMeebitNumber: current.playerMeebitNumber,
   }
 
   saveSaveData(next)

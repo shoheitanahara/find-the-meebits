@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
+import { PLAYER_START_POSITION } from '../game/gameConfig'
 import type { Vector3Tuple } from '../types/game'
+import { getSavedPlayerMeebitNumber, savePlayerMeebitNumber } from '../systems/save/localStorage'
 
 type PlayerState = {
   meebitNumber: number
@@ -16,13 +17,16 @@ type PlayerState = {
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
-  meebitNumber: DEFAULT_PLAYER_MEEBIT_ID,
+  meebitNumber: getSavedPlayerMeebitNumber(),
   position: [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
   rotationY: Math.PI,
   isMoving: false,
   isRunning: false,
   movementLocked: false,
-  setMeebitNumber: (meebitNumber) => set({ meebitNumber }),
+  setMeebitNumber: (meebitNumber) => {
+    const normalized = savePlayerMeebitNumber(meebitNumber)
+    set({ meebitNumber: normalized })
+  },
   setPlayerTransform: (position, rotationY) =>
     set((state) => {
       if (

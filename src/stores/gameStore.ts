@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import {
   CREATOR_NPC_ID,
-  DEFAULT_PLAYER_MEEBIT_ID,
   GAME_TIME_LIMIT_SECONDS,
   PLAYER_START_POSITION,
 } from '../game/gameConfig'
@@ -526,7 +525,6 @@ function resetPlayerPositionToStart() {
 }
 
 function resetPlayerToStart() {
-  usePlayerStore.getState().setMeebitNumber(DEFAULT_PLAYER_MEEBIT_ID)
   resetPlayerPositionToStart()
 }
 
