@@ -62,7 +62,13 @@ export function PalmTree({
   const crownX = x + lean * 0.12
   const crownY = 4.05
 
-  const fronds = [
+  const fronds: Array<{
+    angle: number
+    length: number
+    bend: number
+    color: string
+    lift?: number
+  }> = [
     { angle: 0.0, length: 3.7, bend: 0.195, color: LEAF.a },
     { angle: 0.9, length: 3.4, bend: 0.18, color: LEAF.b },
     { angle: 1.8, length: 3.8, bend: 0.205, color: LEAF.c },
@@ -72,7 +78,7 @@ export function PalmTree({
     { angle: 5.3, length: 3.75, bend: 0.2, color: LEAF.a },
     { angle: 0.45, length: 2.25, bend: 0.115, color: LEAF.b, lift: -0.38 },
     { angle: 3.1, length: 2.15, bend: 0.11, color: LEAF.c, lift: -0.35 },
-  ] as const
+  ]
 
   return (
     <group position={position} scale={scale} rotation={[0, rotationY, 0]}>

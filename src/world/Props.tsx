@@ -4,13 +4,11 @@ import {
   BENCH_POSITIONS,
   SCULPTURE_POSITIONS,
   VRM_SCULPTURE_PLACEMENTS,
-  WALL_PANEL_POSITIONS,
 } from './worldLandmarks'
 import { VrmSculpture } from './VrmSculpture'
 
 const benchPositions = BENCH_POSITIONS
 const sculpturePositions = SCULPTURE_POSITIONS
-const wallPanelPositions = WALL_PANEL_POSITIONS
 
 function Bench({ position }: { position: [number, number, number] }) {
   const seatMaterial = <meshStandardMaterial color="#4a3f35" roughness={0.86} />
@@ -283,28 +281,6 @@ function SplitWingMeshes({
   )
 }
 
-function WallPanel({ position, index }: { position: [number, number, number]; index: number }) {
-  const isSideWall = Math.abs(position[0]) > Math.abs(position[2])
-  const rotationY = isSideWall ? Math.PI / 2 : 0
-
-  return (
-    <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[5.2, 1.15, 0.18]} />
-        <meshStandardMaterial
-          color={index % 2 === 0 ? '#c0c0c0' : '#292524'}
-          roughness={index % 2 === 0 ? 0.25 : 0.78}
-          metalness={index % 2 === 0 ? 0.85 : 0}
-        />
-      </mesh>
-      <mesh position={[0, -0.61, 0.08]} castShadow>
-        <boxGeometry args={[5.6, 0.09, 0.22]} />
-        <meshStandardMaterial color="#0a0a0a" roughness={0.7} />
-      </mesh>
-    </group>
-  )
-}
-
 function Stage() {
   const platformMaterial = <meshStandardMaterial color="#1c1917" roughness={0.78} />
   const backdropMaterial = <meshStandardMaterial color="#f5f5f4" roughness={0.72} />
@@ -427,9 +403,6 @@ export function Props() {
           pedestal={placement.pedestal}
           position={[placement.position[0], placement.position[1], placement.position[2]]}
         />
-      ))}
-      {wallPanelPositions.map((position, index) => (
-        <WallPanel key={position.join('-')} index={index} position={position} />
       ))}
     </group>
   )

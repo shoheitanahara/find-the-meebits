@@ -1,10 +1,13 @@
 import type { VenueId } from '../game/venueConfig'
 import { getMuseumSeasonTreeCollisionCenters } from '../world/MuseumSeasonDecor'
 import {
+  getPlazaGlassCornerPosts,
+  getPlazaGlassWallSegments,
+} from '../world/plazaGlassWallConfig'
+import {
   BENCH_POSITIONS,
   SCULPTURE_POSITIONS,
   VRM_SCULPTURE_PLACEMENTS,
-  WALL_PANEL_POSITIONS,
 } from '../world/worldLandmarks'
 import {
   CLUB_BAR_PLACEMENTS,
@@ -66,17 +69,6 @@ const museumBuildingDefs: Array<{ position: [number, number, number]; size: [num
   { position: [-36, 0.575, 29], size: [16, 1.15, 4] },
   { position: [35, 0.675, 30], size: [15, 1.35, 4] },
 ]
-
-
-function wallPanelBox(position: [number, number, number]): ObstacleBox {
-  const isSideWall = Math.abs(position[0]) > Math.abs(position[2])
-
-  if (isSideWall) {
-    return boxFromCenter(position[0], position[2], 0.35, 5.2, 0.05)
-  }
-
-  return boxFromCenter(position[0], position[2], 5.2, 0.35, 0.05)
-}
 
 function clubOrientedObstacle(
   centerX: number,
@@ -152,10 +144,16 @@ function buildMuseumObstacles(): ObstacleBox[] {
     ...VRM_SCULPTURE_PLACEMENTS.map(({ position }) =>
       boxFromCenter(position[0], position[2], 2.8, 2.8, 0.1),
     ),
-    ...WALL_PANEL_POSITIONS.map((position) => wallPanelBox(position)),
     ...splitBoxesFromCenter(-22, 14, 5, 5, 0.1),
     boxFromCenter(-15, -15, 4.2, 3.2, 0.1),
     ...splitBoxesFromCenter(52, 7.4, 0.5, 4, 0.1),
+    // プラザ外周ガラス壁（正面中央の入口・各辺の開口は衝突なし）
+    ...getPlazaGlassWallSegments().map((segment) =>
+      boxFromCenter(segment.position[0], segment.position[2], segment.size[0], segment.size[2], 0.06),
+    ),
+    ...getPlazaGlassCornerPosts().map((segment) =>
+      boxFromCenter(segment.position[0], segment.position[2], segment.size[0], segment.size[2], 0.04),
+    ),
     // 季節デコの幹のみ（ヒント landmark には含めない）
     ...getMuseumSeasonTreeCollisionCenters().map(([x, z]) => boxFromCenter(x, z, 0.7, 0.7, 0.05)),
   ]

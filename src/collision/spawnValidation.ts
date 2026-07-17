@@ -2,8 +2,8 @@ import { NPC_COLLISION_RADIUS, collidesWithObstacles } from './collision'
 import { PLAYER_START_POSITION, WORLD_RADIUS } from '../game/gameConfig'
 import type { VenueId } from '../game/venueConfig'
 
-const SPAWN_RADIUS = WORLD_RADIUS * 0.72
-const WORLD_EDGE_MARGIN = 6
+/** ワールド端から内側へ。ガラス壁より少し内側になるよう余裕を取る */
+const WORLD_EDGE_MARGIN = 24
 const PLAYER_START_EXCLUSION_RADIUS = 12
 const MIN_NPC_SPACING = 1.15
 const SPAWN_CHECK_RADIUS = NPC_COLLISION_RADIUS + 0.2
@@ -44,9 +44,11 @@ export function generateRandomNpcSpawnPosition(
   existingSpawns: Array<[number, number]>,
   venueId: VenueId = 'museum',
 ): [number, number] {
+  const spawnRadius = WORLD_RADIUS - WORLD_EDGE_MARGIN
+
   for (let attempt = 0; attempt < 128; attempt++) {
     const angle = Math.random() * Math.PI * 2
-    const radius = Math.sqrt(Math.random()) * SPAWN_RADIUS
+    const radius = Math.sqrt(Math.random()) * spawnRadius
     const x = Math.cos(angle) * radius
     const z = Math.sin(angle) * radius
 
@@ -57,7 +59,7 @@ export function generateRandomNpcSpawnPosition(
 
   const fallbackIndex = existingSpawns.length
   const fallbackAngle = fallbackIndex * 2.399963 + Math.random() * 0.5
-  const fallbackRadius = 14 + (fallbackIndex % 28) * 2
+  const fallbackRadius = Math.min(14 + (fallbackIndex % 28) * 2, spawnRadius * 0.85)
   const fallbackX = Math.cos(fallbackAngle) * fallbackRadius
   const fallbackZ = Math.sin(fallbackAngle) * fallbackRadius
 

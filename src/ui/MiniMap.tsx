@@ -6,12 +6,9 @@ import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import type { Vector3Tuple } from '../types/game'
 
-/** 内側の枠線 (inset-[12.5%]) に合わせてワールド座標をマップ上の % に変換 */
-const MAP_INSET_RATIO = 0.125
-
+/** 進入可能なワールド範囲 (±WORLD_RADIUS) をマップ全体に対応させる */
 function worldToMapPercent(coordinate: number) {
-  const normalized = (coordinate + WORLD_RADIUS) / (WORLD_RADIUS * 2)
-  return (MAP_INSET_RATIO + normalized * (1 - MAP_INSET_RATIO * 2)) * 100
+  return ((coordinate + WORLD_RADIUS) / (WORLD_RADIUS * 2)) * 100
 }
 
 function resolveMapPosition(position: Vector3Tuple | undefined, fallback: Vector3Tuple) {
@@ -109,7 +106,6 @@ export function MiniMap() {
       <div className="relative mt-2 size-24 overflow-hidden rounded-xl border border-neutral-600 bg-neutral-800 lg:mt-3 lg:size-36 lg:rounded-2xl">
         <div className="absolute left-1/2 top-0 h-full w-px bg-neutral-600/70" />
         <div className="absolute left-0 top-1/2 h-px w-full bg-neutral-600/70" />
-        <div className="absolute inset-[12.5%] border border-neutral-500/50" />
         {targetMarkers.map((marker) => (
           <MapMarker key={marker.id} xPercent={marker.xPercent} zPercent={marker.zPercent}>
             <div

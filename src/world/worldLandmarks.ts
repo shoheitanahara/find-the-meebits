@@ -49,17 +49,6 @@ export function getVrmSculptureMeebitIds() {
   return VRM_SCULPTURE_PLACEMENTS.map((placement) => placement.meebitId)
 }
 
-export const WALL_PANEL_POSITIONS = [
-  [-54, 0.575, -10],
-  [-54, 0.575, 12],
-  [54, 0.575, -14],
-  [54, 0.575, 10],
-  [-12, 0.575, -54],
-  [14, 0.575, -54],
-  [-14, 0.575, 54],
-  [12, 0.575, 54],
-] as const satisfies ReadonlyArray<[number, number, number]>
-
 export type HintLandmark = {
   x: number
   z: number
