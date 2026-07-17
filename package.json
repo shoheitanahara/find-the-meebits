@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "vrm-worker:dev": "wrangler dev --config workers/vrm-cache/wrangler.toml",
     "vrm-worker:deploy": "wrangler deploy --config workers/vrm-cache/wrangler.toml",
-    "vrm:seed": "node scripts/seed-vrm-sculptures.mjs"
+    "vrm:seed": "node scripts/seed-vrm-sculptures.mjs",
+    "traits:fetch": "node scripts/fetch-meebit-traits.mjs",
+    "traits:images": "node scripts/fetch-meebit-trait-images.mjs"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.5.4",

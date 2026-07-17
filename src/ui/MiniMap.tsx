@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 import { WORLD_RADIUS } from '../game/gameConfig'
+import { ui } from '../i18n/ui'
 import { getNpcById } from '../npc/npcData'
 import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
@@ -55,6 +56,7 @@ export const SP_MINI_MAP_OUTER_WIDTH = '7.5rem'
 const EMPTY_NPC_POSITIONS: Record<string, Vector3Tuple> = {}
 
 export function MiniMap() {
+  const t = ui()
   const gamePhase = useGameStore((state) => state.gamePhase)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)

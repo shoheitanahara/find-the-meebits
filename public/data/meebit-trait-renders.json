@@ -1,0 +1,932 @@
+{
+  "version": 2,
+  "source": "https://cdn.meebco.com/trait-renders/{file}",
+  "fetchedAt": "2026-07-17T18:31:32.905Z",
+  "count": 150,
+  "bySlug": {
+    "type_human": {
+      "type": "Type",
+      "value": "Human",
+      "path": "/traits/type_human.webp"
+    },
+    "hair_style_bald": {
+      "type": "Hair Style",
+      "value": "Bald",
+      "path": "/traits/hair_style_bald.webp"
+    },
+    "hat_backwards_cap": {
+      "type": "Hat",
+      "value": "Backwards Cap",
+      "path": "/traits/hat_backwards_cap.webp"
+    },
+    "shirt_skull_tee": {
+      "type": "Shirt",
+      "value": "Skull Tee",
+      "path": "/traits/shirt_skull_tee.webp"
+    },
+    "overshirt_athletic_jacket": {
+      "type": "Overshirt",
+      "value": "Athletic Jacket",
+      "path": "/traits/overshirt_athletic_jacket.webp"
+    },
+    "pants_cargo_pants": {
+      "type": "Pants",
+      "value": "Cargo Pants",
+      "path": "/traits/pants_cargo_pants.webp"
+    },
+    "shoes_workboots": {
+      "type": "Shoes",
+      "value": "Workboots",
+      "path": "/traits/shoes_workboots.webp"
+    },
+    "hair_style_simple": {
+      "type": "Hair Style",
+      "value": "Simple",
+      "path": "/traits/hair_style_simple.webp"
+    },
+    "beard_full": {
+      "type": "Beard",
+      "value": "Full",
+      "path": "/traits/beard_full.webp"
+    },
+    "hat_trucker_cap": {
+      "type": "Hat",
+      "value": "Trucker Cap",
+      "path": "/traits/hat_trucker_cap.webp"
+    },
+    "shirt_hoodie": {
+      "type": "Shirt",
+      "value": "Hoodie",
+      "path": "/traits/shirt_hoodie.webp"
+    },
+    "pants_ripped_jeans": {
+      "type": "Pants",
+      "value": "Ripped Jeans",
+      "path": "/traits/pants_ripped_jeans.webp"
+    },
+    "shoes_canvas": {
+      "type": "Shoes",
+      "value": "Canvas",
+      "path": "/traits/shoes_canvas.webp"
+    },
+    "hair_style_very_long": {
+      "type": "Hair Style",
+      "value": "Very Long",
+      "path": "/traits/hair_style_very_long.webp"
+    },
+    "glasses_aviators": {
+      "type": "Glasses",
+      "value": "Aviators",
+      "path": "/traits/glasses_aviators.webp"
+    },
+    "shirt_diagonal_tee": {
+      "type": "Shirt",
+      "value": "Diagonal Tee",
+      "path": "/traits/shirt_diagonal_tee.webp"
+    },
+    "pants_skirt": {
+      "type": "Pants",
+      "value": "Skirt",
+      "path": "/traits/pants_skirt.webp"
+    },
+    "shoes_skater": {
+      "type": "Shoes",
+      "value": "Skater",
+      "path": "/traits/shoes_skater.webp"
+    },
+    "hair_style_high_flat_top": {
+      "type": "Hair Style",
+      "value": "High Flat Top",
+      "path": "/traits/hair_style_high_flat_top.webp"
+    },
+    "shirt_classic_jersey": {
+      "type": "Shirt",
+      "value": "Classic Jersey",
+      "path": "/traits/shirt_classic_jersey.webp"
+    },
+    "pants_athletic_shorts": {
+      "type": "Pants",
+      "value": "Athletic Shorts",
+      "path": "/traits/pants_athletic_shorts.webp"
+    },
+    "shoes_slides": {
+      "type": "Shoes",
+      "value": "Slides",
+      "path": "/traits/shoes_slides.webp"
+    },
+    "jersey_number_8": {
+      "type": "Jersey Number",
+      "value": "8",
+      "path": "/traits/jersey_number_8.webp"
+    },
+    "hair_style_pulled_back": {
+      "type": "Hair Style",
+      "value": "Pulled Back",
+      "path": "/traits/hair_style_pulled_back.webp"
+    },
+    "shirt_oversized_hoodie": {
+      "type": "Shirt",
+      "value": "Oversized Hoodie",
+      "path": "/traits/shirt_oversized_hoodie.webp"
+    },
+    "pants_leggings": {
+      "type": "Pants",
+      "value": "Leggings",
+      "path": "/traits/pants_leggings.webp"
+    },
+    "shoes_high_tops": {
+      "type": "Shoes",
+      "value": "High Tops",
+      "path": "/traits/shoes_high_tops.webp"
+    },
+    "hair_style_half_shaved": {
+      "type": "Hair Style",
+      "value": "Half-shaved",
+      "path": "/traits/hair_style_half_shaved.webp"
+    },
+    "shirt_halter_top": {
+      "type": "Shirt",
+      "value": "Halter Top",
+      "path": "/traits/shirt_halter_top.webp"
+    },
+    "type_elephant": {
+      "type": "Type",
+      "value": "Elephant",
+      "path": "/traits/type_elephant.webp"
+    },
+    "glasses_frameless": {
+      "type": "Glasses",
+      "value": "Frameless",
+      "path": "/traits/glasses_frameless.webp"
+    },
+    "shirt_suit": {
+      "type": "Shirt",
+      "value": "Suit",
+      "path": "/traits/shirt_suit.webp"
+    },
+    "pants_suit_pants": {
+      "type": "Pants",
+      "value": "Suit Pants",
+      "path": "/traits/pants_suit_pants.webp"
+    },
+    "shoes_classic": {
+      "type": "Shoes",
+      "value": "Classic",
+      "path": "/traits/shoes_classic.webp"
+    },
+    "hair_style_messy": {
+      "type": "Hair Style",
+      "value": "Messy",
+      "path": "/traits/hair_style_messy.webp"
+    },
+    "glasses_elvis": {
+      "type": "Glasses",
+      "value": "Elvis",
+      "path": "/traits/glasses_elvis.webp"
+    },
+    "shirt_logo_tee": {
+      "type": "Shirt",
+      "value": "Logo Tee",
+      "path": "/traits/shirt_logo_tee.webp"
+    },
+    "shirt_hoodie_up": {
+      "type": "Shirt",
+      "value": "Hoodie Up",
+      "path": "/traits/shirt_hoodie_up.webp"
+    },
+    "pants_regular_pants": {
+      "type": "Pants",
+      "value": "Regular Pants",
+      "path": "/traits/pants_regular_pants.webp"
+    },
+    "shoes_sneakers": {
+      "type": "Shoes",
+      "value": "Sneakers",
+      "path": "/traits/shoes_sneakers.webp"
+    },
+    "hair_style_spiky": {
+      "type": "Hair Style",
+      "value": "Spiky",
+      "path": "/traits/hair_style_spiky.webp"
+    },
+    "glasses_specs": {
+      "type": "Glasses",
+      "value": "Specs",
+      "path": "/traits/glasses_specs.webp"
+    },
+    "shoes_basketball": {
+      "type": "Shoes",
+      "value": "Basketball",
+      "path": "/traits/shoes_basketball.webp"
+    },
+    "hair_style_wild": {
+      "type": "Hair Style",
+      "value": "Wild",
+      "path": "/traits/hair_style_wild.webp"
+    },
+    "shirt_heart_hoodie": {
+      "type": "Shirt",
+      "value": "Heart Hoodie",
+      "path": "/traits/shirt_heart_hoodie.webp"
+    },
+    "shoes_sandals": {
+      "type": "Shoes",
+      "value": "Sandals",
+      "path": "/traits/shoes_sandals.webp"
+    },
+    "necklace_gold_necklace": {
+      "type": "Necklace",
+      "value": "Gold Necklace",
+      "path": "/traits/necklace_gold_necklace.webp"
+    },
+    "hair_style_long": {
+      "type": "Hair Style",
+      "value": "Long",
+      "path": "/traits/hair_style_long.webp"
+    },
+    "hair_style_buzzcut": {
+      "type": "Hair Style",
+      "value": "Buzzcut",
+      "path": "/traits/hair_style_buzzcut.webp"
+    },
+    "hat_headphones": {
+      "type": "Hat",
+      "value": "Headphones",
+      "path": "/traits/hat_headphones.webp"
+    },
+    "glasses_round_glasses": {
+      "type": "Glasses",
+      "value": "Round Glasses",
+      "path": "/traits/glasses_round_glasses.webp"
+    },
+    "shirt_bare_chest": {
+      "type": "Shirt",
+      "value": "Bare Chest",
+      "path": "/traits/shirt_bare_chest.webp"
+    },
+    "necklace_gold_chain": {
+      "type": "Necklace",
+      "value": "Gold Chain",
+      "path": "/traits/necklace_gold_chain.webp"
+    },
+    "hat_brimmed": {
+      "type": "Hat",
+      "value": "Brimmed",
+      "path": "/traits/hat_brimmed.webp"
+    },
+    "shirt_tee": {
+      "type": "Shirt",
+      "value": "Tee",
+      "path": "/traits/shirt_tee.webp"
+    },
+    "pants_short_leggings": {
+      "type": "Pants",
+      "value": "Short Leggings",
+      "path": "/traits/pants_short_leggings.webp"
+    },
+    "overshirt_collar_shirt": {
+      "type": "Overshirt",
+      "value": "Collar Shirt",
+      "path": "/traits/overshirt_collar_shirt.webp"
+    },
+    "shoes_neon_sneakers": {
+      "type": "Shoes",
+      "value": "Neon Sneakers",
+      "path": "/traits/shoes_neon_sneakers.webp"
+    },
+    "beard_stubble": {
+      "type": "Beard",
+      "value": "Stubble",
+      "path": "/traits/beard_stubble.webp"
+    },
+    "glasses_sunglasses": {
+      "type": "Glasses",
+      "value": "Sunglasses",
+      "path": "/traits/glasses_sunglasses.webp"
+    },
+    "shirt_basketball_jersey": {
+      "type": "Shirt",
+      "value": "Basketball Jersey",
+      "path": "/traits/shirt_basketball_jersey.webp"
+    },
+    "jersey_number_3": {
+      "type": "Jersey Number",
+      "value": "3",
+      "path": "/traits/jersey_number_3.webp"
+    },
+    "jersey_number_0": {
+      "type": "Jersey Number",
+      "value": "0",
+      "path": "/traits/jersey_number_0.webp"
+    },
+    "hair_style_fade": {
+      "type": "Hair Style",
+      "value": "Fade",
+      "path": "/traits/hair_style_fade.webp"
+    },
+    "shirt_invader_tee": {
+      "type": "Shirt",
+      "value": "Invader Tee",
+      "path": "/traits/shirt_invader_tee.webp"
+    },
+    "earring_gold_hoops": {
+      "type": "Earring",
+      "value": "Gold Hoops",
+      "path": "/traits/earring_gold_hoops.webp"
+    },
+    "hair_style_mohawk": {
+      "type": "Hair Style",
+      "value": "Mohawk",
+      "path": "/traits/hair_style_mohawk.webp"
+    },
+    "hair_style_big_bangs": {
+      "type": "Hair Style",
+      "value": "Big Bangs",
+      "path": "/traits/hair_style_big_bangs.webp"
+    },
+    "overshirt_trenchcoat": {
+      "type": "Overshirt",
+      "value": "Trenchcoat",
+      "path": "/traits/overshirt_trenchcoat.webp"
+    },
+    "shirt_suit_jacket": {
+      "type": "Shirt",
+      "value": "Suit Jacket",
+      "path": "/traits/shirt_suit_jacket.webp"
+    },
+    "earring_gold_earrings": {
+      "type": "Earring",
+      "value": "Gold Earrings",
+      "path": "/traits/earring_gold_earrings.webp"
+    },
+    "shirt_ghost_tee": {
+      "type": "Shirt",
+      "value": "Ghost Tee",
+      "path": "/traits/shirt_ghost_tee.webp"
+    },
+    "shoes_urban_boots": {
+      "type": "Shoes",
+      "value": "Urban Boots",
+      "path": "/traits/shoes_urban_boots.webp"
+    },
+    "hair_style_one_side": {
+      "type": "Hair Style",
+      "value": "One Side",
+      "path": "/traits/hair_style_one_side.webp"
+    },
+    "shirt_long_sleeved": {
+      "type": "Shirt",
+      "value": "Long-sleeved",
+      "path": "/traits/shirt_long_sleeved.webp"
+    },
+    "hat_cap": {
+      "type": "Hat",
+      "value": "Cap",
+      "path": "/traits/hat_cap.webp"
+    },
+    "shoes_ll_86": {
+      "type": "Shoes",
+      "value": "LL 86",
+      "path": "/traits/shoes_ll_86.webp"
+    },
+    "tattoo_yes": {
+      "type": "Tattoo",
+      "value": "Yes",
+      "path": "/traits/tattoo_yes.webp"
+    },
+    "hair_style_ponytail": {
+      "type": "Hair Style",
+      "value": "Ponytail",
+      "path": "/traits/hair_style_ponytail.webp"
+    },
+    "beard_biker_mustache": {
+      "type": "Beard",
+      "value": "Biker Mustache",
+      "path": "/traits/beard_biker_mustache.webp"
+    },
+    "jersey_number_9": {
+      "type": "Jersey Number",
+      "value": "9",
+      "path": "/traits/jersey_number_9.webp"
+    },
+    "hair_style_straight": {
+      "type": "Hair Style",
+      "value": "Straight",
+      "path": "/traits/hair_style_straight.webp"
+    },
+    "shirt_tube_top": {
+      "type": "Shirt",
+      "value": "Tube Top",
+      "path": "/traits/shirt_tube_top.webp"
+    },
+    "shoes_ll_baby_blue": {
+      "type": "Shoes",
+      "value": "LL Baby Blue",
+      "path": "/traits/shoes_ll_baby_blue.webp"
+    },
+    "glasses_nerdy": {
+      "type": "Glasses",
+      "value": "Nerdy",
+      "path": "/traits/glasses_nerdy.webp"
+    },
+    "shoes_ll_rgb": {
+      "type": "Shoes",
+      "value": "LL RGB",
+      "path": "/traits/shoes_ll_rgb.webp"
+    },
+    "pants_trackpants": {
+      "type": "Pants",
+      "value": "Trackpants",
+      "path": "/traits/pants_trackpants.webp"
+    },
+    "type_pig": {
+      "type": "Type",
+      "value": "Pig",
+      "path": "/traits/type_pig.webp"
+    },
+    "hat_wool_hat": {
+      "type": "Hat",
+      "value": "Wool Hat",
+      "path": "/traits/hat_wool_hat.webp"
+    },
+    "shirt_snoutz_tee": {
+      "type": "Shirt",
+      "value": "Snoutz Tee",
+      "path": "/traits/shirt_snoutz_tee.webp"
+    },
+    "hair_style_pigtails": {
+      "type": "Hair Style",
+      "value": "Pigtails",
+      "path": "/traits/hair_style_pigtails.webp"
+    },
+    "shirt_snoutz_hoodie": {
+      "type": "Shirt",
+      "value": "Snoutz Hoodie",
+      "path": "/traits/shirt_snoutz_hoodie.webp"
+    },
+    "shoes_ll_high_tops": {
+      "type": "Shoes",
+      "value": "LL High Tops",
+      "path": "/traits/shoes_ll_high_tops.webp"
+    },
+    "glasses_3d": {
+      "type": "Glasses",
+      "value": "3D",
+      "path": "/traits/glasses_3d.webp"
+    },
+    "shoes_ll_tall": {
+      "type": "Shoes",
+      "value": "LL Tall",
+      "path": "/traits/shoes_ll_tall.webp"
+    },
+    "shirt_meepet_tee": {
+      "type": "Shirt",
+      "value": "Meepet Tee",
+      "path": "/traits/shirt_meepet_tee.webp"
+    },
+    "shirt_lines": {
+      "type": "Shirt",
+      "value": "Lines",
+      "path": "/traits/shirt_lines.webp"
+    },
+    "earring_gold_earring": {
+      "type": "Earring",
+      "value": "Gold Earring",
+      "path": "/traits/earring_gold_earring.webp"
+    },
+    "hair_style_bob": {
+      "type": "Hair Style",
+      "value": "Bob",
+      "path": "/traits/hair_style_bob.webp"
+    },
+    "overshirt_jean_jacket": {
+      "type": "Overshirt",
+      "value": "Jean Jacket",
+      "path": "/traits/overshirt_jean_jacket.webp"
+    },
+    "shirt_windbreaker": {
+      "type": "Shirt",
+      "value": "Windbreaker",
+      "path": "/traits/shirt_windbreaker.webp"
+    },
+    "jersey_number_5": {
+      "type": "Jersey Number",
+      "value": "5",
+      "path": "/traits/jersey_number_5.webp"
+    },
+    "beard_big": {
+      "type": "Beard",
+      "value": "Big",
+      "path": "/traits/beard_big.webp"
+    },
+    "shoes_running": {
+      "type": "Shoes",
+      "value": "Running",
+      "path": "/traits/shoes_running.webp"
+    },
+    "shoes_high_boots": {
+      "type": "Shoes",
+      "value": "High Boots",
+      "path": "/traits/shoes_high_boots.webp"
+    },
+    "hat_bandana": {
+      "type": "Hat",
+      "value": "Bandana",
+      "path": "/traits/hat_bandana.webp"
+    },
+    "overshirt_leather_jacket": {
+      "type": "Overshirt",
+      "value": "Leather Jacket",
+      "path": "/traits/overshirt_leather_jacket.webp"
+    },
+    "hair_style_curly": {
+      "type": "Hair Style",
+      "value": "Curly",
+      "path": "/traits/hair_style_curly.webp"
+    },
+    "shirt_jersey": {
+      "type": "Shirt",
+      "value": "Jersey",
+      "path": "/traits/shirt_jersey.webp"
+    },
+    "beard_mustache": {
+      "type": "Beard",
+      "value": "Mustache",
+      "path": "/traits/beard_mustache.webp"
+    },
+    "beard_muttonchops": {
+      "type": "Beard",
+      "value": "Muttonchops",
+      "path": "/traits/beard_muttonchops.webp"
+    },
+    "hair_style_bun": {
+      "type": "Hair Style",
+      "value": "Bun",
+      "path": "/traits/hair_style_bun.webp"
+    },
+    "shirt_tie_dyed_tee": {
+      "type": "Shirt",
+      "value": "Tie-dyed Tee",
+      "path": "/traits/shirt_tie_dyed_tee.webp"
+    },
+    "jersey_number_1": {
+      "type": "Jersey Number",
+      "value": "1",
+      "path": "/traits/jersey_number_1.webp"
+    },
+    "shirt_cga_shirt": {
+      "type": "Shirt",
+      "value": "CGA Shirt",
+      "path": "/traits/shirt_cga_shirt.webp"
+    },
+    "type_skeleton": {
+      "type": "Type",
+      "value": "Skeleton",
+      "path": "/traits/type_skeleton.webp"
+    },
+    "jersey_number_4": {
+      "type": "Jersey Number",
+      "value": "4",
+      "path": "/traits/jersey_number_4.webp"
+    },
+    "shoes_ll_retro": {
+      "type": "Shoes",
+      "value": "LL Retro",
+      "path": "/traits/shoes_ll_retro.webp"
+    },
+    "shoes_ll_orange": {
+      "type": "Shoes",
+      "value": "LL Orange",
+      "path": "/traits/shoes_ll_orange.webp"
+    },
+    "shoes_ll_moonboots": {
+      "type": "Shoes",
+      "value": "LL Moonboots",
+      "path": "/traits/shoes_ll_moonboots.webp"
+    },
+    "jersey_number_6": {
+      "type": "Jersey Number",
+      "value": "6",
+      "path": "/traits/jersey_number_6.webp"
+    },
+    "hair_style_fiery_mohawk": {
+      "type": "Hair Style",
+      "value": "Fiery Mohawk",
+      "path": "/traits/hair_style_fiery_mohawk.webp"
+    },
+    "shirt_hawaiian": {
+      "type": "Shirt",
+      "value": "Hawaiian",
+      "path": "/traits/shirt_hawaiian.webp"
+    },
+    "shirt_snoutz_jersey": {
+      "type": "Shirt",
+      "value": "Snoutz Jersey",
+      "path": "/traits/shirt_snoutz_jersey.webp"
+    },
+    "shirt_heart_tee": {
+      "type": "Shirt",
+      "value": "Heart Tee",
+      "path": "/traits/shirt_heart_tee.webp"
+    },
+    "jersey_number_7": {
+      "type": "Jersey Number",
+      "value": "7",
+      "path": "/traits/jersey_number_7.webp"
+    },
+    "shirt_snoutz_skull_tee": {
+      "type": "Shirt",
+      "value": "Snoutz Skull Tee",
+      "path": "/traits/shirt_snoutz_skull_tee.webp"
+    },
+    "type_robot": {
+      "type": "Type",
+      "value": "Robot",
+      "path": "/traits/type_robot.webp"
+    },
+    "shirt_stylized_hoodie": {
+      "type": "Shirt",
+      "value": "Stylized Hoodie",
+      "path": "/traits/shirt_stylized_hoodie.webp"
+    },
+    "beard_medical_mask": {
+      "type": "Beard",
+      "value": "Medical Mask",
+      "path": "/traits/beard_medical_mask.webp"
+    },
+    "shirt_punk_tee": {
+      "type": "Shirt",
+      "value": "Punk Tee",
+      "path": "/traits/shirt_punk_tee.webp"
+    },
+    "jersey_number_2": {
+      "type": "Jersey Number",
+      "value": "2",
+      "path": "/traits/jersey_number_2.webp"
+    },
+    "shirt_flamingo_tee": {
+      "type": "Shirt",
+      "value": "Flamingo Tee",
+      "path": "/traits/shirt_flamingo_tee.webp"
+    },
+    "type_visitor": {
+      "type": "Type",
+      "value": "Visitor",
+      "path": "/traits/type_visitor.webp"
+    },
+    "hat_snoutz_cap": {
+      "type": "Hat",
+      "value": "Snoutz Cap",
+      "path": "/traits/hat_snoutz_cap.webp"
+    },
+    "shoes_ll_alien": {
+      "type": "Shoes",
+      "value": "LL Alien",
+      "path": "/traits/shoes_ll_alien.webp"
+    },
+    "shirt_glyph_shirt": {
+      "type": "Shirt",
+      "value": "Glyph Shirt",
+      "path": "/traits/shirt_glyph_shirt.webp"
+    },
+    "type_dissected": {
+      "type": "Type",
+      "value": "Dissected",
+      "path": "/traits/type_dissected.webp"
+    },
+    "shirt_no_shirt": {
+      "type": "Shirt",
+      "value": "No Shirt",
+      "path": "/traits/shirt_no_shirt.webp"
+    },
+    "pants_no_pants": {
+      "type": "Pants",
+      "value": "No Pants",
+      "path": "/traits/pants_no_pants.webp"
+    },
+    "shoes_no_shoes": {
+      "type": "Shoes",
+      "value": "No Shoes",
+      "path": "/traits/shoes_no_shoes.webp"
+    }
+  },
+  "byTraitKey": {
+    "Type::Human": "/traits/type_human.webp",
+    "Hair Style::Bald": "/traits/hair_style_bald.webp",
+    "Hat::Backwards Cap": "/traits/hat_backwards_cap.webp",
+    "Shirt::Skull Tee": "/traits/shirt_skull_tee.webp",
+    "Overshirt::Athletic Jacket": "/traits/overshirt_athletic_jacket.webp",
+    "Pants::Cargo Pants": "/traits/pants_cargo_pants.webp",
+    "Shoes::Workboots": "/traits/shoes_workboots.webp",
+    "Hair Style::Simple": "/traits/hair_style_simple.webp",
+    "Beard::Full": "/traits/beard_full.webp",
+    "Hat::Trucker Cap": "/traits/hat_trucker_cap.webp",
+    "Shirt::Hoodie": "/traits/shirt_hoodie.webp",
+    "Pants::Ripped Jeans": "/traits/pants_ripped_jeans.webp",
+    "Shoes::Canvas": "/traits/shoes_canvas.webp",
+    "Hair Style::Very Long": "/traits/hair_style_very_long.webp",
+    "Glasses::Aviators": "/traits/glasses_aviators.webp",
+    "Shirt::Diagonal Tee": "/traits/shirt_diagonal_tee.webp",
+    "Pants::Skirt": "/traits/pants_skirt.webp",
+    "Shoes::Skater": "/traits/shoes_skater.webp",
+    "Hair Style::High Flat Top": "/traits/hair_style_high_flat_top.webp",
+    "Shirt::Classic Jersey": "/traits/shirt_classic_jersey.webp",
+    "Pants::Athletic Shorts": "/traits/pants_athletic_shorts.webp",
+    "Shoes::Slides": "/traits/shoes_slides.webp",
+    "Jersey Number::8": "/traits/jersey_number_8.webp",
+    "Hair Style::Pulled Back": "/traits/hair_style_pulled_back.webp",
+    "Shirt::Oversized Hoodie": "/traits/shirt_oversized_hoodie.webp",
+    "Pants::Leggings": "/traits/pants_leggings.webp",
+    "Shoes::High Tops": "/traits/shoes_high_tops.webp",
+    "Hair Style::Half-shaved": "/traits/hair_style_half_shaved.webp",
+    "Shirt::Halter Top": "/traits/shirt_halter_top.webp",
+    "Type::Elephant": "/traits/type_elephant.webp",
+    "Glasses::Frameless": "/traits/glasses_frameless.webp",
+    "Shirt::Suit": "/traits/shirt_suit.webp",
+    "Pants::Suit Pants": "/traits/pants_suit_pants.webp",
+    "Shoes::Classic": "/traits/shoes_classic.webp",
+    "Hair Style::Messy": "/traits/hair_style_messy.webp",
+    "Glasses::Elvis": "/traits/glasses_elvis.webp",
+    "Shirt::Logo Tee": "/traits/shirt_logo_tee.webp",
+    "Shirt::Hoodie Up": "/traits/shirt_hoodie_up.webp",
+    "Pants::Regular Pants": "/traits/pants_regular_pants.webp",
+    "Shoes::Sneakers": "/traits/shoes_sneakers.webp",
+    "Hair Style::Spiky": "/traits/hair_style_spiky.webp",
+    "Glasses::Specs": "/traits/glasses_specs.webp",
+    "Shoes::Basketball": "/traits/shoes_basketball.webp",
+    "Hair Style::Wild": "/traits/hair_style_wild.webp",
+    "Shirt::Heart Hoodie": "/traits/shirt_heart_hoodie.webp",
+    "Shoes::Sandals": "/traits/shoes_sandals.webp",
+    "Necklace::Gold Necklace": "/traits/necklace_gold_necklace.webp",
+    "Hair Style::Long": "/traits/hair_style_long.webp",
+    "Hair Style::Buzzcut": "/traits/hair_style_buzzcut.webp",
+    "Hat::Headphones": "/traits/hat_headphones.webp",
+    "Glasses::Round Glasses": "/traits/glasses_round_glasses.webp",
+    "Shirt::Bare Chest": "/traits/shirt_bare_chest.webp",
+    "Necklace::Gold Chain": "/traits/necklace_gold_chain.webp",
+    "Hat::Brimmed": "/traits/hat_brimmed.webp",
+    "Shirt::Tee": "/traits/shirt_tee.webp",
+    "Pants::Short Leggings": "/traits/pants_short_leggings.webp",
+    "Overshirt::Collar Shirt": "/traits/overshirt_collar_shirt.webp",
+    "Shoes::Neon Sneakers": "/traits/shoes_neon_sneakers.webp",
+    "Beard::Stubble": "/traits/beard_stubble.webp",
+    "Glasses::Sunglasses": "/traits/glasses_sunglasses.webp",
+    "Shirt::Basketball Jersey": "/traits/shirt_basketball_jersey.webp",
+    "Jersey Number::3": "/traits/jersey_number_3.webp",
+    "Jersey Number::0": "/traits/jersey_number_0.webp",
+    "Hair Style::Fade": "/traits/hair_style_fade.webp",
+    "Shirt::Invader Tee": "/traits/shirt_invader_tee.webp",
+    "Earring::Gold Hoops": "/traits/earring_gold_hoops.webp",
+    "Hair Style::Mohawk": "/traits/hair_style_mohawk.webp",
+    "Hair Style::Big Bangs": "/traits/hair_style_big_bangs.webp",
+    "Overshirt::Trenchcoat": "/traits/overshirt_trenchcoat.webp",
+    "Shirt::Suit Jacket": "/traits/shirt_suit_jacket.webp",
+    "Earring::Gold Earrings": "/traits/earring_gold_earrings.webp",
+    "Shirt::Ghost Tee": "/traits/shirt_ghost_tee.webp",
+    "Shoes::Urban Boots": "/traits/shoes_urban_boots.webp",
+    "Hair Style::One Side": "/traits/hair_style_one_side.webp",
+    "Shirt::Long-sleeved": "/traits/shirt_long_sleeved.webp",
+    "Hat::Cap": "/traits/hat_cap.webp",
+    "Shoes::LL 86": "/traits/shoes_ll_86.webp",
+    "Tattoo::Yes": "/traits/tattoo_yes.webp",
+    "Hair Style::Ponytail": "/traits/hair_style_ponytail.webp",
+    "Beard::Biker Mustache": "/traits/beard_biker_mustache.webp",
+    "Jersey Number::9": "/traits/jersey_number_9.webp",
+    "Hair Style::Straight": "/traits/hair_style_straight.webp",
+    "Shirt::Tube Top": "/traits/shirt_tube_top.webp",
+    "Shoes::LL Baby Blue": "/traits/shoes_ll_baby_blue.webp",
+    "Glasses::Nerdy": "/traits/glasses_nerdy.webp",
+    "Shoes::LL RGB": "/traits/shoes_ll_rgb.webp",
+    "Pants::Trackpants": "/traits/pants_trackpants.webp",
+    "Type::Pig": "/traits/type_pig.webp",
+    "Hat::Wool Hat": "/traits/hat_wool_hat.webp",
+    "Shirt::Snoutz Tee": "/traits/shirt_snoutz_tee.webp",
+    "Hair Style::Pigtails": "/traits/hair_style_pigtails.webp",
+    "Shirt::Snoutz Hoodie": "/traits/shirt_snoutz_hoodie.webp",
+    "Shoes::LL High Tops": "/traits/shoes_ll_high_tops.webp",
+    "Glasses::3D": "/traits/glasses_3d.webp",
+    "Shoes::LL Tall": "/traits/shoes_ll_tall.webp",
+    "Shirt::Meepet Tee": "/traits/shirt_meepet_tee.webp",
+    "Shirt::Lines": "/traits/shirt_lines.webp",
+    "Earring::Gold Earring": "/traits/earring_gold_earring.webp",
+    "Hair Style::Bob": "/traits/hair_style_bob.webp",
+    "Overshirt::Jean Jacket": "/traits/overshirt_jean_jacket.webp",
+    "Shirt::Windbreaker": "/traits/shirt_windbreaker.webp",
+    "Jersey Number::5": "/traits/jersey_number_5.webp",
+    "Beard::Big": "/traits/beard_big.webp",
+    "Shoes::Running": "/traits/shoes_running.webp",
+    "Shoes::High Boots": "/traits/shoes_high_boots.webp",
+    "Hat::Bandana": "/traits/hat_bandana.webp",
+    "Overshirt::Leather Jacket": "/traits/overshirt_leather_jacket.webp",
+    "Hair Style::Curly": "/traits/hair_style_curly.webp",
+    "Shirt::Jersey": "/traits/shirt_jersey.webp",
+    "Beard::Mustache": "/traits/beard_mustache.webp",
+    "Beard::Muttonchops": "/traits/beard_muttonchops.webp",
+    "Hair Style::Bun": "/traits/hair_style_bun.webp",
+    "Shirt::Tie-dyed Tee": "/traits/shirt_tie_dyed_tee.webp",
+    "Jersey Number::1": "/traits/jersey_number_1.webp",
+    "Shirt::CGA Shirt": "/traits/shirt_cga_shirt.webp",
+    "Type::Skeleton": "/traits/type_skeleton.webp",
+    "Jersey Number::4": "/traits/jersey_number_4.webp",
+    "Shoes::LL Retro": "/traits/shoes_ll_retro.webp",
+    "Shoes::LL Orange": "/traits/shoes_ll_orange.webp",
+    "Shoes::LL Moonboots": "/traits/shoes_ll_moonboots.webp",
+    "Jersey Number::6": "/traits/jersey_number_6.webp",
+    "Hair Style::Fiery Mohawk": "/traits/hair_style_fiery_mohawk.webp",
+    "Shirt::Hawaiian": "/traits/shirt_hawaiian.webp",
+    "Shirt::Snoutz Jersey": "/traits/shirt_snoutz_jersey.webp",
+    "Shirt::Heart Tee": "/traits/shirt_heart_tee.webp",
+    "Jersey Number::7": "/traits/jersey_number_7.webp",
+    "Shirt::Snoutz Skull Tee": "/traits/shirt_snoutz_skull_tee.webp",
+    "Type::Robot": "/traits/type_robot.webp",
+    "Shirt::Stylized Hoodie": "/traits/shirt_stylized_hoodie.webp",
+    "Beard::Medical Mask": "/traits/beard_medical_mask.webp",
+    "Shirt::Punk Tee": "/traits/shirt_punk_tee.webp",
+    "Jersey Number::2": "/traits/jersey_number_2.webp",
+    "Shirt::Flamingo Tee": "/traits/shirt_flamingo_tee.webp",
+    "Type::Visitor": "/traits/type_visitor.webp",
+    "Hat::Snoutz Cap": "/traits/hat_snoutz_cap.webp",
+    "Shoes::LL Alien": "/traits/shoes_ll_alien.webp",
+    "Shirt::Glyph Shirt": "/traits/shirt_glyph_shirt.webp",
+    "Type::Dissected": "/traits/type_dissected.webp",
+    "Shirt::No Shirt": "/traits/shirt_no_shirt.webp",
+    "Pants::No Pants": "/traits/pants_no_pants.webp",
+    "Shoes::No Shoes": "/traits/shoes_no_shoes.webp",
+    "Hair Color::Argyle": "/traits/argyle.webp",
+    "Hair Color::Blue Camo": "/traits/blue_camo.webp",
+    "Hair Color::Camo": "/traits/camo.webp",
+    "Hair Color::Green Plaid": "/traits/green_plaid.webp",
+    "Hair Color::Leopard Print": "/traits/leopard_print.webp",
+    "Hair Color::Luxe": "/traits/luxe.webp",
+    "Hair Color::Posh": "/traits/posh.webp",
+    "Hair Color::Red Plaid": "/traits/red_plaid.webp",
+    "Beard Color::Argyle": "/traits/argyle.webp",
+    "Beard Color::Blue Camo": "/traits/blue_camo.webp",
+    "Beard Color::Camo": "/traits/camo.webp",
+    "Beard Color::Green Plaid": "/traits/green_plaid.webp",
+    "Beard Color::Leopard Print": "/traits/leopard_print.webp",
+    "Beard Color::Luxe": "/traits/luxe.webp",
+    "Beard Color::Posh": "/traits/posh.webp",
+    "Beard Color::Red Plaid": "/traits/red_plaid.webp",
+    "Shirt Color::Argyle": "/traits/argyle.webp",
+    "Shirt Color::Blue Camo": "/traits/blue_camo.webp",
+    "Shirt Color::Camo": "/traits/camo.webp",
+    "Shirt Color::Green Plaid": "/traits/green_plaid.webp",
+    "Shirt Color::Leopard Print": "/traits/leopard_print.webp",
+    "Shirt Color::Luxe": "/traits/luxe.webp",
+    "Shirt Color::Posh": "/traits/posh.webp",
+    "Shirt Color::Red Plaid": "/traits/red_plaid.webp",
+    "Pants Color::Argyle": "/traits/argyle.webp",
+    "Pants Color::Blue Camo": "/traits/blue_camo.webp",
+    "Pants Color::Camo": "/traits/camo.webp",
+    "Pants Color::Green Plaid": "/traits/green_plaid.webp",
+    "Pants Color::Leopard Print": "/traits/leopard_print.webp",
+    "Pants Color::Luxe": "/traits/luxe.webp",
+    "Pants Color::Posh": "/traits/posh.webp",
+    "Pants Color::Red Plaid": "/traits/red_plaid.webp",
+    "Shoes Color::Argyle": "/traits/argyle.webp",
+    "Shoes Color::Blue Camo": "/traits/blue_camo.webp",
+    "Shoes Color::Camo": "/traits/camo.webp",
+    "Shoes Color::Green Plaid": "/traits/green_plaid.webp",
+    "Shoes Color::Leopard Print": "/traits/leopard_print.webp",
+    "Shoes Color::Luxe": "/traits/luxe.webp",
+    "Shoes Color::Posh": "/traits/posh.webp",
+    "Shoes Color::Red Plaid": "/traits/red_plaid.webp",
+    "Hat Color::Argyle": "/traits/argyle.webp",
+    "Hat Color::Blue Camo": "/traits/blue_camo.webp",
+    "Hat Color::Camo": "/traits/camo.webp",
+    "Hat Color::Green Plaid": "/traits/green_plaid.webp",
+    "Hat Color::Leopard Print": "/traits/leopard_print.webp",
+    "Hat Color::Luxe": "/traits/luxe.webp",
+    "Hat Color::Posh": "/traits/posh.webp",
+    "Hat Color::Red Plaid": "/traits/red_plaid.webp",
+    "Glasses Color::Argyle": "/traits/argyle.webp",
+    "Glasses Color::Blue Camo": "/traits/blue_camo.webp",
+    "Glasses Color::Camo": "/traits/camo.webp",
+    "Glasses Color::Green Plaid": "/traits/green_plaid.webp",
+    "Glasses Color::Leopard Print": "/traits/leopard_print.webp",
+    "Glasses Color::Luxe": "/traits/luxe.webp",
+    "Glasses Color::Posh": "/traits/posh.webp",
+    "Glasses Color::Red Plaid": "/traits/red_plaid.webp",
+    "Overshirt Color::Argyle": "/traits/argyle.webp",
+    "Overshirt Color::Blue Camo": "/traits/blue_camo.webp",
+    "Overshirt Color::Camo": "/traits/camo.webp",
+    "Overshirt Color::Green Plaid": "/traits/green_plaid.webp",
+    "Overshirt Color::Leopard Print": "/traits/leopard_print.webp",
+    "Overshirt Color::Luxe": "/traits/luxe.webp",
+    "Overshirt Color::Posh": "/traits/posh.webp",
+    "Overshirt Color::Red Plaid": "/traits/red_plaid.webp",
+    "Hair Color::Purple Dye": "/traits/hair_color_purple_dye.webp",
+    "Hair Color::Rainbow": "/traits/hair_color_rainbow.webp"
+  },
+  "patternColors": {
+    "Argyle": "/traits/argyle.webp",
+    "Blue Camo": "/traits/blue_camo.webp",
+    "Camo": "/traits/camo.webp",
+    "Green Plaid": "/traits/green_plaid.webp",
+    "Leopard Print": "/traits/leopard_print.webp",
+    "Luxe": "/traits/luxe.webp",
+    "Posh": "/traits/posh.webp",
+    "Red Plaid": "/traits/red_plaid.webp"
+  }
+}
