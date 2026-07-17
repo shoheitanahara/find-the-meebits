@@ -26,6 +26,9 @@ type TraitHuntPoolsFile = {
 }
 
 const STAGE_COUNT = 3
+/** Match Museum stage 1–3 crowd sizes (PC 200→, SP 100→). */
+const PC_TRAIT_HUNT_NPC_COUNTS = [200, 250, 300] as const
+const SP_TRAIT_HUNT_NPC_COUNTS = [100, 125, 150] as const
 const poolsFile = traitHuntPools as TraitHuntPoolsFile
 const poolSetCache = new Map<string, Set<number>>()
 
@@ -116,12 +119,11 @@ export function getTraitHuntProgressionSteps(): TraitHuntStep[] {
     return cachedTraitHuntSteps
   }
 
-  const crowd = isMobilePerfMode() ? 80 : 120
+  const npcCounts = isMobilePerfMode() ? SP_TRAIT_HUNT_NPC_COUNTS : PC_TRAIT_HUNT_NPC_COUNTS
   const quests = pickRandomTraitQuests(STAGE_COUNT)
 
   cachedTraitHuntSteps = quests.map((quest, index) => {
-    const npcCount =
-      index === quests.length - 1 ? crowd + (isMobilePerfMode() ? 20 : 40) : crowd
+    const npcCount = npcCounts[index] ?? npcCounts[npcCounts.length - 1]
 
     return {
       venueId: 'museum' as const,
