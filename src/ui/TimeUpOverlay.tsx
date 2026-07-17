@@ -157,23 +157,23 @@ export function TimeUpOverlay() {
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">{t.timeUp}</p>
             <h2 className="mt-2 text-4xl font-black">{t.answerReveal}</h2>
             <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-              {t.stageWithMeebits(stageLabel, activeNpcCount)}.{' '}
+              {t.stageWithMeebits(stageLabel, activeNpcCount)}
+              {t.sentenceEnd}{' '}
               {targetNpcs.length > 1 ? (
                 <>
                   {t.remainingTargets}{' '}
-                  {targetNpcs.map((npc, index) => (
-                    <span key={npc.id}>
-                      {index > 0 ? (index === targetNpcs.length - 1 ? ' and ' : ', ') : ''}
-                      <span className="font-black text-amber-200">#{npc.meebitNumber}</span>
-                    </span>
-                  ))}
+                  <span className="font-black text-amber-200">
+                    {t.joinList(targetNpcs.map((npc) => `#${npc.meebitNumber}`))}
+                  </span>
+                  {t.sentenceEnd}{' '}
                 </>
               ) : (
                 <>
                   {t.correctAvatar}{' '}
                   <span className="font-black text-amber-200">Meebit #{targetNpcs[0]?.meebitNumber}</span>
+                  {t.sentenceEnd}{' '}
                 </>
-              )}{' '}
+              )}
               {t.andGlowsGold}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">

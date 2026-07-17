@@ -128,7 +128,7 @@ export function MiniMap() {
       </div>
 
       <p className="mt-1 hidden text-sm font-bold text-neutral-200 lg:block">
-        {isAnswerReveal ? 'Find the glow' : 'You are here'}
+        {isAnswerReveal ? t.findTheGlow : t.youAreHere}
       </p>
     </aside>
   )

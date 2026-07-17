@@ -73,6 +73,10 @@ type UiMessages = {
   remainingTargets: string
   correctAvatar: string
   andGlowsGold: string
+  sentenceEnd: string
+  joinList: (items: string[]) => string
+  findTheGlow: string
+  youAreHere: string
   stageClear: string
   fullConquest: string
   afterHoursClear: string
@@ -200,9 +204,17 @@ const en: UiMessages = {
   followGoldGlow: 'Follow the gold glow.',
   timeUpAnswerReveal: 'Time Up · Answer',
   timeUpMobileHint: 'glow gold. Go find them.',
-  remainingTargets: 'Remaining:',
-  correctAvatar: 'Answer:',
+  remainingTargets: 'Still looking for',
+  correctAvatar: 'Answer is',
   andGlowsGold: 'Gold glow marks them. WASD to move.',
+  sentenceEnd: '.',
+  joinList: (items) => {
+    if (items.length <= 1) return items[0] ?? ''
+    if (items.length === 2) return `${items[0]} and ${items[1]}`
+    return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`
+  },
+  findTheGlow: 'Find the glow',
+  youAreHere: 'You are here',
   stageClear: 'Stage Clear',
   fullConquest: 'Full Conquest',
   afterHoursClear: 'After Hours Clear',
@@ -328,13 +340,21 @@ const ja: UiMessages = {
   progressionClub: (counts, max) =>
     `ステージ1〜3では${counts}体の中から2体、ステージ4では${max}体の中から3体、最後のラストコールでは5体を探します`,
   answer: '正解',
-  answerReveal: '正解発表',
-  followGoldGlow: '金色の光を追え。',
-  timeUpAnswerReveal: 'タイムアップ · 正解',
-  timeUpMobileHint: 'が金色に光る。探そう。',
-  remainingTargets: '残り:',
-  correctAvatar: '正解:',
-  andGlowsGold: '金色に光る。WASDで移動。',
+  answerReveal: '答え合わせ',
+  followGoldGlow: '金色の光が目印だよ。',
+  timeUpAnswerReveal: 'タイムアップ・答え合わせ',
+  timeUpMobileHint: 'が金色に光っているよ。会場で探してみよう。',
+  remainingTargets: 'まだ見つかっていないのは',
+  correctAvatar: '正解は',
+  andGlowsGold: '金色に光っているよ。WASDで移動して探そう。',
+  sentenceEnd: '。',
+  joinList: (items) => {
+    if (items.length <= 1) return items[0] ?? ''
+    if (items.length === 2) return `${items[0]} と ${items[1]}`
+    return `${items.slice(0, -1).join('、')} と ${items[items.length - 1]}`
+  },
+  findTheGlow: '光を探そう',
+  youAreHere: 'いまここ',
   stageClear: 'ステージクリア',
   fullConquest: '全制覇',
   afterHoursClear: 'After Hours クリア',
