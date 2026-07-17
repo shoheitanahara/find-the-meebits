@@ -351,7 +351,7 @@ function Signboard() {
         <meshStandardMaterial color="#fafaf9" roughness={0.8} />
       </mesh>
       <Text color="#111111" fontSize={0.16} maxWidth={3.4} position={[0, 0, 0.14]} textAlign="center">
-        Find the target.{'\n'}No labels in the gallery.{'\n'}Inspect with E.
+        Find the target.{'\n'}No labels in the gallery.{'\n'}Talk with E.
       </Text>
     </group>
   )

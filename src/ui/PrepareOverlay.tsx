@@ -1,6 +1,7 @@
 import { getNpcVrmAlwaysLoadDistance, getWarmupLoadDistance } from '../game/perfConfig'
 import { useEffect, useState } from 'react'
 import { isTimedGameMode } from '../game/gameMode'
+import { ui } from '../i18n/ui'
 import { getPrepareProgress } from '../systems/StagePrepareSystem'
 import { useGameStore } from '../stores/gameStore'
 import { getLoadingLabelForVenue } from './gameTips'
@@ -22,6 +23,7 @@ export function PrepareOverlay() {
   }, [gamePhase])
 
   const progress = getPrepareProgress()
+  const t = ui()
 
   if (gamePhase !== 'preparing' || !progress || !tipsAcknowledged) {
     return null
@@ -30,13 +32,13 @@ export function PrepareOverlay() {
   return (
     <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-neutral-950/55 p-4 backdrop-blur-[2px] max-lg:px-3">
       <section className="w-full max-w-md rounded-[2rem] border border-white/15 bg-neutral-950/90 px-6 py-6 text-center text-white shadow-2xl max-lg:px-5 max-lg:py-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">Preparing Stage</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-400">{t.preparingStage}</p>
         <h2 className="mt-3 text-3xl font-black">{getLoadingLabelForVenue(venueId)}</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-          Nearby Meebits: {progress.nearReady}/{progress.nearCount} (within {getNpcVrmAlwaysLoadDistance()}m)
+          {t.nearbyMeebits(progress.nearReady, progress.nearCount, getNpcVrmAlwaysLoadDistance())}
         </p>
         <p className="mt-1 text-xs text-neutral-400">
-          Preloading: {progress.readyCount}/{progress.activeCount} (within {getWarmupLoadDistance()}m)
+          {t.preloading(progress.readyCount, progress.activeCount, getWarmupLoadDistance())}
         </p>
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-neutral-800">
           <div
@@ -45,9 +47,7 @@ export function PrepareOverlay() {
           />
         </div>
         <p className="mt-3 text-xs font-medium text-neutral-400">
-          {isTimedGameMode(gameMode)
-            ? 'The timer starts once avatars around you are ready.'
-            : 'No time limit — explore freely once avatars around you are ready.'}
+          {isTimedGameMode(gameMode) ? t.timerStarts : t.noTimerReady}
         </p>
       </section>
     </div>

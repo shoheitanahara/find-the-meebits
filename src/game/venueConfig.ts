@@ -52,5 +52,6 @@ export function getVenueTheme(venueId: VenueId): VenueTheme {
 }
 
 export function getVenueLabel(venueId: VenueId) {
+  // Brand names stay English in both locales
   return venueId === 'club' ? 'After Hours' : 'Museum'
 }

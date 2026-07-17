@@ -1,5 +1,6 @@
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
+import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
@@ -39,7 +40,7 @@ export function StageRetryButton({ className = '', compact = false }: StageRetry
       } ${className}`}
       onClick={handleRetry}
     >
-      Retry
+      {ui().retry}
     </button>
   )
 }

@@ -1,5 +1,6 @@
 import { GAME_TIME_LIMIT_SECONDS } from '../game/gameConfig'
 import { isTimedGameMode, type GameMode } from '../game/gameMode'
+import { ui } from '../i18n/ui'
 import { getRemainingSeconds, useGameStore } from '../stores/gameStore'
 
 export function shouldShowGameTimer(gameMode: GameMode) {
@@ -12,12 +13,14 @@ export function getTimerDisplay(
   clearTimeSeconds: number | null,
   gameMode: GameMode,
 ) {
+  const t = ui()
+
   if (!shouldShowGameTimer(gameMode)) {
     return null
   }
   if (gamePhase === 'preparing') {
     return {
-      label: 'Starting Soon',
+      label: t.startingSoon,
       value: formatTimerSeconds(GAME_TIME_LIMIT_SECONDS),
       urgent: false,
     }
@@ -26,7 +29,7 @@ export function getTimerDisplay(
   if (gamePhase === 'playing') {
     const remaining = getRemainingSeconds(startedAt)
     return {
-      label: 'Time Left',
+      label: t.timeLeft,
       value: formatTimerSeconds(remaining),
       urgent: remaining <= 30,
     }
@@ -34,7 +37,7 @@ export function getTimerDisplay(
 
   if (gamePhase === 'timedOut') {
     return {
-      label: 'Time Up',
+      label: t.timeUp,
       value: '0:00',
       urgent: true,
     }
@@ -42,14 +45,14 @@ export function getTimerDisplay(
 
   if (gamePhase === 'cleared' || gamePhase === 'conquered') {
     return {
-      label: 'Clear Time',
+      label: t.clearTime,
       value: formatTimerSeconds(clearTimeSeconds ?? 0),
       urgent: false,
     }
   }
 
   return {
-    label: 'Time Limit',
+    label: t.timeLimit,
     value: formatTimerSeconds(GAME_TIME_LIMIT_SECONDS),
     urgent: false,
   }

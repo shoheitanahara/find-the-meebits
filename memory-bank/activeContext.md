@@ -1,8 +1,18 @@
 # Active Context
 
-最終更新: 2026-07-05
+最終更新: 2026-07-17
 
 ## 直近の作業サマリー
+
+### 日本語化 `/jp`（実装済み・翻訳は調整中）
+
+- **ロケール**: `src/i18n/locale.ts` — `/jp` パスで `ja`、それ以外 `en`
+- **UI辞書**: `src/i18n/ui.ts` — `ui()` で取得
+- **セリフ**: `src/i18n/dialogue/` — Museum/Club 初回・再会・発見・Shawn、ヒント・ランドマーク
+- **切替**: スタート画面右上 `LanguageSwitcher`（フルリロードで `/` ↔ `/jp`）
+- **Vercel**: `vercel.json` で `/jp` → `index.html`
+- **Vite**: `jpSpaFallback` プラグインでローカルでも `/jp` 表示可
+- NPC セリフ・ヒント・Tips・HUD・クリア/タイムアップ等も locale 連動
 
 ### After Hours（Club 会場）— 主要実装済み
 

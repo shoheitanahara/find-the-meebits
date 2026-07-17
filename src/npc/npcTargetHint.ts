@@ -1,5 +1,7 @@
 import type { Vector3Tuple } from '../types/game'
 import type { VenueId } from '../game/venueConfig'
+import { isJapanese } from '../i18n/locale'
+import { LANDMARK_PHRASE_JA } from '../i18n/dialogue/landmarkPhrasesJa'
 import { buildHintLandmarksForVenue } from '../world/worldLandmarks'
 import { getVenueHintPhrases, type MapZone } from './npcTargetHintPhrases'
 
@@ -22,15 +24,18 @@ export function buildTargetLocationHint(
   const targetZ = targetPosition[2]
   const distance = Math.hypot(targetX - playerPosition[0], targetZ - playerPosition[2])
   const prefix = pickFrom(phrases.prefixes, seed)
+  const ja = isJapanese()
 
   if (distance < VERY_CLOSE_DISTANCE) {
     const phrase = pickFrom(phrases.veryClose, seed + 1)
-    return `${prefix} your target is ${phrase}.`
+    return ja ? `${prefix}ターゲットは${phrase}。` : `${prefix} your target is ${phrase}.`
   }
 
   const landmarkPhrase = getNearestLandmarkPhrase(targetX, targetZ, seed + 2, landmarks)
   if (landmarkPhrase) {
-    return `${prefix} your target is ${landmarkPhrase}.`
+    return ja
+      ? `${prefix}ターゲットは${landmarkPhrase}。`
+      : `${prefix} your target is ${landmarkPhrase}.`
   }
 
   const targetZone = classifyZone(targetX, targetZ)
@@ -38,16 +43,16 @@ export function buildTargetLocationHint(
 
   if (targetZone === playerZone) {
     const phrase = pickFrom(phrases.sameZone[targetZone], seed + 3)
-    return `${prefix} your target is ${phrase}.`
+    return ja ? `${prefix}ターゲットは${phrase}。` : `${prefix} your target is ${phrase}.`
   }
 
   if (distance >= FAR_ACROSS_VENUE) {
     const phrase = pickFrom(phrases.farZone[targetZone], seed + 4)
-    return `${prefix} your target is ${phrase}.`
+    return ja ? `${prefix}ターゲットは${phrase}。` : `${prefix} your target is ${phrase}.`
   }
 
   const phrase = pickFrom(phrases.zone[targetZone], seed + 4)
-  return `${prefix} your target is ${phrase}.`
+  return ja ? `${prefix}ターゲットは${phrase}。` : `${prefix} your target is ${phrase}.`
 }
 
 export function classifyZone(x: number, z: number): MapZone {
@@ -95,7 +100,15 @@ function getNearestLandmarkPhrase(
     return null
   }
 
-  return pickFrom(nearest.phrases, seed)
+  return localizeLandmarkPhrase(pickFrom(nearest.phrases, seed))
+}
+
+function localizeLandmarkPhrase(phrase: string) {
+  if (!isJapanese()) {
+    return phrase
+  }
+
+  return LANDMARK_PHRASE_JA[phrase] ?? phrase
 }
 
 function pickFrom<T>(options: T[], seed: number) {

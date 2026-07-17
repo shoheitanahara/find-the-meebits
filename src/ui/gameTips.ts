@@ -1,47 +1,32 @@
 import type { VenueId } from '../game/venueConfig'
+import { ui } from '../i18n/ui'
 
 export type GameTip = {
   title: string
   body: string
 }
 
-export const MUSEUM_GAME_TIPS: GameTip[] = [
-  {
-    title: 'Red marker',
-    body: 'Walk up to a Meebit. A red dot above them means you can talk.',
-  },
-  {
-    title: 'Friendly NPCs',
-    body: 'Everyone in the museum is on your team. Chat often — someone may surprise you with a hint.',
-  },
-  {
-    title: 'Find your target',
-    body: 'Match the target shown in the corner. Wrong Meebit? Keep searching and keep talking.',
-  },
-]
-
-export const CLUB_GAME_TIPS: GameTip[] = [
-  {
-    title: 'Red marker',
-    body: 'Walk up to a Meebit on the floor. A red dot above them means you can talk.',
-  },
-  {
-    title: 'Club crowd',
-    body: 'Everyone in After Hours is fair game to chat with. Someone near the bar, DJ booth, or VIP lounge might drop a hint.',
-  },
-  {
-    title: 'Find your target',
-    body: 'Match the target in the corner. Wrong face? Keep moving through the lights and keep talking.',
-  },
-]
-
-/** @deprecated Use getGameTipsForVenue instead */
-export const GAME_TIPS = MUSEUM_GAME_TIPS
-
 export function getGameTipsForVenue(venueId: VenueId): GameTip[] {
-  return venueId === 'club' ? CLUB_GAME_TIPS : MUSEUM_GAME_TIPS
+  const t = ui()
+
+  if (venueId === 'club') {
+    return [
+      { title: t.tipRedTitle, body: t.tipRedClub },
+      { title: t.tipNpcClubTitle, body: t.tipNpcClub },
+      { title: t.tipTargetTitle, body: t.tipTargetClub },
+    ]
+  }
+
+  return [
+    { title: t.tipRedTitle, body: t.tipRedMuseum },
+    { title: t.tipNpcTitle, body: t.tipNpcMuseum },
+    { title: t.tipTargetTitle, body: t.tipTargetMuseum },
+  ]
 }
 
+/** @deprecated Use getGameTipsForVenue */
+export const GAME_TIPS = getGameTipsForVenue('museum')
+
 export function getLoadingLabelForVenue(venueId: VenueId) {
-  return venueId === 'club' ? 'Loading the club' : 'Loading the museum'
+  return venueId === 'club' ? ui().loadingClub : ui().loadingMuseum
 }

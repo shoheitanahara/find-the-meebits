@@ -1,5 +1,6 @@
 import { getNpcById } from '../npc/npcData'
 import { advanceDialogue } from './advanceDialogue'
+import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from '../ui/TargetPreview'
@@ -106,6 +107,7 @@ function DialogueContent({
   const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const setMeebitNumber = usePlayerStore((state) => state.setMeebitNumber)
   const isCurrentAvatar = playerMeebitNumber === npc.meebitNumber
+  const t = ui()
 
   const handleUseAvatar = () => {
     if (isCurrentAvatar) {
@@ -141,7 +143,7 @@ function DialogueContent({
                   compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
                 }`}
               >
-                Your Avatar
+                {t.yourAvatar}
               </span>
             ) : (
               <button
@@ -151,7 +153,7 @@ function DialogueContent({
                 }`}
                 onClick={handleUseAvatar}
               >
-                Use This Avatar
+                {t.useThisAvatar}
               </button>
             )}
           </div>
@@ -163,7 +165,7 @@ function DialogueContent({
           }`}
           onClick={onClose}
         >
-          Close
+          {t.close}
         </button>
       </div>
 
@@ -174,7 +176,7 @@ function DialogueContent({
               compact ? 'text-[0.6rem]' : 'text-xs'
             }`}
           >
-            Hint
+            {t.hint}
           </p>
           <p
             className={`mt-1.5 font-black leading-relaxed text-neutral-950 ${
@@ -205,7 +207,7 @@ function DialogueContent({
           }`}
           onClick={onNext}
         >
-          {isLastLine ? 'Done' : 'Next'}
+          {isLastLine ? t.done : t.nextLine}
         </button>
       </div>
     </div>

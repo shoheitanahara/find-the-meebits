@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { ui } from '../i18n/ui'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { getProgressionStep, getStageDescription, getStageLabel, getChallengeNpcCount } from '../game/gameProgression'
@@ -76,6 +77,7 @@ export function ClearOverlay() {
 
   const clearedStageLabel = clearedStep ? getStageLabel(clearedStep) : getCurrentStageLabel(progressionIndex, venueId)
   const clubClearTheme = isClubVenue
+  const t = ui()
 
   return (
     <div
@@ -98,13 +100,13 @@ export function ClearOverlay() {
           <div className="mx-auto flex flex-row items-end justify-center gap-4 max-lg:mx-auto lg:mx-0 lg:flex-col lg:items-start lg:gap-4">
             {clearedNpc ? (
               <ConqueredAvatarPreview
-                label="Final Target"
+                label={t.finalTarget}
                 meebitNumber={clearedNpc.meebitNumber}
                 variant={clubClearTheme ? 'club' : 'museum'}
               />
             ) : null}
             <ConqueredAvatarPreview
-              label="You"
+              label={t.you}
               meebitNumber={playerMeebitNumber}
               variant={clubClearTheme ? 'club' : 'museum'}
             />
@@ -128,7 +130,7 @@ export function ClearOverlay() {
                   : 'text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500'
             }
           >
-            {isConquered ? (isClubVenue ? 'After Hours Clear' : 'Full Conquest') : 'Stage Clear'}
+            {isConquered ? (isClubVenue ? t.afterHoursClear : t.fullConquest) : t.stageClear}
           </p>
           <h2
             className={`mt-3 text-4xl font-black ${
@@ -141,9 +143,9 @@ export function ClearOverlay() {
           >
             {isConquered
               ? isClubVenue
-                ? 'You owned the night.'
-                : 'You conquered the museum.'
-              : 'You found it.'}
+                ? t.ownedNight
+                : t.conqueredMuseum
+              : t.youFoundIt}
           </h2>
           {!isConquered ? (
             <p className={`mt-4 text-lg font-bold ${clubClearTheme ? 'text-fuchsia-100' : ''}`}>
@@ -151,9 +153,9 @@ export function ClearOverlay() {
             </p>
           ) : (
             <p className={`mt-4 text-sm font-semibold ${clubClearTheme ? 'text-neutral-300' : 'text-neutral-600'}`}>
-              {clearedNpc ? `Final target #${clearedNpc.meebitNumber}` : null}
+              {clearedNpc ? t.finalTargetHash(clearedNpc.meebitNumber) : null}
               {clearedNpc ? ' · ' : null}
-              You #{playerMeebitNumber}
+              {t.youHash(playerMeebitNumber)}
             </p>
           )}
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -179,7 +181,7 @@ export function ClearOverlay() {
                       : 'text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500'
                 }
               >
-                Clear Time
+                {t.clearTime}
               </p>
               <p className="mt-1 text-2xl font-black">{formatClearTime(clearTimeSeconds)}</p>
             </div>
@@ -205,9 +207,9 @@ export function ClearOverlay() {
                       : 'text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500'
                 }
               >
-                Stage
+                {t.stage}
               </p>
-              <p className="mt-1 text-2xl font-black">{isConquered ? 'Complete' : clearedStageLabel}</p>
+              <p className="mt-1 text-2xl font-black">{isConquered ? t.complete : clearedStageLabel}</p>
             </div>
           </div>
           <p
@@ -223,18 +225,18 @@ export function ClearOverlay() {
           >
             {isConquered
               ? isClubVenue
-                ? `You cleared all five After Hours stages, ending with Last Call at ${getChallengeNpcCount('club')} Meebits.`
-                : `You cleared Semifinal, Final, and Grand Final at ${getChallengeNpcCount('museum')} Meebits. Full conquest complete.`
+                ? t.conqueredClubBody(getChallengeNpcCount('club'))
+                : t.conqueredMuseumBody(getChallengeNpcCount('museum'))
               : nextStep
-                ? `Next: ${getStageLabel(nextStep)} — ${getStageDescription(nextStep)}`
-                : `Next stage: ${activeNpcCount} Meebits.`}
+                ? t.nextColon(getStageLabel(nextStep), getStageDescription(nextStep))
+                : t.nextStageNpcs(activeNpcCount)}
           </p>
           {isConquered && !isClubVenue ? (
             <div className="mt-5 rounded-2xl border border-violet-300/80 bg-violet-950/10 p-4 text-center sm:text-left">
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-violet-500">New Venue</p>
-              <p className="mt-2 text-2xl font-black uppercase tracking-[0.08em] text-violet-700">After Hours Unlocked!</p>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-violet-500">{t.newVenue}</p>
+              <p className="mt-2 text-2xl font-black uppercase tracking-[0.08em] text-violet-700">{t.afterHoursUnlocked}</p>
               <p className="mt-2 text-sm font-medium text-violet-900/80">
-                Return to the title screen to begin After Hours.
+                {t.returnTitleForAfterHours}
               </p>
             </div>
           ) : null}
@@ -251,7 +253,7 @@ export function ClearOverlay() {
             }
             onClick={handleContinue}
           >
-            {isConquered ? 'Back to Title' : 'Next Stage'}
+            {isConquered ? t.backToTitle : t.nextStage}
           </button>
           {isConquered ? (
             <p
@@ -259,7 +261,7 @@ export function ClearOverlay() {
                 clubClearTheme ? 'text-fuchsia-200/70' : 'text-neutral-500'
               }`}
             >
-              Click to continue
+              {t.clickToContinue}
             </p>
           ) : null}
         </div>

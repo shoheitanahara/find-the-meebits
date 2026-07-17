@@ -1,4 +1,5 @@
 import { useGameStore } from '../stores/gameStore'
+import { ui } from '../i18n/ui'
 import { getLoadingLabelForVenue } from './gameTips'
 
 export function LoadingScreen() {
@@ -7,6 +8,7 @@ export function LoadingScreen() {
   const playerModelStatus = useGameStore((state) => state.playerModelStatus)
   const loadingLabel = getLoadingLabelForVenue(venueId)
   const isClubVenue = venueId === 'club'
+  const t = ui()
 
   if (gamePhase === 'intro' || gamePhase === 'preparing' || playerModelStatus !== 'loading') {
     return null
@@ -30,11 +32,11 @@ export function LoadingScreen() {
             isClubVenue ? 'text-fuchsia-300' : 'text-sky-700'
           }`}
         >
-          Loading
+          {t.loading}
         </p>
         <p className="mt-2 text-xl font-black">{loadingLabel}</p>
         <p className={`mt-2 text-sm font-medium ${isClubVenue ? 'text-neutral-300' : 'text-slate-600'}`}>
-          Loading your Meebit avatar...
+          {t.loadingAvatar}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ui } from '../../i18n/ui'
 import { getStageLabel, getProgressionStep } from '../../game/gameProgression'
 import { getNpcById } from '../../npc/npcData'
 import { useGameStore } from '../../stores/gameStore'
@@ -84,8 +85,9 @@ export function MobileTopBar() {
     return null
   }
 
+  const t = ui()
   const step = getProgressionStep(progressionIndex, venueId)
-  const stageLabel = step ? getStageLabel(step) : 'Stage'
+  const stageLabel = step ? getStageLabel(step) : t.stage
   const targetNpcs = targetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
@@ -117,7 +119,7 @@ export function MobileTopBar() {
               <p className="text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 {stageLabel}
               </p>
-              <p className="truncate text-[0.65rem] font-bold text-neutral-300">{activeNpcCount} Meebits</p>
+              <p className="truncate text-[0.65rem] font-bold text-neutral-300">{t.meebitsCount(activeNpcCount)}</p>
               <PlayerMeebitLabel className="mt-0.5 text-[0.6rem] font-bold text-neutral-200" />
               {!showTimer ? (
                 <p className="mt-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.14em] text-neutral-500">
@@ -152,7 +154,7 @@ export function MobileTopBar() {
               isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
             }`}
           >
-            {isAnswerReveal ? 'Answer' : targetNpcs.length > 1 ? 'Targets' : 'Target'}
+            {isAnswerReveal ? t.answer : targetNpcs.length > 1 ? t.targets : t.target}
           </p>
           {targetNpcs.map((npc) => {
             const isFound = foundTargetNpcIds.includes(npc.id)

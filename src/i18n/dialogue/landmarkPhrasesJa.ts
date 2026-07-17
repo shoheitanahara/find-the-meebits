@@ -1,0 +1,41 @@
+/** Landmark hint phrase translations — English key → Japanese. */
+
+export const LANDMARK_PHRASE_JA: Record<string, string> = {
+  // Museum — worldLandmarks
+  'near a black sculpture': '黒い彫刻の近くにいるよ',
+  'near a white sculpture': '白い彫刻の近くにいるよ',
+  'near a gray Meebit sculpture on a white pedestal': '白い台座に立つグレーのMeebit像の近くにいるよ',
+  'near a gray Meebit sculpture on a black pedestal': '黒い台座に立つグレーのMeebit像の近くにいるよ',
+  'near a bench': 'ベンチの近くにいるよ',
+
+  // Club — buildClubHintLandmarks
+  'near the entrance arch': '入口のアーチの近くにいるよ',
+  'by the front neon signs': '正面のネオンサインのそばにいるよ',
+  'under the center spotlight': '中央のスポットライトの下にいるよ',
+  'on the main dance floor': 'メインのダンスフロアにいるよ',
+  'near a velvet rope line': 'ベルベットのロープのそばにいるよ',
+  'by the stanchion ropes': '仕切りのロープのそばにいるよ',
+  'in the VIP lounge': 'VIPラウンジにいるよ',
+  'by the velvet sofas and gold trim': 'ベルベットのソファと金の装飾のそばにいるよ',
+  'near a PA speaker stack': '大きなスピーカーの近くにいるよ',
+  'close to the wall speakers': '壁ぎわのスピーカーのそばにいるよ',
+  'near the bar': 'バーの近くにいるよ',
+  'by the glowing bar counter': '光るバーカウンターのそばにいるよ',
+  'near the entrance neon': '入口のネオンの近くにいるよ',
+  'under the front neon sign': '正面のネオンサインの下にいるよ',
+  'near a wall neon sign': '壁のネオンサインの近くにいるよ',
+  'by the side neon lights': '横のネオンライトのそばにいるよ',
+  'near an entrance Meebit statue': '入口のMeebit像の近くにいるよ',
+  'by the lit statues at the door': 'ドアのライトアップされた像のそばにいるよ',
+  'near a dark Meebit statue': '暗いMeebit像の近くにいるよ',
+  'near a spotlighted Meebit statue': 'スポットライトに照らされたMeebit像の近くにいるよ',
+  'near the DJ booth': 'DJブースの近くにいるよ',
+  'by the decks and mixer': 'デッキとミキサーのそばにいるよ',
+  'in the back by the DJ booth': '奥のDJブースのあたりにいるよ',
+  'near the bar lights': 'バーのライトの近くにいるよ',
+  'under the bar spotlight': 'バーのスポットライトの下にいるよ',
+  'under the dance floor lights': 'ダンスフロアのライトの下にいるよ',
+  'in the entrance spotlight': '入口のスポットライトの中にいるよ',
+  'in the Meebit statue spotlight': 'Meebit像のスポットライトの中にいるよ',
+  'under a club spotlight': 'クラブのスポットライトの下にいるよ',
+}

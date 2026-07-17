@@ -1,4 +1,5 @@
 import { getNpcById } from '../npc/npcData'
+import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
 import { FoundTargetIcon } from './FoundTargetIcon'
 import { TARGET_HUD_PREVIEW_PRIORITY } from './targetPreviewCache'
@@ -25,6 +26,7 @@ export function TargetHUD() {
   const targetCount = targetNpcs.length
   const previewSize = getTargetPreviewSize(targetCount)
   const useCompactGrid = targetCount > 1
+  const t = ui()
 
   if (!shouldMountPreview || targetCount === 0) {
     return null
@@ -44,7 +46,7 @@ export function TargetHUD() {
           isAnswerReveal ? 'text-amber-200/90' : 'text-neutral-400'
         }`}
       >
-        {isAnswerReveal ? 'Answer' : targetCount > 1 ? 'Targets' : 'Target'}
+        {isAnswerReveal ? t.answer : targetCount > 1 ? t.targets : t.target}
         {targetCount > 1 ? ` (${targetCount})` : ''}
       </p>
       <div className={`mt-1.5 grid gap-1.5 ${useCompactGrid ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -86,7 +88,7 @@ export function TargetHUD() {
       </div>
       {isAnswerReveal ? (
         <p className="mt-2 text-[0.65rem] leading-snug text-amber-100/80">
-          Follow the golden glow in the gallery.
+          {t.followGoldGlow}
         </p>
       ) : null}
     </aside>

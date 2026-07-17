@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
+import { ui } from '../i18n/ui'
 import { getGameTipsForVenue } from './gameTips'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
@@ -20,6 +21,7 @@ export function TipsOverlay() {
   const isVisible = gamePhase === 'preparing' && !tipsAcknowledged
   const isClubVenue = venueId === 'club'
   const gameTips = getGameTipsForVenue(venueId)
+  const t = ui()
 
   useEffect(() => {
     if (!isVisible) {
@@ -46,10 +48,10 @@ export function TipsOverlay() {
   return (
     <div className="pointer-events-auto absolute inset-0 z-[48] grid place-items-center bg-neutral-950/70 p-4 backdrop-blur-sm max-lg:px-3 max-lg:py-[max(1rem,env(safe-area-inset-top))]">
       <section className="w-full max-w-lg rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:rounded-3xl max-lg:p-4 lg:p-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Tips</p>
-        <h2 className="mt-2 text-2xl font-black tracking-tight lg:text-3xl">Before you start</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">{t.tips}</p>
+        <h2 className="mt-2 text-2xl font-black tracking-tight lg:text-3xl">{t.beforeStart}</h2>
         <p className="mt-2 text-sm leading-relaxed text-neutral-600 max-lg:text-xs">
-          {isClubVenue ? 'A few things that help in After Hours.' : 'A few things that help in the museum.'}
+          {isClubVenue ? t.tipsClubLead : t.tipsMuseumLead}
         </p>
 
         <ul className="mt-5 space-y-3">
@@ -76,8 +78,7 @@ export function TipsOverlay() {
         </ul>
 
         <p className="mt-4 text-xs leading-relaxed text-neutral-500 max-lg:text-[0.65rem]">
-          <span className="font-semibold text-neutral-700">PC:</span> Press E to talk ·{' '}
-          <span className="font-semibold text-neutral-700">Mobile:</span> Tap Inspect when nearby
+          {t.tipsControls}
         </p>
 
         <button
@@ -89,7 +90,7 @@ export function TipsOverlay() {
             acknowledgeTips()
           }}
         >
-          Got it
+          {t.gotIt}
         </button>
       </section>
     </div>

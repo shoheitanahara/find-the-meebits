@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ui } from '../i18n/ui'
 import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
 import { getSavedPlayerMeebitNumber, normalizePlayerMeebitNumber } from '../systems/save/localStorage'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
@@ -12,11 +13,11 @@ import {
   getStageDescription,
   getStageLabel,
 } from '../game/gameProgression'
-import { getVenueLabel } from '../game/venueConfig'
 import { getNpcById } from '../npc/npcData'
 import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { LanguageSwitcher } from './LanguageSwitcher'
 import { START_SCREEN_TARGET_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
@@ -41,6 +42,7 @@ export function StartScreen() {
   const currentStep = getProgressionStep(progressionIndex, venueId)
   const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const isClubVenue = venueId === 'club'
+  const t = ui()
 
   useEffect(() => {
     if (gamePhase !== 'intro') {
@@ -107,16 +109,20 @@ export function StartScreen() {
             sizeClassName="h-40 w-40"
           />
         </div>
-        <div>
+        <div className="relative">
+          <LanguageSwitcher
+            className="absolute right-0 top-0 z-10"
+            tone={isClubVenue ? 'dark' : 'light'}
+          />
           <p
-            className={`text-xs font-semibold uppercase tracking-[0.35em] max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
+            className={`pr-24 text-xs font-semibold uppercase tracking-[0.35em] max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
               isClubVenue ? 'text-fuchsia-300' : 'text-neutral-500'
             }`}
           >
-            {isClubVenue ? 'After Hours' : 'Meebits Museum Hunt'}
+            {isClubVenue ? t.afterHours : t.museumHunt}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
-            Find the Meebit
+            {t.title}
           </h1>
           <p
             className={`mt-4 text-base leading-relaxed max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug ${
@@ -132,7 +138,7 @@ export function StartScreen() {
             }`}
           >
             <p className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
-              Game Mode
+              {t.gameMode}
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {(['challenge', 'enjoy'] as const).map((mode) => {
@@ -193,7 +199,7 @@ export function StartScreen() {
               />
               <div className="min-w-0 flex-1">
                 <p className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
-                  {getStageLabel(currentStep)} Target{currentStep.targetCount > 1 ? 's' : ''}
+                  {getStageLabel(currentStep)} {currentStep.targetCount > 1 ? t.targets : t.target}
                 </p>
                 <p className="text-3xl font-black max-lg:text-xl">Meebit #{firstTargetNpc.meebitNumber}</p>
                 <p
@@ -201,7 +207,7 @@ export function StartScreen() {
                     isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
                   }`}
                 >
-                  {activeNpcCount} Meebits in the {isClubVenue ? 'club' : 'museum'}
+                  {t.meebitsInVenue(activeNpcCount, isClubVenue ? t.club : t.museum)}
                 </p>
               </div>
               <button
@@ -217,7 +223,7 @@ export function StartScreen() {
                   rerollTargets()
                 }}
               >
-                Random
+                {t.random}
               </button>
             </div>
           </div>
@@ -236,7 +242,7 @@ export function StartScreen() {
               <label className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
-                    Your Meebit
+                    {t.yourMeebit}
                   </span>
                   <button
                     type="button"
@@ -253,7 +259,7 @@ export function StartScreen() {
                       usePlayerStore.getState().setMeebitNumber(next)
                     }}
                   >
-                    Random
+                    {t.random}
                   </button>
                 </div>
                 <input
@@ -278,7 +284,7 @@ export function StartScreen() {
                     isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
                   }`}
                 >
-                  #{DEFAULT_PLAYER_MEEBIT_ID} default · 1–20000
+                  {t.defaultMeebitRange(DEFAULT_PLAYER_MEEBIT_ID)}
                 </span>
               </label>
             </div>
@@ -293,7 +299,7 @@ export function StartScreen() {
             }`}
             onClick={handleStart}
           >
-            Start {getVenueLabel(venueId)}
+            {t.startVenue(isClubVenue ? t.afterHours : t.museum)}
           </button>
 
           {isClubVenue ? (
@@ -302,7 +308,7 @@ export function StartScreen() {
               className="mt-3 w-full rounded-full border border-fuchsia-400/35 px-6 py-3 text-xs font-black uppercase tracking-[0.2em] text-fuchsia-100 transition hover:border-fuchsia-300 hover:text-white max-lg:py-2.5"
               onClick={handleBackToMuseum}
             >
-              Back to Museum
+              {t.backToMuseum}
             </button>
           ) : afterHoursUnlocked ? (
             <button
@@ -310,7 +316,7 @@ export function StartScreen() {
               className="after-hours-enter-pulse mt-3 w-full rounded-full border-2 border-violet-700 bg-gradient-to-r from-violet-700 via-fuchsia-600 to-violet-700 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-violet-600/40 transition hover:from-violet-600 hover:via-fuchsia-500 hover:to-violet-600 max-lg:py-3 max-lg:text-xs"
               onClick={handleEnterAfterHours}
             >
-              Enter After Hours
+              {t.enterAfterHours}
             </button>
           ) : null}
         </div>

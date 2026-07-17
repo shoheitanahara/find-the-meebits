@@ -1,18 +1,16 @@
 import { CREATOR_NPC_ID } from '../game/gameConfig'
+import { isJapanese } from '../i18n/locale'
+import {
+  getClubCreatorDialogue,
+  getFirstMeetingDialogue,
+  getMuseumCreatorDialogueJa,
+  getReturningDialogue,
+} from '../i18n/dialogue'
 import { useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getNpcById } from './npcData'
 import type { DialogueLine, NPCProfile } from './npcTypes'
-import {
-  CLUB_CREATOR_DIALOGUE_LINES,
-  CLUB_FIRST_MEETING_DIALOGUE,
-  CLUB_RETURNING_DIALOGUE,
-} from './npcClubDialogue'
-import {
-  MUSEUM_FIRST_MEETING_DIALOGUE,
-  MUSEUM_RETURNING_DIALOGUE,
-} from './npcDialoguePool'
 import { buildTargetLocationHint } from './npcTargetHint'
 
 const TARGET_HINT_CHANCE = 0.25
@@ -38,7 +36,14 @@ function toDialogueLine(
 
 function pickOneLine(lines: DialogueLine[], seed: number, talkCount: number): DialogueLine {
   if (lines.length === 0) {
-    return toDialogueLine('npc-unknown', talkCount, 0, 'I do not think I am your target, but hello anyway.')
+    return toDialogueLine(
+      'npc-unknown',
+      talkCount,
+      0,
+      isJapanese()
+        ? '探してる相手じゃないけど、こんにちは。'
+        : 'I do not think I am your target, but hello anyway.',
+    )
   }
 
   const index = seededIndex(seed, talkCount, lines.length)
@@ -47,14 +52,9 @@ function pickOneLine(lines: DialogueLine[], seed: number, talkCount: number): Di
 
 function pickWandererLine(npc: NPCProfile, talkCount: number, venueId: 'museum' | 'club'): string {
   const isFirstMeeting = talkCount === 0
-  const pool =
-    venueId === 'club'
-      ? isFirstMeeting
-        ? CLUB_FIRST_MEETING_DIALOGUE
-        : CLUB_RETURNING_DIALOGUE
-      : isFirstMeeting
-        ? MUSEUM_FIRST_MEETING_DIALOGUE
-        : MUSEUM_RETURNING_DIALOGUE
+  const pool = isFirstMeeting
+    ? getFirstMeetingDialogue(venueId)
+    : getReturningDialogue(venueId)
 
   const index = seededIndex(npc.meebitNumber + npc.id.length, talkCount, pool.length)
   return pool[index]
@@ -95,7 +95,12 @@ export function selectDialogueLines(npc: NPCProfile, talkCount: number): Dialogu
   const venueId = useGameStore.getState().venueId
 
   if (npc.id === CREATOR_NPC_ID) {
-    const creatorLines = venueId === 'club' ? CLUB_CREATOR_DIALOGUE_LINES : npc.dialogues
+    const creatorLines =
+      venueId === 'club'
+        ? getClubCreatorDialogue()
+        : isJapanese()
+          ? getMuseumCreatorDialogueJa()
+          : npc.dialogues
     return [pickOneLine(creatorLines, npc.meebitNumber, talkCount)]
   }
 

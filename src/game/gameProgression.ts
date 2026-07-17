@@ -1,5 +1,6 @@
 import { isMobilePerfMode } from './perfConfig'
 import type { VenueId } from './venueConfig'
+import { ui } from '../i18n/ui'
 
 export type StageKind =
   | 'regular'
@@ -133,46 +134,52 @@ export function getProgressionStep(index: number, venueId: VenueId = 'museum'): 
 }
 
 export function getStageLabel(step: ProgressionStep) {
+  const t = ui()
+
   if (step.kind === 'semifinal') {
-    return 'Semifinal'
+    return t.semifinal
   }
 
   if (step.kind === 'final') {
-    return 'Final'
+    return t.final
   }
 
   if (step.kind === 'grandfinal') {
-    return 'Grand Final'
+    return t.grandFinal
   }
 
   if (step.kind === 'lastcall') {
-    return 'Last Call'
+    return t.lastCall
   }
 
   if (step.kind === 'afterhours') {
-    return `After Hours ${step.stageNumber}`
+    return t.afterHoursN(step.stageNumber)
   }
 
-  return `Stage ${step.stageNumber}`
+  return t.stageN(step.stageNumber)
 }
 
 export function getStageDescription(step: ProgressionStep) {
+  const t = ui()
+
   if (step.kind === 'semifinal' || step.kind === 'final' || step.kind === 'afterhours') {
-    return `Find ${step.targetCount} targets among ${step.npcCount} Meebits`
+    return t.findTargetsAmong(step.targetCount, step.npcCount)
   }
 
   if (step.kind === 'grandfinal' || step.kind === 'lastcall') {
-    return `Find all ${step.targetCount} targets among ${step.npcCount} Meebits`
+    return t.findAllTargetsAmong(step.targetCount, step.npcCount)
   }
 
-  return `${step.npcCount} Meebits · find 1 target`
+  return t.findOneTarget(step.npcCount)
 }
 
 export function getProgressionSummary(venueId: VenueId = 'museum') {
+  const t = ui()
+
   if (venueId === 'club') {
     const clubNpcCounts = getClubNpcCounts()
     const maxCount = getClubNpcMaxCount()
-    return `${clubNpcCounts.join(' → ')} across stages 1–3 (2 targets), then ${maxCount} with 3 targets, Last Call with 5`
+    return t.progressionClub(clubNpcCounts.join(' → '), maxCount)
   }
 
   const regularCounts = isMobilePerfMode() ? SP_REGULAR_NPC_COUNTS : PC_REGULAR_NPC_COUNTS
@@ -180,5 +187,5 @@ export function getProgressionSummary(venueId: VenueId = 'museum') {
   const lastRegular = regularCounts[regularCounts.length - 1]
   const challengeNpcCount = getChallengeNpcCount('museum')
 
-  return `${first}–${lastRegular} across 5 stages, then Semifinal (2), Final (3), and Grand Final (5 targets) at ${challengeNpcCount} Meebits`
+  return t.progressionMuseum(first, lastRegular, challengeNpcCount)
 }

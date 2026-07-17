@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { advanceDialogue } from '../../dialogue/advanceDialogue'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
+import { ui } from '../../i18n/ui'
 import { getNpcById } from '../../npc/npcData'
 import { interactWithNearestNpc } from '../../systems/interaction/interactWithNearestNpc'
 import { useGameStore } from '../../stores/gameStore'
@@ -21,6 +22,7 @@ export function MobileControls() {
   const canMove = gamePhase === 'playing' || gamePhase === 'timedOut'
   const nearestNpc = nearestNpcId ? getNpcById(nearestNpcId) : null
   const isLastLine = currentIndex >= lines.length - 1
+  const t = ui()
 
   if (isDialogueOpen) {
     return (
@@ -35,7 +37,7 @@ export function MobileControls() {
         >
           {isLastLine ? <DoneIcon /> : <NextIcon />}
           <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
-            {isLastLine ? 'Done' : 'Next'}
+            {isLastLine ? t.done : t.nextLine}
           </span>
         </button>
       </div>
@@ -59,7 +61,7 @@ export function MobileControls() {
           }}
         >
           <InspectIcon />
-          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">Inspect</span>
+          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{ui().inspectAction}</span>
         </button>
       ) : (
         <div className="h-20 w-20 shrink-0" />

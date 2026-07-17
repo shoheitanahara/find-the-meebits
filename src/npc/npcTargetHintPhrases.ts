@@ -1,4 +1,6 @@
 import type { VenueId } from '../game/venueConfig'
+import { isJapanese } from '../i18n/locale'
+import { CLUB_HINT_PHRASES_JA, MUSEUM_HINT_PHRASES_JA } from '../i18n/dialogue/hintPhrasesJa'
 
 export type MapZone = 'entrance' | 'front' | 'center' | 'back' | 'west' | 'east'
 
@@ -81,5 +83,9 @@ const CLUB_HINT_PHRASES: VenueHintPhrases = {
 }
 
 export function getVenueHintPhrases(venueId: VenueId): VenueHintPhrases {
+  if (isJapanese()) {
+    return venueId === 'club' ? CLUB_HINT_PHRASES_JA : MUSEUM_HINT_PHRASES_JA
+  }
+
   return venueId === 'club' ? CLUB_HINT_PHRASES : MUSEUM_HINT_PHRASES
 }

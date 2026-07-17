@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ui } from '../i18n/ui'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 type AfterHoursUnlockOverlayProps = {
@@ -29,6 +30,8 @@ export function AfterHoursUnlockOverlay({ isVisible, onComplete }: AfterHoursUnl
     return null
   }
 
+  const t = ui()
+
   return (
     <div
       className={`pointer-events-auto absolute inset-0 z-[70] overflow-hidden transition-opacity duration-500 ${
@@ -48,19 +51,19 @@ export function AfterHoursUnlockOverlay({ isVisible, onComplete }: AfterHoursUnl
 
       <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
         <p className="after-hours-unlock-rise text-xs font-semibold uppercase tracking-[0.45em] text-fuchsia-300/90">
-          New Venue
+          {t.newVenue}
         </p>
         <h2 className="after-hours-unlock-pop mt-4 text-5xl font-black uppercase tracking-tight text-white max-lg:text-4xl">
-          After Hours
+          {t.afterHours}
         </h2>
         <p className="after-hours-unlock-pop-delay mt-2 text-6xl font-black uppercase tracking-[0.08em] text-fuchsia-300 max-lg:text-5xl">
-          Unlocked!
+          {t.afterHoursUnlocked}
         </p>
         <p className="after-hours-unlock-rise-delay mt-6 max-w-md text-sm font-medium leading-relaxed text-violet-100/85">
-          The museum is yours. Head into the club and hunt Meebits under the lights.
+          {t.unlockBody}
         </p>
         <p className="after-hours-unlock-rise-delay mt-8 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-fuchsia-200/70">
-          Tap to continue
+          {t.tapToContinue}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { ui } from '../i18n/ui'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { getProgressionStep, getStageLabel } from '../game/gameProgression'
@@ -46,8 +47,9 @@ export function TimeUpOverlay() {
   const targetNpcs = remainingTargetNpcIds
     .map((id) => getNpcById(id))
     .filter((npc): npc is NonNullable<typeof npc> => npc !== null)
+  const t = ui()
   const step = getProgressionStep(progressionIndex, venueId)
-  const stageLabel = step ? getStageLabel(step) : 'Stage'
+  const stageLabel = step ? getStageLabel(step) : t.stage
   const isVisible = gamePhase === 'timedOut' && targetNpcs.length > 0
   const targetNumbersLabel = targetNpcs.map((npc) => `#${npc.meebitNumber}`).join(', ')
   const previewLayout = getTimeUpPreviewLayout(targetNpcs.length)
@@ -103,11 +105,10 @@ export function TimeUpOverlay() {
       >
         <section className="pointer-events-auto w-[min(46vw,13.5rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-3.5 py-3 text-white shadow-lg backdrop-blur-md">
           <p className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-amber-300/95">
-            Time Up · Answer Reveal
+            {t.timeUpAnswerReveal}
           </p>
           <p className="mt-1 text-xs leading-snug text-neutral-300">
-            <span className="font-bold text-amber-200">{targetNumbersLabel}</span> glow gold. Move to find
-            them.
+            <span className="font-bold text-amber-200">{targetNumbersLabel}</span> {t.timeUpMobileHint}
           </p>
           <div className="mt-2.5 flex gap-2">
             <button
@@ -115,14 +116,14 @@ export function TimeUpOverlay() {
               className="flex-1 rounded-full bg-amber-400 px-2.5 py-2 text-[0.65rem] font-black uppercase tracking-[0.1em] text-neutral-950 transition active:bg-amber-300"
               onClick={handleRetry}
             >
-              Retry
+              {t.retry}
             </button>
             <button
               type="button"
               className="flex-1 rounded-full border border-white/25 px-2.5 py-2 text-[0.65rem] font-black uppercase tracking-[0.1em] text-white transition active:bg-white/10"
               onClick={handleBackToTitle}
             >
-              Title
+              {t.titleBtn}
             </button>
           </div>
         </section>
@@ -153,13 +154,13 @@ export function TimeUpOverlay() {
             ))}
           </div>
           <div className="text-left">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">Time Up</p>
-            <h2 className="mt-2 text-4xl font-black">Answer reveal</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">{t.timeUp}</p>
+            <h2 className="mt-2 text-4xl font-black">{t.answerReveal}</h2>
             <p className="mt-3 text-sm leading-relaxed text-neutral-300">
-              {stageLabel} with {activeNpcCount} Meebits.{' '}
+              {t.stageWithMeebits(stageLabel, activeNpcCount)}.{' '}
               {targetNpcs.length > 1 ? (
                 <>
-                  The remaining targets are{' '}
+                  {t.remainingTargets}{' '}
                   {targetNpcs.map((npc, index) => (
                     <span key={npc.id}>
                       {index > 0 ? (index === targetNpcs.length - 1 ? ' and ' : ', ') : ''}
@@ -169,11 +170,11 @@ export function TimeUpOverlay() {
                 </>
               ) : (
                 <>
-                  The correct avatar is{' '}
+                  {t.correctAvatar}{' '}
                   <span className="font-black text-amber-200">Meebit #{targetNpcs[0]?.meebitNumber}</span>
                 </>
               )}{' '}
-              and glows gold in the gallery. Keep moving with WASD to find them.
+              {t.andGlowsGold}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -181,14 +182,14 @@ export function TimeUpOverlay() {
                 className="rounded-full bg-amber-400 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-amber-300"
                 onClick={handleRetry}
               >
-                Retry Stage
+                {t.retryStage}
               </button>
               <button
                 type="button"
                 className="rounded-full border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-white transition hover:border-white hover:bg-white/10"
                 onClick={handleBackToTitle}
               >
-                Title
+                {t.titleBtn}
               </button>
             </div>
           </div>
