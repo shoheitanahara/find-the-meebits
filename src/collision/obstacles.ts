@@ -1,4 +1,5 @@
 import type { VenueId } from '../game/venueConfig'
+import { getMuseumSeasonTreeCollisionCenters } from '../world/MuseumSeasonDecor'
 import {
   BENCH_POSITIONS,
   SCULPTURE_POSITIONS,
@@ -155,6 +156,8 @@ function buildMuseumObstacles(): ObstacleBox[] {
     ...splitBoxesFromCenter(-22, 14, 5, 5, 0.1),
     boxFromCenter(-15, -15, 4.2, 3.2, 0.1),
     ...splitBoxesFromCenter(52, 7.4, 0.5, 4, 0.1),
+    // 季節デコの幹のみ（ヒント landmark には含めない）
+    ...getMuseumSeasonTreeCollisionCenters().map(([x, z]) => boxFromCenter(x, z, 0.7, 0.7, 0.05)),
   ]
 }
 

@@ -1,8 +1,8 @@
 import { getLocale, type Locale } from './locale'
 
 type UiMessages = {
-  prototype: string
   title: string
+  summerVer: string
   museumHunt: string
   afterHours: string
   museum: string
@@ -129,8 +129,8 @@ type UiMessages = {
 }
 
 const en: UiMessages = {
-  prototype: 'Prototype',
   title: 'Find the Meebit',
+  summerVer: 'Summer Ver.',
   museumHunt: 'Meebits Museum Hunt',
   afterHours: 'After Hours',
   museum: 'Museum',
@@ -261,8 +261,8 @@ const en: UiMessages = {
 }
 
 const ja: UiMessages = {
-  prototype: 'プロトタイプ',
   title: 'Find the Meebit',
+  summerVer: '夏 Ver.',
   museumHunt: 'Meebits Museum Hunt',
   afterHours: 'After Hours',
   museum: 'Museum',

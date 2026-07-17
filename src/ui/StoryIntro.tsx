@@ -1,4 +1,5 @@
 import { ui } from '../i18n/ui'
+import { getMuseumSeason } from '../world/museumSeason'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 import { markStoryIntroSeen } from './storyIntroStorage'
@@ -7,6 +8,7 @@ const STORY_VIDEO_SRC = '/video/meebits-4274-3s.gif'
 
 export function StoryIntro({ onComplete }: { onComplete: () => void }) {
   const t = ui()
+  const showSummerVer = getMuseumSeason() === 'summer'
 
   const finish = () => {
     unlockAudioIfNeeded()
@@ -35,8 +37,12 @@ export function StoryIntro({ onComplete }: { onComplete: () => void }) {
         <div className="relative min-w-0">
           <LanguageSwitcher className="absolute right-0 top-0 z-10" tone="light" />
 
-          <p className="pr-24 text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500 max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em]">
-            {t.storyBrand}
+          <p
+            className={`pr-24 text-xs font-semibold uppercase tracking-[0.35em] max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
+              showSummerVer ? 'text-sky-600' : 'text-neutral-500'
+            }`}
+          >
+            {showSummerVer ? t.summerVer : t.storyBrand}
           </p>
           <h1
             id="story-intro-title"
@@ -44,6 +50,9 @@ export function StoryIntro({ onComplete }: { onComplete: () => void }) {
           >
             {t.storyGameTitle}
           </h1>
+          {showSummerVer ? (
+            <p className="mt-1 text-sm font-semibold text-sky-700/80 max-lg:text-xs">{t.storyBrand}</p>
+          ) : null}
 
           <div className="mt-5 space-y-4 text-base leading-relaxed text-neutral-600 max-lg:mt-3 max-lg:space-y-3 max-lg:text-sm max-lg:leading-snug">
             <p>{t.storyAbout}</p>

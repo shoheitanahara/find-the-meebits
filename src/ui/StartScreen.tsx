@@ -17,6 +17,7 @@ import { getNpcById } from '../npc/npcData'
 import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { getMuseumSeason } from '../world/museumSeason'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { START_SCREEN_TARGET_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
@@ -42,6 +43,7 @@ export function StartScreen() {
   const currentStep = getProgressionStep(progressionIndex, venueId)
   const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const isClubVenue = venueId === 'club'
+  const showSummerVer = !isClubVenue && getMuseumSeason() === 'summer'
   const t = ui()
 
   useEffect(() => {
@@ -116,14 +118,19 @@ export function StartScreen() {
           />
           <p
             className={`pr-24 text-xs font-semibold uppercase tracking-[0.35em] max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
-              isClubVenue ? 'text-fuchsia-300' : 'text-neutral-500'
+              isClubVenue ? 'text-fuchsia-300' : showSummerVer ? 'text-sky-600' : 'text-neutral-500'
             }`}
           >
-            {isClubVenue ? t.afterHours : t.museumHunt}
+            {isClubVenue ? t.afterHours : showSummerVer ? t.summerVer : t.museumHunt}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
             {t.title}
           </h1>
+          {showSummerVer ? (
+            <p className="mt-1 text-sm font-semibold text-sky-700/80 max-lg:text-xs">
+              {t.museumHunt}
+            </p>
+          ) : null}
           <p
             className={`mt-4 text-base leading-relaxed max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug ${
               isClubVenue ? 'text-neutral-300' : 'text-neutral-600'
