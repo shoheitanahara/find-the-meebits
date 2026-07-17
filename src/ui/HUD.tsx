@@ -2,6 +2,7 @@ import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
 import { getMuseumSeason } from '../world/museumSeason'
+import { getCachedAppEdition } from '../game/appEdition'
 import { PlayerMeebitLabel } from './PlayerMeebitLabel'
 
 export function HUD() {
@@ -11,19 +12,24 @@ export function HUD() {
   const step = getProgressionStep(progressionIndex, venueId)
   const t = ui()
   const stageLabel = step ? getStageLabel(step) : t.stage
-  const showSummerVer = venueId === 'museum' && getMuseumSeason() === 'summer'
+  const isTraitHunt = getCachedAppEdition() === 'v2'
+  const showSummerVer = !isTraitHunt && venueId === 'museum' && getMuseumSeason() === 'summer'
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 hidden p-5 sm:p-6 lg:block">
       <section className="w-fit rounded-3xl border border-white/40 bg-neutral-950/80 px-5 py-4 text-white shadow-xl shadow-black/20 backdrop-blur-md">
-        {showSummerVer ? (
+        {isTraitHunt ? (
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">
+            {t.traitHuntPrototype}
+          </p>
+        ) : showSummerVer ? (
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300/90">
             {t.summerVer}
           </p>
         ) : null}
         <h1
           className={`text-2xl font-black tracking-tight text-slate-950 sm:text-3xl ${
-            showSummerVer ? 'mt-1' : ''
+            isTraitHunt || showSummerVer ? 'mt-1' : ''
           }`}
         >
           <span className="text-white">{t.title}</span>

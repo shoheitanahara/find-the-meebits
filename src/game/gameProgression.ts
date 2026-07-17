@@ -1,6 +1,15 @@
 import { isMobilePerfMode } from './perfConfig'
 import type { VenueId } from './venueConfig'
 import { ui } from '../i18n/ui'
+import { getCachedAppEdition } from './appEdition'
+import {
+  formatTraitDisplayName,
+  getTraitHuntProgressionSteps,
+  getTraitHuntStep,
+  type TraitQuest,
+} from './traitHunt'
+
+export type { TraitQuest }
 
 export type StageKind =
   | 'regular'
@@ -16,6 +25,8 @@ export type ProgressionStep = {
   npcCount: number
   targetCount: number
   kind: StageKind
+  /** Present in /v2 trait-hunt stages */
+  quest?: TraitQuest
 }
 
 const PC_REGULAR_NPC_COUNTS = [200, 250, 300, 350, 400] as const
@@ -126,10 +137,18 @@ export function getClubProgressionSteps(): ProgressionStep[] {
 }
 
 export function getProgressionSteps(venueId: VenueId = 'museum'): ProgressionStep[] {
+  if (getCachedAppEdition() === 'v2') {
+    return getTraitHuntProgressionSteps()
+  }
+
   return venueId === 'club' ? getClubProgressionSteps() : getMuseumProgressionSteps()
 }
 
 export function getProgressionStep(index: number, venueId: VenueId = 'museum'): ProgressionStep | null {
+  if (getCachedAppEdition() === 'v2') {
+    return getTraitHuntStep(index)
+  }
+
   return getProgressionSteps(venueId)[index] ?? null
 }
 
@@ -162,6 +181,14 @@ export function getStageLabel(step: ProgressionStep) {
 export function getStageDescription(step: ProgressionStep) {
   const t = ui()
 
+  if (step.quest) {
+    return t.findTraitAmong(
+      step.quest.findCount,
+      formatTraitDisplayName(step.quest.traitType, step.quest.traitValue),
+      step.npcCount,
+    )
+  }
+
   if (step.kind === 'semifinal' || step.kind === 'final' || step.kind === 'afterhours') {
     return t.findTargetsAmong(step.targetCount, step.npcCount)
   }
@@ -175,6 +202,10 @@ export function getStageDescription(step: ProgressionStep) {
 
 export function getProgressionSummary(venueId: VenueId = 'museum') {
   const t = ui()
+
+  if (getCachedAppEdition() === 'v2') {
+    return t.progressionTraitHunt
+  }
 
   if (venueId === 'club') {
     const clubNpcCounts = getClubNpcCounts()

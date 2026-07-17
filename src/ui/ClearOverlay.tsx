@@ -3,6 +3,7 @@ import { ui } from '../i18n/ui'
 import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import { getProgressionStep, getStageDescription, getStageLabel, getChallengeNpcCount } from '../game/gameProgression'
+import { getCachedAppEdition } from '../game/appEdition'
 import { getNpcById } from '../npc/npcData'
 import { getCurrentStageLabel, useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -23,6 +24,7 @@ export function ClearOverlay() {
   const isVisible = gamePhase === 'cleared' || gamePhase === 'conquered'
   const isConquered = gamePhase === 'conquered'
   const isClubVenue = venueId === 'club'
+  const isTraitHunt = getCachedAppEdition() === 'v2'
   const clearedStep = getProgressionStep(isConquered ? progressionIndex : progressionIndex - 1, venueId)
   const nextStep = isConquered ? null : getProgressionStep(progressionIndex, venueId)
   const wasVisibleRef = useRef(false)
@@ -231,7 +233,7 @@ export function ClearOverlay() {
                 ? t.nextColon(getStageLabel(nextStep), getStageDescription(nextStep))
                 : t.nextStageNpcs(activeNpcCount)}
           </p>
-          {isConquered && !isClubVenue ? (
+          {isConquered && !isClubVenue && !isTraitHunt ? (
             <div className="mt-5 rounded-2xl border border-violet-300/80 bg-violet-950/10 p-4 text-center sm:text-left">
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-violet-500">{t.newVenue}</p>
               <p className="mt-2 text-2xl font-black uppercase tracking-[0.08em] text-violet-700">{t.afterHoursUnlocked}</p>

@@ -3,10 +3,12 @@ import { useGameStore } from '../stores/gameStore'
 import { StartScreen } from './StartScreen'
 import { StoryIntro } from './StoryIntro'
 import { hasSeenStoryIntro } from './storyIntroStorage'
+import { getCachedAppEdition } from '../game/appEdition'
 
 /**
  * Museum 初回イントロではストーリー → スタート画面の順。
  * Club / After Hours 解放演出中はストーリーをスキップ。
+ * /v2 トレイトハント試作もストーリーをスキップ（v1 導線と分離）。
  */
 export function IntroFlow() {
   const gamePhase = useGameStore((state) => state.gamePhase)
@@ -19,7 +21,10 @@ export function IntroFlow() {
   }
 
   const showStory =
-    venueId === 'museum' && !afterHoursUnlockPending && !storyDone
+    getCachedAppEdition() !== 'v2' &&
+    venueId === 'museum' &&
+    !afterHoursUnlockPending &&
+    !storyDone
 
   if (showStory) {
     return <StoryIntro onComplete={() => setStoryDone(true)} />

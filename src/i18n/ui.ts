@@ -63,8 +63,17 @@ type UiMessages = {
   findTargetsAmong: (targets: number, npcs: number) => string
   findAllTargetsAmong: (targets: number, npcs: number) => string
   findOneTarget: (npcs: number) => string
+  findTraitAmong: (count: number, traitValue: string, npcs: number) => string
+  findTraitLabel: (count: number, traitValue: string) => string
+  foundProgress: (found: number, total: number) => string
+  traitHunt: string
+  traitHuntPrototype: string
+  traitIgnoreColor: string
+  traitCompareMatch: string
+  traitCompareMiss: (wanted: string) => string
   progressionMuseum: (first: number, last: number, challenge: number) => string
   progressionClub: (counts: string, max: number) => string
+  progressionTraitHunt: string
   answer: string
   answerReveal: string
   followGoldGlow: string
@@ -195,10 +204,20 @@ const en: UiMessages = {
   findTargetsAmong: (targets, npcs) => `Find ${targets} among ${npcs} Meebits`,
   findAllTargetsAmong: (targets, npcs) => `Find all ${targets} among ${npcs} Meebits`,
   findOneTarget: (npcs) => `${npcs} Meebits · find 1`,
+  findTraitAmong: (count, traitValue, npcs) =>
+    `Find ${count} with ${traitValue} among ${npcs} Meebits`,
+  findTraitLabel: (count, traitValue) => `Find ${count} · ${traitValue}`,
+  foundProgress: (found, total) => `${found} / ${total} found`,
+  traitHunt: 'Trait Hunt',
+  traitHuntPrototype: 'Trait Hunt · Prototype',
+  traitIgnoreColor: 'Color & pattern do not matter.',
+  traitCompareMatch: 'Match — this is one!',
+  traitCompareMiss: (wanted) => `Looking for ${wanted}`,
   progressionMuseum: (first, last, challenge) =>
     `${first}–${last} ×5, then Semi(2)/Final(3)/Grand(5) at ${challenge}`,
   progressionClub: (counts, max) =>
     `${counts} (2 targets), then ${max}×3, Last Call×5`,
+  progressionTraitHunt: '3 random trait stages',
   answer: 'Answer',
   answerReveal: 'Answer reveal',
   followGoldGlow: 'Follow the gold glow.',
@@ -335,10 +354,20 @@ const ja: UiMessages = {
   findTargetsAmong: (targets, npcs) => `${npcs}体のMeebitからターゲットを${targets}体見つけよう`,
   findAllTargetsAmong: (targets, npcs) => `${npcs}体のMeebitからターゲット${targets}体すべてを見つけよう`,
   findOneTarget: (npcs) => `${npcs}体のMeebitからターゲットを1体見つけよう`,
+  findTraitAmong: (count, traitValue, npcs) =>
+    `${npcs}体の中から「${traitValue}」のMeebitを${count}体見つけよう`,
+  findTraitLabel: (count, traitValue) => `${traitValue} を ${count}体`,
+  foundProgress: (found, total) => `${found} / ${total} 発見`,
+  traitHunt: 'トレイトハント',
+  traitHuntPrototype: 'トレイトハント · 試作',
+  traitIgnoreColor: '色や模様は関係ありません。',
+  traitCompareMatch: '一致 — これだ！',
+  traitCompareMiss: (wanted) => `探しているのは ${wanted}`,
   progressionMuseum: (first, last, challenge) =>
     `ステージ1〜5は${first}〜${last}体から1体を探します。その後は${challenge}体の中から、セミファイナルで2体・ファイナルで3体・グランドファイナルで5体を探します`,
   progressionClub: (counts, max) =>
     `ステージ1〜3では${counts}体の中から2体、ステージ4では${max}体の中から3体、最後のラストコールでは5体を探します`,
+  progressionTraitHunt: 'ランダムなトレイトで3ステージ',
   answer: '正解',
   answerReveal: '答え合わせ',
   followGoldGlow: '金色の光が目印だよ。',

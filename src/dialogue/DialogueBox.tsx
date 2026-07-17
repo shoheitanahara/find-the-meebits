@@ -5,6 +5,7 @@ import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { TargetPreview } from '../ui/TargetPreview'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
+import { DialogueTraitCompare } from './DialogueTraitCompare'
 import { useDialogueStore } from './dialogueStore'
 
 export function DialogueBox() {
@@ -122,7 +123,7 @@ function DialogueContent({
   return (
     <div>
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p
             className={`font-semibold uppercase tracking-[0.25em] text-neutral-500 ${
               compact ? 'text-[0.6rem]' : 'text-xs'
@@ -130,9 +131,12 @@ function DialogueContent({
           >
             {npc.role}
           </p>
-          <h2 className={`mt-0.5 font-black text-slate-950 ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
-            {npc.name}
-          </h2>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-4 gap-y-1 md:gap-x-10">
+            <h2 className={`font-black text-slate-950 ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
+              {npc.name}
+            </h2>
+            <DialogueTraitCompare meebitNumber={npc.meebitNumber} compact={compact} />
+          </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             <p className={`font-semibold text-slate-500 ${compact ? 'text-xs' : 'text-sm'}`}>
               Meebit #{npc.meebitNumber}

@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/jp", "destination": "/index.html" },
-    { "source": "/jp/(.*)", "destination": "/index.html" }
+    { "source": "/jp/(.*)", "destination": "/index.html" },
+    { "source": "/v2", "destination": "/index.html" },
+    { "source": "/v2/(.*)", "destination": "/index.html" }
   ]
 }

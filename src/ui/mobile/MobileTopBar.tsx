@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ui } from '../../i18n/ui'
 import { getStageLabel, getProgressionStep } from '../../game/gameProgression'
+import { formatTraitDisplayName } from '../../game/traitHunt'
 import { getNpcById } from '../../npc/npcData'
 import { useGameStore } from '../../stores/gameStore'
 import { getTimerDisplay, shouldShowGameTimer } from '../gameTimerDisplay'
@@ -9,6 +10,7 @@ import { FoundTargetIcon } from '../FoundTargetIcon'
 import { StageRetryButton } from '../StageRetryButton'
 import { TARGET_HUD_PREVIEW_PRIORITY } from '../targetPreviewCache'
 import { TargetPreview } from '../TargetPreview'
+import { TraitQuestVisual } from '../TraitQuestVisual'
 import { PlayerMeebitLabel } from '../PlayerMeebitLabel'
 
 function getTargetStackLayout(targetCount: number) {
@@ -87,6 +89,7 @@ export function MobileTopBar() {
 
   const t = ui()
   const step = getProgressionStep(progressionIndex, venueId)
+  const quest = step?.quest
   const stageLabel = step ? getStageLabel(step) : t.stage
   const targetNpcs = targetNpcIds
     .map((id) => getNpcById(id))
@@ -101,6 +104,8 @@ export function MobileTopBar() {
     : isAnswerReveal
       ? 'border-amber-300/40 bg-amber-950/90 text-amber-50'
       : 'border-white/20 bg-neutral-950/90 text-white'
+  const showTraitQuestHud = Boolean(quest) && !isAnswerReveal && targetNpcs.length > 0
+  const foundCount = foundTargetNpcIds.length
 
   return (
     <header className="pointer-events-none absolute inset-x-0 top-0 z-30 lg:hidden">
@@ -145,7 +150,49 @@ export function MobileTopBar() {
         </div>
       </div>
 
-      {targetNpcs.length > 0 ? (
+      {showTraitQuestHud && quest ? (
+        <div className="absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex max-h-[calc(100dvh-5rem)] flex-col items-end gap-1 overflow-y-auto">
+          <p className="pr-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+            {t.traitHunt}
+          </p>
+          <div className="rounded-xl border border-white/20 bg-neutral-950/90 px-1.5 py-1.5 shadow-lg backdrop-blur-md">
+            <TraitQuestVisual
+              traitType={quest.traitType}
+              traitValue={quest.traitValue}
+              sizeClassName="h-12 w-12"
+            />
+            <p className="mt-1 max-w-[5.5rem] text-center text-[0.55rem] font-black leading-tight text-white">
+              {t.findTraitLabel(
+                quest.findCount,
+                formatTraitDisplayName(quest.traitType, quest.traitValue),
+              )}
+            </p>
+            <p className="mt-0.5 text-center text-[0.5rem] font-semibold text-emerald-300">
+              {t.foundProgress(foundCount, quest.findCount)}
+            </p>
+          </div>
+          {foundTargetNpcIds.map((id) => {
+            const npc = getNpcById(id)
+            if (!npc) return null
+            return (
+              <div
+                key={id}
+                className="flex items-center gap-1 rounded-xl border border-emerald-400/35 bg-neutral-950/90 px-1 py-0.5 shadow-lg backdrop-blur-md"
+              >
+                <p className="min-w-[2.25rem] text-right text-[0.65rem] font-black leading-none text-emerald-300">
+                  #{npc.meebitNumber}
+                </p>
+                <TargetPreview
+                  meebitNumber={npc.meebitNumber}
+                  capturePriority={TARGET_HUD_PREVIEW_PRIORITY}
+                  modelScale={1.05}
+                  sizeClassName="h-9 w-9 rounded-lg"
+                />
+              </div>
+            )
+          })}
+        </div>
+      ) : targetNpcs.length > 0 ? (
         <div
           className={`absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex flex-col items-end ${targetLayout.stackGap}`}
         >

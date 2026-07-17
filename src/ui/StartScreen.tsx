@@ -18,9 +18,12 @@ import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getMuseumSeason } from '../world/museumSeason'
+import { getCachedAppEdition } from '../game/appEdition'
+import { questIgnoresColorAndPattern, formatTraitDisplayName } from '../game/traitHunt'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { START_SCREEN_TARGET_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
+import { TraitQuestVisual } from './TraitQuestVisual'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function StartScreen() {
@@ -43,7 +46,9 @@ export function StartScreen() {
   const currentStep = getProgressionStep(progressionIndex, venueId)
   const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const isClubVenue = venueId === 'club'
-  const showSummerVer = !isClubVenue && getMuseumSeason() === 'summer'
+  const isTraitHunt = getCachedAppEdition() === 'v2'
+  const quest = currentStep?.quest
+  const showSummerVer = !isClubVenue && !isTraitHunt && getMuseumSeason() === 'summer'
   const t = ui()
 
   useEffect(() => {
@@ -55,12 +60,12 @@ export function StartScreen() {
   }, [gamePhase, venueId])
 
   useEffect(() => {
-    if (gamePhase !== 'intro') {
+    if (gamePhase !== 'intro' || isTraitHunt) {
       return
     }
 
     setAfterHoursUnlocked(isAfterHoursUnlocked())
-  }, [gamePhase])
+  }, [gamePhase, isTraitHunt])
 
   if (gamePhase !== 'intro' || !firstTargetNpc || !currentStep) {
     return null
@@ -105,11 +110,19 @@ export function StartScreen() {
         }`}
       >
         <div className="max-lg:hidden">
-          <TargetPreview
-            capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
-            meebitNumber={firstTargetNpc.meebitNumber}
-            sizeClassName="h-40 w-40"
-          />
+          {quest ? (
+            <TraitQuestVisual
+              traitType={quest.traitType}
+              traitValue={quest.traitValue}
+              sizeClassName="h-40 w-40"
+            />
+          ) : (
+            <TargetPreview
+              capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
+              meebitNumber={firstTargetNpc.meebitNumber}
+              sizeClassName="h-40 w-40"
+            />
+          )}
         </div>
         <div className="relative">
           <LanguageSwitcher
@@ -118,10 +131,22 @@ export function StartScreen() {
           />
           <p
             className={`pr-24 text-xs font-semibold uppercase tracking-[0.35em] max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
-              isClubVenue ? 'text-fuchsia-300' : showSummerVer ? 'text-sky-600' : 'text-neutral-500'
+              isClubVenue
+                ? 'text-fuchsia-300'
+                : isTraitHunt
+                  ? 'text-amber-700'
+                  : showSummerVer
+                    ? 'text-sky-600'
+                    : 'text-neutral-500'
             }`}
           >
-            {isClubVenue ? t.afterHours : showSummerVer ? t.summerVer : t.museumHunt}
+            {isClubVenue
+              ? t.afterHours
+              : isTraitHunt
+                ? t.traitHuntPrototype
+                : showSummerVer
+                  ? t.summerVer
+                  : t.museumHunt}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
             {t.title}
@@ -198,17 +223,34 @@ export function StartScreen() {
             }`}
           >
             <div className="flex items-center gap-3">
-              <TargetPreview
-                capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
-                meebitNumber={firstTargetNpc.meebitNumber}
-                modelScale={1}
-                sizeClassName="h-20 w-20 shrink-0 lg:hidden"
-              />
+              {quest ? (
+                <TraitQuestVisual
+                  traitType={quest.traitType}
+                  traitValue={quest.traitValue}
+                  sizeClassName="h-20 w-20 shrink-0 lg:hidden"
+                />
+              ) : (
+                <TargetPreview
+                  capturePriority={START_SCREEN_TARGET_PREVIEW_PRIORITY}
+                  meebitNumber={firstTargetNpc.meebitNumber}
+                  modelScale={1}
+                  sizeClassName="h-20 w-20 shrink-0 lg:hidden"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <p className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
-                  {getStageLabel(currentStep)} {currentStep.targetCount > 1 ? t.targets : t.target}
+                  {quest
+                    ? t.traitHunt
+                    : `${getStageLabel(currentStep)} ${currentStep.targetCount > 1 ? t.targets : t.target}`}
                 </p>
-                <p className="text-3xl font-black max-lg:text-xl">Meebit #{firstTargetNpc.meebitNumber}</p>
+                <p className="text-3xl font-black max-lg:text-xl">
+                  {quest
+                    ? t.findTraitLabel(
+                        quest.findCount,
+                        formatTraitDisplayName(quest.traitType, quest.traitValue),
+                      )
+                    : `Meebit #${firstTargetNpc.meebitNumber}`}
+                </p>
                 <p
                   className={`mt-1 text-xs font-medium max-lg:mt-0 max-lg:text-[0.65rem] ${
                     isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
@@ -216,6 +258,15 @@ export function StartScreen() {
                 >
                   {t.meebitsInVenue(activeNpcCount, isClubVenue ? t.club : t.museum)}
                 </p>
+                {quest && questIgnoresColorAndPattern(quest) ? (
+                  <p
+                    className={`mt-1 text-xs font-semibold max-lg:text-[0.65rem] ${
+                      isClubVenue ? 'text-amber-200/90' : 'text-amber-700'
+                    }`}
+                  >
+                    {t.traitIgnoreColor}
+                  </p>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -317,7 +368,7 @@ export function StartScreen() {
             >
               {t.backToMuseum}
             </button>
-          ) : afterHoursUnlocked ? (
+          ) : !isTraitHunt && afterHoursUnlocked ? (
             <button
               type="button"
               className="after-hours-enter-pulse mt-3 w-full rounded-full border-2 border-violet-700 bg-gradient-to-r from-violet-700 via-fuchsia-600 to-violet-700 px-6 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white shadow-lg shadow-violet-600/40 transition hover:from-violet-600 hover:via-fuchsia-500 hover:to-violet-600 max-lg:py-3 max-lg:text-xs"

@@ -15,7 +15,13 @@ import { DEFAULT_GAME_MODE, type GameMode, isTimedGameMode } from '../game/gameM
 import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import type { VenueId } from '../game/venueConfig'
+import { getCachedAppEdition } from '../game/appEdition'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
+import {
+  pickTraitHuntMeebitNumbers,
+  pickTraitHuntTargetIds,
+  rerollTraitHuntQuestAt,
+} from '../game/traitHunt'
 import { clearActiveVrmNpcIds, setActiveVrmNpcIds } from '../npc/vrmLodState'
 import { preloadVrm, resetVrmInstancePoolForStageChange } from '../avatar/vrmInstancePool'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
@@ -91,13 +97,15 @@ function createVenueIntroState(
   }
 
   const activeNpcCount = step.npcCount
-  const npcProfiles = buildNpcProfiles(activeNpcCount, effectiveVenueId)
+  const { npcProfiles, targetNpcIds } = createStageNpcBundle(
+    step,
+    effectiveVenueId,
+  )
   if (!options?.preservePlayer) {
     resetPlayerToStart()
   }
   seedNpcPositions(npcProfiles)
 
-  const targetNpcIds = pickRandomTargetNpcIds(npcProfiles, step.targetCount)
   const foundTargetNpcIds = pickFoundTargetNpcIds(targetNpcIds, dev?.foundCount ?? 0)
 
   const base = {
@@ -161,7 +169,7 @@ function createVenueIntroState(
           foundTargetNpcIds: targetNpcIds,
           targetNpcIds: [],
           clearTimeSeconds: 72.4,
-          afterHoursUnlockPending: effectiveVenueId === 'museum',
+          afterHoursUnlockPending: shouldOfferAfterHoursUnlock(effectiveVenueId),
         }
       }
 
@@ -186,7 +194,7 @@ function createVenueIntroState(
         foundTargetNpcIds: targetNpcIds,
         targetNpcIds: [],
         clearTimeSeconds: 142.8,
-        afterHoursUnlockPending: effectiveVenueId === 'museum',
+        afterHoursUnlockPending: shouldOfferAfterHoursUnlock(effectiveVenueId),
       }
     default:
       return {
@@ -302,10 +310,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const nextStep = getProgressionStep(nextIndex, state.venueId)
 
     if (!nextStep) {
-      if (state.venueId === 'museum') {
-        markMuseumConquered()
-      } else {
-        markClubConquered()
+      if (getCachedAppEdition() !== 'v2') {
+        if (state.venueId === 'museum') {
+          markMuseumConquered()
+        } else {
+          markClubConquered()
+        }
       }
 
       set({
@@ -314,7 +324,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         targetNpcIds: [],
         clearedNpcId: foundNpcId,
         clearTimeSeconds,
-        afterHoursUnlockPending: state.venueId === 'museum',
+        afterHoursUnlockPending: shouldOfferAfterHoursUnlock(state.venueId),
       })
       return
     }
@@ -347,17 +357,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
 
-    const npcLayout = createNpcLayout(step.npcCount, state.npcLayoutVersion, state.venueId)
-    const targetNpcIds = pickRandomTargetNpcIds(npcLayout.npcProfiles, step.targetCount)
-    resetStageRuntimeState(collectKeepMeebitIds(state.venueId, npcLayout.npcProfiles, targetNpcIds))
-    seedNpcPositions(npcLayout.npcProfiles)
+    const { npcProfiles, targetNpcIds } = createStageNpcBundle(step, state.venueId)
+    const npcLayoutVersion = state.npcLayoutVersion + 1
+    resetStageRuntimeState(collectKeepMeebitIds(state.venueId, npcProfiles, targetNpcIds))
+    seedNpcPositions(npcProfiles)
     resetPlayerPositionToStart()
     usePlayerStore.getState().setMovementLocked(true)
-    preloadTargetVrms(npcLayout.npcProfiles, targetNpcIds)
+    preloadTargetVrms(npcProfiles, targetNpcIds)
 
     set({
       gamePhase: 'preparing',
-      ...npcLayout,
+      npcProfiles,
+      npcLayoutVersion,
       activeNpcCount: step.npcCount,
       targetNpcIds,
       foundTargetNpcIds: [],
@@ -374,7 +385,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     const step = getProgressionStep(state.progressionIndex, state.venueId)
     if (!step) return
 
-    const targetNpcIds = pickRandomTargetNpcIds(state.npcProfiles, step.targetCount, state.targetNpcIds)
+    const targetNpcIds = pickStageTargetNpcIds(
+      state.npcProfiles,
+      step,
+      state.targetNpcIds,
+    )
     resetStageRuntimeStateForRetry(collectKeepMeebitIds(state.venueId, state.npcProfiles, targetNpcIds))
     seedNpcPositions(state.npcProfiles)
     resetPlayerPositionToStart()
@@ -415,6 +430,23 @@ export const useGameStore = create<GameState>((set, get) => ({
       const step = getProgressionStep(state.progressionIndex, state.venueId)
       if (!step) return state
 
+      // Trait hunt: roll a new quest for this stage, then rebuild the crowd.
+      if (step.quest) {
+        const nextStep = rerollTraitHuntQuestAt(state.progressionIndex) ?? step
+        const { npcProfiles, targetNpcIds } = createStageNpcBundle(nextStep, state.venueId)
+        seedNpcPositions(npcProfiles)
+        preloadTargetVrms(npcProfiles, targetNpcIds)
+        return {
+          npcProfiles,
+          npcLayoutVersion: state.npcLayoutVersion + 1,
+          activeNpcCount: nextStep.npcCount,
+          targetNpcIds,
+          foundTargetNpcIds: [],
+          stage: nextStep.stageNumber,
+          stageKind: nextStep.kind,
+        }
+      }
+
       const targetNpcIds = pickRandomTargetNpcIds(
         state.npcProfiles,
         step.targetCount,
@@ -445,11 +477,36 @@ function pickFoundTargetNpcIds(targetNpcIds: string[], foundCount: number) {
   return targetNpcIds.slice(0, Math.min(foundCount, targetNpcIds.length))
 }
 
-function createNpcLayout(activeNpcCount: number, currentLayoutVersion: number, venueId: VenueId) {
-  return {
-    npcProfiles: buildNpcProfiles(activeNpcCount, venueId),
-    npcLayoutVersion: currentLayoutVersion + 1,
+function shouldOfferAfterHoursUnlock(venueId: VenueId) {
+  return getCachedAppEdition() !== 'v2' && venueId === 'museum'
+}
+
+function createStageNpcBundle(
+  step: NonNullable<ReturnType<typeof getProgressionStep>>,
+  venueId: VenueId,
+) {
+  if (step.quest) {
+    const meebitNumbers = pickTraitHuntMeebitNumbers(step.quest, step.npcCount)
+    const npcProfiles = buildNpcProfiles(step.npcCount, venueId, { meebitNumbers })
+    const targetNpcIds = pickTraitHuntTargetIds(npcProfiles, step.quest)
+    return { npcProfiles, targetNpcIds }
   }
+
+  const npcProfiles = buildNpcProfiles(step.npcCount, venueId)
+  const targetNpcIds = pickRandomTargetNpcIds(npcProfiles, step.targetCount)
+  return { npcProfiles, targetNpcIds }
+}
+
+function pickStageTargetNpcIds(
+  npcProfiles: NPCProfile[],
+  step: NonNullable<ReturnType<typeof getProgressionStep>>,
+  excludeNpcIds: string[] = [],
+) {
+  if (step.quest) {
+    return pickTraitHuntTargetIds(npcProfiles, step.quest, excludeNpcIds)
+  }
+
+  return pickRandomTargetNpcIds(npcProfiles, step.targetCount, excludeNpcIds)
 }
 
 function preloadTargetVrms(profiles: NPCProfile[], targetNpcIds: string[]) {

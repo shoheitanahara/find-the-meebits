@@ -100,8 +100,13 @@ const creatorNpc: NPCProfile = {
   ],
 }
 
-export function buildNpcProfiles(wanderingNpcCount: number, venueId: VenueId = 'museum'): NPCProfile[] {
-  const meebitNumbers = pickRandomMeebitNumbers(wanderingNpcCount)
+export function buildNpcProfiles(
+  wanderingNpcCount: number,
+  venueId: VenueId = 'museum',
+  options?: { meebitNumbers?: number[] },
+): NPCProfile[] {
+  const meebitNumbers =
+    options?.meebitNumbers ?? pickRandomMeebitNumbers(wanderingNpcCount)
   const creator = getCreatorNpcForVenue(venueId)
   const existingSpawns: Array<[number, number]> = [[creator.position[0], creator.position[2]]]
   const wanderingNpcs = meebitNumbers.map((meebitNumber, index) =>

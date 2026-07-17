@@ -61,3 +61,12 @@ export async function getMeebitTraits(meebitId: number): Promise<MeebitTraitMap 
   const dataset = await loadMeebitTraitsDataset()
   return getMeebitTraitsFromDataset(dataset, meebitId)
 }
+
+/** Sync lookup after dataset has been loaded (or null if not ready). */
+export function getCachedMeebitTraits(meebitId: number): MeebitTraitMap | null {
+  return getMeebitTraitsFromDataset(cachedDataset, meebitId)
+}
+
+export function getCachedMeebitTraitValue(meebitId: number, traitType: string): string | null {
+  return getCachedMeebitTraits(meebitId)?.[traitType] ?? null
+}
