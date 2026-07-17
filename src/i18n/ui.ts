@@ -117,6 +117,15 @@ type UiMessages = {
   langJa: string
   meebitsCount: (n: number) => string
   stageWithMeebits: (stage: string, n: number) => string
+  storyBrand: string
+  storyGameTitle: string
+  storyAbout: string
+  storySetting: string
+  storyMission: string
+  storyPlay: string
+  storyWish: string
+  storyCta: string
+  storySkip: string
 }
 
 const en: UiMessages = {
@@ -238,6 +247,16 @@ const en: UiMessages = {
   langJa: '日本語',
   meebitsCount: (n) => `${n} Meebits`,
   stageWithMeebits: (stage, n) => `${stage} / ${n} Meebits`,
+  storyBrand: 'Meebits',
+  storyGameTitle: 'Find the Meebit',
+  storyAbout:
+    'Meebits are a collection of 20,000 generative voxel avatars — digital sculptures built for a three-dimensional internet.',
+  storySetting: 'Tonight, a crowd of them fills the museum.',
+  storyMission: 'Somewhere in that crowd is your target. Just one.',
+  storyPlay: 'Talk to strangers. Chase the hints. Find them before time runs out.',
+  storyWish: 'Hope you find a favorite of your own among the 20,000.',
+  storyCta: 'Continue',
+  storySkip: 'Skip',
 }
 
 const ja: UiMessages = {
@@ -359,6 +378,16 @@ const ja: UiMessages = {
   langJa: '日本語',
   meebitsCount: (n) => `${n} Meebits`,
   stageWithMeebits: (stage, n) => `${stage} / ${n} Meebits`,
+  storyBrand: 'Meebits',
+  storyGameTitle: 'Find the Meebit',
+  storyAbout:
+    'Meebitsは、アルゴリズムで生まれた20,000体のボクセルアバター。デジタル時代のための、動く彫刻のコレクションです。',
+  storySetting: '今夜、美術館には大勢のMeebitsが溢れています。',
+  storyMission: 'その中のターゲットは、ただ一人。',
+  storyPlay: '話しかけて、ヒントを集めて、走り回って見つけよう。',
+  storyWish: '20,000体の中から、あなたのお気に入りが見つかるといいね。',
+  storyCta: 'つづける',
+  storySkip: 'スキップ',
 }
 
 const catalogs: Record<Locale, UiMessages> = { en, ja }

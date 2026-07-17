@@ -21,7 +21,7 @@ import { MobileControls } from './ui/mobile/MobileControls'
 import { MobileTopBar } from './ui/mobile/MobileTopBar'
 import { DevBootstrapBanner } from './ui/DevBootstrapBanner'
 import { AfterHoursUnlockOverlay } from './ui/AfterHoursUnlockOverlay'
-import { StartScreen } from './ui/StartScreen'
+import { IntroFlow } from './ui/IntroFlow'
 import { TargetHUD } from './ui/TargetHUD'
 import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
 import { useGameStore } from './stores/gameStore'
@@ -63,7 +63,7 @@ export default function App() {
       <DialogueBox />
       <LoadingScreen />
       <ErrorMessage />
-      <StartScreen />
+      <IntroFlow />
       <AfterHoursUnlockGate />
       <TipsOverlay />
       <PrepareOverlay />
