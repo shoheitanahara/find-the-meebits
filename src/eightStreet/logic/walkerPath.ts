@@ -22,7 +22,7 @@ const PATH_SPACING = 2.4
  * How far the lead Meebit starts before the bend.
  * Large enough that the first body climbs into view from off-screen on Leg B.
  */
-const LEAD_START_BACK = 4.5
+const LEAD_START_BACK = 5.0
 
 /**
  * Path length from deep Leg B to the bend.
