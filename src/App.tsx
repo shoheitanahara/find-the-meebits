@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { GameCanvas } from './game/GameCanvas'
 import { getCachedAppEdition } from './game/appEdition'
 import { loadMeebitTraitsDataset } from './data/meebitTraits'
+import { EightStreetApp } from './eightStreet/EightStreetApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
 import { GameTimerSystem } from './systems/GameTimerSystem'
@@ -45,7 +46,7 @@ function AfterHoursUnlockGate() {
   return <AfterHoursUnlockOverlay isVisible={isVisible} onComplete={handleComplete} />
 }
 
-export default function App() {
+function HuntApp() {
   useEffect(() => {
     if (getCachedAppEdition() === 'v2') {
       void loadMeebitTraitsDataset()
@@ -82,4 +83,19 @@ export default function App() {
       <Analytics />
     </main>
   )
+}
+
+export default function App() {
+  const edition = getCachedAppEdition()
+
+  if (edition === '8th-street') {
+    return (
+      <>
+        <EightStreetApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  return <HuntApp />
 }

@@ -3,6 +3,8 @@
     { "source": "/jp", "destination": "/index.html" },
     { "source": "/jp/(.*)", "destination": "/index.html" },
     { "source": "/v2", "destination": "/index.html" },
-    { "source": "/v2/(.*)", "destination": "/index.html" }
+    { "source": "/v2/(.*)", "destination": "/index.html" },
+    { "source": "/8th-street", "destination": "/index.html" },
+    { "source": "/8th-street/(.*)", "destination": "/index.html" }
   ]
 }

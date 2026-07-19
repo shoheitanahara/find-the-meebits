@@ -29,8 +29,13 @@ export function getLocaleHomePath(
   locale: Locale,
   pathname = typeof window !== 'undefined' ? window.location.pathname : '/',
 ) {
-  // Preserve /v2 edition when switching language (not linked from v1 UI).
-  if (pathname.split('/').filter(Boolean).includes('v2')) {
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments.includes('8th-street')) {
+    return locale === 'ja' ? '/jp/8th-street' : '/8th-street'
+  }
+
+  if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }
 

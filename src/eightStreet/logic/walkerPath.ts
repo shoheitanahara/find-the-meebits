@@ -1,0 +1,67 @@
+import { EIGHT_STREET } from '../config'
+
+export type WalkerPatternSlot = {
+  slotIndex: number
+  lane: number
+  initialProgress: number
+  speed: number
+}
+
+export type PathPose = {
+  x: number
+  z: number
+  yaw: number
+  despawned: boolean
+}
+
+const SLOT_LANES = [-0.92, 0.88, -0.55, 0.42, -0.18, 0.72, -0.78, 0.12, 0.58, -0.38] as const
+const SLOT_SPEEDS = [1.12, 1.18, 1.08, 1.22, 1.15, 1.2, 1.1, 1.16, 1.14, 1.19] as const
+/** Gap between walkers along the approach (meters of path). */
+const PATH_SPACING = 2.4
+
+/**
+ * Lead (nearest the bend) sits just before the corner.
+ * Wider PATH_SPACING pushes the last walker further down Leg B.
+ */
+const CORNER_APPROACH =
+  PATH_SPACING * (EIGHT_STREET.meebitCount - 1) + 1.5
+
+export function createSessionWalkerPattern(
+  count: number = EIGHT_STREET.meebitCount,
+): WalkerPatternSlot[] {
+  return Array.from({ length: count }, (_, i) => ({
+    slotIndex: i,
+    lane: SLOT_LANES[i % SLOT_LANES.length],
+    // i=0 nearest the corner; higher i = further down the side street.
+    initialProgress: (count - 1 - i) * PATH_SPACING,
+    speed: SLOT_SPEEDS[i % SLOT_SPEEDS.length],
+  }))
+}
+
+/**
+ * Walkers approach along Leg B (−X) just before the first corner, then Leg A (+Z).
+ * Corner position is continuous — only yaw snaps 90°.
+ */
+export function getLPathPose(progress: number, lane: number): PathPose {
+  const hw = EIGHT_STREET.halfWidth - 0.85
+  const lateral = Math.max(-1, Math.min(1, lane)) * hw * 0.85
+  const cornerZ = EIGHT_STREET.corner1Z
+
+  // Start a short stretch before the bend — not deep on Leg C.
+  const horizStart = lateral + CORNER_APPROACH
+  const turnX = lateral
+  const horizLen = Math.max(horizStart - turnX, 0.01)
+  const entryZ = cornerZ + lateral
+
+  if (progress < horizLen) {
+    return { x: horizStart - progress, z: entryZ, yaw: -Math.PI / 2, despawned: false }
+  }
+
+  const zPos = entryZ + (progress - horizLen)
+  return {
+    x: turnX,
+    z: zPos,
+    yaw: 0,
+    despawned: zPos > EIGHT_STREET.walkerDespawnZ,
+  }
+}

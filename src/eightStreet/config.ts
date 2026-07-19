@@ -1,0 +1,211 @@
+/**
+ * Crank-shaped street (one stage):
+ *
+ *   Start (facing −Z)
+ *     │
+ *     │  Leg A (−Z, observe Meebits)
+ *     │
+ *     └───────→  Leg B (+X, right turn)
+ *                    │
+ *                    │  Leg C (−Z, left turn)
+ *                    │
+ *                    ↓  Continuity → warp to Start
+ */
+export const EIGHT_STREET = {
+  title: '8th Street',
+  meebitCount: 10,
+  targetProgress: 8,
+  halfWidth: 3.0,
+
+  // Leg A: x=0, z goes from startZ down to corner1Z
+  startZ: 6,
+  /** Open return corridor behind the player (no visible end wall). */
+  returnEndZ: 20,
+  corner1Z: -26,
+
+  // Leg B: z=corner1Z, x goes from 0 to corner2X
+  corner2X: 24,
+
+  // Leg C: x=corner2X, z goes from corner1Z down to exitZ
+  exitZ: -52,
+  /** Switch to the next street shortly after the final left turn. */
+  forwardTransitionZ: -33,
+
+  eyeHeight: 1.65,
+  moveSpeed: 3.6,
+  dashSpeed: 6.5,
+  fov: 70,
+  pitchMaxUp: (30 * Math.PI) / 180,
+  pitchMaxDown: (35 * Math.PI) / 180,
+  mouseLookSensitivity: 0.0022,
+  touchLookSensitivity: 1.8,
+
+  playerStartX: 0,
+  playerStartZ: 4,
+
+  /**
+   * Turn-back fires as soon as the player walks past this on leg A.
+   * Kept just behind spawn so a fog wrap-in (landing in front) cannot re-trigger.
+   */
+  returnTransitionZ: 5.2,
+  /** Continue / restart land here — always in front of returnTransitionZ. */
+  entranceLandingZ: 3.2,
+  wallMargin: 0.35,
+
+  walkerBaseSpeed: 1.2,
+  walkerSpeedJitter: 0.28,
+  walkerDespawnZ: 10,
+  normalRoundChance: 0.55,
+  maxSameKindStreak: 3,
+} as const
+
+/**
+ * Late-night mood knobs — tweak these to rebalance darkness vs street brightness.
+ * Warm sodium lamps light the route; cold white stays only at wrap veils.
+ */
+export const NIGHT_MOOD = {
+  /** Canvas / fog / clear color */
+  sky: '#0c1220',
+  fogNear: 28,
+  fogFar: 85,
+
+  /** Base fill — readable night without needing a forest of point lights. */
+  ambient: 0.42,
+  hemiSky: '#3a4e78',
+  hemiGround: '#2a2218',
+  hemiIntensity: 0.52,
+  moonIntensity: 0.45,
+  moonColor: '#a8c0e0',
+
+  /** Warm street lamps (one pointLight each — spotlights were too costly). */
+  lampColor: '#ffc078',
+  lampIntensity: 55,
+  lampDistance: 16,
+  lampAngle: 0.82,
+  lampPenumbra: 0.5,
+  lampDecay: 1.6,
+  lampHeight: 5.1,
+  /** Wider spacing keeps the light count playable with 10 VRMs. */
+  lampSpacing: 9.5,
+  lampInset: 0.4,
+  fillIntensity: 7.5,
+  fillDistance: 13,
+
+  /** Foot-level neon — mostly emissive; only a few real lights. */
+  neonColors: ['#38bdf8', '#f472b6', '#a3e635', '#fbbf24'] as const,
+  neonIntensity: 3.4,
+  neonDistance: 8,
+  neonHeight: 0.18,
+  neonInset: 0.08,
+
+  /** Cold white at transition veils only */
+  veilColor: '#ffffff',
+  veilLightIntensity: 5.5,
+  veilLightDistance: 15,
+  veilPeakOpacity: 0.82,
+  veilVolumeOpacity: 0.42,
+} as const
+
+export type AlleyPoint = { x: number; z: number }
+
+type Aabb = { minX: number; maxX: number; minZ: number; maxZ: number }
+
+/** Matches the thick brick boxes in AlleyStreet (wallDepth = 3). */
+const WALL_DEPTH = 3
+
+function getLastCornerSolids(): Aabb[] {
+  const hw = EIGHT_STREET.halfWidth
+  const { corner1Z, corner2X, exitZ } = EIGHT_STREET
+  const wallExtend = hw + WALL_DEPTH
+  const exitEndZ = exitZ - 12
+  /** How far the outer brick corner juts into the walkable lane. */
+  const jut = 0.85
+
+  return [
+    // Leg C east wall (full height box).
+    {
+      minX: corner2X + hw,
+      maxX: corner2X + hw + WALL_DEPTH,
+      minZ: exitEndZ,
+      maxZ: corner1Z + wallExtend,
+    },
+    // Leg B north wall.
+    {
+      minX: hw,
+      maxX: corner2X + hw + WALL_DEPTH,
+      minZ: corner1Z + hw,
+      maxZ: corner1Z + hw + WALL_DEPTH,
+    },
+    // Outer NE jut at the last bend — the protruding brick players were clipping through.
+    {
+      minX: corner2X + hw - jut,
+      maxX: corner2X + hw + WALL_DEPTH,
+      minZ: corner1Z + hw - jut,
+      maxZ: corner1Z + wallExtend,
+    },
+  ]
+}
+
+function pushOutOfAabb(x: number, z: number, box: Aabb): AlleyPoint {
+  if (x <= box.minX || x >= box.maxX || z <= box.minZ || z >= box.maxZ) {
+    return { x, z }
+  }
+  const dl = x - box.minX
+  const dr = box.maxX - x
+  const db = z - box.minZ
+  const dt = box.maxZ - z
+  const m = Math.min(dl, dr, db, dt)
+  if (m === dl) return { x: box.minX, z }
+  if (m === dr) return { x: box.maxX, z }
+  if (m === db) return { x, z: box.minZ }
+  return { x, z: box.maxZ }
+}
+
+export function clampToAlley(x: number, z: number): AlleyPoint {
+  const hw = EIGHT_STREET.halfWidth - EIGHT_STREET.wallMargin
+  const { returnEndZ, corner1Z, corner2X, exitZ } = EIGHT_STREET
+  const topZ = returnEndZ
+
+  // Check each corridor + corners
+  const inA = Math.abs(x) <= hw && z >= corner1Z - hw && z <= topZ
+  const inB = Math.abs(z - corner1Z) <= hw && x >= -hw && x <= corner2X + hw
+  const inC = Math.abs(x - corner2X) <= hw && z >= exitZ - hw && z <= corner1Z + hw
+
+  let point: AlleyPoint = { x, z }
+
+  if (!(inA || inB || inC)) {
+    // Clamp to nearest corridor
+    const candidates: AlleyPoint[] = [
+      { x: Math.max(-hw, Math.min(hw, x)), z: Math.max(corner1Z - hw, Math.min(topZ, z)) },
+      { x: Math.max(-hw, Math.min(corner2X + hw, x)), z: Math.max(corner1Z - hw, Math.min(corner1Z + hw, z)) },
+      { x: Math.max(corner2X - hw, Math.min(corner2X + hw, x)), z: Math.max(exitZ - hw, Math.min(corner1Z + hw, z)) },
+    ]
+
+    let best = candidates[0]
+    let bestD = Infinity
+    for (const p of candidates) {
+      const inAny =
+        (Math.abs(p.x) <= hw && p.z >= corner1Z - hw && p.z <= topZ) ||
+        (Math.abs(p.z - corner1Z) <= hw && p.x >= -hw && p.x <= corner2X + hw) ||
+        (Math.abs(p.x - corner2X) <= hw && p.z >= exitZ - hw && p.z <= corner1Z + hw)
+      if (!inAny) continue
+      const d = (p.x - x) ** 2 + (p.z - z) ** 2
+      if (d < bestD) { bestD = d; best = p }
+    }
+    point = best
+  }
+
+  // Solid brick volumes (last-corner overhang etc.) — inflate slightly into the lane
+  // so the player cannot slip through the visible face.
+  const pad = EIGHT_STREET.wallMargin
+  for (const solid of getLastCornerSolids()) {
+    point = pushOutOfAabb(point.x, point.z, {
+      minX: solid.minX - pad,
+      maxX: solid.maxX + pad,
+      minZ: solid.minZ - pad,
+      maxZ: solid.maxZ + pad,
+    })
+  }
+
+  return point
+}

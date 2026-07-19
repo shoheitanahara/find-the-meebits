@@ -1,8 +1,6 @@
-/** App edition from URL path. v2 is trait-hunt prototype (not linked from v1 UI). */
+/** App edition from URL path. */
 
-const V2_SEGMENTS = new Set(['v2'])
-
-export type AppEdition = 'v1' | 'v2'
+export type AppEdition = 'v1' | 'v2' | '8th-street'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   return pathname.split('/').filter(Boolean)
@@ -10,7 +8,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
-  // /v2 or /jp/v2
+  if (segments.includes('8th-street')) {
+    return '8th-street'
+  }
   if (segments.includes('v2')) {
     return 'v2'
   }
@@ -19,6 +19,10 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
 
 export function isTraitHuntEdition(pathname?: string) {
   return getAppEdition(pathname) === 'v2'
+}
+
+export function isEightStreetEdition(pathname?: string) {
+  return getAppEdition(pathname) === '8th-street'
 }
 
 let cachedEdition: AppEdition | null = null

@@ -8,7 +8,19 @@ import { resolve } from 'node:path'
 /** Local VRM Worker (`npm run vrm-worker:dev`). Override via VRM_WORKER_DEV_URL in shell if needed. */
 const vrmWorkerDevUrl = process.env.VRM_WORKER_DEV_URL ?? 'http://127.0.0.1:8787'
 
-const SPA_FALLBACK_PATHS = new Set(['/jp', '/jp/', '/v2', '/v2/', '/jp/v2', '/jp/v2/'])
+const SPA_FALLBACK_PATHS = new Set([
+  '/jp',
+  '/jp/',
+  '/v2',
+  '/v2/',
+  '/jp/v2',
+  '/jp/v2/',
+  '/8th-street',
+  '/8th-street/',
+  '/jp/8th-street',
+  '/jp/8th-street/',
+])
+
 
 /** Serve index.html for locale / edition SPA routes in vite/preview. */
 function spaPathFallback(): Plugin {
