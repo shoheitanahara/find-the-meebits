@@ -47,10 +47,6 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
   const armedRoundKeyRef = useRef(-1)
 
   const submitAnswer = useEightStreetStore((s) => s.submitAnswer)
-  const phase = useEightStreetStore((s) => s.phase)
-  const loopKey = useEightStreetStore((s) => s.loopKey)
-  const roundKey = useEightStreetStore((s) => s.roundKey)
-  const isAdvancing = useEightStreetStore((s) => s.isAdvancing)
 
   // Input binding
   useEffect(() => {
@@ -92,17 +88,19 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
   }, [enabled, gl])
 
   useFrame((_, dt) => {
+    // Always read live store — React-subscribed flags lag one render behind submitAnswer.
+    const street = useEightStreetStore.getState()
+    const { phase, loopKey, roundKey, isAdvancing } = street
     if (!enabled || (phase !== 'playing' && phase !== 'cleared')) return
 
     // Apply wrap handoff before movement / judging (same frame as loopKey bump).
     if (loopKey !== appliedLoopKeyRef.current) {
       appliedLoopKeyRef.current = loopKey
-      const state = useEightStreetStore.getState()
-      const handoff = state.handoff
-      const spawnX = state.sessionSpawnX
-      const landZ = state.sessionLandZ
-      const startZ = state.sessionStartZ
-      const spawnYaw = state.sessionSpawnYaw
+      const handoff = street.handoff
+      const spawnX = street.sessionSpawnX
+      const landZ = street.sessionLandZ
+      const startZ = street.sessionStartZ
+      const spawnYaw = street.sessionSpawnYaw
       zonesRef.current = createJudgeZones()
       boostRef.current = 0
       stepTimerRef.current = 0
@@ -154,7 +152,6 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     let mx = 0
     let mz = 0
 
-    // Mobile stick: ease camera to face stick direction, then walk mostly forward.
     const stickX = ctrl.moveX
     const stickZ = ctrl.moveY
     const stickLen = Math.hypot(stickX, stickZ)
@@ -173,6 +170,7 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     if (k.has('KeyW') || k.has('ArrowUp')) mz += 1
     if (k.has('KeyS') || k.has('ArrowDown')) mz -= 1
 
+    // Keep wrap boost so street handoffs stay smooth.
     if (boostRef.current > 0) { boostRef.current -= dt; if (mz >= 0) mz = Math.max(mz, 1) }
 
     const len = Math.hypot(mx, mz)
@@ -189,8 +187,14 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     const clamped = clampToAlley(posRef.current.x + dx, posRef.current.z + dz)
     posRef.current.set(clamped.x, EIGHT_STREET.eyeHeight, clamped.z)
 
-    const moved = Math.hypot(clamped.x - prevX, clamped.z - prevZ) > 1e-4
-    if (!moved || isAdvancing) {
+    // Soft barrier until this street is entered — prevents wrap re-triggers without freezing.
+    const maxZBeforeCommit = EIGHT_STREET.returnTransitionZ - 1.35
+    if (!zonesRef.current.clearedReturnLine && posRef.current.z > maxZBeforeCommit) {
+      posRef.current.z = maxZBeforeCommit
+    }
+
+    const moved = Math.hypot(posRef.current.x - prevX, posRef.current.z - prevZ) > 1e-4
+    if (!moved) {
       stepTimerRef.current = 0
     } else {
       const interval = sprinting ? DASH_FOOTSTEP_INTERVAL_SEC : WALK_FOOTSTEP_INTERVAL_SEC
@@ -206,9 +210,9 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
 
     if (phase !== 'playing' || isAdvancing) return
     if (armedRoundKeyRef.current !== roundKey) return
+    if (useEightStreetStore.getState().isAdvancing) return
 
     zonesRef.current = updateJudgeZones(posRef.current.x, posRef.current.z, zonesRef.current)
-    // While entrance boost is active, ignore turn-back so wrap-ins do not re-trigger.
     const answer = tryResolveAnswer(posRef.current.x, posRef.current.z, zonesRef.current, {
       allowAnomaly: boostRef.current <= 0,
     })

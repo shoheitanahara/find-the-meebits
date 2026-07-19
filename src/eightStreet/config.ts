@@ -53,14 +53,14 @@ export const EIGHT_STREET = {
    */
   sessionSpawnMaxX: 2.1,
   sessionLandZMin: 1.35,
-  sessionLandZMax: 4.0,
-  sessionStartZMin: 2.0,
-  sessionStartZMax: 4.55,
+  sessionLandZMax: 3.4,
+  sessionStartZMin: 1.8,
+  sessionStartZMax: 3.6,
   sessionSpawnYawMax: (18 * Math.PI) / 180,
 
   /**
    * Turn-back fires as soon as the player walks past this on leg A.
-   * Kept just behind spawn so a fog wrap-in (landing in front) cannot re-trigger.
+   * Kept clearly behind session spawn / wrap landings.
    */
   returnTransitionZ: 5.2,
   /** Continue / restart land here — always in front of returnTransitionZ. */
