@@ -113,35 +113,45 @@ type Aabb = { minX: number; maxX: number; minZ: number; maxZ: number }
 /** Matches the thick brick boxes in AlleyStreet (wallDepth = 3). */
 const WALL_DEPTH = 3
 
+/**
+ * Solid AABBs for the last bend (Leg B → Leg C).
+ * Corridor clamps alone are not enough: Leg C’s west wall ends at z=corner1Z,
+ * so it occupies the south half of Leg B’s lane as an L-shaped brick block.
+ */
 function getLastCornerSolids(): Aabb[] {
   const hw = EIGHT_STREET.halfWidth
   const { corner1Z, corner2X, exitZ } = EIGHT_STREET
   const wallExtend = hw + WALL_DEPTH
   const exitEndZ = exitZ - 12
-  /** How far the outer brick corner juts into the walkable lane. */
-  const jut = 0.85
 
   return [
-    // Leg C east wall (full height box).
+    // Leg C west — sticks into Leg B (inner pivot of the left turn).
+    {
+      minX: corner2X - hw - WALL_DEPTH,
+      maxX: corner2X - hw,
+      minZ: exitEndZ,
+      maxZ: corner1Z,
+    },
+    // Leg B south — meets Leg C west at the re-entrant corner.
+    {
+      minX: -hw,
+      maxX: corner2X - hw,
+      minZ: corner1Z - hw - WALL_DEPTH,
+      maxZ: corner1Z - hw,
+    },
+    // Leg C east (extends past the bend toward +Z).
     {
       minX: corner2X + hw,
       maxX: corner2X + hw + WALL_DEPTH,
       minZ: exitEndZ,
       maxZ: corner1Z + wallExtend,
     },
-    // Leg B north wall.
+    // Leg B north.
     {
       minX: hw,
-      maxX: corner2X + hw + WALL_DEPTH,
+      maxX: corner2X + hw,
       minZ: corner1Z + hw,
       maxZ: corner1Z + hw + WALL_DEPTH,
-    },
-    // Outer NE jut at the last bend — the protruding brick players were clipping through.
-    {
-      minX: corner2X + hw - jut,
-      maxX: corner2X + hw + WALL_DEPTH,
-      minZ: corner1Z + hw - jut,
-      maxZ: corner1Z + wallExtend,
     },
   ]
 }
