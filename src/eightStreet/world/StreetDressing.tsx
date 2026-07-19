@@ -678,8 +678,9 @@ export function StreetDressing() {
       <Crate position={[left, 0.22, -15]} rotationY={-0.25} color="#7a5230" />
       {/* Keep wall clutter off the street-sign / rules posters near z≈-6…-2. */}
       <ACUnit position={[-hw + 0.05, 3.2, -14]} />
-      <ACUnit position={[-hw + 0.05, 4.8, -20]} />
-      <PipeRun position={[-hw + 0.08, 5.6, -18]} length={10} axis="z" />
+      {/* Nudged past the left-wall lamp (~z −19.6) so the box doesn’t share the fixture. */}
+      <ACUnit position={[-hw + 0.05, 4.55, -22.6]} />
+      <PipeRun position={[-hw + 0.08, 5.6, -17]} length={8} axis="z" />
 
       <Crate position={[10.5, 0.22, corner1Z - hw + 0.65]} rotationY={0.4} />
       <ACUnit position={[11, 3.4, corner1Z + hw - 0.2]} />
