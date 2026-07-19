@@ -28,7 +28,22 @@ const TRAIT_WEIGHTS: Record<string, number> = {
   Tattoo: 2,
 }
 
+/** Residue class for the stride-3 main scan (0 → 1,4,7… / 1 → 2,5,8… / 2 → 3,6,9…). */
+let sessionScanOffset = 0
+/** Residue for the looser stride-7 fallback (0–6). */
+let sessionLooseOffset = 0
+
 const similarCache = new Map<number, number[]>()
+
+/**
+ * Call once per Start. Rotates which ~1/3 of the 20k pool the similarity
+ * scan can see, so across games every Meebit id can appear as an anomaly.
+ */
+export function beginSimilarScanSession() {
+  sessionScanOffset = Math.floor(Math.random() * 3)
+  sessionLooseOffset = Math.floor(Math.random() * 7)
+  similarCache.clear()
+}
 
 function scoreSimilarity(a: MeebitTraitMap, b: MeebitTraitMap) {
   let score = 0
@@ -66,8 +81,8 @@ function buildCandidatesFor(
 
   const scored: Array<{ id: number; score: number; ratio: number; matches: number }> = []
 
-  // Stride sample first — full 20k sync scan freezes the main thread.
-  for (let id = 1; id <= 20000; id += 3) {
+  // Stride sample — offset rotates per game so all 20k ids are reachable over time.
+  for (let id = 1 + sessionScanOffset; id <= 20000; id += 3) {
     if (id === baseId) continue
     const traits = getMeebitTraitsFromDataset(dataset, id)
     if (!traits) continue
@@ -110,7 +125,7 @@ export async function selectSimilarMeebitId(
     const baseTraits = getMeebitTraitsFromDataset(dataset, baseId)
     if (!baseTraits) return null
     const loose: Array<{ id: number; score: number }> = []
-    for (let id = 1; id <= 20000; id += 7) {
+    for (let id = 1 + sessionLooseOffset; id <= 20000; id += 7) {
       if (exclude.has(id)) continue
       const traits = getMeebitTraitsFromDataset(dataset, id)
       if (!traits) continue

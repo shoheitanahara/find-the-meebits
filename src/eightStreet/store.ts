@@ -4,6 +4,7 @@ import { EIGHT_STREET } from './config'
 import { generateRound, type GeneratedRound, type RoundKind } from './logic/generateRound'
 import { isAnswerCorrect, type PlayerAnswer } from './logic/judgeAnswer'
 import { selectBaseMeebitIds } from './logic/selectBaseMeebits'
+import { beginSimilarScanSession } from './logic/selectSimilarMeebit'
 import { createSessionWalkerPattern, type WalkerPatternSlot } from './logic/walkerPath'
 
 /** No transition UI — only title / first load / playing / cleared. */
@@ -207,6 +208,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
     })
 
     await loadMeebitTraitsDataset()
+    beginSimilarScanSession()
     const baseMeebitIds = selectBaseMeebitIds(EIGHT_STREET.meebitCount)
     const walkerPattern = createSessionWalkerPattern(baseMeebitIds.length)
     const currentRound = await buildNextRound({
