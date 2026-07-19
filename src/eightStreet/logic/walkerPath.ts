@@ -26,15 +26,33 @@ const PATH_SPACING = 2.4
 const CORNER_APPROACH =
   PATH_SPACING * (EIGHT_STREET.meebitCount - 1) + 1.5
 
+function shuffleCopy<T>(source: readonly T[]): T[] {
+  const next = [...source]
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[next[i], next[j]] = [next[j], next[i]]
+  }
+  return next
+}
+
+/**
+ * Fixed cast order / spacing for the session, but lane sides are shuffled
+ * so the lead Meebits are not always on the same wall.
+ */
 export function createSessionWalkerPattern(
   count: number = EIGHT_STREET.meebitCount,
 ): WalkerPatternSlot[] {
+  const lanes = shuffleCopy(SLOT_LANES)
+  const speeds = shuffleCopy(SLOT_SPEEDS)
+  // Occasionally mirror the whole formation for more session variety.
+  const mirror = Math.random() < 0.5 ? -1 : 1
+
   return Array.from({ length: count }, (_, i) => ({
     slotIndex: i,
-    lane: SLOT_LANES[i % SLOT_LANES.length],
+    lane: Math.max(-0.95, Math.min(0.95, lanes[i % lanes.length] * mirror)),
     // i=0 nearest the corner; higher i = further down the side street.
     initialProgress: (count - 1 - i) * PATH_SPACING,
-    speed: SLOT_SPEEDS[i % SLOT_SPEEDS.length],
+    speed: speeds[i % speeds.length],
   }))
 }
 

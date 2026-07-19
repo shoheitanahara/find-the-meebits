@@ -36,10 +36,38 @@ type EightStreetState = {
    * `restart` = wrong / turn-back → emerge from the same entrance fog.
    */
   handoff: 'spawn' | 'continue' | 'restart' | null
+  /**
+   * Absolute spawn pose for one play session; re-rolled on each Start.
+   * Keeps wraps consistent while varying runs across reloads.
+   */
+  sessionSpawnX: number
+  sessionLandZ: number
+  sessionStartZ: number
+  sessionSpawnYaw: number
   setHowToPlayOpen: (open: boolean) => void
   startGame: () => Promise<void>
   submitAnswer: (answer: PlayerAnswer) => void
   playAgain: () => void
+}
+
+function randRange(min: number, max: number) {
+  return min + Math.random() * (max - min)
+}
+
+function rollSessionSpawn() {
+  const maxX = EIGHT_STREET.sessionSpawnMaxX
+  const landZ = randRange(EIGHT_STREET.sessionLandZMin, EIGHT_STREET.sessionLandZMax)
+  // First spawn can sit a bit farther into the alley than wrap landings.
+  const startZ = randRange(
+    Math.max(EIGHT_STREET.sessionStartZMin, landZ - 0.35),
+    EIGHT_STREET.sessionStartZMax,
+  )
+  return {
+    sessionSpawnX: randRange(-maxX, maxX),
+    sessionLandZ: landZ,
+    sessionStartZ: startZ,
+    sessionSpawnYaw: randRange(-EIGHT_STREET.sessionSpawnYawMax, EIGHT_STREET.sessionSpawnYawMax),
+  }
 }
 
 async function buildNextRound(state: {
@@ -78,8 +106,13 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
   isAdvancing: false,
   advanceId: 0,
   handoff: null,
+  sessionSpawnX: EIGHT_STREET.playerStartX,
+  sessionLandZ: EIGHT_STREET.entranceLandingZ,
+  sessionStartZ: EIGHT_STREET.playerStartZ,
+  sessionSpawnYaw: 0,
   setHowToPlayOpen: (howToPlayOpen) => set({ howToPlayOpen }),
   startGame: async () => {
+    const spawn = rollSessionSpawn()
     set({
       phase: 'loading',
       howToPlayOpen: false,
@@ -94,6 +127,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
       advanceId: 0,
       handoff: null,
       loopKey: 0,
+      ...spawn,
     })
 
     await loadMeebitTraitsDataset()
@@ -240,6 +274,10 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
       advanceId: 0,
       handoff: null,
       loopKey: 0,
+      sessionSpawnX: EIGHT_STREET.playerStartX,
+      sessionLandZ: EIGHT_STREET.entranceLandingZ,
+      sessionStartZ: EIGHT_STREET.playerStartZ,
+      sessionSpawnYaw: 0,
     })
   },
 }))

@@ -14,7 +14,8 @@ type EightStreetCopy = {
   playAgain: string
   progressHint: string
   controlsTitle: string
-  controlsLines: string[]
+  controlsLinesPc: string[]
+  controlsLinesMobile: string[]
   wallRulesTitle: string
   wallRules: string[]
   clearedEyebrow: string
@@ -49,14 +50,16 @@ const en: EightStreetCopy = {
   playAgain: 'Play Again',
   progressHint: 'Look at the street sign on the wall.',
   controlsTitle: 'Controls',
-  controlsLines: [
+  controlsLinesPc: [
     'WASD — Move',
     'Shift — Dash',
-    'Stick — Move (mobile)',
-    'Stick outer — Dash (mobile)',
-    'Drag screen — Look (mobile)',
     'Click — Look around',
     'Esc — Release mouse',
+  ],
+  controlsLinesMobile: [
+    'Stick — Move (turns to face)',
+    'Stick outer — Dash',
+    'Drag screen — Look',
   ],
   wallRulesTitle: 'How to Play — 8th Street',
   wallRules: [
@@ -91,14 +94,16 @@ const ja: EightStreetCopy = {
   playAgain: 'もう一度',
   progressHint: '壁の看板を見て街の番号を確認しよう。',
   controlsTitle: '操作',
-  controlsLines: [
+  controlsLinesPc: [
     'WASD — 移動',
     'Shift — ダッシュ',
-    'スティック — 移動（スマホ）',
-    'スティック外縁 — ダッシュ（スマホ）',
-    '画面ドラッグ — 視点（スマホ）',
     'クリック — 視点',
     'Esc — 視点解除',
+  ],
+  controlsLinesMobile: [
+    'スティック — 移動（向いた方向へ）',
+    'スティック外縁 — ダッシュ',
+    '画面ドラッグ — 視点',
   ],
   wallRulesTitle: '＜8番ストリートの遊び方＞',
   wallRules: [

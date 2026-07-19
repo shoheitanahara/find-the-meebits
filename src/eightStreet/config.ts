@@ -40,9 +40,22 @@ export const EIGHT_STREET = {
   mouseLookSensitivity: 0.0022,
   /** Mobile drag look — higher than mouse for finger-sized swipes. */
   touchLookSensitivity: 0.0065,
+  /** Mobile stick: how fast yaw eases toward the stick direction. */
+  stickFaceTurnSpeed: 1.5,
+  stickFaceDeadzone: 0.3,
 
   playerStartX: 0,
   playerStartZ: 4,
+  /**
+   * Session spawn is re-rolled on each Start.
+   * Absolute ranges (kept clear of returnTransitionZ / walls).
+   */
+  sessionSpawnMaxX: 2.1,
+  sessionLandZMin: 1.35,
+  sessionLandZMax: 4.0,
+  sessionStartZMin: 2.0,
+  sessionStartZMax: 4.55,
+  sessionSpawnYawMax: (18 * Math.PI) / 180,
 
   /**
    * Turn-back fires as soon as the player walks past this on leg A.

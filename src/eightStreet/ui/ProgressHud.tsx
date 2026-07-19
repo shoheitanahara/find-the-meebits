@@ -15,8 +15,13 @@ export function ControlsHud() {
       <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-amber-200/70">
         {copy.controlsTitle}
       </p>
-      <ul className="mt-1.5 space-y-0.5 text-[0.72rem] leading-snug text-slate-200">
-        {copy.controlsLines.map((line) => (
+      <ul className="mt-1.5 hidden space-y-0.5 text-[0.72rem] leading-snug text-slate-200 lg:block">
+        {copy.controlsLinesPc.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      <ul className="mt-1.5 space-y-0.5 text-[0.72rem] leading-snug text-slate-200 lg:hidden">
+        {copy.controlsLinesMobile.map((line) => (
           <li key={line}>{line}</li>
         ))}
       </ul>

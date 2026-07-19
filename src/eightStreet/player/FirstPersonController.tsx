@@ -17,6 +17,14 @@ const MOVE_KEYS = new Set([
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
 ])
 
+/** Shortest signed delta from `from` to `to` in (−π, π]. */
+function shortestAngleDelta(from: number, to: number) {
+  let d = to - from
+  while (d > Math.PI) d -= Math.PI * 2
+  while (d < -Math.PI) d += Math.PI * 2
+  return d
+}
+
 /** Same cadence as Find the Meebits (`FootstepAudioSystem`). */
 const DASH_FOOTSTEP_INTERVAL_SEC = 0.25
 /** Slightly slower than dash when walking. */
@@ -89,29 +97,33 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     // Apply wrap handoff before movement / judging (same frame as loopKey bump).
     if (loopKey !== appliedLoopKeyRef.current) {
       appliedLoopKeyRef.current = loopKey
-      const handoff = useEightStreetStore.getState().handoff
+      const state = useEightStreetStore.getState()
+      const handoff = state.handoff
+      const spawnX = state.sessionSpawnX
+      const landZ = state.sessionLandZ
+      const startZ = state.sessionStartZ
+      const spawnYaw = state.sessionSpawnYaw
       zonesRef.current = createJudgeZones()
       boostRef.current = 0
       stepTimerRef.current = 0
       armedRoundKeyRef.current = -1
 
-      const landZ = EIGHT_STREET.entranceLandingZ
       if (handoff === 'continue') {
         const lateralOffset = posRef.current.x - EIGHT_STREET.corner2X
         posRef.current.set(
-          EIGHT_STREET.playerStartX + lateralOffset,
+          spawnX + lateralOffset,
           EIGHT_STREET.eyeHeight,
           landZ,
         )
         boostRef.current = 0.85
       } else if (handoff === 'restart') {
-        posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, landZ)
-        yawRef.current = 0
+        posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, landZ)
+        yawRef.current = spawnYaw
         pitchRef.current = 0
         boostRef.current = 0.75
       } else {
-        posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, EIGHT_STREET.playerStartZ)
-        yawRef.current = 0
+        posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, startZ)
+        yawRef.current = spawnYaw
         pitchRef.current = 0
       }
 
@@ -139,7 +151,22 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
       )
     }
 
-    let mx = ctrl.moveX, mz = ctrl.moveY
+    let mx = 0
+    let mz = 0
+
+    // Mobile stick: ease camera to face stick direction, then walk mostly forward.
+    const stickX = ctrl.moveX
+    const stickZ = ctrl.moveY
+    const stickLen = Math.hypot(stickX, stickZ)
+    if (stickLen > EIGHT_STREET.stickFaceDeadzone) {
+      const nx = stickX / stickLen
+      const nz = stickZ / stickLen
+      const targetYaw = yawRef.current - Math.atan2(nx, nz)
+      const turnT = 1 - Math.exp(-EIGHT_STREET.stickFaceTurnSpeed * dt)
+      yawRef.current += shortestAngleDelta(yawRef.current, targetYaw) * turnT
+      mz += stickLen
+    }
+
     const k = keysRef.current
     if (k.has('KeyA') || k.has('ArrowLeft')) mx -= 1
     if (k.has('KeyD') || k.has('ArrowRight')) mx += 1
