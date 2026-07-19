@@ -33,43 +33,16 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
   const lockedRef = useRef(false)
   const boostRef = useRef(0)
   const stepTimerRef = useRef(0)
+  /** Handoff must apply in useFrame (not useEffect) or return-line can re-judge. */
+  const appliedLoopKeyRef = useRef(-1)
+  /** Judgment stays cold until the new cast is mounted for this advance. */
+  const armedRoundKeyRef = useRef(-1)
 
   const submitAnswer = useEightStreetStore((s) => s.submitAnswer)
   const phase = useEightStreetStore((s) => s.phase)
   const loopKey = useEightStreetStore((s) => s.loopKey)
+  const roundKey = useEightStreetStore((s) => s.roundKey)
   const isAdvancing = useEightStreetStore((s) => s.isAdvancing)
-
-  // Reset on each street loop
-  useEffect(() => {
-    const handoff = useEightStreetStore.getState().handoff
-    zonesRef.current = createJudgeZones()
-    boostRef.current = 0
-
-    // Always land in front of the return line so turn-back cannot re-fire on wrap-in.
-    const landZ = EIGHT_STREET.entranceLandingZ
-
-    if (handoff === 'continue') {
-      const lateralOffset = posRef.current.x - EIGHT_STREET.corner2X
-      posRef.current.set(
-        EIGHT_STREET.playerStartX + lateralOffset,
-        EIGHT_STREET.eyeHeight,
-        landZ,
-      )
-      boostRef.current = 0.85
-    } else if (handoff === 'restart') {
-      posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, landZ)
-      yawRef.current = 0
-      pitchRef.current = 0
-      boostRef.current = 0.75
-    } else {
-      posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, EIGHT_STREET.playerStartZ)
-      yawRef.current = 0
-      pitchRef.current = 0
-    }
-
-    camera.position.copy(posRef.current)
-    camera.quaternion.setFromEuler(new Euler(pitchRef.current, yawRef.current, 0, 'YXZ'))
-  }, [camera, loopKey])
 
   // Input binding
   useEffect(() => {
@@ -112,6 +85,45 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
 
   useFrame((_, dt) => {
     if (!enabled || (phase !== 'playing' && phase !== 'cleared')) return
+
+    // Apply wrap handoff before movement / judging (same frame as loopKey bump).
+    if (loopKey !== appliedLoopKeyRef.current) {
+      appliedLoopKeyRef.current = loopKey
+      const handoff = useEightStreetStore.getState().handoff
+      zonesRef.current = createJudgeZones()
+      boostRef.current = 0
+      stepTimerRef.current = 0
+      armedRoundKeyRef.current = -1
+
+      const landZ = EIGHT_STREET.entranceLandingZ
+      if (handoff === 'continue') {
+        const lateralOffset = posRef.current.x - EIGHT_STREET.corner2X
+        posRef.current.set(
+          EIGHT_STREET.playerStartX + lateralOffset,
+          EIGHT_STREET.eyeHeight,
+          landZ,
+        )
+        boostRef.current = 0.85
+      } else if (handoff === 'restart') {
+        posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, landZ)
+        yawRef.current = 0
+        pitchRef.current = 0
+        boostRef.current = 0.75
+      } else {
+        posRef.current.set(EIGHT_STREET.playerStartX, EIGHT_STREET.eyeHeight, EIGHT_STREET.playerStartZ)
+        yawRef.current = 0
+        pitchRef.current = 0
+      }
+
+      camera.position.copy(posRef.current)
+      camera.quaternion.setFromEuler(new Euler(pitchRef.current, yawRef.current, 0, 'YXZ'))
+    }
+
+    // Arm judging only after the next cast is ready for this street.
+    if (!isAdvancing && armedRoundKeyRef.current !== roundKey) {
+      armedRoundKeyRef.current = roundKey
+      zonesRef.current = createJudgeZones()
+    }
 
     const ctrl = useEightStreetControlsStore.getState()
     if (Math.abs(ctrl.lookX) > 0.01 || Math.abs(ctrl.lookY) > 0.01) {
@@ -159,6 +171,7 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     camera.quaternion.setFromEuler(new Euler(pitchRef.current, yawRef.current, 0, 'YXZ'))
 
     if (phase !== 'playing' || isAdvancing) return
+    if (armedRoundKeyRef.current !== roundKey) return
 
     zonesRef.current = updateJudgeZones(posRef.current.x, posRef.current.z, zonesRef.current)
     // While entrance boost is active, ignore turn-back so wrap-ins do not re-trigger.

@@ -37,7 +37,7 @@ export function tryResolveAnswer(
     return 'normal'
   }
 
-  // Turn-back: as soon as you walk behind the start on leg A (no observe gate).
+  // Turn-back: walk behind the start on leg A.
   if (allowAnomaly && onStartCorridor && z >= EIGHT_STREET.returnTransitionZ) {
     return 'anomaly'
   }

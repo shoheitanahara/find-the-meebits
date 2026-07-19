@@ -27,6 +27,8 @@ type EightStreetState = {
   loopKey: number
   /** Blocks double answers while the next cast is preparing. */
   isAdvancing: boolean
+  /** Bumped on each advance; stale async round builds must not unlock judging. */
+  advanceId: number
   /**
    * How the next street should hand off the player camera.
    * `spawn` = first start clear of the fog bank.
@@ -74,6 +76,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
   roundKey: 0,
   loopKey: 0,
   isAdvancing: false,
+  advanceId: 0,
   handoff: null,
   setHowToPlayOpen: (howToPlayOpen) => set({ howToPlayOpen }),
   startGame: async () => {
@@ -88,6 +91,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
       clearTimeSeconds: null,
       startedAt: Date.now(),
       isAdvancing: false,
+      advanceId: 0,
       handoff: null,
       loopKey: 0,
     })
@@ -147,11 +151,13 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
       }
 
       // Sign updates + player wraps immediately — no toast / loading UI.
+      const advanceId = state.advanceId + 1
       set({
         progress,
         normalStreak,
         anomalyStreak,
         isAdvancing: true,
+        advanceId,
         handoff,
         loopKey: state.loopKey + 1,
       })
@@ -167,24 +173,29 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
           normalStreak: latest.normalStreak,
           anomalyStreak: latest.anomalyStreak,
         })
-        set((prev) => ({
-          phase: 'playing',
-          roundNumber: nextRoundNumber,
-          currentRound,
-          roundKey: prev.roundKey + 1,
-          isAdvancing: false,
-        }))
+        set((prev) => {
+          if (prev.advanceId !== advanceId) return prev
+          return {
+            phase: 'playing' as const,
+            roundNumber: nextRoundNumber,
+            currentRound,
+            roundKey: prev.roundKey + 1,
+            isAdvancing: false,
+          }
+        })
       })()
       return
     }
 
     // Wrong: wall sign silently returns to 0th Street.
+    const advanceId = state.advanceId + 1
     set({
       progress: 0,
       mistakeCount: state.mistakeCount + 1,
       normalStreak: 0,
       anomalyStreak: 0,
       isAdvancing: true,
+      advanceId,
       handoff: 'restart',
       loopKey: state.loopKey + 1,
     })
@@ -200,13 +211,16 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
         normalStreak: 0,
         anomalyStreak: 0,
       })
-      set((prev) => ({
-        phase: 'playing',
-        roundNumber: nextRoundNumber,
-        currentRound,
-        roundKey: prev.roundKey + 1,
-        isAdvancing: false,
-      }))
+      set((prev) => {
+        if (prev.advanceId !== advanceId) return prev
+        return {
+          phase: 'playing' as const,
+          roundNumber: nextRoundNumber,
+          currentRound,
+          roundKey: prev.roundKey + 1,
+          isAdvancing: false,
+        }
+      })
     })()
   },
   playAgain: () => {
@@ -224,6 +238,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
       startedAt: null,
       clearTimeSeconds: null,
       isAdvancing: false,
+      advanceId: 0,
       handoff: null,
       loopKey: 0,
     })
