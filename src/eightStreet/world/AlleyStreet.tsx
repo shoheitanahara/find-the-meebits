@@ -219,6 +219,12 @@ export function LAlleyStreet() {
       {/* Compact rules board tucked beside the street number, eye-level. */}
       <RulesPlate position={[-halfWidth + 0.12, 2.35, -3.55]} rotationY={Math.PI / 2} />
 
+      {/* Dead-end wall at the first corner — faces players walking down Leg A (−Z). */}
+      <SignPlate
+        position={[0, 2.55, corner1Z - halfWidth + 0.12]}
+        rotationY={0}
+      />
+
       <StreetLampRow />
       <StreetDressing />
 
