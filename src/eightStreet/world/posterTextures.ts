@@ -80,31 +80,62 @@ export function drawRulesPoster(
   ctx.fillStyle = '#f5f0e6'
   ctx.fillRect(0, 0, width, height)
 
-  const padX = 40
+  const padX = 32
   const contentW = width - padX * 2
 
   ctx.fillStyle = '#1c1917'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
-  ctx.font = `700 34px ${JP_STACK}`
-  const titleLines = wrapLines(ctx, title, contentW)
-  let y = 36
-  for (const line of titleLines) {
-    ctx.fillText(line, width / 2, y)
-    y += 44
+  // Keep title on one line — shrink until it fits.
+  let titleSize = 26
+  ctx.font = `700 ${titleSize}px ${JP_STACK}`
+  while (titleSize > 17 && ctx.measureText(title).width > contentW) {
+    titleSize -= 1
+    ctx.font = `700 ${titleSize}px ${JP_STACK}`
   }
+  const topPad = 26
+  ctx.fillText(title, width / 2, topPad)
 
-  y += 18
+  let y = topPad + titleSize + 20
   ctx.textAlign = 'left'
   ctx.fillStyle = '#292524'
-  ctx.font = `600 28px ${JP_STACK}`
+  ctx.font = `600 21px ${JP_STACK}`
 
   for (const rule of rules) {
     const lines = wrapLines(ctx, rule, contentW)
     for (const line of lines) {
       ctx.fillText(line, padX, y)
-      y += 40
+      y += 30
     }
-    y += 22
+    y += 12
   }
+}
+
+/** Canvas height that fits title + rules without a large bottom gap. */
+export function rulesPosterPixelSize(title: string, rules: string[]) {
+  const width = 512
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = 64
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return { width, height: 360 }
+
+  const padX = 32
+  const contentW = width - padX * 2
+  let titleSize = 26
+  ctx.font = `700 ${titleSize}px ${JP_STACK}`
+  while (titleSize > 17 && ctx.measureText(title).width > contentW) {
+    titleSize -= 1
+    ctx.font = `700 ${titleSize}px ${JP_STACK}`
+  }
+
+  let y = 26 + titleSize + 20
+  ctx.font = `600 21px ${JP_STACK}`
+  for (const rule of rules) {
+    const lines = wrapLines(ctx, rule, contentW)
+    y += lines.length * 30 + 12
+  }
+  // Bottom padding only.
+  const height = Math.ceil(y + 22)
+  return { width, height: Math.max(280, height) }
 }

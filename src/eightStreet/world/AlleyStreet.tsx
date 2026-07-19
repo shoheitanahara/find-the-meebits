@@ -1,4 +1,4 @@
-import { DoubleSide } from 'three'
+import { DoubleSide, Quaternion, Vector3 } from 'three'
 import { EIGHT_STREET, NIGHT_MOOD } from '../config'
 import { eightStreetUi } from '../i18n'
 import { useEightStreetStore } from '../store'
@@ -6,8 +6,48 @@ import { AsphaltDeck, BrickWall, StreetDressing } from './StreetDressing'
 import {
   drawRulesPoster,
   drawStreetSign,
+  rulesPosterPixelSize,
   usePosterTexture,
 } from './posterTextures'
+
+const _rodUp = new Vector3(0, 1, 0)
+const _rodDir = new Vector3()
+const _rodQuat = new Quaternion()
+
+function LampRod({
+  from,
+  to,
+  radius = 0.03,
+  color,
+  metalness = 0.72,
+  roughness = 0.38,
+}: {
+  from: [number, number, number]
+  to: [number, number, number]
+  radius?: number
+  color: string
+  metalness?: number
+  roughness?: number
+}) {
+  const [ax, ay, az] = from
+  const [bx, by, bz] = to
+  const dx = bx - ax
+  const dy = by - ay
+  const dz = bz - az
+  const len = Math.hypot(dx, dy, dz)
+  if (len < 1e-4) return null
+
+  const mid: [number, number, number] = [(ax + bx) / 2, (ay + by) / 2, (az + bz) / 2]
+  _rodDir.set(dx, dy, dz).normalize()
+  _rodQuat.setFromUnitVectors(_rodUp, _rodDir)
+
+  return (
+    <mesh position={mid} quaternion={_rodQuat.clone()}>
+      <cylinderGeometry args={[radius, radius, len, 10]} />
+      <meshStandardMaterial color={color} metalness={metalness} roughness={roughness} />
+    </mesh>
+  )
+}
 
 function SignPlate({
   position,
@@ -55,21 +95,28 @@ function RulesPlate({
   rotationY?: number
 }) {
   const copy = eightStreetUi()
+  const { width: texW, height: texH } = rulesPosterPixelSize(copy.wallRulesTitle, copy.wallRules)
   const map = usePosterTexture(
     (ctx, w, h) => drawRulesPoster(ctx, w, h, copy.wallRulesTitle, copy.wallRules),
-    512,
-    640,
-    [copy.wallRulesTitle, ...copy.wallRules],
+    texW,
+    texH,
+    [copy.wallRulesTitle, ...copy.wallRules, texW, texH],
   )
+
+  // World size from texture aspect — compact board, little empty foot.
+  const faceW = 2.05
+  const faceH = faceW * (texH / texW)
+  const frameW = faceW + 0.12
+  const frameH = faceH + 0.12
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
       <mesh>
-        <boxGeometry args={[2.15, 2.55, 0.1]} />
+        <boxGeometry args={[frameW, frameH, 0.1]} />
         <meshStandardMaterial color="#78716c" roughness={0.9} />
       </mesh>
       <mesh position={[0, 0, 0.06]}>
-        <boxGeometry args={[2.0, 2.4, 0.03]} />
+        <boxGeometry args={[faceW, faceH, 0.03]} />
         <meshStandardMaterial
           map={map}
           color="#ffffff"
@@ -168,9 +215,9 @@ export function LAlleyStreet() {
         size={[wallDepth, wallHeight, legCEastLen]}
       />
 
-      <SignPlate position={[-halfWidth + 0.12, 2.5, -6]} rotationY={Math.PI / 2} />
-      {/* Beside the street sign, toward the entrance — keep clear of wall props. */}
-      <RulesPlate position={[-halfWidth + 0.12, 2.05, -2.35]} rotationY={Math.PI / 2} />
+      <SignPlate position={[-halfWidth + 0.12, 2.55, -6]} rotationY={Math.PI / 2} />
+      {/* Compact rules board tucked beside the street number, eye-level. */}
+      <RulesPlate position={[-halfWidth + 0.12, 2.35, -3.55]} rotationY={Math.PI / 2} />
 
       <StreetLampRow />
       <StreetDressing />
@@ -288,6 +335,23 @@ function StreetLampRow() {
   )
 }
 
+function LampJoint({
+  position,
+  radius = 0.034,
+  color,
+}: {
+  position: [number, number, number]
+  radius?: number
+  color: string
+}) {
+  return (
+    <mesh position={position}>
+      <sphereGeometry args={[radius, 10, 10]} />
+      <meshStandardMaterial color={color} metalness={0.72} roughness={0.38} />
+    </mesh>
+  )
+}
+
 function StreetLamp({
   x,
   z,
@@ -301,30 +365,89 @@ function StreetLamp({
 }) {
   const h = NIGHT_MOOD.lampHeight
   const color = NIGHT_MOOD.lampColor
+  const iron = '#2a2c30'
+  const ironDark = '#17181b'
+  const brass = '#8a7355'
+  const yaw = Math.atan2(nx, nz)
+
+  // Connected polyline in local space (+Z into street).
+  const base: [number, number, number] = [0, 0.02, 0.05]
+  const elbow: [number, number, number] = [0, h * 0.88, 0.05]
+  const bend: [number, number, number] = [0, h * 0.98, 0.34]
+  const tip: [number, number, number] = [0, h * 0.9, 0.64]
+  const hang: [number, number, number] = [0, h * 0.82, 0.64]
 
   return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, h * 0.42, 0]}>
-        <cylinderGeometry args={[0.06, 0.08, h * 0.84, 6]} />
-        <meshStandardMaterial color="#1c1917" metalness={0.45} roughness={0.55} />
+    <group position={[x, 0, z]} rotation={[0, yaw, 0]}>
+      {/* Wall plate */}
+      <mesh position={[0, elbow[1], -0.03]}>
+        <boxGeometry args={[0.3, 0.46, 0.06]} />
+        <meshStandardMaterial color={iron} metalness={0.72} roughness={0.38} />
       </mesh>
-      <mesh position={[nx * 0.35, h * 0.9, nz * 0.35]}>
-        <boxGeometry args={[0.12 + Math.abs(nx) * 0.55, 0.08, 0.12 + Math.abs(nz) * 0.55]} />
-        <meshStandardMaterial color="#292524" metalness={0.4} roughness={0.5} />
+      <mesh position={[0, elbow[1], 0.01]}>
+        <boxGeometry args={[0.16, 0.24, 0.04]} />
+        <meshStandardMaterial color={brass} metalness={0.65} roughness={0.4} />
       </mesh>
-      <mesh position={[nx * 0.55, h, nz * 0.55]}>
-        <sphereGeometry args={[0.16, 10, 10]} />
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={4}
-          roughness={0.3}
-          toneMapped={false}
-        />
-      </mesh>
-      {/* One point light per lamp — spotlights × N were the main FPS sink. */}
+
+      {/* Ground → elbow → curved arm → hang point (overlapping joints = no gaps). */}
+      <LampRod from={base} to={elbow} radius={0.038} color={iron} />
+      <LampJoint position={elbow} radius={0.042} color={iron} />
+      <LampRod from={elbow} to={bend} radius={0.03} color={iron} />
+      <LampJoint position={bend} radius={0.034} color={iron} />
+      <LampRod from={bend} to={tip} radius={0.026} color={iron} />
+      <LampJoint position={tip} radius={0.03} color={iron} />
+      <LampRod from={tip} to={hang} radius={0.02} color={brass} metalness={0.65} />
+      <LampJoint position={hang} radius={0.028} color={brass} />
+
+      {/* Diagonal brace wall → mid-arm */}
+      <LampRod
+        from={[0, elbow[1] - 0.22, 0.05]}
+        to={[0, bend[1] - 0.04, bend[2] - 0.02]}
+        radius={0.012}
+        color={brass}
+        metalness={0.6}
+        roughness={0.45}
+      />
+
+      {/* Lantern hangs from tip */}
+      <group position={hang}>
+        <mesh position={[0, -0.02, 0]}>
+          <cylinderGeometry args={[0.07, 0.1, 0.05, 8]} />
+          <meshStandardMaterial color={ironDark} metalness={0.75} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, -0.12, 0]}>
+          <cylinderGeometry args={[0.095, 0.095, 0.14, 8]} />
+          <meshStandardMaterial color={iron} metalness={0.55} roughness={0.45} />
+        </mesh>
+        <mesh position={[0, -0.26, 0]}>
+          <cylinderGeometry args={[0.09, 0.08, 0.2, 8]} />
+          <meshStandardMaterial
+            color={color}
+            emissive={color}
+            emissiveIntensity={2.4}
+            transparent
+            opacity={0.88}
+            roughness={0.25}
+            metalness={0.05}
+            toneMapped={false}
+          />
+        </mesh>
+        <mesh position={[0, -0.4, 0]}>
+          <cylinderGeometry args={[0.085, 0.06, 0.08, 8]} />
+          <meshStandardMaterial color={ironDark} metalness={0.7} roughness={0.4} />
+        </mesh>
+        <mesh position={[0, 0.04, 0]}>
+          <sphereGeometry args={[0.032, 10, 10]} />
+          <meshStandardMaterial color={brass} metalness={0.7} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 0.1, 0]}>
+          <coneGeometry args={[0.018, 0.055, 8]} />
+          <meshStandardMaterial color={brass} metalness={0.7} roughness={0.35} />
+        </mesh>
+      </group>
+
       <pointLight
-        position={[nx * 0.7, h * 0.75, nz * 0.7]}
+        position={[hang[0], hang[1] - 0.22, hang[2]]}
         intensity={NIGHT_MOOD.fillIntensity}
         distance={NIGHT_MOOD.fillDistance}
         decay={NIGHT_MOOD.lampDecay}
