@@ -109,6 +109,8 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
       if (handoff === 'continue') {
         // Always land on the alley centerline — no lateral carry from Leg C.
         posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, landZ)
+        yawRef.current = spawnYaw
+        pitchRef.current = 0
         boostRef.current = 0.85
       } else if (handoff === 'restart') {
         posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, landZ)
