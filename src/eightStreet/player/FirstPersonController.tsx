@@ -128,7 +128,7 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     const ctrl = useEightStreetControlsStore.getState()
     const look = ctrl.consumeLookDelta()
     if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
-      const sens = EIGHT_STREET.mouseLookSensitivity * 1.35
+      const sens = EIGHT_STREET.touchLookSensitivity
       yawRef.current -= look.lookDeltaX * sens
       pitchRef.current = Math.max(
         -EIGHT_STREET.pitchMaxDown,

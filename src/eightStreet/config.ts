@@ -38,6 +38,8 @@ export const EIGHT_STREET = {
   pitchMaxUp: (30 * Math.PI) / 180,
   pitchMaxDown: (35 * Math.PI) / 180,
   mouseLookSensitivity: 0.0022,
+  /** Mobile drag look — higher than mouse for finger-sized swipes. */
+  touchLookSensitivity: 0.0065,
 
   playerStartX: 0,
   playerStartZ: 4,
