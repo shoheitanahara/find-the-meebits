@@ -55,7 +55,6 @@ function randRange(min: number, max: number) {
 }
 
 function rollSessionSpawn() {
-  const maxX = EIGHT_STREET.sessionSpawnMaxX
   const landZ = randRange(EIGHT_STREET.sessionLandZMin, EIGHT_STREET.sessionLandZMax)
   // First spawn can sit a bit farther into the alley than wrap landings.
   const startZ = randRange(
@@ -63,10 +62,11 @@ function rollSessionSpawn() {
     EIGHT_STREET.sessionStartZMax,
   )
   return {
-    sessionSpawnX: randRange(-maxX, maxX),
+    // Always centered and facing down the alley — no per-session lateral / yaw jitter.
+    sessionSpawnX: EIGHT_STREET.playerStartX,
     sessionLandZ: landZ,
     sessionStartZ: startZ,
-    sessionSpawnYaw: randRange(-EIGHT_STREET.sessionSpawnYawMax, EIGHT_STREET.sessionSpawnYawMax),
+    sessionSpawnYaw: 0,
   }
 }
 

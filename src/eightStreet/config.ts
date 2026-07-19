@@ -48,15 +48,13 @@ export const EIGHT_STREET = {
   playerStartX: 0,
   playerStartZ: 4,
   /**
-   * Session spawn is re-rolled on each Start.
+   * Session spawn Z is re-rolled on each Start (X/yaw stay centered facing −Z).
    * Absolute ranges (kept clear of returnTransitionZ / walls).
    */
-  sessionSpawnMaxX: 2.1,
   sessionLandZMin: 1.35,
   sessionLandZMax: 3.4,
   sessionStartZMin: 1.8,
   sessionStartZMax: 3.6,
-  sessionSpawnYawMax: (18 * Math.PI) / 180,
 
   /**
    * Turn-back fires as soon as the player walks past this on leg A.

@@ -107,12 +107,8 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
       armedRoundKeyRef.current = -1
 
       if (handoff === 'continue') {
-        const lateralOffset = posRef.current.x - EIGHT_STREET.corner2X
-        posRef.current.set(
-          spawnX + lateralOffset,
-          EIGHT_STREET.eyeHeight,
-          landZ,
-        )
+        // Always land on the alley centerline — no lateral carry from Leg C.
+        posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, landZ)
         boostRef.current = 0.85
       } else if (handoff === 'restart') {
         posRef.current.set(spawnX, EIGHT_STREET.eyeHeight, landZ)
