@@ -13,7 +13,7 @@
  */
 export const EIGHT_STREET = {
   title: '8th Street',
-  meebitCount: 10,
+  meebitCount: 8,
   targetProgress: 8,
   halfWidth: 3.0,
 
@@ -100,7 +100,7 @@ export const NIGHT_MOOD = {
   lampPenumbra: 0.5,
   lampDecay: 1.55,
   lampHeight: 5.1,
-  /** Wider spacing keeps the light count playable with 10 VRMs. */
+  /** Wider spacing keeps the light count playable with several VRMs. */
   lampSpacing: 9.5,
   lampInset: 0.4,
   /** Mid-height fill under each lamp — main readability knob for dark Meebits. */
