@@ -126,29 +126,28 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
     const kind: RoundKind = state.currentRound.kind
 
     if (correct) {
-      const progress = Math.min(state.progress + 1, EIGHT_STREET.targetProgress)
       const normalStreak = kind === 'normal' ? state.normalStreak + 1 : 0
       const anomalyStreak = kind === 'anomaly' ? state.anomalyStreak + 1 : 0
       // Forward keeps marching through the exit fog; turn-back uses the entrance fog.
       const handoff: 'continue' | 'restart' = answer === 'normal' ? 'continue' : 'restart'
 
-      if (progress >= EIGHT_STREET.targetProgress) {
+      // Correctly resolving 8th Street ends the run (Meebits were already shown there).
+      if (state.progress >= EIGHT_STREET.targetProgress) {
         const clearTimeSeconds = state.startedAt
           ? (Date.now() - state.startedAt) / 1000
           : null
         set({
-          progress,
           normalStreak,
           anomalyStreak,
           phase: 'cleared',
           clearTimeSeconds,
           isAdvancing: false,
-          handoff: 'continue',
-          loopKey: state.loopKey + 1,
-          roundKey: state.roundKey + 1,
+          handoff: null,
         })
         return
       }
+
+      const progress = state.progress + 1
 
       // Sign updates + player wraps immediately — no toast / loading UI.
       const advanceId = state.advanceId + 1

@@ -15,6 +15,13 @@ type EightStreetCopy = {
   progressHint: string
   controlsTitle: string
   controlsLines: string[]
+  wallRulesTitle: string
+  wallRules: string[]
+  clearedEyebrow: string
+  clearedHeadline: string
+  clearedBody: string
+  clearTime: string
+  mistakes: string
 }
 
 const en: EightStreetCopy = {
@@ -25,10 +32,10 @@ const en: EightStreetCopy = {
   sound: 'Sound',
   close: 'Close',
   howToBody: [
-    'Watch the Meebits carefully.',
-    'If everything looks normal, follow the alley through the next L.',
-    'If something is different, turn back.',
-    'Trust the street signs on the wall. Reach 8th Street.',
+    '1. Remember the familiar Meebits.',
+    '2. If you see an unfamiliar Meebit, turn back immediately.',
+    '3. If all the Meebits look familiar, do not turn back.',
+    '4. Reach the house on 8th Street.',
   ],
   loading: 'Loading the alley…',
   clickToLook: 'Click to look around · Esc to release',
@@ -48,10 +55,19 @@ const en: EightStreetCopy = {
     'Stick outer — Dash (mobile)',
     'Click — Look around',
     'Esc — Release mouse',
-    'Same → keep following the L chain',
-    'Different → turn back',
-    'Watch the wall signs',
   ],
+  wallRulesTitle: 'How to Play — 8th Street',
+  wallRules: [
+    '1. Remember the familiar Meebits.',
+    '2. If you see an unfamiliar Meebit, turn back immediately.',
+    '3. If all the Meebits look familiar, do not turn back.',
+    '4. Reach the house on 8th Street.',
+  ],
+  clearedEyebrow: 'Stage Clear',
+  clearedHeadline: 'Finally made it home.',
+  clearedBody: 'You walked every street and reached the house on 8th Street.',
+  clearTime: 'Clear Time',
+  mistakes: 'Mistakes',
 }
 
 const ja: EightStreetCopy = {
@@ -62,10 +78,10 @@ const ja: EightStreetCopy = {
   sound: 'サウンド',
   close: '閉じる',
   howToBody: [
-    'すれ違うMeebitsをよく見てください。',
-    'いつもと同じなら、連続するLを進んでください。',
-    '何かが違うなら、引き返してください。',
-    '壁の看板の番号だけを頼りに、8番ストリートを目指してください。',
+    '1. いつものMeebitsをよく覚えること',
+    '2. 見慣れないMeebitを見つけたら、すぐに引き返すこと',
+    '3. いつものMeebitsしかいなければ、引き返さないこと',
+    '4. 8番ストリートの家にたどり着くこと',
   ],
   loading: '路地を準備中…',
   clickToLook: 'クリックで視点操作 · Escで解除',
@@ -79,10 +95,19 @@ const ja: EightStreetCopy = {
     'スティック外縁 — ダッシュ（スマホ）',
     'クリック — 視点',
     'Esc — 視点解除',
-    '同じ → Lを連続して進む',
-    '違う → 引き返す',
-    '判断は壁の看板だけ',
   ],
+  wallRulesTitle: '＜8番ストリートの遊び方＞',
+  wallRules: [
+    '1. いつものMeebitsをよく覚えること',
+    '2. 見慣れないMeebitを見つけたら、すぐに引き返すこと',
+    '3. いつものMeebitsしかいなければ、引き返さないこと',
+    '4. 8番ストリートの家にたどり着くこと',
+  ],
+  clearedEyebrow: 'ステージクリア',
+  clearedHeadline: 'やっと家に帰れた。',
+  clearedBody: 'すべての通りを歩き、8番ストリートの家にたどり着けた。',
+  clearTime: 'クリアタイム',
+  mistakes: '失敗',
 }
 
 export function eightStreetUi() {

@@ -10,7 +10,8 @@ import { useEightStreetStore } from './store'
 import { AlleyEnvironment, LAlleyStreet } from './world/AlleyStreet'
 import { TitleScreen } from './ui/TitleScreen'
 import { HowToPlay } from './ui/HowToPlay'
-import { ClearedRestartBar, ControlsHud, LoadingOverlay, WrapWash } from './ui/ProgressHud'
+import { EightStreetClearOverlay } from './ui/ClearOverlay'
+import { ControlsHud, LoadingOverlay, WrapWash } from './ui/ProgressHud'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -30,7 +31,7 @@ function useTabFrameloop() {
 
 function EightStreetScene() {
   const phase = useEightStreetStore((state) => state.phase)
-  const enabled = phase === 'playing' || phase === 'cleared'
+  const enabled = phase === 'playing'
 
   return (
     <>
@@ -77,7 +78,7 @@ export function EightStreetApp() {
       <LoadingOverlay />
       <WrapWash />
       <ControlsHud />
-      <ClearedRestartBar />
+      <EightStreetClearOverlay />
       {phase === 'playing' && <EightStreetMobileControls />}
     </main>
   )

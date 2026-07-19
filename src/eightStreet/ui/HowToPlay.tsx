@@ -10,18 +10,18 @@ export function HowToPlay() {
 
   return (
     <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-lg border border-white/15 bg-slate-950/95 p-6 text-white shadow-2xl">
-        <h2 className="text-lg font-bold tracking-wide">{copy.howToPlay}</h2>
-        <ul className="mt-4 space-y-3 text-left text-sm leading-relaxed text-white/80">
-          {copy.howToBody.map((line) => (
-            <li key={line} className="border-l-2 border-amber-400/60 pl-3">
+      <div className="w-full max-w-md rounded-[1.5rem] border border-white/15 bg-[#f5f0e6] p-6 text-stone-900 shadow-2xl">
+        <h2 className="text-center text-base font-bold tracking-wide">{copy.wallRulesTitle}</h2>
+        <ul className="mt-5 space-y-3 text-left">
+          {copy.wallRules.map((line) => (
+            <li key={line} className="border-l-2 border-amber-700/50 pl-3 text-sm font-semibold leading-snug">
               {line}
             </li>
           ))}
         </ul>
         <button
           type="button"
-          className="mt-6 w-full rounded-md bg-white/10 px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] hover:bg-white/15"
+          className="mt-6 w-full rounded-md bg-stone-900 px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-white hover:bg-stone-800"
           onClick={() => setHowToPlayOpen(false)}
         >
           {copy.close}

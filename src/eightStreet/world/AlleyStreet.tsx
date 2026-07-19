@@ -1,9 +1,13 @@
-import { Text } from '@react-three/drei'
 import { DoubleSide } from 'three'
 import { EIGHT_STREET, NIGHT_MOOD } from '../config'
 import { eightStreetUi } from '../i18n'
 import { useEightStreetStore } from '../store'
 import { AsphaltDeck, BrickWall, StreetDressing } from './StreetDressing'
+import {
+  drawRulesPoster,
+  drawStreetSign,
+  usePosterTexture,
+} from './posterTextures'
 
 function SignPlate({
   position,
@@ -14,6 +18,12 @@ function SignPlate({
 }) {
   const progress = useEightStreetStore((s) => s.progress)
   const label = eightStreetUi().streetLabel(progress)
+  const map = usePosterTexture(
+    (ctx, w, h) => drawStreetSign(ctx, w, h, label),
+    512,
+    220,
+    [label],
+  )
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
@@ -24,18 +34,51 @@ function SignPlate({
       <mesh position={[0, 0, 0.08]}>
         <boxGeometry args={[2.2, 0.88, 0.04]} />
         <meshStandardMaterial
-          color="#f8fafc"
+          map={map}
+          color="#ffffff"
           roughness={0.55}
-          emissive="#f8fafc"
-          emissiveIntensity={0.35}
+          emissiveMap={map}
+          emissive="#ffffff"
+          emissiveIntensity={0.28}
         />
       </mesh>
-      <Text position={[0, 0.05, 0.11]} fontSize={0.28} color="#0f172a" anchorX="center" anchorY="middle" maxWidth={2} textAlign="center">
-        {label}
-      </Text>
-      <Text position={[0, -0.28, 0.11]} fontSize={0.1} color="#64748b" anchorX="center" anchorY="middle" letterSpacing={0.08}>
-        MEEBITS ALLEY
-      </Text>
+    </group>
+  )
+}
+
+/** Rules poster beside the street-number sign (locale-switched copy). */
+function RulesPlate({
+  position,
+  rotationY = 0,
+}: {
+  position: [number, number, number]
+  rotationY?: number
+}) {
+  const copy = eightStreetUi()
+  const map = usePosterTexture(
+    (ctx, w, h) => drawRulesPoster(ctx, w, h, copy.wallRulesTitle, copy.wallRules),
+    512,
+    640,
+    [copy.wallRulesTitle, ...copy.wallRules],
+  )
+
+  return (
+    <group position={position} rotation={[0, rotationY, 0]}>
+      <mesh>
+        <boxGeometry args={[2.15, 2.55, 0.1]} />
+        <meshStandardMaterial color="#78716c" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0, 0.06]}>
+        <boxGeometry args={[2.0, 2.4, 0.03]} />
+        <meshStandardMaterial
+          map={map}
+          color="#ffffff"
+          roughness={0.72}
+          emissiveMap={map}
+          emissive="#ffffff"
+          emissiveIntensity={0.1}
+        />
+      </mesh>
     </group>
   )
 }
@@ -126,6 +169,8 @@ export function LAlleyStreet() {
       />
 
       <SignPlate position={[-halfWidth + 0.12, 2.5, -6]} rotationY={Math.PI / 2} />
+      {/* Beside the street sign, toward the entrance — keep clear of wall props. */}
+      <RulesPlate position={[-halfWidth + 0.12, 2.05, -2.35]} rotationY={Math.PI / 2} />
 
       <StreetLampRow />
       <StreetDressing />
@@ -142,7 +187,7 @@ export function LAlleyStreet() {
       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
         <mesh
           key={`w${i}`}
-          position={[-halfWidth - 0.06, 2.6 + (i % 3) * 1.5, -1 - i * 3.6]}
+          position={[-halfWidth - 0.06, 2.6 + (i % 3) * 1.5, -10 - i * 3.6]}
         >
           <boxGeometry args={[0.1, 1.1, 1.2]} />
           <meshStandardMaterial
@@ -165,8 +210,6 @@ export function LAlleyStreet() {
           />
         </mesh>
       ))}
-
-      <DestinationHouse />
     </group>
   )
 }
@@ -349,34 +392,6 @@ function TransitionVeil({
           depthWrite={false}
         />
       </mesh>
-    </group>
-  )
-}
-
-function DestinationHouse() {
-  const phase = useEightStreetStore((s) => s.phase)
-  if (phase !== 'cleared') return null
-  const x = EIGHT_STREET.corner2X
-  const z = EIGHT_STREET.exitZ - 8
-
-  return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, 1.4, 0]} castShadow>
-        <boxGeometry args={[3.2, 2.8, 3.2]} />
-        <meshStandardMaterial color="#6b5240" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 3.1, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
-        <coneGeometry args={[2.6, 1.4, 4]} />
-        <meshStandardMaterial color="#4a1c10" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 1.1, 1.62]}>
-        <boxGeometry args={[0.9, 1.8, 0.12]} />
-        <meshStandardMaterial color="#0f172a" />
-      </mesh>
-      <pointLight position={[0, 2.2, 2.2]} intensity={2.2} distance={9} color="#ffb066" />
-      <Text position={[0, 2.5, 1.7]} fontSize={0.22} color="#f8fafc" anchorX="center">
-        8
-      </Text>
     </group>
   )
 }

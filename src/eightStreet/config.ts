@@ -79,17 +79,18 @@ export const NIGHT_MOOD = {
 
   /** Warm street lamps (one pointLight each — spotlights were too costly). */
   lampColor: '#ffc078',
-  lampIntensity: 55,
-  lampDistance: 16,
+  lampIntensity: 62,
+  lampDistance: 17,
   lampAngle: 0.82,
   lampPenumbra: 0.5,
-  lampDecay: 1.6,
+  lampDecay: 1.55,
   lampHeight: 5.1,
   /** Wider spacing keeps the light count playable with 10 VRMs. */
   lampSpacing: 9.5,
   lampInset: 0.4,
-  fillIntensity: 7.5,
-  fillDistance: 13,
+  /** Mid-height fill under each lamp — main readability knob for dark Meebits. */
+  fillIntensity: 16,
+  fillDistance: 15,
 
   /** Foot-level neon — mostly emissive; only a few real lights. */
   neonColors: ['#38bdf8', '#f472b6', '#a3e635', '#fbbf24'] as const,

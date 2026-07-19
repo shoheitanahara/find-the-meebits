@@ -372,9 +372,10 @@ export function StreetDressing() {
       <TrashBag position={[left + 0.25, 0.14, 0.55]} scale={0.6} color="#374151" />
       <Crate position={[right, 0.22, -2.2]} rotationY={0.3} />
       <Crate position={[left, 0.22, -15]} rotationY={-0.25} color="#7a5230" />
-      <ACUnit position={[-hw + 0.05, 3.2, -4]} />
-      <ACUnit position={[-hw + 0.05, 4.8, -12]} />
-      <PipeRun position={[-hw + 0.08, 5.6, -8]} length={10} axis="z" />
+      {/* Keep wall clutter off the street-sign / rules posters near z≈-6…-2. */}
+      <ACUnit position={[-hw + 0.05, 3.2, -14]} />
+      <ACUnit position={[-hw + 0.05, 4.8, -20]} />
+      <PipeRun position={[-hw + 0.08, 5.6, -18]} length={10} axis="z" />
 
       <Crate position={[10.5, 0.22, corner1Z - hw + 0.65]} rotationY={0.4} />
       <ACUnit position={[11, 3.4, corner1Z + hw - 0.2]} />
