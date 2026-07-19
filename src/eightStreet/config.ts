@@ -13,7 +13,7 @@
  */
 export const EIGHT_STREET = {
   title: '8th Street',
-  meebitCount: 8,
+  meebitCount: 10,
   targetProgress: 8,
   halfWidth: 3.0,
 
