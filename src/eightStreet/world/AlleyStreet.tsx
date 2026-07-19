@@ -226,9 +226,12 @@ export function LAlleyStreet() {
         position={[0, 0, EIGHT_STREET.returnTransitionZ + 1.2]}
         length={10}
       />
+      {/* Same switch line as before (−33); dense fog stretches deeper into the exit. */}
       <TransitionVeil
         position={[corner2X, 0, EIGHT_STREET.forwardTransitionZ - 1.5]}
-        length={12}
+        length={20}
+        deepen={7}
+        layers={9}
       />
     </group>
   )
@@ -437,37 +440,41 @@ function StreetLamp({
 function TransitionVeil({
   position,
   length = 10,
+  /** Shift fog volume toward local −Z (deeper into the exit corridor). */
+  deepen = 0,
+  layers = 7,
 }: {
   position: [number, number, number]
   length?: number
+  deepen?: number
+  layers?: number
 }) {
   const width = EIGHT_STREET.halfWidth * 2 - 0.15
   const height = 7.2
-  const layers = 7
   const color = NIGHT_MOOD.veilColor
   const peak = NIGHT_MOOD.veilPeakOpacity
 
   return (
     <group position={position}>
       <pointLight
-        position={[0, 2.6, 0]}
+        position={[0, 2.6, -deepen * 0.35]}
         intensity={NIGHT_MOOD.veilLightIntensity}
-        distance={NIGHT_MOOD.veilLightDistance}
+        distance={NIGHT_MOOD.veilLightDistance + deepen * 0.4}
         decay={2}
         color={color}
       />
 
       {Array.from({ length: layers }, (_, i) => {
         const t = i / (layers - 1)
-        const z = (t - 0.35) * length
-        const opacity = peak * 0.35 + Math.sin(t * Math.PI) * peak * 0.65
+        const z = (t - 0.35) * length - deepen
+        const opacity = peak * 0.4 + Math.sin(t * Math.PI) * peak * 0.7
         return (
           <mesh key={`veil-${i}`} position={[0, height * 0.48, z]} renderOrder={20}>
             <planeGeometry args={[width, height]} />
             <meshBasicMaterial
               color={color}
               transparent
-              opacity={opacity}
+              opacity={Math.min(1, opacity)}
               depthWrite={false}
               side={DoubleSide}
             />
@@ -475,16 +482,16 @@ function TransitionVeil({
         )
       })}
 
-      <mesh position={[0, height * 0.48, length * 0.05]} renderOrder={19}>
-        <boxGeometry args={[width * 0.98, height * 0.95, length * 0.55]} />
+      <mesh position={[0, height * 0.48, length * 0.05 - deepen * 0.55]} renderOrder={19}>
+        <boxGeometry args={[width * 0.98, height * 0.95, length * 0.7 + deepen * 0.35]} />
         <meshBasicMaterial color={color} transparent opacity={NIGHT_MOOD.veilVolumeOpacity} depthWrite={false} />
       </mesh>
-      <mesh position={[0, height * 0.48, -length * 0.12]} renderOrder={19}>
-        <boxGeometry args={[width * 0.98, height * 0.9, length * 0.35]} />
+      <mesh position={[0, height * 0.48, -length * 0.2 - deepen * 0.85]} renderOrder={19}>
+        <boxGeometry args={[width * 0.98, height * 0.9, length * 0.45 + deepen * 0.55]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={NIGHT_MOOD.veilVolumeOpacity * 0.7}
+          opacity={NIGHT_MOOD.veilVolumeOpacity * 0.85}
           depthWrite={false}
         />
       </mesh>

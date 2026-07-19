@@ -23,9 +23,9 @@ type EightStreetState = {
   startedAt: number | null
   clearTimeSeconds: number | null
   roundKey: number
-  /** Increments immediately on a resolved turn — wraps the player into the next street. */
+  /** Increments after wash fades in — teleports player into the next street. */
   loopKey: number
-  /** Blocks double answers while the next cast is preparing. */
+  /** True while the white wash is up (fade + teleport + cast swap). */
   isAdvancing: boolean
   /** Bumped on each advance; stale async round builds must not unlock judging. */
   advanceId: number
@@ -86,6 +86,82 @@ async function buildNextRound(state: {
     normalStreak: state.normalStreak,
     anomalyStreak: state.anomalyStreak,
   })
+}
+
+/**
+ * Fade screen to white, then teleport, then reveal once the next cast is ready.
+ * Avoids a hard cut at the fog line.
+ */
+function runStreetWrap(
+  get: () => EightStreetState,
+  set: (
+    partial:
+      | Partial<EightStreetState>
+      | ((state: EightStreetState) => Partial<EightStreetState>),
+  ) => void,
+  options: {
+    handoff: 'continue' | 'restart'
+    progress: number
+    normalStreak: number
+    anomalyStreak: number
+    mistakeCount?: number
+    streetProgressForRound: number
+  },
+) {
+  const state = get()
+  const advanceId = state.advanceId + 1
+  const startedAt = performance.now()
+
+  set({
+    progress: options.progress,
+    mistakeCount: options.mistakeCount ?? state.mistakeCount,
+    normalStreak: options.normalStreak,
+    anomalyStreak: options.anomalyStreak,
+    isAdvancing: true,
+    advanceId,
+    handoff: options.handoff,
+  })
+
+  // Teleport only after the wash has bloomed opaque.
+  window.setTimeout(() => {
+    if (get().advanceId !== advanceId) return
+    set({ loopKey: get().loopKey + 1 })
+  }, EIGHT_STREET.wrapFadeInMs)
+
+  void (async () => {
+    const latest = get()
+    const nextRoundNumber = latest.roundNumber + 1
+    const currentRound = await buildNextRound({
+      roundNumber: nextRoundNumber,
+      streetProgress: options.streetProgressForRound,
+      baseMeebitIds: latest.baseMeebitIds,
+      walkerPattern: latest.walkerPattern,
+      normalStreak: options.normalStreak,
+      anomalyStreak: options.anomalyStreak,
+    })
+    if (get().advanceId !== advanceId) return
+
+    const elapsed = performance.now() - startedAt
+    // Stay fully white until fade-in + teleport settle, and at least wrapMinWhiteMs.
+    const minHold = Math.max(
+      EIGHT_STREET.wrapMinWhiteMs,
+      EIGHT_STREET.wrapFadeInMs + 160,
+    )
+    const remaining = Math.max(0, minHold - elapsed)
+
+    window.setTimeout(() => {
+      set((prev) => {
+        if (prev.advanceId !== advanceId) return prev
+        return {
+          phase: 'playing' as const,
+          roundNumber: nextRoundNumber,
+          currentRound,
+          roundKey: prev.roundKey + 1,
+          isAdvancing: false,
+        }
+      })
+    }, remaining)
+  })()
 }
 
 export const useEightStreetStore = create<EightStreetState>((set, get) => ({
@@ -183,78 +259,25 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
 
       const progress = state.progress + 1
 
-      // Sign updates + player wraps immediately — no toast / loading UI.
-      const advanceId = state.advanceId + 1
-      set({
+      runStreetWrap(get, set, {
+        handoff,
         progress,
         normalStreak,
         anomalyStreak,
-        isAdvancing: true,
-        advanceId,
-        handoff,
-        loopKey: state.loopKey + 1,
+        streetProgressForRound: progress,
       })
-
-      void (async () => {
-        const latest = get()
-        const nextRoundNumber = latest.roundNumber + 1
-        const currentRound = await buildNextRound({
-          roundNumber: nextRoundNumber,
-          streetProgress: latest.progress,
-          baseMeebitIds: latest.baseMeebitIds,
-          walkerPattern: latest.walkerPattern,
-          normalStreak: latest.normalStreak,
-          anomalyStreak: latest.anomalyStreak,
-        })
-        set((prev) => {
-          if (prev.advanceId !== advanceId) return prev
-          return {
-            phase: 'playing' as const,
-            roundNumber: nextRoundNumber,
-            currentRound,
-            roundKey: prev.roundKey + 1,
-            isAdvancing: false,
-          }
-        })
-      })()
       return
     }
 
     // Wrong: wall sign silently returns to 0th Street.
-    const advanceId = state.advanceId + 1
-    set({
+    runStreetWrap(get, set, {
+      handoff: 'restart',
       progress: 0,
       mistakeCount: state.mistakeCount + 1,
       normalStreak: 0,
       anomalyStreak: 0,
-      isAdvancing: true,
-      advanceId,
-      handoff: 'restart',
-      loopKey: state.loopKey + 1,
+      streetProgressForRound: 0,
     })
-
-    void (async () => {
-      const latest = get()
-      const nextRoundNumber = latest.roundNumber + 1
-      const currentRound = await buildNextRound({
-        roundNumber: nextRoundNumber,
-        streetProgress: 0,
-        baseMeebitIds: latest.baseMeebitIds,
-        walkerPattern: latest.walkerPattern,
-        normalStreak: 0,
-        anomalyStreak: 0,
-      })
-      set((prev) => {
-        if (prev.advanceId !== advanceId) return prev
-        return {
-          phase: 'playing' as const,
-          roundNumber: nextRoundNumber,
-          currentRound,
-          roundKey: prev.roundKey + 1,
-          isAdvancing: false,
-        }
-      })
-    })()
   },
   playAgain: () => {
     set({

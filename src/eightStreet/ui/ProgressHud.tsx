@@ -1,3 +1,4 @@
+import { EIGHT_STREET } from '../config'
 import { eightStreetUi } from '../i18n'
 import { useEightStreetStore } from '../store'
 
@@ -29,7 +30,7 @@ export function ControlsHud() {
   )
 }
 
-/** Soft white wash while wrapping — hides cast swaps inside the fog bank. */
+/** Soft full-screen white wash while wrapping — bloom in, hold, then ease out. */
 export function WrapWash() {
   const isAdvancing = useEightStreetStore((state) => state.isAdvancing)
   const phase = useEightStreetStore((state) => state.phase)
@@ -38,9 +39,16 @@ export function WrapWash() {
   return (
     <div
       aria-hidden
-      className={`pointer-events-none absolute inset-0 z-20 bg-white transition-opacity duration-300 ${
-        isAdvancing ? 'opacity-85' : 'opacity-0'
-      }`}
+      className="pointer-events-none absolute inset-0 z-40"
+      style={{
+        opacity: isAdvancing ? 1 : 0,
+        // Ease-out in: hits near-opaque early so the corridor can’t read through.
+        transition: isAdvancing
+          ? `opacity ${EIGHT_STREET.wrapFadeInMs}ms cubic-bezier(0.12, 0.7, 0.2, 1)`
+          : `opacity ${EIGHT_STREET.wrapFadeOutMs}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        background:
+          'radial-gradient(ellipse at 50% 45%, #ffffff 0%, #ffffff 55%, #f7f7f7 100%)',
+      }}
     />
   )
 }

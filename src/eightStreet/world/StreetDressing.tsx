@@ -518,10 +518,11 @@ function nearLamp(x: number, z: number, lamps: Array<{ x: number; z: number }>, 
 function nearTransition(x: number, z: number) {
   const hw = EIGHT_STREET.halfWidth
   const returnCenterZ = EIGHT_STREET.returnTransitionZ + 1.2
-  const forwardCenterZ = EIGHT_STREET.forwardTransitionZ - 1.5
-  // Match TransitionVeil length (10 / 12) with a little padding.
+  // Forward veil sits at −33−1.5 and stretches deep into the exit.
+  const forwardCenterZ = EIGHT_STREET.forwardTransitionZ - 1.5 - 3.5
+  // Match TransitionVeil length (10 / ~20) with a little padding.
   const returnPad = 5.8
-  const forwardPad = 6.8
+  const forwardPad = 11
 
   if (Math.abs(x) <= hw + 0.4 && Math.abs(z - returnCenterZ) < returnPad) return true
   if (

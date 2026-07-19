@@ -29,7 +29,9 @@ export const EIGHT_STREET = {
 
   // Leg C: x=corner2X, z goes from corner1Z down to exitZ
   exitZ: -52,
-  /** Switch to the next street shortly after the final left turn. */
+  /**
+   * Continue fires after the final left turn.
+   */
   forwardTransitionZ: -33,
 
   eyeHeight: 1.65,
@@ -70,6 +72,11 @@ export const EIGHT_STREET = {
   walkerDespawnZ: 10,
   normalRoundChance: 0.55,
   maxSameKindStreak: 3,
+
+  /** Full-screen white wash between streets (ms). */
+  wrapFadeInMs: 560,
+  wrapMinWhiteMs: 900,
+  wrapFadeOutMs: 560,
 } as const
 
 /**
@@ -107,10 +114,10 @@ export const NIGHT_MOOD = {
 
   /** Cold white at transition veils only */
   veilColor: '#ffffff',
-  veilLightIntensity: 5.5,
-  veilLightDistance: 15,
-  veilPeakOpacity: 0.82,
-  veilVolumeOpacity: 0.42,
+  veilLightIntensity: 5.8,
+  veilLightDistance: 16,
+  veilPeakOpacity: 0.88,
+  veilVolumeOpacity: 0.5,
 } as const
 
 export type AlleyPoint = { x: number; z: number }
