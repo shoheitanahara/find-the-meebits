@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Euler, Vector3 } from 'three'
+import { playSfx } from '../../ui/sfx'
 import { clampToAlley, EIGHT_STREET } from '../config'
 import { useEightStreetControlsStore } from '../controlsStore'
 import {
@@ -16,6 +17,11 @@ const MOVE_KEYS = new Set([
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
 ])
 
+/** Same cadence as Find the Meebits (`FootstepAudioSystem`). */
+const DASH_FOOTSTEP_INTERVAL_SEC = 0.25
+/** Slightly slower than dash when walking. */
+const WALK_FOOTSTEP_INTERVAL_SEC = 0.34
+
 export function FirstPersonController({ enabled }: { enabled: boolean }) {
   const { camera, gl } = useThree()
   const yawRef = useRef(0)
@@ -26,6 +32,7 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
   const zonesRef = useRef<JudgeZones>(createJudgeZones())
   const lockedRef = useRef(false)
   const boostRef = useRef(0)
+  const stepTimerRef = useRef(0)
 
   const submitAnswer = useEightStreetStore((s) => s.submitAnswer)
   const phase = useEightStreetStore((s) => s.phase)
@@ -126,12 +133,27 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     if (len > 1) { mx /= len; mz /= len }
 
     const yaw = yawRef.current
-    const speed = (shiftRef.current || ctrl.sprint) ? EIGHT_STREET.dashSpeed : EIGHT_STREET.moveSpeed
+    const sprinting = shiftRef.current || ctrl.sprint
+    const speed = sprinting ? EIGHT_STREET.dashSpeed : EIGHT_STREET.moveSpeed
     const dx = (-Math.sin(yaw) * mz + Math.cos(yaw) * mx) * speed * dt
     const dz = (-Math.cos(yaw) * mz - Math.sin(yaw) * mx) * speed * dt
 
+    const prevX = posRef.current.x
+    const prevZ = posRef.current.z
     const clamped = clampToAlley(posRef.current.x + dx, posRef.current.z + dz)
     posRef.current.set(clamped.x, EIGHT_STREET.eyeHeight, clamped.z)
+
+    const moved = Math.hypot(clamped.x - prevX, clamped.z - prevZ) > 1e-4
+    if (!moved || isAdvancing) {
+      stepTimerRef.current = 0
+    } else {
+      const interval = sprinting ? DASH_FOOTSTEP_INTERVAL_SEC : WALK_FOOTSTEP_INTERVAL_SEC
+      stepTimerRef.current += dt
+      if (stepTimerRef.current >= interval) {
+        stepTimerRef.current -= interval
+        playSfx('footstep')
+      }
+    }
 
     camera.position.copy(posRef.current)
     camera.quaternion.setFromEuler(new Euler(pitchRef.current, yawRef.current, 0, 'YXZ'))

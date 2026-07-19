@@ -1,6 +1,7 @@
-import { useEightStreetStore } from '../store'
-import { eightStreetUi } from '../i18n'
 import { LanguageSwitcher } from '../../ui/LanguageSwitcher'
+import { unlockAudioIfNeeded } from '../../ui/sfx'
+import { eightStreetUi } from '../i18n'
+import { useEightStreetStore } from '../store'
 
 export function TitleScreen() {
   const phase = useEightStreetStore((state) => state.phase)
@@ -25,6 +26,7 @@ export function TitleScreen() {
           type="button"
           className="rounded-md bg-amber-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:bg-amber-400"
           onClick={() => {
+            void unlockAudioIfNeeded()
             void startGame()
           }}
         >
