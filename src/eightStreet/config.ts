@@ -24,7 +24,8 @@ export const EIGHT_STREET = {
   corner1Z: -26,
 
   // Leg B: z=corner1Z, x goes from 0 to corner2X
-  corner2X: 24,
+  // Long enough that the walker pack can start off-screen before the first corner.
+  corner2X: 28,
 
   // Leg C: x=corner2X, z goes from corner1Z down to exitZ
   exitZ: -52,

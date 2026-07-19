@@ -18,13 +18,18 @@ const SLOT_LANES = [-0.92, 0.88, -0.55, 0.42, -0.18, 0.72, -0.78, 0.12, 0.58, -0
 const SLOT_SPEEDS = [1.12, 1.18, 1.08, 1.22, 1.15, 1.2, 1.1, 1.16, 1.14, 1.19] as const
 /** Gap between walkers along the approach (meters of path). */
 const PATH_SPACING = 2.4
+/**
+ * How far the lead Meebit starts before the bend.
+ * Large enough that the first body climbs into view from off-screen on Leg B.
+ */
+const LEAD_START_BACK = 4.5
 
 /**
- * Lead (nearest the bend) sits just before the corner.
- * Wider PATH_SPACING pushes the last walker further down Leg B.
+ * Path length from deep Leg B to the bend.
+ * Lead sits LEAD_START_BACK before the corner; the pack stacks behind them.
  */
 const CORNER_APPROACH =
-  PATH_SPACING * (EIGHT_STREET.meebitCount - 1) + 1.5
+  PATH_SPACING * (EIGHT_STREET.meebitCount - 1) + LEAD_START_BACK
 
 function shuffleCopy<T>(source: readonly T[]): T[] {
   const next = [...source]
