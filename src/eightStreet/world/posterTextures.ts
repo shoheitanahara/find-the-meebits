@@ -47,27 +47,113 @@ export function usePosterTexture(
   return texture
 }
 
-const JP_STACK =
+const JP_SANS =
   '"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif'
+
+/** Enamel street plaques — serif / mincho reads more period than UI gothic. */
+const EN_SIGN =
+  'Georgia, "Palatino Linotype", Palatino, "Times New Roman", Times, serif'
+const JP_SIGN =
+  '"Hiragino Mincho ProN", "Hiragino Mincho", "Yu Mincho", "Noto Serif JP", "Hiragino Mincho Pro", serif'
 
 export function drawStreetSign(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   label: string,
+  locale: 'en' | 'ja' = 'en',
 ) {
-  ctx.fillStyle = '#f8fafc'
+  const face = '#ebe4d4'
+  const faceEdge = '#d9cfc0'
+  const ink = '#1a2744'
+  const brass = '#9a7b4f'
+  const muted = '#6b5a3e'
+  const display = locale === 'ja' ? JP_SIGN : EN_SIGN
+
+  // Aged enamel face
+  const grad = ctx.createLinearGradient(0, 0, 0, height)
+  grad.addColorStop(0, '#f3eee4')
+  grad.addColorStop(0.45, face)
+  grad.addColorStop(1, faceEdge)
+  ctx.fillStyle = grad
   ctx.fillRect(0, 0, width, height)
 
-  ctx.fillStyle = '#0f172a'
+  // Soft vignette
+  const vig = ctx.createRadialGradient(
+    width * 0.5,
+    height * 0.45,
+    height * 0.15,
+    width * 0.5,
+    height * 0.5,
+    width * 0.72,
+  )
+  vig.addColorStop(0, 'rgba(0,0,0,0)')
+  vig.addColorStop(1, 'rgba(40,28,16,0.1)')
+  ctx.fillStyle = vig
+  ctx.fillRect(0, 0, width, height)
+
+  // Double navy border (classic enamel)
+  const inset = 14
+  ctx.strokeStyle = ink
+  ctx.lineWidth = 10
+  ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2)
+  ctx.lineWidth = 3
+  ctx.strokeRect(inset + 14, inset + 14, width - (inset + 14) * 2, height - (inset + 14) * 2)
+
+  // Corner rivets
+  const rivetR = 7
+  const rivets: Array<[number, number]> = [
+    [28, 28],
+    [width - 28, 28],
+    [28, height - 28],
+    [width - 28, height - 28],
+  ]
+  for (const [rx, ry] of rivets) {
+    ctx.beginPath()
+    ctx.fillStyle = brass
+    ctx.arc(rx, ry, rivetR, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.beginPath()
+    ctx.fillStyle = '#c4a46a'
+    ctx.arc(rx - 1.5, ry - 1.5, rivetR * 0.45, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  // Street name — fit width inside the inner border
+  const maxTextW = width - 88
+  let size = locale === 'ja' ? 58 : 62
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `700 64px ${JP_STACK}`
-  ctx.fillText(label, width / 2, height * 0.42)
+  ctx.fillStyle = ink
+  ctx.font = `700 ${size}px ${display}`
+  while (size > 34 && ctx.measureText(label).width > maxTextW) {
+    size -= 1
+    ctx.font = `700 ${size}px ${display}`
+  }
+  // Slight letterpress shadow
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'
+  ctx.fillText(label, width / 2, height * 0.44 - 1)
+  ctx.fillStyle = ink
+  ctx.fillText(label, width / 2, height * 0.44)
 
-  ctx.fillStyle = '#64748b'
-  ctx.font = '600 28px system-ui, sans-serif'
-  ctx.fillText('MEEBITS ALLEY', width / 2, height * 0.72)
+  // Thin brass rule
+  const ruleY = height * 0.62
+  const ruleW = Math.min(width * 0.42, 180)
+  ctx.strokeStyle = brass
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(width / 2 - ruleW / 2, ruleY)
+  ctx.lineTo(width / 2 + ruleW / 2, ruleY)
+  ctx.stroke()
+
+  ctx.fillStyle = muted
+  ctx.font =
+    locale === 'ja'
+      ? `600 22px ${JP_SANS}`
+      : `600 22px "Avenir Next Condensed", "Helvetica Neue", ${EN_SIGN}`
+  ctx.letterSpacing = locale === 'ja' ? '0px' : '0.22em'
+  ctx.fillText(locale === 'ja' ? 'ミービッツ横丁' : 'MEEBITS ALLEY', width / 2, height * 0.76)
+  ctx.letterSpacing = '0px'
 }
 
 export function drawRulesPoster(
@@ -88,10 +174,10 @@ export function drawRulesPoster(
   ctx.textBaseline = 'top'
   // Keep title on one line — shrink until it fits.
   let titleSize = 26
-  ctx.font = `700 ${titleSize}px ${JP_STACK}`
+  ctx.font = `700 ${titleSize}px ${JP_SANS}`
   while (titleSize > 17 && ctx.measureText(title).width > contentW) {
     titleSize -= 1
-    ctx.font = `700 ${titleSize}px ${JP_STACK}`
+    ctx.font = `700 ${titleSize}px ${JP_SANS}`
   }
   const topPad = 26
   ctx.fillText(title, width / 2, topPad)
@@ -99,7 +185,7 @@ export function drawRulesPoster(
   let y = topPad + titleSize + 20
   ctx.textAlign = 'left'
   ctx.fillStyle = '#292524'
-  ctx.font = `600 21px ${JP_STACK}`
+  ctx.font = `600 21px ${JP_SANS}`
 
   for (const rule of rules) {
     const lines = wrapLines(ctx, rule, contentW)
@@ -123,14 +209,14 @@ export function rulesPosterPixelSize(title: string, rules: string[]) {
   const padX = 32
   const contentW = width - padX * 2
   let titleSize = 26
-  ctx.font = `700 ${titleSize}px ${JP_STACK}`
+  ctx.font = `700 ${titleSize}px ${JP_SANS}`
   while (titleSize > 17 && ctx.measureText(title).width > contentW) {
     titleSize -= 1
-    ctx.font = `700 ${titleSize}px ${JP_STACK}`
+    ctx.font = `700 ${titleSize}px ${JP_SANS}`
   }
 
   let y = 26 + titleSize + 20
-  ctx.font = `600 21px ${JP_STACK}`
+  ctx.font = `600 21px ${JP_SANS}`
   for (const rule of rules) {
     const lines = wrapLines(ctx, rule, contentW)
     y += lines.length * 30 + 12

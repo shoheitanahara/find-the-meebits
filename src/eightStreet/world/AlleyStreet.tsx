@@ -1,4 +1,5 @@
 import { DoubleSide, Quaternion, Vector3 } from 'three'
+import { getLocale } from '../../i18n/locale'
 import { EIGHT_STREET, NIGHT_MOOD } from '../config'
 import { eightStreetUi } from '../i18n'
 import { useEightStreetStore } from '../store'
@@ -57,29 +58,36 @@ function SignPlate({
   rotationY?: number
 }) {
   const progress = useEightStreetStore((s) => s.progress)
+  const locale = getLocale()
   const label = eightStreetUi().streetLabel(progress)
   const map = usePosterTexture(
-    (ctx, w, h) => drawStreetSign(ctx, w, h, label),
-    512,
-    220,
-    [label],
+    (ctx, w, h) => drawStreetSign(ctx, w, h, label, locale),
+    640,
+    280,
+    [label, locale],
   )
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
+      {/* Weathered iron tray */}
       <mesh>
-        <boxGeometry args={[2.4, 1.05, 0.14]} />
-        <meshStandardMaterial color="#0b1220" roughness={0.85} />
+        <boxGeometry args={[2.55, 1.15, 0.12]} />
+        <meshStandardMaterial color="#2a241c" roughness={0.88} metalness={0.18} />
+      </mesh>
+      {/* Thin brass rim */}
+      <mesh position={[0, 0, 0.055]}>
+        <boxGeometry args={[2.48, 1.08, 0.03]} />
+        <meshStandardMaterial color="#8a7355" roughness={0.45} metalness={0.55} />
       </mesh>
       <mesh position={[0, 0, 0.08]}>
-        <boxGeometry args={[2.2, 0.88, 0.04]} />
+        <boxGeometry args={[2.32, 0.94, 0.04]} />
         <meshStandardMaterial
           map={map}
           color="#ffffff"
-          roughness={0.55}
+          roughness={0.62}
           emissiveMap={map}
           emissive="#ffffff"
-          emissiveIntensity={0.28}
+          emissiveIntensity={0.12}
         />
       </mesh>
     </group>
