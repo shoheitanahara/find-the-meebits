@@ -11,7 +11,7 @@ function formatClearTime(seconds: number | null) {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-/** Result card — same family as Find the Meebits ClearOverlay. */
+/** Clear screen — title-screen restraint, light/white so “clear” reads instantly. */
 export function EightStreetClearOverlay() {
   const phase = useEightStreetStore((state) => state.phase)
   const clearTimeSeconds = useEightStreetStore((state) => state.clearTimeSeconds)
@@ -50,39 +50,46 @@ export function EightStreetClearOverlay() {
   if (!isVisible) return null
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 overflow-y-auto bg-neutral-950/75 p-4 backdrop-blur-sm max-lg:py-[max(1rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6">
-      <section className="mx-auto w-full max-w-lg rounded-[2rem] border border-white/15 bg-white p-6 text-neutral-950 shadow-2xl max-lg:my-auto sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">
-          {copy.clearedEyebrow}
-        </p>
-        <h2 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl font-black tracking-tight sm:text-4xl">
-          {copy.clearedHeadline}
-        </h2>
-        <p className="mt-4 text-sm leading-relaxed text-neutral-600">{copy.clearedBody}</p>
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_8%,#ffffff_0%,#f4f6f8_48%,#e8ecf1_100%)] px-6 text-center text-slate-900">
+      <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-700/80">
+        {copy.clearedEyebrow}
+      </p>
+      <h1 className="max-w-lg font-[family-name:Georgia,Times_New_Roman,serif] text-4xl tracking-tight text-slate-950 sm:text-5xl">
+        {copy.clearedHeadline}
+      </h1>
+      <p className="mt-4 max-w-sm text-base leading-relaxed text-slate-500">
+        {copy.clearedBody}
+      </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">
-              {copy.clearTime}
-            </p>
-            <p className="mt-1 text-2xl font-black">{formatClearTime(clearTimeSeconds)}</p>
-          </div>
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500">
-              {copy.mistakes}
-            </p>
-            <p className="mt-1 text-2xl font-black">{mistakeCount}</p>
-          </div>
+      <dl className="mt-10 flex items-start justify-center gap-10 text-slate-900">
+        <div>
+          <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
+            {copy.clearTime}
+          </dt>
+          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight">
+            {formatClearTime(clearTimeSeconds)}
+          </dd>
         </div>
+        <div className="w-px self-stretch bg-slate-200" aria-hidden />
+        <div>
+          <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
+            {copy.mistakes}
+          </dt>
+          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight">
+            {mistakeCount}
+          </dd>
+        </div>
+      </dl>
 
+      <div className="mt-10 w-full max-w-xs">
         <button
           type="button"
-          className="mt-7 w-full rounded-2xl bg-neutral-950 px-5 py-3.5 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-neutral-800"
+          className="w-full rounded-md bg-amber-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:bg-amber-400"
           onClick={handlePlayAgain}
         >
           {copy.playAgain}
         </button>
-      </section>
+      </div>
     </div>
   )
 }
