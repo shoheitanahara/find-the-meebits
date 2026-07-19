@@ -94,7 +94,6 @@ function RulesPlate({
   position: [number, number, number]
   rotationY?: number
 }) {
-  const progress = useEightStreetStore((s) => s.progress)
   const copy = eightStreetUi()
   const { width: texW, height: texH } = rulesPosterPixelSize(copy.wallRulesTitle, copy.wallRules)
   const map = usePosterTexture(
@@ -103,9 +102,6 @@ function RulesPlate({
     texH,
     [copy.wallRulesTitle, ...copy.wallRules, texW, texH],
   )
-
-  // 0th Street is the warm-up beat — show rules from 1st Street onward.
-  if (progress <= 0) return null
 
   // World size from texture aspect — compact board, little empty foot.
   const faceW = 2.05
