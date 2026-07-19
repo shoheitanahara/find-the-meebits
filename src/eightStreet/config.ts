@@ -100,17 +100,10 @@ export const NIGHT_MOOD = {
   lampHeight: 5.1,
   /** Wider spacing keeps the light count playable with several VRMs. */
   lampSpacing: 9.5,
-  lampInset: 0.4,
+  lampInset: 0.1,
   /** Mid-height fill under each lamp — main readability knob for dark Meebits. */
   fillIntensity: 16,
   fillDistance: 15,
-
-  /** Foot-level neon — mostly emissive; only a few real lights. */
-  neonColors: ['#38bdf8', '#f472b6', '#a3e635', '#fbbf24'] as const,
-  neonIntensity: 3.4,
-  neonDistance: 8,
-  neonHeight: 0.18,
-  neonInset: 0.08,
 
   /** Cold white at transition veils only */
   veilColor: '#ffffff',

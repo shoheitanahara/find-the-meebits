@@ -230,33 +230,6 @@ export function LAlleyStreet() {
         position={[corner2X, 0, EIGHT_STREET.forwardTransitionZ - 1.5]}
         length={12}
       />
-
-      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-        <mesh
-          key={`w${i}`}
-          position={[-halfWidth - 0.06, 2.6 + (i % 3) * 1.5, -10 - i * 3.6]}
-        >
-          <boxGeometry args={[0.1, 1.1, 1.2]} />
-          <meshStandardMaterial
-            color={i % 2 === 0 ? '#fde68a' : '#93c5fd'}
-            emissive={i % 2 === 0 ? '#f59e0b' : '#3b82f6'}
-            emissiveIntensity={i % 2 === 0 ? 1.8 : 1.4}
-          />
-        </mesh>
-      ))}
-      {[0, 1, 2, 3].map((i) => (
-        <mesh
-          key={`wc${i}`}
-          position={[corner2X + halfWidth + 0.06, 3.2 + (i % 2) * 1.6, corner1Z - 8 - i * 5]}
-        >
-          <boxGeometry args={[0.1, 1.0, 1.1]} />
-          <meshStandardMaterial
-            color="#fde68a"
-            emissive="#f59e0b"
-            emissiveIntensity={1.6}
-          />
-        </mesh>
-      ))}
     </group>
   )
 }
