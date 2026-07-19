@@ -2,7 +2,6 @@ import { ui } from '../i18n/ui'
 import { getMuseumSeason } from '../world/museumSeason'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
-import { markStoryIntroSeen } from './storyIntroStorage'
 
 const STORY_VIDEO_SRC = '/video/meebits-4274-3s.gif'
 
@@ -13,7 +12,6 @@ export function StoryIntro({ onComplete }: { onComplete: () => void }) {
   const finish = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    markStoryIntroSeen()
     onComplete()
   }
 
