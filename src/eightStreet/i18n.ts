@@ -52,7 +52,9 @@ const en: EightStreetCopy = {
   controlsLines: [
     'WASD — Move',
     'Shift — Dash',
+    'Stick — Move (mobile)',
     'Stick outer — Dash (mobile)',
+    'Drag screen — Look (mobile)',
     'Click — Look around',
     'Esc — Release mouse',
   ],
@@ -92,7 +94,9 @@ const ja: EightStreetCopy = {
   controlsLines: [
     'WASD — 移動',
     'Shift — ダッシュ',
+    'スティック — 移動（スマホ）',
     'スティック外縁 — ダッシュ（スマホ）',
+    '画面ドラッグ — 視点（スマホ）',
     'クリック — 視点',
     'Esc — 視点解除',
   ],

@@ -126,10 +126,17 @@ export function FirstPersonController({ enabled }: { enabled: boolean }) {
     }
 
     const ctrl = useEightStreetControlsStore.getState()
-    if (Math.abs(ctrl.lookX) > 0.01 || Math.abs(ctrl.lookY) > 0.01) {
-      yawRef.current -= ctrl.lookX * EIGHT_STREET.touchLookSensitivity * dt
-      pitchRef.current = Math.max(-EIGHT_STREET.pitchMaxDown, Math.min(EIGHT_STREET.pitchMaxUp,
-        pitchRef.current + ctrl.lookY * EIGHT_STREET.touchLookSensitivity * dt))
+    const look = ctrl.consumeLookDelta()
+    if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
+      const sens = EIGHT_STREET.mouseLookSensitivity * 1.35
+      yawRef.current -= look.lookDeltaX * sens
+      pitchRef.current = Math.max(
+        -EIGHT_STREET.pitchMaxDown,
+        Math.min(
+          EIGHT_STREET.pitchMaxUp,
+          pitchRef.current - look.lookDeltaY * sens,
+        ),
+      )
     }
 
     let mx = ctrl.moveX, mz = ctrl.moveY
