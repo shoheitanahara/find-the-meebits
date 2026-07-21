@@ -12,6 +12,15 @@ import { useTouchControlsStore } from '../stores/touchControlsStore'
 import { playSfx } from '../ui/sfx'
 import { VrmSculpture } from '../world/VrmSculpture'
 import { TOP_ATTRACTIONS, type Attraction } from './topConfig'
+import {
+  BENCH_PLACEMENTS,
+  LAMP_POSITIONS,
+  NPC_COLLISION_RADIUS,
+  PLANTER_POSITIONS,
+  PLAYER_COLLISION_RADIUS,
+  isParkPositionWalkable,
+  resolveParkMovement,
+} from './topCollisions'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
@@ -23,15 +32,6 @@ const ENTRANCE_HALF_WIDTH = 1.15
 const ENTRANCE_TRIGGER_DEPTH = 0.7
 const TOP_NPC_COUNT = 30
 const TOP_NPC_WALK_SPEED = 1.15
-const PLAYER_COLLISION_RADIUS = 0.42
-const BENCH_HALF_WIDTH = 0.48
-const BENCH_HALF_LENGTH = 1.28
-const BENCH_PLACEMENTS = [
-  [-16.8, 8, Math.PI / 2],
-  [16.8, 8, -Math.PI / 2],
-  [-16.8, -1.5, Math.PI / 2],
-  [16.8, -1.5, -Math.PI / 2],
-] as const
 const TOP_NPC_WALK_PATTERNS = [
   { walkSeconds: [4.5, 8], idleSeconds: [0.8, 1.8], turnSpread: Math.PI * 0.35 },
   { walkSeconds: [3, 6], idleSeconds: [1.5, 3], turnSpread: Math.PI * 0.65 },
@@ -235,22 +235,9 @@ function Tree({ z }: { z: number }) {
 }
 
 function ParkLamps() {
-  const lampPositions: Array<[number, number]> = [
-    [-8.5, 10],
-    [8.5, 10],
-    [-8.5, 5],
-    [8.5, 5],
-    [-8.5, 0],
-    [8.5, 0],
-    [-17.5, 10],
-    [17.5, 10],
-    [-18, 0],
-    [18, 0],
-  ]
-
   return (
     <group>
-      {lampPositions.map(([x, z]) => (
+      {LAMP_POSITIONS.map(([x, z]) => (
         <group key={`${x}-${z}`} position={[x, 0, z]}>
           <mesh position={[0, 0.12, 0]}>
             <cylinderGeometry args={[0.23, 0.3, 0.24, 12]} />
@@ -289,12 +276,7 @@ function ParkDetails() {
       {BENCH_PLACEMENTS.map(([x, z, rotationY], index) => (
         <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
       ))}
-      {[
-        [-17, 12],
-        [17, 12],
-        [-17, 3.2],
-        [17, 3.2],
-      ].map(([x, z], index) => (
+      {PLANTER_POSITIONS.map(([x, z], index) => (
         <FlowerPlanter key={`planter-${index}`} position={[x, 0, z]} />
       ))}
       {[-1, 1].map((side) => (
@@ -604,51 +586,11 @@ function createTopNpcSpawns(): TopNpcSpawn[] {
 
 function isTopNpcPositionWalkable(x: number, z: number) {
   if (Math.abs(x) > 18.2 || z < -5 || z > 13.3) return false
-  if (Math.hypot(x, z - 3.4) < 3.25) return false
-  if (Math.hypot(x, z - 8) < 2.2) return false
-
-  for (const [benchX, benchZ] of BENCH_PLACEMENTS) {
-    if (
-      Math.abs(x - benchX) < BENCH_HALF_WIDTH + 0.5 &&
-      Math.abs(z - benchZ) < BENCH_HALF_LENGTH + 0.5
-    ) {
-      return false
-    }
-  }
-
+  // 入口トリガー付近は NPC を寄せない（プレイヤーの入場を邪魔しない）
   for (const attraction of TOP_ATTRACTIONS) {
     if (Math.hypot(x - attraction.x, z - attraction.entranceZ) < 2.8) return false
-
-    const infoBoardX = attraction.x + (attraction.x > 0 ? -4.2 : 4.2)
-    const infoBoardZ = attraction.z + 3.25
-    if (Math.abs(x - infoBoardX) < 2 && Math.abs(z - infoBoardZ) < 1.1) return false
   }
-
-  return true
-}
-
-function resolveBenchCollisions(x: number, z: number) {
-  let resolvedX = x
-  let resolvedZ = z
-
-  for (const [benchX, benchZ] of BENCH_PLACEMENTS) {
-    const deltaX = resolvedX - benchX
-    const deltaZ = resolvedZ - benchZ
-    const collisionHalfX = BENCH_HALF_WIDTH + PLAYER_COLLISION_RADIUS
-    const collisionHalfZ = BENCH_HALF_LENGTH + PLAYER_COLLISION_RADIUS
-
-    if (Math.abs(deltaX) >= collisionHalfX || Math.abs(deltaZ) >= collisionHalfZ) continue
-
-    const penetrationX = collisionHalfX - Math.abs(deltaX)
-    const penetrationZ = collisionHalfZ - Math.abs(deltaZ)
-    if (penetrationX < penetrationZ) {
-      resolvedX = benchX + (deltaX >= 0 ? collisionHalfX : -collisionHalfX)
-    } else {
-      resolvedZ = benchZ + (deltaZ >= 0 ? collisionHalfZ : -collisionHalfZ)
-    }
-  }
-
-  return { x: resolvedX, z: resolvedZ }
+  return isParkPositionWalkable(x, z, NPC_COLLISION_RADIUS)
 }
 
 function TopNpcCrowd() {
@@ -823,22 +765,11 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
 
     if (moving) {
       movement.normalize()
-      x = MathUtils.clamp(x + movement.x * MOVE_SPEED * delta, -HUB_BOUNDS_X, HUB_BOUNDS_X)
-      z = MathUtils.clamp(z + movement.y * MOVE_SPEED * delta, HUB_MIN_Z, HUB_MAX_Z)
-
-      // Keep the player outside the fountain basin.
-      const fountainDx = x
-      const fountainDz = z - 3.4
-      const fountainDistance = Math.hypot(fountainDx, fountainDz)
-      if (fountainDistance < 2.05) {
-        const scale = 2.05 / Math.max(fountainDistance, 0.001)
-        x = fountainDx * scale
-        z = 3.4 + fountainDz * scale
-      }
-
-      const benchResolved = resolveBenchCollisions(x, z)
-      x = benchResolved.x
-      z = benchResolved.z
+      const nextX = MathUtils.clamp(x + movement.x * MOVE_SPEED * delta, -HUB_BOUNDS_X, HUB_BOUNDS_X)
+      const nextZ = MathUtils.clamp(z + movement.y * MOVE_SPEED * delta, HUB_MIN_Z, HUB_MAX_Z)
+      const resolved = resolveParkMovement(x, z, nextX, nextZ, PLAYER_COLLISION_RADIUS)
+      x = resolved.x
+      z = resolved.z
 
       rotationY = Math.atan2(movement.x, movement.y)
       footstepTimer.current += delta
