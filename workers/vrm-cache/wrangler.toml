@@ -8,7 +8,7 @@ bucket_name = "meebits-vrm"
 
 [vars]
 UPSTREAM_ORIGIN = "https://files.meebits.app"
-ALLOWED_ORIGINS = "https://find-the-meebits.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+ALLOWED_ORIGINS = "https://meebits-park.vercel.app,https://find-the-meebits.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
 
 # カスタムドメインを使う場合（Cloudflare DNS 管理下）:
 # [[routes]]
