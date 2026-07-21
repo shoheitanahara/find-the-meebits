@@ -138,5 +138,5 @@ export async function selectSimilarMeebitId(
   }
 
   if (candidates.length === 0) return null
-  return candidates[Math.floor(Math.random() * Math.min(candidates.length, 12))]
+  return candidates[Math.floor(Math.random() * Math.min(candidates.length, 20))]
 }
