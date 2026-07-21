@@ -43,12 +43,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'TRAIT HUNT',
     subtitle: 'The Gallery',
     description: {
-      en: 'Only a few traits remain.\nFollow the clues and reveal\nwho they describe.',
-      ja: '残された特徴は、\nわずかな手がかり。\nその先のMeebitを見抜けるか？',
+      en: 'Hair, clothes, accessories!\nFind the Meebits that match\nthe trait clues.',
+      ja: '髪型、服、アクセサリー！\nヒントと同じ特徴を持つ\nMeebitを探そう！',
     },
     storyTitle: {
-      en: 'THE TRAITS LEFT BEHIND',
-      ja: '残された特徴',
+      en: 'MATCH THE TRAITS!',
+      ja: '同じ特徴を探そう！',
     },
     color: '#28576b',
     roofColor: '#163142',

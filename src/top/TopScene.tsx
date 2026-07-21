@@ -413,8 +413,8 @@ function AttractionBuilding({
         onEnter(attraction.id)
       }}
     >
-      <mesh position={[0, 2.5, 0]} castShadow receiveShadow>
-        <boxGeometry args={[7, 5, 5]} />
+      <mesh position={[0, 2.175, 0]} castShadow receiveShadow>
+        <boxGeometry args={[7, 4.35, 5]} />
         <meshStandardMaterial color={attraction.color} roughness={0.72} metalness={0.08} />
       </mesh>
       <mesh position={[0, 5.45, 0]} rotation={[0, Math.PI / 4, 0]}>
@@ -429,13 +429,13 @@ function AttractionBuilding({
         <coneGeometry args={[0.16, 0.72, 12]} />
         <meshStandardMaterial color="#d5ab5e" metalness={0.72} roughness={0.28} />
       </mesh>
-      <mesh position={[0, 4.98, 2.54]}>
+      <mesh position={[0, 4.35, 2.54]}>
         <boxGeometry args={[7.05, 0.09, 0.12]} />
         <meshStandardMaterial color="#ad8747" emissive="#8b632b" emissiveIntensity={0.32} metalness={0.72} roughness={0.28} />
       </mesh>
       {[-3.15, 3.15].map((x) => (
-        <mesh key={`column-${x}`} position={[x, 2.5, 2.57]}>
-          <boxGeometry args={[0.16, 4.9, 0.16]} />
+        <mesh key={`column-${x}`} position={[x, 2.18, 2.57]}>
+          <boxGeometry args={[0.16, 4.2, 0.16]} />
           <meshStandardMaterial color="#9c7b48" metalness={0.55} roughness={0.38} />
         </mesh>
       ))}

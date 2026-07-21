@@ -49,7 +49,7 @@ export function TargetHUD() {
 
     return (
       <aside
-        className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/20 bg-neutral-950/85 p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
+        className={`pointer-events-none absolute top-20 right-5 z-30 hidden max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/20 bg-neutral-950/85 p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
           isVisible ? '' : 'invisible'
         }`}
         aria-hidden={!isVisible}
@@ -115,7 +115,7 @@ export function TargetHUD() {
 
   return (
     <aside
-      className={`pointer-events-none absolute top-5 right-5 z-30 hidden max-h-[calc(100dvh-2.5rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
+      className={`pointer-events-none absolute top-20 right-5 z-30 hidden max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain rounded-2xl border p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
         isAnswerReveal
           ? 'border-amber-300/40 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'

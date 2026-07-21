@@ -12,6 +12,7 @@ import { TitleScreen } from './ui/TitleScreen'
 import { HowToPlay } from './ui/HowToPlay'
 import { EightStreetClearOverlay } from './ui/ClearOverlay'
 import { ControlsHud, LoadingOverlay, WrapWash } from './ui/ProgressHud'
+import { ParkReturnButton } from '../ui/ParkReturnButton'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -77,6 +78,7 @@ export function EightStreetApp() {
       <HowToPlay />
       <LoadingOverlay />
       <WrapWash />
+      <ParkReturnButton />
       <ControlsHud />
       <EightStreetClearOverlay />
       {phase === 'playing' && <EightStreetMobileControls />}

@@ -13,7 +13,7 @@ export function TitleScreen() {
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_10%,#1a2744_0%,#0a1020_42%,#05070d_100%)] px-6 text-center text-slate-100">
-      <LanguageSwitcher className="absolute right-4 top-4" tone="dark" />
+      <LanguageSwitcher className="absolute left-4 top-4" tone="dark" />
       <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-200/70">
         Meebits
       </p>

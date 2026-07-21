@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { useCallback, useState } from 'react'
+import { useCallback, useLayoutEffect, useState } from 'react'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { getLocale } from '../i18n/locale'
 import { usePlayerStore } from '../stores/playerStore'
@@ -57,6 +57,13 @@ function getAttractionPath(id: AttractionId) {
   return `${localePrefix}/8th-street`
 }
 
+function getReturningAttractionId(): AttractionId | null {
+  if (typeof window === 'undefined') return null
+
+  const from = new URLSearchParams(window.location.search).get('from')
+  return from === 'find' || from === 'traits' || from === 'street' ? from : null
+}
+
 export function TopApp() {
   const locale = getLocale()
   const t = copy[locale]
@@ -64,7 +71,27 @@ export function TopApp() {
   const nearestAttraction = useTopStore((state) => state.nearestAttraction)
   const savedMeebit = usePlayerStore((state) => state.meebitNumber)
   const [meebitInput, setMeebitInput] = useState(String(savedMeebit))
+  const [returningAttractionId] = useState(getReturningAttractionId)
+  const isReturningFromGame = returningAttractionId !== null
   const previewMeebitNumber = normalizePlayerMeebitNumber(meebitInput)
+
+  useLayoutEffect(() => {
+    if (!returningAttractionId) return
+
+    const attraction = TOP_ATTRACTIONS.find((item) => item.id === returningAttractionId)
+    if (!attraction) return
+
+    useTopStore.getState().start(usePlayerStore.getState().meebitNumber, {
+      x: attraction.x,
+      z: attraction.entranceZ + 2.2,
+      rotationY: Math.PI,
+    })
+
+    // 帰還判定だけをURLから消し、更新後は通常のパークURLとして扱う。
+    const url = new URL(window.location.href)
+    url.searchParams.delete('from')
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+  }, [returningAttractionId])
 
   const enterAttraction = useCallback((id: AttractionId) => {
     // 遷移先のゲームが同じアバターIDを復元できるよう、移動前に保存する。
@@ -105,7 +132,7 @@ export function TopApp() {
       </Canvas>
       <TargetPreviewCapture />
 
-      {!started ? (
+      {!started && !isReturningFromGame ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_50%_16%,rgba(88,64,122,0.32),transparent_42%),linear-gradient(180deg,rgba(3,5,16,0.42),rgba(3,5,16,0.84))] px-4 py-6 backdrop-blur-[4px]">
           <LanguageSwitcher className="absolute right-4 top-4 z-10" tone="dark" />
           <section className="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/92 shadow-[0_28px_90px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]">

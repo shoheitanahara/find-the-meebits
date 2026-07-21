@@ -29,6 +29,7 @@ import { AfterHoursUnlockOverlay } from './ui/AfterHoursUnlockOverlay'
 import { IntroFlow } from './ui/IntroFlow'
 import { TargetHUD } from './ui/TargetHUD'
 import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
+import { ParkReturnButton } from './ui/ParkReturnButton'
 import { useGameStore } from './stores/gameStore'
 
 function AfterHoursUnlockGate() {
@@ -64,6 +65,7 @@ function HuntApp() {
       <TargetVrmPreloader />
       <TargetPreviewCapture />
       <GameTimer />
+      <ParkReturnButton />
       <MobileTopBar />
       <HUD />
       <DialogueSystem />

@@ -151,7 +151,7 @@ export function MobileTopBar() {
       </div>
 
       {showTraitQuestHud && quest ? (
-        <div className="absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex max-h-[calc(100dvh-5rem)] flex-col items-end gap-1 overflow-y-auto">
+        <div className="absolute right-2.5 top-[max(4rem,env(safe-area-inset-top))] z-10 flex max-h-[calc(100dvh-8rem)] flex-col items-end gap-1 overflow-y-auto">
           <p className="pr-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.18em] text-neutral-400">
             {t.traitHunt}
           </p>
@@ -194,7 +194,7 @@ export function MobileTopBar() {
         </div>
       ) : targetNpcs.length > 0 ? (
         <div
-          className={`absolute right-2.5 top-[max(0.5rem,env(safe-area-inset-top))] z-10 flex flex-col items-end ${targetLayout.stackGap}`}
+          className={`absolute right-2.5 top-[max(4rem,env(safe-area-inset-top))] z-10 flex flex-col items-end ${targetLayout.stackGap}`}
         >
           <p
             className={`pr-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.18em] ${
