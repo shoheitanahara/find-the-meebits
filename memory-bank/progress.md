@@ -2,6 +2,30 @@
 
 ## 完了済み
 
+### Meebits Park（ハブ / `top`）
+
+- [x] `/` を Park に、本編を `/find-the-meebit` に移設（互換リダイレクトなし）
+- [x] アバター選択カード（番号 / ランダム + 実 VRM プレビュー）
+- [x] 固定追従カメラ（本編相当の距離感）+ WASD/ジョイスティック移動
+- [x] 3 建物（find / traits / street）、入口通過で自動遷移（アバター ID 引継ぎ）
+- [x] ストーリーテリング調の説明看板（EN/JA）
+- [x] 夜 + 海の演出、噴水 + #11143 銅像、街灯・ベンチ・植栽
+- [x] NPC 30 体（3 種歩行、会話/衝突なし、T ポーズ修正）
+- [x] パーク復帰時のスポーン（建物前）+ 選択カードスキップ（`?from=`）
+
+### 8th Street（`/8th-street`）
+
+- [x] 一人称・クランク型夜路地のループ
+- [x] 歩行者 10 体 / 8 回前進クリア / 白フェードワープ
+- [x] 夜のムード（`NIGHT_MOOD`）+ 路地当たり判定（`clampToAlley`）
+
+### 共通導線・ルーティング
+
+- [x] 全ゲーム共通ヘッダー（Meebits Park / Back to Top、確認ダイアログ付き）
+- [x] URL パス判定（`appEdition.ts`）+ SPA fallback（Vite / Vercel）
+- [x] edition 別ページメタ（`pageMetadata.ts`）
+- [x] 本番ドメイン `meebits-park.vercel.app` + Worker CORS 追加
+
 ### コアゲーム
 
 - [x] Museum 8 ステージ進行（regular ×5 + semifinal / final / grandfinal）

@@ -1,8 +1,27 @@
 # Active Context
 
-最終更新: 2026-07-17
+最終更新: 2026-07-22
 
 ## 直近の作業サマリー
+
+### Meebits Park（`/`）ハブ新設 + ルーティング刷新（最新）
+
+- **ルート変更**: `/` `/jp` = Meebits Park（`top`）。旧本編は `/find-the-meebit` へ移設。**互換リダイレクトなし**
+  - `src/game/appEdition.ts` で判定。SPA fallback は `vite.config.ts` + `vercel.json` 両方に追加
+- **パーク（`src/top/`）**:
+  - `TopApp.tsx` — アバター選択カード（番号/ランダム + 実 VRM プレビュー）→ 入場。`?from=<attractionId>` があれば自動 start(spawn)（選択カードスキップ、該当建物前へ）
+  - `TopScene.tsx` — `TopFollowCamera`（本編相当の追従）、3 建物、噴水 + #11143 銅像（`VrmSculpture` の `hidePedestal`）、NPC 30 体（3 種歩行、会話/衝突なし、`exclusive:true` で T ポーズ回避）、ベンチ衝突、夜 + 海の演出
+  - `topConfig.ts` — `TOP_ATTRACTIONS`（find/traits/street）: 座標・色・説明看板（`storyTitle`/`description` EN/JA）
+  - `topStore.ts` — `start(spawn?)` でスポーン座標指定可
+- **共通ヘッダー**: `ParkReturnButton` を全ゲームに無条件マウント（左「Meebits Park」/右「Back to Top」）。確認ダイアログ付き。既存 UI（タイマー/HUD/言語切替）はヘッダー分だけ下げた
+- **ページメタ**: `src/game/pageMetadata.ts` の `applyPageMetadata(edition, locale)` を `App.tsx` で edition 変化時に適用
+- **本番ドメイン**: `https://meebits-park.vercel.app`。移行時に Worker `ALLOWED_ORIGINS` 追加漏れで VRM が CORS 全滅 → `wrangler.toml` に追加して再デプロイで解消
+
+### 8th Street（`/8th-street`）
+
+- 一人称・クランク型夜路地の間違い探しループ。定数は `src/eightStreet/config.ts`（`EIGHT_STREET` / `NIGHT_MOOD`）
+- 10 体歩行者、`targetProgress`(8) 回前進でクリア。最終左折でワープ（白フェード）
+- 当たり: `clampToAlley()`（回廊 + 最終コーナー L 字ソリッド）
 
 ### 日本語化 `/jp`（実装済み・翻訳は調整中）
 
@@ -74,6 +93,14 @@
 
 | 用途 | パス |
 |------|------|
+| パーク UI/入場 | `src/top/TopApp.tsx` |
+| パーク 3D/NPC | `src/top/TopScene.tsx` |
+| パーク建物設定 | `src/top/topConfig.ts` |
+| 共通ヘッダー/戻る | `src/ui/ParkReturnButton.tsx` |
+| ルート判定 | `src/game/appEdition.ts` |
+| SPA fallback | `vite.config.ts`, `vercel.json` |
+| ページメタ | `src/game/pageMetadata.ts` |
+| 8th Street 座標 | `src/eightStreet/config.ts` |
 | Club 座標・DJ | `src/world/clubLandmarks.ts`, `ClubProps.tsx` |
 | Shawn DJ ポーズ | `src/avatar/VRMLocomotion.ts` (`applyVRMDjPose`) |
 | Shawn 配置 | `src/npc/npcGeneration.ts` (`getCreatorNpcForVenue`) |
@@ -86,14 +113,19 @@
 ## エージェント向け注意
 
 1. **Next.js ではない** — Vite + React
-2. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts`
-3. **DJ ブース collision** は `CLUB_DJ_BOOTH_LAYOUT` と `ClubProps` を同期すること
-4. **Shawn Club 回転** は `0`（+Z = ダンスフロア）。`Math.PI` は後ろ向きになる
-5. タブ非表示は **全部止める**方針。常時 delta クランプは使わない
-6. commit はユーザー依頼時のみ
+2. **`/` は Park**（`top`）。本編は `/find-the-meebit`。新ルートは `vite.config.ts` + `vercel.json` の両方に登録
+3. **本番ドメイン変更時は Worker `ALLOWED_ORIGINS` を更新して再デプロイ**（忘れると VRM が CORS 全滅）
+4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts`
+5. **パーク NPC は `useVRMModel(exclusive:true)`**（プール共有だと T ポーズになる）
+6. **DJ ブース collision** は `CLUB_DJ_BOOTH_LAYOUT` と `ClubProps` を同期すること
+7. **Shawn Club 回転** は `0`（+Z = ダンスフロア）。`Math.PI` は後ろ向きになる
+8. タブ非表示は **全部止める**方針。常時 delta クランプは使わない
+9. commit はユーザー依頼時のみ
 
-## デプロイチェックリスト（VRM — 変更なし）
+## デプロイチェックリスト
 
-1. `npm run vrm-worker:deploy`
-2. Vercel `VITE_VRM_BASE_URL` → Redeploy
-3. 任意: `VITE_BGM_BASE_URL`（BGM を R2/CDN に置く場合）
+1. **本番ドメインを変えた場合**: `workers/vrm-cache/wrangler.toml` の `ALLOWED_ORIGINS` に新ドメイン追加
+2. `npm run vrm-worker:deploy`
+3. Vercel `VITE_VRM_BASE_URL` → Redeploy
+4. 新ルートを足したら `vite.config.ts`（`SPA_FALLBACK_PATHS`）と `vercel.json` を確認
+5. 任意: `VITE_BGM_BASE_URL`（BGM を R2/CDN に置く場合）
