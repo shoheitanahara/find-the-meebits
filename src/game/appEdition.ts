@@ -8,16 +8,17 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
-  if (segments.includes('top')) {
-    return 'top'
-  }
   if (segments.includes('8th-street')) {
     return '8th-street'
   }
   if (segments.includes('v2')) {
     return 'v2'
   }
-  return 'v1'
+  if (segments.includes('find-the-meebit')) {
+    return 'v1'
+  }
+  // `/` and `/jp` are the park hub.
+  return 'top'
 }
 
 export function isTraitHuntEdition(pathname?: string) {

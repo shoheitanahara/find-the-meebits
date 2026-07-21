@@ -16,7 +16,7 @@ export function HUD() {
   const showSummerVer = !isTraitHunt && venueId === 'museum' && getMuseumSeason() === 'summer'
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 hidden p-5 sm:p-6 lg:block">
+    <div className="pointer-events-none absolute inset-0 z-10 hidden px-5 pb-5 pt-16 sm:px-6 sm:pb-6 lg:block">
       <section className="w-fit rounded-3xl border border-white/40 bg-neutral-950/80 px-5 py-4 text-white shadow-xl shadow-black/20 backdrop-blur-md">
         {isTraitHunt ? (
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">

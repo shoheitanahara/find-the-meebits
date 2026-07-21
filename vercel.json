@@ -6,7 +6,7 @@
     { "source": "/v2/(.*)", "destination": "/index.html" },
     { "source": "/8th-street", "destination": "/index.html" },
     { "source": "/8th-street/(.*)", "destination": "/index.html" },
-    { "source": "/top", "destination": "/index.html" },
-    { "source": "/top/(.*)", "destination": "/index.html" }
+    { "source": "/find-the-meebit", "destination": "/index.html" },
+    { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]
 }

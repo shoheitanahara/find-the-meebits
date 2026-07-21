@@ -98,7 +98,7 @@ export function StartScreen() {
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-0 z-40 overflow-y-auto p-4 backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:p-3 max-lg:py-[max(0.5rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6 ${
+      className={`pointer-events-auto absolute inset-0 z-40 overflow-y-auto backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)] lg:grid lg:place-items-center lg:px-6 lg:pb-6 lg:pt-16 ${
         isClubVenue ? 'bg-violet-950/85' : 'bg-neutral-950/80'
       }`}
     >

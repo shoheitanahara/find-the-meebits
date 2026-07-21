@@ -16,7 +16,7 @@ export function StoryIntro({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 overflow-y-auto bg-neutral-950/80 p-4 backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:p-3 max-lg:py-[max(0.5rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6">
+    <div className="pointer-events-auto absolute inset-0 z-50 overflow-y-auto bg-neutral-950/80 backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)] lg:grid lg:place-items-center lg:px-6 lg:pb-6 lg:pt-16">
       <section
         className="relative grid w-full max-w-4xl gap-6 rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-lg:max-h-[calc(100dvh-1rem)] max-lg:gap-3 max-lg:overflow-y-auto max-lg:rounded-3xl max-lg:p-4 lg:grid-cols-[minmax(0,17rem)_1fr] lg:p-8"
         role="dialog"

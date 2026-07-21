@@ -31,8 +31,8 @@ export function getLocaleHomePath(
 ) {
   const segments = pathname.split('/').filter(Boolean)
 
-  if (segments.includes('top')) {
-    return locale === 'ja' ? '/jp/top' : '/top'
+  if (segments.includes('find-the-meebit')) {
+    return locale === 'ja' ? '/jp/find-the-meebit' : '/find-the-meebit'
   }
 
   if (segments.includes('8th-street')) {
@@ -43,6 +43,7 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }
 
+  // Park hub (`/` / `/jp`) and any other path.
   return locale === 'ja' ? JP_PATH_PREFIX : '/'
 }
 

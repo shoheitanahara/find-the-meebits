@@ -12,7 +12,7 @@ export function ControlsHud() {
   }
 
   return (
-    <div className="pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 max-w-[13rem] rounded-md border border-white/10 bg-black/55 px-3 py-2.5 text-slate-100 shadow-md backdrop-blur-md">
+    <div className="pointer-events-none absolute left-3 top-[calc(env(safe-area-inset-top)+3.25rem)] z-30 max-w-[13rem] rounded-md border border-white/10 bg-black/55 px-3 py-2.5 text-slate-100 shadow-md backdrop-blur-md">
       <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-amber-200/70">
         {copy.controlsTitle}
       </p>

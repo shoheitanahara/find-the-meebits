@@ -4,14 +4,14 @@ import { playSfx } from './sfx'
 
 const copy = {
   en: {
-    trigger: 'Back to Park',
+    trigger: 'Back to Top',
     title: 'Leave this attraction?',
     description: 'Your current game will end and you will return to Meebits Park.',
     cancel: 'Keep playing',
     confirm: 'Return to Park',
   },
   ja: {
-    trigger: 'パークへ戻る',
+    trigger: 'トップへ戻る',
     title: 'アトラクションを終了しますか？',
     description: '現在のゲームを終了して、ミービッツ・パークへ戻ります。',
     cancel: 'ゲームを続ける',
@@ -41,7 +41,7 @@ export function ParkReturnButton() {
 
   const returnToPark = () => {
     playSfx('uiConfirm')
-    const parkPath = locale === 'ja' ? '/jp/top' : '/top'
+    const parkPath = locale === 'ja' ? '/jp' : '/'
     const pathSegments = window.location.pathname.split('/').filter(Boolean)
     const attractionId = pathSegments.includes('8th-street')
       ? 'street'
@@ -53,18 +53,23 @@ export function ParkReturnButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={openConfirmation}
-        aria-expanded={isConfirming}
-        className="fixed right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[70] rounded-full border border-white/25 bg-neutral-950/80 px-3 py-2 text-[0.65rem] font-bold tracking-[0.08em] text-white/85 shadow-xl backdrop-blur-md transition hover:border-amber-300/60 hover:text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
-      >
-        <span aria-hidden="true">←</span>&nbsp; {t.trigger}
-      </button>
+      <header className="fixed inset-x-0 top-0 z-[100] flex min-h-10 items-center justify-between border-b border-white/10 bg-neutral-950/80 px-3 pb-1.5 pt-[max(0.4rem,env(safe-area-inset-top))] text-white shadow-lg backdrop-blur-md sm:px-4">
+        <span className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs tracking-[0.12em] text-amber-100/90">
+          Meebits Park
+        </span>
+        <button
+          type="button"
+          onClick={openConfirmation}
+          aria-expanded={isConfirming}
+          className="rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.1em] text-white/75 transition hover:border-amber-300/50 hover:bg-amber-400/10 hover:text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+        >
+          <span aria-hidden="true">←</span>&nbsp; {t.trigger}
+        </button>
+      </header>
 
       {isConfirming ? (
         <div
-          className="fixed inset-0 z-[90] flex items-start justify-end bg-black/30 p-3 pt-[max(3.75rem,calc(env(safe-area-inset-top)+3.25rem))] backdrop-blur-[2px]"
+          className="fixed inset-0 z-[120] flex items-start justify-end bg-black/30 p-3 pt-[max(3.75rem,calc(env(safe-area-inset-top)+3.25rem))] backdrop-blur-[2px]"
           role="presentation"
           onMouseDown={(event) => {
             if (event.currentTarget === event.target) setIsConfirming(false)

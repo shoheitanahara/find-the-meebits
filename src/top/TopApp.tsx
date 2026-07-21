@@ -52,7 +52,7 @@ const copy = {
 
 function getAttractionPath(id: AttractionId) {
   const localePrefix = getLocale() === 'ja' ? '/jp' : ''
-  if (id === 'find') return localePrefix || '/'
+  if (id === 'find') return `${localePrefix}/find-the-meebit`
   if (id === 'traits') return `${localePrefix}/v2`
   return `${localePrefix}/8th-street`
 }

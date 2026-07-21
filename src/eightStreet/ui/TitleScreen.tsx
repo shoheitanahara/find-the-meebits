@@ -12,8 +12,11 @@ export function TitleScreen() {
   if (phase !== 'title') return null
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_10%,#1a2744_0%,#0a1020_42%,#05070d_100%)] px-6 text-center text-slate-100">
-      <LanguageSwitcher className="absolute left-4 top-4" tone="dark" />
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_10%,#1a2744_0%,#0a1020_42%,#05070d_100%)] px-6 pt-10 text-center text-slate-100">
+      <LanguageSwitcher
+        className="absolute left-4 top-[calc(env(safe-area-inset-top)+3.25rem)]"
+        tone="dark"
+      />
       <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-200/70">
         Meebits
       </p>
