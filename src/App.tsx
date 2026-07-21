@@ -2,6 +2,8 @@ import { Analytics } from '@vercel/analytics/react'
 import { useEffect } from 'react'
 import { GameCanvas } from './game/GameCanvas'
 import { getCachedAppEdition } from './game/appEdition'
+import { applyPageMetadata } from './game/pageMetadata'
+import { getLocale } from './i18n/locale'
 import { loadMeebitTraitsDataset } from './data/meebitTraits'
 import { EightStreetApp } from './eightStreet/EightStreetApp'
 import { TopApp } from './top/TopApp'
@@ -90,6 +92,10 @@ function HuntApp() {
 
 export default function App() {
   const edition = getCachedAppEdition()
+
+  useEffect(() => {
+    applyPageMetadata(edition, getLocale())
+  }, [edition])
 
   if (edition === 'top') {
     return (
