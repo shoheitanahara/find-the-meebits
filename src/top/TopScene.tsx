@@ -180,19 +180,6 @@ function Fountain() {
         <torusGeometry args={[1.47, 0.1, 12, 48]} />
         <meshStandardMaterial color="#c4b596" metalness={0.4} roughness={0.42} />
       </mesh>
-      {Array.from({ length: 8 }, (_, index) => {
-        const angle = (index / 8) * Math.PI * 2
-        return (
-          <mesh
-            key={`water-jet-${index}`}
-            position={[Math.cos(angle) * 0.82, 1.12, Math.sin(angle) * 0.82]}
-            rotation={[Math.sin(angle) * 0.28, 0, -Math.cos(angle) * 0.28]}
-          >
-            <cylinderGeometry args={[0.018, 0.028, 0.82, 8]} />
-            <meshStandardMaterial color="#bcecff" emissive="#53c7ed" emissiveIntensity={0.9} transparent opacity={0.72} />
-          </mesh>
-        )
-      })}
       <pointLight position={[0, 2.5, 0]} intensity={18} distance={10} color="#7cddff" />
     </group>
   )
