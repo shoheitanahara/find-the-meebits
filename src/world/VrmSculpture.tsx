@@ -91,6 +91,8 @@ type VrmSculptureProps = {
   pedestal: VrmSculpturePedestal
   facingY?: number
   sculptureTone?: SculptureTone
+  /** 台座を描画しない（外部で独自の台座を用意する場合に使う） */
+  hidePedestal?: boolean
 }
 
 export function VrmSculpture({
@@ -99,6 +101,7 @@ export function VrmSculpture({
   pedestal,
   facingY,
   sculptureTone = 'museum',
+  hidePedestal = false,
 }: VrmSculptureProps) {
   const rotationY = facingY ?? getEntranceFacingY(position[0], position[2])
   const [sculptureScene, setSculptureScene] = useState<Group | null>(null)
@@ -146,9 +149,9 @@ export function VrmSculpture({
 
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <SculpturePedestal pedestal={pedestal} />
+      {hidePedestal ? null : <SculpturePedestal pedestal={pedestal} />}
       {sculptureScene ? (
-        <group position={[0, SCULPTURE_PEDESTAL_TOP_Y, 0]}>
+        <group position={[0, hidePedestal ? 0 : SCULPTURE_PEDESTAL_TOP_Y, 0]}>
           <primitive object={sculptureScene} scale={SCULPTURE_VRM_SCALE} />
         </group>
       ) : null}

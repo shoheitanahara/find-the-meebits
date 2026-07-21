@@ -4,6 +4,7 @@ import { GameCanvas } from './game/GameCanvas'
 import { getCachedAppEdition } from './game/appEdition'
 import { loadMeebitTraitsDataset } from './data/meebitTraits'
 import { EightStreetApp } from './eightStreet/EightStreetApp'
+import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
 import { GameTimerSystem } from './systems/GameTimerSystem'
@@ -87,6 +88,15 @@ function HuntApp() {
 
 export default function App() {
   const edition = getCachedAppEdition()
+
+  if (edition === 'top') {
+    return (
+      <>
+        <TopApp />
+        <Analytics />
+      </>
+    )
+  }
 
   if (edition === '8th-street') {
     return (

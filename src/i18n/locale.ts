@@ -31,6 +31,10 @@ export function getLocaleHomePath(
 ) {
   const segments = pathname.split('/').filter(Boolean)
 
+  if (segments.includes('top')) {
+    return locale === 'ja' ? '/jp/top' : '/top'
+  }
+
   if (segments.includes('8th-street')) {
     return locale === 'ja' ? '/jp/8th-street' : '/8th-street'
   }

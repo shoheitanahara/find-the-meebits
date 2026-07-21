@@ -1,0 +1,92 @@
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useTouchControlsStore } from '../stores/touchControlsStore'
+
+const JOYSTICK_RADIUS = 44
+const BASE_SIZE = 112
+const KNOB_SIZE = 44
+
+export function TopMobileControls() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <VirtualJoystick />
+    </div>
+  )
+}
+
+function VirtualJoystick() {
+  const baseRef = useRef<HTMLDivElement>(null)
+  const pointerIdRef = useRef<number | null>(null)
+  const [knobOffset, setKnobOffset] = useState({ x: 0, y: 0 })
+  const setJoystick = useTouchControlsStore((state) => state.setJoystick)
+  const resetJoystick = useTouchControlsStore((state) => state.resetJoystick)
+
+  useEffect(() => () => resetJoystick(), [resetJoystick])
+
+  const updateJoystick = (clientX: number, clientY: number) => {
+    const base = baseRef.current
+    if (!base) return
+
+    const rect = base.getBoundingClientRect()
+    const dx = clientX - (rect.left + rect.width / 2)
+    const dy = clientY - (rect.top + rect.height / 2)
+    const distance = Math.hypot(dx, dy)
+    const clampedDistance = Math.min(distance, JOYSTICK_RADIUS)
+    const angle = Math.atan2(dy, dx)
+    const x = Math.cos(angle) * clampedDistance
+    const y = Math.sin(angle) * clampedDistance
+
+    setKnobOffset({ x, y })
+    setJoystick(x / JOYSTICK_RADIUS, y / JOYSTICK_RADIUS, clampedDistance > 6)
+  }
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    pointerIdRef.current = event.pointerId
+    event.currentTarget.setPointerCapture(event.pointerId)
+    updateJoystick(event.clientX, event.clientY)
+  }
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (pointerIdRef.current !== event.pointerId) return
+    event.preventDefault()
+    updateJoystick(event.clientX, event.clientY)
+  }
+
+  const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (pointerIdRef.current !== event.pointerId) return
+    pointerIdRef.current = null
+    setKnobOffset({ x: 0, y: 0 })
+    resetJoystick()
+  }
+
+  return (
+    <div
+      className="pointer-events-auto relative ml-1 touch-none select-none"
+      style={{ width: BASE_SIZE, height: BASE_SIZE }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+    >
+      <div
+        ref={baseRef}
+        className="absolute left-1/2 top-1/2 rounded-full border-2 border-white/35 bg-sky-950/55 shadow-xl backdrop-blur-sm"
+        style={{
+          width: BASE_SIZE,
+          height: BASE_SIZE,
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+      <div
+        className="absolute rounded-full border-2 border-white/70 bg-white/35 shadow-lg"
+        style={{
+          width: KNOB_SIZE,
+          height: KNOB_SIZE,
+          left: `calc(50% + ${knobOffset.x}px)`,
+          top: `calc(50% + ${knobOffset.y}px)`,
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+    </div>
+  )
+}

@@ -1,6 +1,6 @@
 /** App edition from URL path. */
 
-export type AppEdition = 'v1' | 'v2' | '8th-street'
+export type AppEdition = 'v1' | 'v2' | '8th-street' | 'top'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   return pathname.split('/').filter(Boolean)
@@ -8,6 +8,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
+  if (segments.includes('top')) {
+    return 'top'
+  }
   if (segments.includes('8th-street')) {
     return '8th-street'
   }

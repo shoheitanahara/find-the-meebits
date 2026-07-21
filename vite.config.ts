@@ -19,6 +19,10 @@ const SPA_FALLBACK_PATHS = new Set([
   '/8th-street/',
   '/jp/8th-street',
   '/jp/8th-street/',
+  '/top',
+  '/top/',
+  '/jp/top',
+  '/jp/top/',
 ])
 
 
