@@ -17,7 +17,7 @@ export const DAILY_VISITOR_COUNT = 30
 export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v4'
+const STORAGE_KEY = 'meebits-park-daily-v5'
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
 export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 5.15]
@@ -115,6 +115,9 @@ function pickFeaturedId(dataset: MeebitTraitsDataset, rng: () => number): number
   return ids[Math.floor(rng() * ids.length)] ?? ids[0]
 }
 
+/** 「本日の共通点」に選ばないトレイト種別 */
+const THEME_TRAIT_EXCLUDED_TYPES = new Set(['Hair Style'])
+
 /**
  * 主役のトレイトから「本日の共通点」を1つ選ぶ。
  * マッチ枠を満たせる候補を優先し、その中では出現数が少ない（特徴的な）トレイトを好む。
@@ -125,9 +128,12 @@ function pickThemeTrait(
   dataset: MeebitTraitsDataset,
   rng: () => number,
 ): DailyThemeTrait {
-  const entries = Object.entries(featuredTraits)
+  const allEntries = Object.entries(featuredTraits)
+  const entries = allEntries.filter(([traitType]) => !THEME_TRAIT_EXCLUDED_TYPES.has(traitType))
   if (entries.length === 0) {
-    throw new Error(`[dailyFeatured] featured #${featuredId} has no traits`)
+    throw new Error(
+      `[dailyFeatured] featured #${featuredId} has no eligible theme traits (excluded Hair Style)`,
+    )
   }
 
   // 1パスで各候補トレイトの他 Meebit 数を集計
