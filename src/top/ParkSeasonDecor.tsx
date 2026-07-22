@@ -55,7 +55,7 @@ export function getParkSeasonTreePlacements(season: ParkSeason): ParkTreePlaceme
 
 /**
  * Park 外周の季節デコ。
- * 夏は Museum と同じ PalmTree を流用。左右の列木は触らない。
+ * 夏は PalmTree を流用。左右の列木は触らない。
  */
 export function ParkSeasonDecor({ season }: { season: ParkSeason }) {
   if (season !== 'summer') return null

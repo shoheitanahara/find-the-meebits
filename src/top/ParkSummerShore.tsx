@@ -5,7 +5,7 @@ import type { ParkSeasonLook } from './parkSeason'
 
 /**
  * Park 向け夏の海〜砂浜。
- * Museum の SummerShore と同じ「重ね平面」方式。円形島スケールに合わせた half を使う。
+ * 単純な重ね平面方式。円形島スケールに合わせた half を使う。
  */
 export function ParkSummerShore({ look }: { look: ParkSeasonLook }) {
   const drySandGeo = useMemo(() => {

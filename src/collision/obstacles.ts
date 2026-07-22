@@ -1,5 +1,4 @@
 import type { VenueId } from '../game/venueConfig'
-import { getMuseumSeasonTreeCollisionCenters } from '../world/MuseumSeasonDecor'
 import {
   getPlazaGlassCornerPosts,
   getPlazaGlassWallSegments,
@@ -154,8 +153,6 @@ function buildMuseumObstacles(): ObstacleBox[] {
     ...getPlazaGlassCornerPosts().map((segment) =>
       boxFromCenter(segment.position[0], segment.position[2], segment.size[0], segment.size[2], 0.04),
     ),
-    // 季節デコの幹のみ（ヒント landmark には含めない）
-    ...getMuseumSeasonTreeCollisionCenters().map(([x, z]) => boxFromCenter(x, z, 0.7, 0.7, 0.05)),
   ]
 }
 

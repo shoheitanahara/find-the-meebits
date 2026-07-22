@@ -1,6 +1,3 @@
-import type { MuseumSeason } from '../world/museumSeason'
-import { getMuseumSeason, getMuseumSeasonLook } from '../world/museumSeason'
-
 export type VenueId = 'museum' | 'club'
 
 export type VenueTheme = {
@@ -50,33 +47,8 @@ const CLUB_THEME: VenueTheme = {
   pointLights: [],
 }
 
-function applyMuseumSeason(theme: VenueTheme, season: MuseumSeason): VenueTheme {
-  if (season === 'default') {
-    return theme
-  }
-
-  const look = getMuseumSeasonLook(season)
-
-  return {
-    ...theme,
-    backgroundColor: look.backgroundColor,
-    fogColor: look.fogColor,
-    fogNear: look.fogNear,
-    fogFar: look.fogFar,
-    ambientIntensity: look.ambientIntensity,
-    hemisphereSky: look.hemisphereSky,
-    hemisphereGround: look.hemisphereGround,
-    hemisphereIntensity: look.hemisphereIntensity,
-    directionalIntensity: look.directionalIntensity,
-  }
-}
-
 export function getVenueTheme(venueId: VenueId): VenueTheme {
-  if (venueId === 'club') {
-    return CLUB_THEME
-  }
-
-  return applyMuseumSeason(MUSEUM_THEME, getMuseumSeason())
+  return venueId === 'club' ? CLUB_THEME : MUSEUM_THEME
 }
 
 export function getVenueLabel(venueId: VenueId) {

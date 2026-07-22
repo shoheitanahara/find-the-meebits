@@ -17,7 +17,6 @@ import { getNpcById } from '../npc/npcData'
 import { isAfterHoursUnlocked } from '../systems/save/unlockProgress'
 import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
-import { getMuseumSeason } from '../world/museumSeason'
 import { getCachedAppEdition } from '../game/appEdition'
 import { questIgnoresColorAndPattern, formatTraitDisplayName } from '../game/traitHunt'
 import { LanguageSwitcher } from './LanguageSwitcher'
@@ -48,7 +47,6 @@ export function StartScreen() {
   const isClubVenue = venueId === 'club'
   const isTraitHunt = getCachedAppEdition() === 'v2'
   const quest = currentStep?.quest
-  const showSummerVer = !isClubVenue && !isTraitHunt && getMuseumSeason() === 'summer'
   const t = ui()
 
   useEffect(() => {
@@ -135,27 +133,18 @@ export function StartScreen() {
                 ? 'text-fuchsia-300'
                 : isTraitHunt
                   ? 'text-amber-700'
-                  : showSummerVer
-                    ? 'text-sky-600'
-                    : 'text-neutral-500'
+                  : 'text-neutral-500'
             }`}
           >
             {isClubVenue
               ? t.afterHours
               : isTraitHunt
                 ? t.traitHuntPrototype
-                : showSummerVer
-                  ? t.summerVer
-                  : t.museumHunt}
+                : t.museumHunt}
           </p>
           <h1 className="mt-3 text-3xl font-black tracking-tight max-lg:mt-1 max-lg:text-xl lg:text-5xl">
             {t.title}
           </h1>
-          {showSummerVer ? (
-            <p className="mt-1 text-sm font-semibold text-sky-700/80 max-lg:text-xs">
-              {t.museumHunt}
-            </p>
-          ) : null}
           <p
             className={`mt-4 text-base leading-relaxed max-lg:mt-1.5 max-lg:text-xs max-lg:leading-snug ${
               isClubVenue ? 'text-neutral-300' : 'text-neutral-600'
