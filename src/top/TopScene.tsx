@@ -108,10 +108,11 @@ export function TopScene({
         intensity={look.directionalIntensity}
         color={look.directionalColor}
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-24}
-        shadow-camera-right={24}
-        shadow-camera-top={24}
-        shadow-camera-bottom={-24}
+        shadow-camera-left={-32}
+        shadow-camera-right={32}
+        shadow-camera-top={32}
+        shadow-camera-bottom={-32}
+        shadow-bias={-0.0002}
       />
       <pointLight
         position={[0, 9, 2]}
@@ -341,11 +342,11 @@ function FountainStatue({ featuredId }: { featuredId: number }) {
 function Tree({ z }: { z: number }) {
   return (
     <group position={[0, 0, z]}>
-      <mesh position={[0, 0.28, 0]}>
+      <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.72, 0.82, 0.56, 16]} />
         <meshStandardMaterial color="#79654f" roughness={0.68} />
       </mesh>
-      <mesh position={[0, 1.2, 0]}>
+      <mesh position={[0, 1.2, 0]} castShadow>
         <cylinderGeometry args={[0.2, 0.35, 2.4, 10]} />
         <meshStandardMaterial color="#5b4030" roughness={0.92} />
       </mesh>
@@ -355,7 +356,7 @@ function Tree({ z }: { z: number }) {
         [0.68, 2.82, -0.08, 0.9],
         [0, 3.65, 0.02, 0.78],
       ].map(([x, y, treeZ, scale], index) => (
-        <mesh key={`crown-${index}`} position={[x, y, treeZ]} scale={scale}>
+        <mesh key={`crown-${index}`} position={[x, y, treeZ]} scale={scale} castShadow>
           <dodecahedronGeometry args={[1, 1]} />
           <meshStandardMaterial color={index % 2 === 0 ? '#285849' : '#34705a'} roughness={0.94} />
         </mesh>
@@ -369,21 +370,21 @@ function ParkLamps({ look }: { look: ParkSeasonLook }) {
     <group>
       {LAMP_POSITIONS.map(([x, z]) => (
         <group key={`${x}-${z}`} position={[x, 0, z]}>
-          <mesh position={[0, 0.12, 0]}>
+          <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.23, 0.3, 0.24, 12]} />
             <meshStandardMaterial color="#2d2930" metalness={0.72} roughness={0.28} />
           </mesh>
-          <mesh position={[0, 1.55, 0]}>
+          <mesh position={[0, 1.55, 0]} castShadow>
             <cylinderGeometry args={[0.065, 0.11, 3.1, 12]} />
             <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
           </mesh>
-          <mesh position={[0, 2.9, 0]}>
+          <mesh position={[0, 2.9, 0]} castShadow>
             <boxGeometry args={[0.95, 0.06, 0.06]} />
             <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
           </mesh>
           {[-0.42, 0.42].map((lanternX) => (
             <group key={lanternX} position={[lanternX, 3.05, 0]}>
-              <mesh>
+              <mesh castShadow>
                 <sphereGeometry args={[0.19, 14, 12]} />
                 <meshStandardMaterial
                   color="#fff0bd"
@@ -391,7 +392,7 @@ function ParkLamps({ look }: { look: ParkSeasonLook }) {
                   emissiveIntensity={look.lampEmissiveIntensity}
                 />
               </mesh>
-              <mesh position={[0, 0.25, 0]}>
+              <mesh position={[0, 0.25, 0]} castShadow>
                 <coneGeometry args={[0.23, 0.22, 8]} />
                 <meshStandardMaterial color="#343039" metalness={0.74} roughness={0.3} />
               </mesh>
