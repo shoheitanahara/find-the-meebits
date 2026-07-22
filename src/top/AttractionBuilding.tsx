@@ -146,8 +146,11 @@ function ConstructionSignBoard({
   locale: 'en' | 'ja'
   scale?: number
 }) {
-  const title = locale === 'ja' ? '建設中' : 'UNDER CONSTRUCTION'
-  const sub = locale === 'ja' ? 'Mountain Climb' : 'Mountain Climb'
+  const isJa = locale === 'ja'
+  const title = isJa ? '建設中' : 'UNDER\nCONSTRUCTION'
+  const sub = 'Mountain Climb'
+  const titleSize = isJa ? 0.3 : 0.2
+  const titleY = isJa ? 2.55 : 2.58
 
   return (
     <group position={position} scale={scale}>
@@ -156,17 +159,26 @@ function ConstructionSignBoard({
         <meshStandardMaterial color="#8a7050" roughness={0.85} />
       </mesh>
       <mesh position={[0, 2.35, 0.05]} castShadow>
-        <boxGeometry args={[2.4, 1.35, 0.12]} />
+        <boxGeometry args={[2.55, 1.45, 0.12]} />
         <meshStandardMaterial color="#1a1510" roughness={0.7} />
       </mesh>
       <mesh position={[0, 2.35, 0.12]}>
-        <boxGeometry args={[2.2, 1.15, 0.04]} />
+        <boxGeometry args={[2.35, 1.25, 0.04]} />
         <meshStandardMaterial color="#c9a24a" emissive="#c9a24a" emissiveIntensity={0.12} roughness={0.55} />
       </mesh>
-      <Text position={[0, 2.55, 0.16]} fontSize={0.28} color="#1a1208" anchorX="center" anchorY="middle">
+      <Text
+        position={[0, titleY, 0.16]}
+        fontSize={titleSize}
+        color="#1a1208"
+        anchorX="center"
+        anchorY="middle"
+        textAlign="center"
+        lineHeight={1.05}
+        maxWidth={2.2}
+      >
         {title}
       </Text>
-      <Text position={[0, 2.15, 0.16]} fontSize={0.18} color="#3a2a10" anchorX="center" anchorY="middle">
+      <Text position={[0, 2.08, 0.16]} fontSize={0.16} color="#3a2a10" anchorX="center" anchorY="middle">
         {sub}
       </Text>
     </group>

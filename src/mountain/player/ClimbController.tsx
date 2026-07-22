@@ -7,7 +7,6 @@ import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { usePlayerStore } from '../../stores/playerStore'
-import { useTopStore } from '../../top/topStore'
 import { MOUNTAIN } from '../config'
 import { isAtGoal, resolveHorizontal, resolveVertical, type PlayerBody } from '../collisions'
 import { useMountainControlsStore } from '../controlsStore'
@@ -18,10 +17,8 @@ const cameraTarget = new Vector3()
 
 export function ClimbController({ enabled }: { enabled: boolean }) {
   const groupRef = useRef<Group>(null)
-  // Park と同じ Meebit を優先（なければ playerStore / ローカルセーブ）
-  const topMeebit = useTopStore((state) => state.meebitNumber)
-  const playerMeebit = usePlayerStore((state) => state.meebitNumber)
-  const meebitNumber = topMeebit || playerMeebit
+  // Park 入場時に localStorage へ保存された Meebit を使う（ページ遷移後も維持）
+  const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const bodyRef = useRef<PlayerBody>({
     x: MOUNTAIN.start.x,
     y: MOUNTAIN.start.y,

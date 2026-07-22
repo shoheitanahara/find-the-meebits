@@ -24,17 +24,17 @@ type ObstacleCircle = {
 
 /**
  * ベンチ配置（見た目と共有）。
- * 外側レーン寄りに置き、アトラクション入口の動線は空ける。
+ * 外側レーン寄りに置き、アトラクション建物・入口の動線は空ける。
  */
 export const BENCH_PLACEMENTS = [
-  [-26, 11, Math.PI / 2],
-  [26, 11, -Math.PI / 2],
-  [-26, 3, Math.PI / 2],
-  [26, 3, -Math.PI / 2],
-  [-26, -5, Math.PI / 2],
-  [26, -5, -Math.PI / 2],
-  [-18, -12, 0],
-  [18, -12, 0],
+  [-28, 12, Math.PI / 2],
+  [28, 12, -Math.PI / 2],
+  [-28, 3, Math.PI / 2],
+  [28, 4, -Math.PI / 2],
+  [-28, -5, Math.PI / 2],
+  [22, 8, -Math.PI / 2],
+  [-32, -11, Math.PI / 2],
+  [10, 13.5, 0],
 ] as const
 
 /**
@@ -53,26 +53,28 @@ export const LAMP_POSITIONS: Array<[number, number]> = [
   [10, -8],
   // 中間レーン（建物と柵のあいだ）
   [-22, 10],
-  [22, 10],
+  [20, 11],
   [-22, 2],
   [22, 2],
   [-22, -7],
-  [22, -7],
   // 外周寄り（入口 X を避ける）
   [-34, 8],
-  [34, 9],
+  [34, 12],
   [-34, -1],
-  [34, 1],
+  [34, 4],
 ]
 
-/** 花壇プランターの足元座標（見た目と共有）。 */
+/**
+ * ベンチ横オブジェ（夏はパラソル）。
+ * 天蓋半径 ≈1.3 を見越し、建物 AABB から十分離す。
+ */
 export const PLANTER_POSITIONS: Array<[number, number]> = [
-  [-26, 14],
-  [26, 14],
-  [-26, -0.5],
-  [26, -0.5],
-  [-18, -8],
-  [18, -8],
+  [-28, 14.5],
+  [28, 14.5],
+  [-28, 1],
+  [28, 2],
+  [-28, -8],
+  [24, 10],
 ]
 
 const FOUNTAIN_CENTER = { x: 0, z: 3.4 }
@@ -91,7 +93,8 @@ const FEATURED_BOARD_HALF_X = 1.75
 const FEATURED_BOARD_HALF_Z = 0.5
 
 const LAMP_RADIUS = 0.38
-const PLANTER_RADIUS = 0.85
+/** パラソル天蓋ぶんも少し広めに取る */
+const PLANTER_RADIUS = 1.15
 
 function boxFromCenter(
   centerX: number,

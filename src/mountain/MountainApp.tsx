@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
-import { usePlayerStore } from '../stores/playerStore'
-import { useTopStore } from '../top/topStore'
 import { ClimbController, useMountainKeyboardBridge } from './player/ClimbController'
 import { MountainMobileControls } from './player/MobileControls'
 import { useMountainStore } from './store'
@@ -46,14 +44,6 @@ export function MountainApp() {
   const frameloop = useTabFrameloop()
   useMountainKeyboardBridge()
   const showWorld = phase !== 'title'
-
-  // Park で選んだ Meebit を山登り側にも引き継ぐ
-  useEffect(() => {
-    const topMeebit = useTopStore.getState().meebitNumber
-    if (topMeebit) {
-      usePlayerStore.getState().setMeebitNumber(topMeebit)
-    }
-  }, [])
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#87b8d8] text-slate-100">
