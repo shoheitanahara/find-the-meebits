@@ -39,6 +39,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/8th-street' : '/8th-street'
   }
 
+  if (segments.includes('mountain')) {
+    return locale === 'ja' ? '/jp/mountain' : '/mountain'
+  }
+
   if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }

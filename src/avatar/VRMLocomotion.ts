@@ -5,6 +5,10 @@ type LocomotionOptions = {
   elapsedTime: number
   isMoving: boolean
   isRunning?: boolean
+  /** 空中（ジャンプ／落下）。歩行より優先して簡易ジャンプポーズ */
+  isAirborne?: boolean
+  /** 上向きが正。上昇と落下でポーズを少し変える */
+  verticalVelocity?: number
   idleOffset?: number
   /** 歩行サイクルの開始タイミングずらし（同じ速さで位相だけずらす） */
   walkPhaseOffset?: number
@@ -123,14 +127,6 @@ export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) 
     return
   }
 
-  const speed = options.isRunning ? 12 : 7
-  const phase = options.walkPhaseOffset ?? 0
-  const stride = Math.sin(options.elapsedTime * speed + phase)
-  const counterStride = Math.sin(options.elapsedTime * speed + phase + Math.PI)
-  const idle = Math.sin(options.elapsedTime * 1.8 + (options.idleOffset ?? 0))
-  const movementWeight = options.isMoving ? 1 : 0
-  const idleWeight = 1 - movementWeight
-
   const hips = getBone(vrm, VRMHumanBoneName.Hips)
   const spine = getBone(vrm, VRMHumanBoneName.Spine)
   const chest = getBone(vrm, VRMHumanBoneName.Chest)
@@ -145,6 +141,38 @@ export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) 
   const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
   const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
   const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  // ジャンプ: 前傾＋脚たたみの単一ポーズ（上昇／落下で切り替えない）
+  if (options.isAirborne) {
+    const lean = -0.24
+    const tuck = 0.95
+
+    setRotationFast(hips, { x: lean * 0.7, y: 0, z: 0 })
+    setRotationFast(spine, { x: lean, y: 0 })
+    setRotationFast(chest, { x: lean * 0.55, y: 0, z: 0 })
+    setRotationFast(head, { x: -0.02, y: 0 })
+
+    setRotationFast(leftUpperArm, { x: 0.4, z: 0.85 })
+    setRotationFast(rightUpperArm, { x: 0.4, z: -0.85 })
+    setRotationFast(leftLowerArm, { x: 0.28, z: 0 })
+    setRotationFast(rightLowerArm, { x: 0.28, z: 0 })
+
+    setRotationFast(leftUpperLeg, { x: tuck * 1.05 })
+    setRotationFast(rightUpperLeg, { x: tuck * 0.95 })
+    setRotationFast(leftLowerLeg, { x: kneeBaseBend - tuck * 1.55 })
+    setRotationFast(rightLowerLeg, { x: kneeBaseBend - tuck * 1.45 })
+    setRotationFast(leftFoot, { x: 0.42 })
+    setRotationFast(rightFoot, { x: 0.36 })
+    return
+  }
+
+  const speed = options.isRunning ? 12 : 7
+  const phase = options.walkPhaseOffset ?? 0
+  const stride = Math.sin(options.elapsedTime * speed + phase)
+  const counterStride = Math.sin(options.elapsedTime * speed + phase + Math.PI)
+  const idle = Math.sin(options.elapsedTime * 1.8 + (options.idleOffset ?? 0))
+  const movementWeight = options.isMoving ? 1 : 0
+  const idleWeight = 1 - movementWeight
 
   setRotation(hips, {
     x: idle * 0.015 * idleWeight,
@@ -219,6 +247,25 @@ function setRotation(
   }
 
   const smoothing = 0.35
+  if (rotation.x !== undefined) bone.rotation.x = MathUtils.lerp(bone.rotation.x, rotation.x, smoothing)
+  if (rotation.y !== undefined) bone.rotation.y = MathUtils.lerp(bone.rotation.y, rotation.y, smoothing)
+  if (rotation.z !== undefined) bone.rotation.z = MathUtils.lerp(bone.rotation.z, rotation.z, smoothing)
+}
+
+/** ジャンプなど切り替えを速く見せる */
+function setRotationFast(
+  bone: Object3D | null,
+  rotation: {
+    x?: number
+    y?: number
+    z?: number
+  },
+) {
+  if (!bone) {
+    return
+  }
+
+  const smoothing = 0.62
   if (rotation.x !== undefined) bone.rotation.x = MathUtils.lerp(bone.rotation.x, rotation.x, smoothing)
   if (rotation.y !== undefined) bone.rotation.y = MathUtils.lerp(bone.rotation.y, rotation.y, smoothing)
   if (rotation.z !== undefined) bone.rotation.z = MathUtils.lerp(bone.rotation.z, rotation.z, smoothing)

@@ -19,6 +19,10 @@ const metadata = {
       title: '8th Street | Meebits Park',
       description: 'Walk the repeating night alley, spot what changed, and find the way out.',
     },
+    mountain: {
+      title: 'Mountain Climb | Meebits Park',
+      description: 'Climb the voxel mountain with jumps and dashes. Reach the summit in a few minutes.',
+    },
   },
   ja: {
     top: {
@@ -36,6 +40,10 @@ const metadata = {
     '8th-street': {
       title: '8番ストリート | Meebits Park',
       description: '繰り返す夜の路地を歩き、小さな変化を見破って出口を目指そう。',
+    },
+    mountain: {
+      title: '山登り | Meebits Park',
+      description: 'ボクセルの山をジャンプとダッシュで登り、山頂を目指そう。',
     },
   },
 } as const
