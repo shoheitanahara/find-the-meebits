@@ -11,7 +11,7 @@ import {
 } from './vrmSculptureCache'
 import type { VrmSculpturePedestal } from './worldLandmarks'
 
-export type SculptureTone = 'museum' | 'club'
+export type SculptureTone = 'museum' | 'club' | 'copper'
 
 const CLUB_SCULPTURE_MATERIAL = new MeshStandardMaterial({
   color: '#52525b',
@@ -19,6 +19,17 @@ const CLUB_SCULPTURE_MATERIAL = new MeshStandardMaterial({
   metalness: 0.22,
   emissive: '#27272a',
   emissiveIntensity: 0.35,
+})
+
+/** 公園の本日の主役向け — 明るめの艶のある銅。 */
+const COPPER_SCULPTURE_MATERIAL = new MeshStandardMaterial({
+  color: '#d99252',
+  roughness: 0.14,
+  metalness: 1,
+  // emissive が強いと金属反射が潰れてプラスチックに見える
+  emissive: '#8a4a22',
+  emissiveIntensity: 0.12,
+  envMapIntensity: 1.35,
 })
 
 function applyClubSculptureTone(root: Object3D) {
@@ -29,7 +40,14 @@ function applyClubSculptureTone(root: Object3D) {
   })
 }
 
-/** NPC がプレイヤーを向くのと同じ式で、入口（開始位置）方向を向く */
+function applyCopperSculptureTone(root: Object3D) {
+  root.traverse((object) => {
+    if (object instanceof Mesh) {
+      object.material = COPPER_SCULPTURE_MATERIAL
+    }
+  })
+}
+
 export function getEntranceFacingY(x: number, z: number) {
   const dx = PLAYER_START_POSITION[0] - x
   const dz = PLAYER_START_POSITION[2] - z
@@ -117,9 +135,13 @@ export function VrmSculpture({
         return
       }
 
-      if (sculptureTone === 'club') {
+      if (sculptureTone === 'club' || sculptureTone === 'copper') {
         const clone = cloneSkeleton(acquired) as Group
-        applyClubSculptureTone(clone)
+        if (sculptureTone === 'club') {
+          applyClubSculptureTone(clone)
+        } else {
+          applyCopperSculptureTone(clone)
+        }
         releaseVrmSculptureScene(meebitId, acquired)
         activeScene = clone
         ownsPoolRef = false

@@ -1,4 +1,5 @@
 import { MathUtils } from 'three'
+import { FEATURED_BOARD_POSITION } from './dailyFeatured'
 import { TOP_ATTRACTIONS } from './topConfig'
 
 /** プレイヤーの水平当たり半径。 */
@@ -68,6 +69,10 @@ const BENCH_LOCAL_HALF_Z = 0.42
 const INFO_BOARD_HALF_X = 1.55
 const INFO_BOARD_HALF_Z = 0.55
 
+/** 主役説明看板の半サイズ（コンパクト2列表示）。 */
+const FEATURED_BOARD_HALF_X = 1.75
+const FEATURED_BOARD_HALF_Z = 0.5
+
 const LAMP_RADIUS = 0.38
 const PLANTER_RADIUS = 0.85
 
@@ -127,6 +132,15 @@ function buildBenchObstacles(): ObstacleBox[] {
   })
 }
 
+function buildFeaturedBoardObstacle(): ObstacleBox {
+  return boxFromCenter(
+    FEATURED_BOARD_POSITION[0],
+    FEATURED_BOARD_POSITION[2],
+    FEATURED_BOARD_HALF_X,
+    FEATURED_BOARD_HALF_Z,
+  )
+}
+
 function buildCircleObstacles(): ObstacleCircle[] {
   const circles: ObstacleCircle[] = [
     { x: FOUNTAIN_CENTER.x, z: FOUNTAIN_CENTER.z, radius: FOUNTAIN_RADIUS },
@@ -142,7 +156,11 @@ function buildCircleObstacles(): ObstacleCircle[] {
   return circles
 }
 
-const PARK_BOX_OBSTACLES = [...buildAttractionObstacles(), ...buildBenchObstacles()]
+const PARK_BOX_OBSTACLES = [
+  ...buildAttractionObstacles(),
+  ...buildBenchObstacles(),
+  buildFeaturedBoardObstacle(),
+]
 const PARK_CIRCLE_OBSTACLES = buildCircleObstacles()
 
 function collidesWithBox(x: number, z: number, radius: number, box: ObstacleBox) {

@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Stars, Text } from '@react-three/drei'
+import { PerspectiveCamera, Stars, Text, Environment } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
@@ -7,11 +7,18 @@ import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomoti
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE } from '../game/gameConfig'
+import { formatTraitDisplayName } from '../game/traitHunt'
 import { getLocale } from '../i18n/locale'
+import type { MeebitTraitMap } from '../data/meebitTraits'
 import { useTouchControlsStore } from '../stores/touchControlsStore'
 import { playSfx } from '../ui/sfx'
 import { VrmSculpture } from '../world/VrmSculpture'
 import { TOP_ATTRACTIONS, type Attraction } from './topConfig'
+import {
+  FEATURED_BOARD_POSITION,
+  type DailyParkLineup,
+  type DailyVisitor,
+} from './dailyFeatured'
 import {
   BENCH_PLACEMENTS,
   LAMP_POSITIONS,
@@ -30,7 +37,6 @@ const HUB_MAX_Z = 14
 const ENTER_DISTANCE = 3.1
 const ENTRANCE_HALF_WIDTH = 1.15
 const ENTRANCE_TRIGGER_DEPTH = 0.7
-const TOP_NPC_COUNT = 30
 const TOP_NPC_WALK_SPEED = 1.15
 const TOP_NPC_WALK_PATTERNS = [
   { walkSeconds: [4.5, 8], idleSeconds: [0.8, 1.8], turnSpread: Math.PI * 0.35 },
@@ -42,7 +48,13 @@ const cameraOffset = new Vector3(CAMERA_FOLLOW_OFFSET_XZ[0], 6.5, CAMERA_FOLLOW_
 const cameraPosition = new Vector3()
 const cameraTarget = new Vector3()
 
-export function TopScene({ onEnter }: { onEnter: (id: AttractionId) => void }) {
+export function TopScene({
+  onEnter,
+  lineup,
+}: {
+  onEnter: (id: AttractionId) => void
+  lineup: DailyParkLineup
+}) {
   const locale = getLocale()
 
   return (
@@ -72,8 +84,15 @@ export function TopScene({ onEnter }: { onEnter: (id: AttractionId) => void }) {
         shadow-camera-bottom={-24}
       />
       <pointLight position={[0, 9, 2]} intensity={38} distance={38} color="#ffd38a" />
+      {/* PBR の metalness は環境反射がないとほぼ効かない。弱めの IBL を足す。 */}
+      <Environment preset="night" environmentIntensity={0.55} />
 
-      <HubGround />
+      <HubGround featuredId={lineup.featuredId} />
+      <FeaturedInfoBoard
+        featuredId={lineup.featuredId}
+        featuredTraits={lineup.featuredTraits}
+        locale={locale}
+      />
       <ParkLamps />
       <ParkDetails />
       {TOP_ATTRACTIONS.map((attraction) => (
@@ -84,7 +103,7 @@ export function TopScene({ onEnter }: { onEnter: (id: AttractionId) => void }) {
           onEnter={onEnter}
         />
       ))}
-      <TopNpcCrowd />
+      <TopNpcCrowd visitors={lineup.visitors} />
       <TopPlayer />
       <TopPlayerController onEnter={onEnter} />
     </>
@@ -105,7 +124,7 @@ function TopFollowCamera() {
   return null
 }
 
-function HubGround() {
+function HubGround({ featuredId }: { featuredId: number }) {
   return (
     <group>
       {/* 島の外側を覆う、月明かりを反射する海。 */}
@@ -149,7 +168,7 @@ function HubGround() {
         <meshStandardMaterial color="#7b6648" metalness={0.25} roughness={0.62} />
       </mesh>
       <Fountain />
-      <FountainStatue />
+      <FountainStatue featuredId={featuredId} />
       {[-21.5, 21.5].map((x) => (
         <group key={x} position={[x, 0, 0]}>
           {[-11, -4, 3, 10].map((z) => (
@@ -185,23 +204,24 @@ function Fountain() {
   )
 }
 
-/** 噴水中央の Meebit #11143 銅像。丸い石柱の上に立たせる。 */
-function FountainStatue() {
+/** 噴水中央の本日の主役銅像。丸い石柱の上に立たせる。 */
+function FountainStatue({ featuredId }: { featuredId: number }) {
   return (
     <group position={[0, 0, 3.4]}>
       <mesh position={[0, 0.95, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.62, 0.78, 1.1, 32]} />
-        <meshStandardMaterial color="#b7a884" metalness={0.24} roughness={0.6} />
+        <meshStandardMaterial color="#c9a06a" metalness={0.62} roughness={0.36} />
       </mesh>
       <mesh position={[0, 1.54, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.72, 0.66, 0.16, 32]} />
-        <meshStandardMaterial color="#c8b896" metalness={0.32} roughness={0.5} />
+        <meshStandardMaterial color="#e0b878" metalness={0.78} roughness={0.26} />
       </mesh>
       <VrmSculpture
-        meebitId={11143}
+        meebitId={featuredId}
         position={[0, 1.62, 0]}
         pedestal="light"
         facingY={0}
+        sculptureTone="copper"
         hidePedestal
       />
     </group>
@@ -545,20 +565,160 @@ function AttractionInfoBoard({
   )
 }
 
+/** 本日の主役のトレイトを噴水脇に掲示する（見出し＋ID＋2列トレイト）。 */
+function FeaturedInfoBoard({
+  featuredId,
+  featuredTraits,
+  locale,
+}: {
+  featuredId: number
+  featuredTraits: MeebitTraitMap
+  locale: 'en' | 'ja'
+}) {
+  const heading = locale === 'ja' ? '本日の主役' : "TODAY'S STAR"
+  const orderedTraits = orderFeaturedTraits(featuredTraits)
+  const mid = Math.ceil(orderedTraits.length / 2)
+  const leftTraits = orderedTraits.slice(0, mid)
+  const rightTraits = orderedTraits.slice(mid)
+
+  return (
+    <group position={FEATURED_BOARD_POSITION} rotation={[0, 0, 0]}>
+      <mesh position={[0, 0.1, 0]}>
+        <boxGeometry args={[3.35, 0.2, 0.9]} />
+        <meshStandardMaterial color="#29242c" roughness={0.62} />
+      </mesh>
+      {[-1.35, 1.35].map((x) => (
+        <mesh key={x} position={[x, 1.05, 0]}>
+          <cylinderGeometry args={[0.05, 0.065, 1.95, 10]} />
+          <meshStandardMaterial color="#a8864d" metalness={0.66} roughness={0.34} />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.35, 0.04]}>
+        <boxGeometry args={[3.4, 1.85, 0.14]} />
+        <meshStandardMaterial
+          color="#17151d"
+          emissive="#d4b46a"
+          emissiveIntensity={0.1}
+          metalness={0.18}
+          roughness={0.5}
+        />
+      </mesh>
+
+      {/* ヘッダー帯（余白を詰めてコンパクトに） */}
+      <mesh position={[0, 2.02, 0.05]}>
+        <boxGeometry args={[3.25, 0.38, 0.04]} />
+        <meshStandardMaterial color="#221c28" roughness={0.55} metalness={0.12} />
+      </mesh>
+      <Text
+        position={[-0.78, 2.04, 0.14]}
+        fontSize={0.15}
+        color="#e2c77f"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={1.5}
+      >
+        {heading}
+      </Text>
+      <Text
+        position={[0.88, 2.04, 0.14]}
+        fontSize={0.22}
+        color="#f4ead2"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {`#${featuredId}`}
+      </Text>
+
+      <mesh position={[0, 1.78, 0.13]}>
+        <boxGeometry args={[3.05, 0.012, 0.02]} />
+        <meshStandardMaterial color="#d4b46a" emissive="#8b632b" emissiveIntensity={0.35} />
+      </mesh>
+
+      <FeaturedTraitColumn traits={leftTraits} position={[-0.82, 1.25, 0.15]} />
+      <FeaturedTraitColumn traits={rightTraits} position={[0.82, 1.25, 0.15]} />
+    </group>
+  )
+}
+
+const FEATURED_TRAIT_ORDER = [
+  'Type',
+  'Hair Style',
+  'Hair Color',
+  'Glasses',
+  'Hat',
+  'Hat Color',
+  'Beard',
+  'Beard Color',
+  'Shirt',
+  'Shirt Color',
+  'Overshirt',
+  'Overshirt Color',
+  'Pants',
+  'Pants Color',
+  'Shoes',
+  'Shoes Color',
+  'Necklace',
+  'Earring',
+  'Tattoo',
+] as const
+
+function orderFeaturedTraits(traits: MeebitTraitMap): Array<[string, string]> {
+  const entries = Object.entries(traits)
+  const rank = new Map(FEATURED_TRAIT_ORDER.map((key, index) => [key, index]))
+  return entries.sort((a, b) => {
+    const ra = rank.get(a[0] as (typeof FEATURED_TRAIT_ORDER)[number]) ?? 100
+    const rb = rank.get(b[0] as (typeof FEATURED_TRAIT_ORDER)[number]) ?? 100
+    if (ra !== rb) return ra - rb
+    return a[0].localeCompare(b[0])
+  })
+}
+
+function FeaturedTraitColumn({
+  traits,
+  position,
+}: {
+  traits: Array<[string, string]>
+  position: [number, number, number]
+}) {
+  if (traits.length === 0) return null
+
+  // 1トレイト1行で2列に収める（「Type · Human」形式）
+  const lines = traits
+    .map(([type, value]) => `${type} · ${formatTraitDisplayName(type, value)}`)
+    .join('\n')
+
+  return (
+    <Text
+      position={position}
+      fontSize={0.118}
+      lineHeight={1.32}
+      color="#d8cfc0"
+      anchorX="center"
+      anchorY="middle"
+      textAlign="left"
+      maxWidth={1.55}
+    >
+      {lines}
+    </Text>
+  )
+}
+
 type TopNpcSpawn = {
   meebitNumber: number
   x: number
   z: number
   rotationY: number
   walkPattern: 0 | 1 | 2
+  matched: boolean
 }
 
-function createTopNpcSpawns(): TopNpcSpawn[] {
+function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
+  // ID は日次固定。位置・向きだけ訪問ごとにランダムにして探しがいを出す。
   const spawns: TopNpcSpawn[] = []
-  const usedMeebitNumbers = new Set<number>([11143])
   let attempts = 0
+  const maxAttempts = visitors.length * 80
 
-  while (spawns.length < TOP_NPC_COUNT && attempts < 2000) {
+  while (spawns.length < visitors.length && attempts < maxAttempts) {
     attempts += 1
     const x = MathUtils.randFloat(-18, 18)
     const z = MathUtils.randFloat(-4.8, 13)
@@ -566,18 +726,39 @@ function createTopNpcSpawns(): TopNpcSpawn[] {
     if (!isTopNpcPositionWalkable(x, z)) continue
     if (spawns.some((spawn) => Math.hypot(spawn.x - x, spawn.z - z) < 1.45)) continue
 
-    let meebitNumber = MathUtils.randInt(1, 20000)
-    while (usedMeebitNumbers.has(meebitNumber)) {
-      meebitNumber = MathUtils.randInt(1, 20000)
-    }
-    usedMeebitNumbers.add(meebitNumber)
+    const visitor = visitors[spawns.length]
+    if (!visitor) break
 
     spawns.push({
-      meebitNumber,
+      meebitNumber: visitor.meebitNumber,
+      matched: visitor.matched,
       x,
       z,
       rotationY: Math.random() * Math.PI * 2,
       walkPattern: (spawns.length % TOP_NPC_WALK_PATTERNS.length) as 0 | 1 | 2,
+    })
+  }
+
+  // 位置が取れなかった余りは円配置＋ランダムジッターで埋める
+  while (spawns.length < visitors.length) {
+    const visitor = visitors[spawns.length]
+    if (!visitor) break
+    const fallbackIndex = spawns.length
+    const angle = (fallbackIndex / visitors.length) * Math.PI * 2 + Math.random() * 0.4
+    const radius = 6 + (fallbackIndex % 5) * 1.4 + MathUtils.randFloat(-0.6, 0.6)
+    let x = Math.cos(angle) * radius
+    let z = 6 + Math.sin(angle) * radius * 0.55
+    if (!isTopNpcPositionWalkable(x, z)) {
+      x = MathUtils.clamp(x, -17, 17)
+      z = MathUtils.clamp(z, -4.5, 12.5)
+    }
+    spawns.push({
+      meebitNumber: visitor.meebitNumber,
+      matched: visitor.matched,
+      x,
+      z,
+      rotationY: Math.random() * Math.PI * 2,
+      walkPattern: (fallbackIndex % TOP_NPC_WALK_PATTERNS.length) as 0 | 1 | 2,
     })
   }
 
@@ -593,16 +774,17 @@ function isTopNpcPositionWalkable(x: number, z: number) {
   return isParkPositionWalkable(x, z, NPC_COLLISION_RADIUS)
 }
 
-function TopNpcCrowd() {
+function TopNpcCrowd({ visitors }: { visitors: DailyVisitor[] }) {
   const started = useTopStore((state) => state.started)
-  const spawns = useMemo(createTopNpcSpawns, [])
+  // visitors（日次固定ID）だけ依存。位置はマウントごとにランダム。
+  const spawns = useMemo(() => createTopNpcSpawns(visitors), [visitors])
 
   if (!started) return null
 
   return (
     <group>
       {spawns.map((spawn, index) => (
-        <TopNpc key={spawn.meebitNumber} spawn={spawn} index={index} />
+        <TopNpc key={`${spawn.meebitNumber}-${index}`} spawn={spawn} index={index} />
       ))}
     </group>
   )
@@ -611,11 +793,12 @@ function TopNpcCrowd() {
 function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
   const groupRef = useRef<Group>(null)
   const walkPattern = TOP_NPC_WALK_PATTERNS[spawn.walkPattern]
-  const isWalkingRef = useRef(Math.random() > 0.35)
+  // 初期歩行状態も index 由来で固定（リロードで挙動がぶれない）
+  const isWalkingRef = useRef((index * 17) % 10 > 3)
   const behaviorTimerRef = useRef(
     isWalkingRef.current
-      ? MathUtils.randFloat(walkPattern.walkSeconds[0], walkPattern.walkSeconds[1])
-      : MathUtils.randFloat(walkPattern.idleSeconds[0], walkPattern.idleSeconds[1]),
+      ? walkPattern.walkSeconds[0] + ((index * 0.37) % 1) * (walkPattern.walkSeconds[1] - walkPattern.walkSeconds[0])
+      : walkPattern.idleSeconds[0] + ((index * 0.53) % 1) * (walkPattern.idleSeconds[1] - walkPattern.idleSeconds[0]),
   )
   const rotationYRef = useRef(spawn.rotationY)
   const targetRotationYRef = useRef(spawn.rotationY)

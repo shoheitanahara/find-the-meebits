@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { useCallback, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { getLocale } from '../i18n/locale'
 import { usePlayerStore } from '../stores/playerStore'
@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '../ui/LanguageSwitcher'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { TargetPreview } from '../ui/TargetPreview'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
+import { getDailyParkLineup, type DailyParkLineup } from './dailyFeatured'
 import { TopMobileControls } from './TopControls'
 import { TOP_ATTRACTIONS } from './topConfig'
 import { TopScene } from './TopScene'
@@ -25,6 +26,7 @@ const copy = {
     mobileControls: 'Use the joystick to move',
     approach: 'Walk up to an attraction entrance.',
     enter: 'Enter',
+    preparing: 'Preparing today’s guests…',
     attractions: {
       find: 'Find the Meebit',
       traits: 'Trait Hunt',
@@ -42,6 +44,7 @@ const copy = {
     mobileControls: 'スティックで移動',
     approach: 'アトラクションの入口まで歩いてください。',
     enter: '入る',
+    preparing: '本日の来場者を準備中…',
     attractions: {
       find: 'Find the Meebit',
       traits: 'トレイトハント',
@@ -74,9 +77,27 @@ export function TopApp() {
   const [returningAttractionId] = useState(getReturningAttractionId)
   const isReturningFromGame = returningAttractionId !== null
   const previewMeebitNumber = normalizePlayerMeebitNumber(meebitInput)
+  const [lineup, setLineup] = useState<DailyParkLineup | null>(null)
+  const [lineupError, setLineupError] = useState(false)
+
+  // 日付シードのラインナップを先読み（ゲーム往復でも sessionStorage で即復帰）
+  useEffect(() => {
+    let cancelled = false
+    void getDailyParkLineup()
+      .then((next) => {
+        if (!cancelled) setLineup(next)
+      })
+      .catch((error) => {
+        console.warn('[TopApp] daily lineup failed', error)
+        if (!cancelled) setLineupError(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useLayoutEffect(() => {
-    if (!returningAttractionId) return
+    if (!returningAttractionId || !lineup) return
 
     const attraction = TOP_ATTRACTIONS.find((item) => item.id === returningAttractionId)
     if (!attraction) return
@@ -91,7 +112,7 @@ export function TopApp() {
     const url = new URL(window.location.href)
     url.searchParams.delete('from')
     window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
-  }, [returningAttractionId])
+  }, [returningAttractionId, lineup])
 
   const enterAttraction = useCallback((id: AttractionId) => {
     // 遷移先のゲームが同じアバターIDを復元できるよう、移動前に保存する。
@@ -103,6 +124,7 @@ export function TopApp() {
   }, [])
 
   const startPark = () => {
+    if (!lineup) return
     const meebitNumber = normalizePlayerMeebitNumber(meebitInput)
     setMeebitInput(String(meebitNumber))
     usePlayerStore.getState().setMeebitNumber(meebitNumber)
@@ -120,19 +142,32 @@ export function TopApp() {
     ? TOP_ATTRACTIONS.find((attraction) => attraction.id === nearestAttraction)
     : null
 
+  const showSelectionCard = !started && !isReturningFromGame
+  const parkReady = lineup !== null
+
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#070914] text-[#f4ead2]">
-      <Canvas
-        dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}
-        shadows
-        gl={{ antialias: getEnableAntialias(), powerPreference: 'high-performance' }}
-        className="absolute inset-0"
-      >
-        <TopScene onEnter={enterAttraction} />
-      </Canvas>
+      {parkReady ? (
+        <Canvas
+          dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}
+          shadows
+          gl={{ antialias: getEnableAntialias(), powerPreference: 'high-performance' }}
+          className="absolute inset-0"
+        >
+          <TopScene onEnter={enterAttraction} lineup={lineup} />
+        </Canvas>
+      ) : null}
       <TargetPreviewCapture />
 
-      {!started && !isReturningFromGame ? (
+      {!parkReady ? (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#070914]/92 px-4">
+          <p className="text-sm tracking-[0.18em] text-[#d8c9aa]">
+            {lineupError ? (locale === 'ja' ? '読み込みに失敗しました' : 'Failed to load') : t.preparing}
+          </p>
+        </div>
+      ) : null}
+
+      {showSelectionCard && parkReady ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_50%_16%,rgba(88,64,122,0.32),transparent_42%),linear-gradient(180deg,rgba(3,5,16,0.42),rgba(3,5,16,0.84))] px-4 py-6 backdrop-blur-[4px]">
           <LanguageSwitcher className="absolute right-4 top-4 z-10" tone="dark" />
           <section className="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/92 shadow-[0_28px_90px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]">
@@ -165,44 +200,46 @@ export function TopApp() {
 
                 <div className="mt-7">
                   <div className="flex items-center justify-between gap-3">
-                <label
-                  htmlFor="top-meebit-number"
+                    <label
+                      htmlFor="top-meebit-number"
                       className="text-[0.64rem] font-semibold uppercase tracking-[0.2em] text-[#d8c9aa]"
-                >
-                  {t.avatar}
-                </label>
+                    >
+                      {t.avatar}
+                    </label>
+                    <button
+                      type="button"
+                      className="rounded-full border border-[#d4b46a]/35 bg-[#d4b46a]/10 px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#e9cf91] transition hover:border-[#e9cf91]/70 hover:bg-[#d4b46a]/20"
+                      onClick={randomizeMeebit}
+                    >
+                      {t.random}
+                    </button>
+                  </div>
+                  <input
+                    id="top-meebit-number"
+                    type="number"
+                    min={1}
+                    max={20000}
+                    inputMode="numeric"
+                    value={meebitInput}
+                    onChange={(event) => setMeebitInput(event.target.value)}
+                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/25 px-4 py-3 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl text-[#f4ead2] outline-none transition placeholder:text-white/20 focus:border-[#d4b46a]/70 focus:ring-2 focus:ring-[#d4b46a]/10"
+                  />
+                </div>
+
                 <button
                   type="button"
-                      className="rounded-full border border-[#d4b46a]/35 bg-[#d4b46a]/10 px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#e9cf91] transition hover:border-[#e9cf91]/70 hover:bg-[#d4b46a]/20"
-                  onClick={randomizeMeebit}
-                >
-                  {t.random}
-                </button>
-              </div>
-                <input
-                  id="top-meebit-number"
-                  type="number"
-                  min={1}
-                  max={20000}
-                  inputMode="numeric"
-                  value={meebitInput}
-                  onChange={(event) => setMeebitInput(event.target.value)}
-                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/25 px-4 py-3 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl text-[#f4ead2] outline-none transition placeholder:text-white/20 focus:border-[#d4b46a]/70 focus:ring-2 focus:ring-[#d4b46a]/10"
-                />
-              </div>
-
-            <button
-              type="button"
                   className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25),inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:brightness-110 active:scale-[0.99]"
-              onClick={startPark}
-            >
-              {t.enterPark}
-            </button>
+                  onClick={startPark}
+                >
+                  {t.enterPark}
+                </button>
               </div>
             </div>
           </section>
         </div>
-      ) : (
+      ) : null}
+
+      {started && parkReady ? (
         <>
           <div className="pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md">
             <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
@@ -227,7 +264,7 @@ export function TopApp() {
 
           <TopMobileControls />
         </>
-      )}
+      ) : null}
     </main>
   )
 }
