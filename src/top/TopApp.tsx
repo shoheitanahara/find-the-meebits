@@ -9,6 +9,7 @@ import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { TargetPreview } from '../ui/TargetPreview'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { getDailyParkLineup, type DailyParkLineup } from './dailyFeatured'
+import { getParkSeason } from './parkSeason'
 import { TopMobileControls } from './TopControls'
 import { TOP_ATTRACTIONS } from './topConfig'
 import { TopScene } from './TopScene'
@@ -17,6 +18,7 @@ import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { useTopStore, type AttractionId } from './topStore'
 import { useDialogueStore } from '../dialogue/dialogueStore'
+import { ui } from '../i18n/ui'
 
 const copy = {
   en: {
@@ -74,6 +76,8 @@ function getReturningAttractionId(): AttractionId | null {
 export function TopApp() {
   const locale = getLocale()
   const t = copy[locale]
+  const uiT = ui()
+  const showSummerVer = getParkSeason() === 'summer'
   const started = useTopStore((state) => state.started)
   const nearestAttraction = useTopStore((state) => state.nearestAttraction)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
@@ -250,7 +254,16 @@ export function TopApp() {
           <ParkDialogueBox />
           <ParkInteractionPrompt />
           <div className="pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md">
-            <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
+            {showSummerVer ? (
+              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-sky-300/90">
+                {uiT.summerVer}
+              </p>
+            ) : null}
+            <p
+              className={`font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f] ${
+                showSummerVer ? 'mt-1' : ''
+              }`}
+            >
               Meebits Park
             </p>
             <p className="mt-1.5 hidden text-[0.68rem] text-[#d2c9b7] lg:block">{t.controls}</p>

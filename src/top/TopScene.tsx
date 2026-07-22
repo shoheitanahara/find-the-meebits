@@ -26,6 +26,9 @@ import {
 } from './dailyFeatured'
 import { setParkDialogueContext } from './interactWithParkNpc'
 import { parkNpcIdFor, registerParkNpcs } from './parkNpcRegistry'
+import { ParkSeasonDecor, PARK_SIDE_TREE_XZ } from './ParkSeasonDecor'
+import { ParkSummerShore } from './ParkSummerShore'
+import { getParkSeason, getParkSeasonLook, type ParkSeasonLook } from './parkSeason'
 import {
   BENCH_PLACEMENTS,
   LAMP_POSITIONS,
@@ -35,6 +38,7 @@ import {
   isParkPositionWalkable,
   resolveParkMovement,
 } from './topCollisions'
+import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
@@ -76,12 +80,16 @@ export function TopScene({
   lineup: DailyParkLineup
 }) {
   const locale = getLocale()
+  const season = getParkSeason()
+  const look = getParkSeasonLook(season)
 
   return (
     <>
-      <color attach="background" args={['#111a33']} />
-      <fog attach="fog" args={['#17233d', 34, 82]} />
-      <Stars radius={72} depth={28} count={900} factor={2.2} saturation={0.15} fade speed={0.25} />
+      <color attach="background" args={[look.backgroundColor]} />
+      <fog attach="fog" args={[look.fogColor, look.fogNear, look.fogFar]} />
+      {look.showStars ? (
+        <Stars radius={72} depth={28} count={900} factor={2.2} saturation={0.15} fade speed={0.25} />
+      ) : null}
       <PerspectiveCamera
         makeDefault
         position={[0, 6.5, 18]}
@@ -90,32 +98,43 @@ export function TopScene({
         far={100}
       />
       <TopFollowCamera />
-      <ambientLight intensity={0.82} color="#c4c9eb" />
-      <hemisphereLight args={['#8492c3', '#35293a', 1.45]} />
+      <ambientLight intensity={look.ambientIntensity} color={look.ambientColor} />
+      <hemisphereLight
+        args={[look.hemisphereSky, look.hemisphereGround, look.hemisphereIntensity]}
+      />
       <directionalLight
         castShadow
         position={[-14, 20, 10]}
-        intensity={2.25}
-        color="#d8e1ff"
+        intensity={look.directionalIntensity}
+        color={look.directionalColor}
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-24}
         shadow-camera-right={24}
         shadow-camera-top={24}
         shadow-camera-bottom={-24}
       />
-      <pointLight position={[0, 9, 2]} intensity={38} distance={38} color="#ffd38a" />
+      <pointLight
+        position={[0, 9, 2]}
+        intensity={look.accentPointIntensity}
+        distance={38}
+        color={look.accentPointColor}
+      />
       {/* PBR の metalness は環境反射がないとほぼ効かない。弱めの IBL を足す。 */}
-      <Environment preset="night" environmentIntensity={0.55} />
+      <Environment
+        preset={look.environmentPreset}
+        environmentIntensity={look.environmentIntensity}
+      />
 
-      <HubGround featuredId={lineup.featuredId} />
+      <HubGround featuredId={lineup.featuredId} look={look} />
+      <ParkSeasonDecor season={season} />
       <FeaturedInfoBoard
         featuredId={lineup.featuredId}
         featuredTraits={lineup.featuredTraits}
         themeTrait={lineup.themeTrait}
         locale={locale}
       />
-      <ParkLamps />
-      <ParkDetails />
+      <ParkLamps look={look} />
+      <ParkDetails benchProp={look.benchProp} />
       {TOP_ATTRACTIONS.map((attraction) => (
         <AttractionBuilding
           key={attraction.id}
@@ -208,56 +227,63 @@ function TopFollowCamera() {
   return null
 }
 
-function HubGround({ featuredId }: { featuredId: number }) {
+function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonLook }) {
   return (
     <group>
-      {/* 島の外側を覆う、月明かりを反射する海。 */}
-      <mesh position={[0, -0.42, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[180, 180]} />
-        <meshStandardMaterial
-          color="#0b4163"
-          emissive="#0d5275"
-          emissiveIntensity={0.2}
-          metalness={0.45}
-          roughness={0.24}
-        />
-      </mesh>
-      <mesh position={[0, -0.25, 0]} receiveShadow>
-        <cylinderGeometry args={[26, 27, 0.5, 64]} />
-        <meshStandardMaterial color="#3a3440" roughness={0.92} />
-      </mesh>
+      {look.useSummerShore ? (
+        <ParkSummerShore look={look} />
+      ) : (
+        <>
+          {/* 島の外側を覆う、月明かりを反射する海。 */}
+          <mesh position={[0, -0.42, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[180, 180]} />
+            <meshStandardMaterial
+              color={look.oceanColor}
+              emissive={look.oceanEmissive}
+              emissiveIntensity={look.oceanEmissiveIntensity}
+              metalness={0.45}
+              roughness={0.24}
+            />
+          </mesh>
+          <mesh position={[0, -0.25, 0]} receiveShadow>
+            <cylinderGeometry args={[26, 27, 0.5, 64]} />
+            <meshStandardMaterial color={look.islandColor} roughness={0.92} />
+          </mesh>
+        </>
+      )}
       <mesh position={[0, 0.015, 1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[25.3, 64]} />
-        <meshStandardMaterial color="#303746" roughness={0.88} metalness={0.08} />
+        <meshStandardMaterial color={look.plazaColor} roughness={0.88} metalness={0.08} />
       </mesh>
       <mesh position={[0, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[29, 31]} />
-        <meshStandardMaterial color="#554d52" roughness={0.82} metalness={0.08} />
+        <meshStandardMaterial color={look.pathColor} roughness={0.82} metalness={0.08} />
       </mesh>
       {/* 大判の敷石で中央通りに奥行きと素材感を加える。 */}
       {Array.from({ length: 16 }, (_, index) => 14.2 - index * 1.9).map((z, index) => (
         <mesh key={`paver-${z}`} position={[0, 0.055, z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[28.6, 1.72]} />
-          <meshStandardMaterial color={index % 2 === 0 ? '#5e565b' : '#50494f'} roughness={0.9} />
+          <meshStandardMaterial
+            color={index % 2 === 0 ? look.paverColorA : look.paverColorB}
+            roughness={0.9}
+          />
         </mesh>
       ))}
       {[-14.45, 14.45].map((x) => (
         <mesh key={`path-edge-${x}`} position={[x, 0.07, 0.9]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[0.18, 30.8]} />
-          <meshStandardMaterial color="#b89758" metalness={0.42} roughness={0.42} />
+          <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
         </mesh>
       ))}
       <mesh position={[0, 0.05, 3.4]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[2.2, 2.85, 48]} />
-        <meshStandardMaterial color="#7b6648" metalness={0.25} roughness={0.62} />
+        <meshStandardMaterial color={look.fountainRingColor} metalness={0.25} roughness={0.62} />
       </mesh>
       <Fountain />
       <FountainStatue featuredId={featuredId} />
-      {[-21.5, 21.5].map((x) => (
-        <group key={x} position={[x, 0, 0]}>
-          {[-11, -4, 3, 10].map((z) => (
-            <Tree key={z} z={z} />
-          ))}
+      {PARK_SIDE_TREE_XZ.map(([x, z]) => (
+        <group key={`${x}-${z}`} position={[x, 0, 0]}>
+          <Tree z={z} />
         </group>
       ))}
     </group>
@@ -338,7 +364,7 @@ function Tree({ z }: { z: number }) {
   )
 }
 
-function ParkLamps() {
+function ParkLamps({ look }: { look: ParkSeasonLook }) {
   return (
     <group>
       {LAMP_POSITIONS.map(([x, z]) => (
@@ -359,7 +385,11 @@ function ParkLamps() {
             <group key={lanternX} position={[lanternX, 3.05, 0]}>
               <mesh>
                 <sphereGeometry args={[0.19, 14, 12]} />
-                <meshStandardMaterial color="#fff0bd" emissive="#f6b84f" emissiveIntensity={3.2} />
+                <meshStandardMaterial
+                  color="#fff0bd"
+                  emissive="#f6b84f"
+                  emissiveIntensity={look.lampEmissiveIntensity}
+                />
               </mesh>
               <mesh position={[0, 0.25, 0]}>
                 <coneGeometry args={[0.23, 0.22, 8]} />
@@ -367,21 +397,31 @@ function ParkLamps() {
               </mesh>
             </group>
           ))}
-          <pointLight position={[0, 3.05, 0]} intensity={14} distance={8.5} color="#ffd080" />
+          <pointLight
+            position={[0, 3.05, 0]}
+            intensity={look.lampLightIntensity}
+            distance={8.5}
+            color="#ffd080"
+          />
         </group>
       ))}
     </group>
   )
 }
 
-function ParkDetails() {
+function ParkDetails({ benchProp }: { benchProp: ParkBenchPropKind }) {
   return (
     <group>
       {BENCH_PLACEMENTS.map(([x, z, rotationY], index) => (
         <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
       ))}
       {PLANTER_POSITIONS.map(([x, z], index) => (
-        <FlowerPlanter key={`planter-${index}`} position={[x, 0, z]} />
+        <ParkBenchProp
+          key={`bench-prop-${index}`}
+          kind={benchProp}
+          position={[x, 0, z]}
+          index={index}
+        />
       ))}
       {[-1, 1].map((side) => (
         <group key={`railing-${side}`} position={[side * 20.2, 0, 1]}>
@@ -436,31 +476,6 @@ function ClassicBench({
           </mesh>
         </group>
       ))}
-    </group>
-  )
-}
-
-function FlowerPlanter({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.35, 0]}>
-        <cylinderGeometry args={[0.7, 0.58, 0.7, 16]} />
-        <meshStandardMaterial color="#a18b70" roughness={0.7} />
-      </mesh>
-      {[0, 1, 2, 3, 4, 5].map((index) => {
-        const angle = (index / 6) * Math.PI * 2
-        return (
-          <mesh key={index} position={[Math.cos(angle) * 0.38, 0.85, Math.sin(angle) * 0.38]}>
-            <sphereGeometry args={[0.22, 10, 8]} />
-            <meshStandardMaterial
-              color={index % 2 === 0 ? '#d47b9a' : '#e2b35f'}
-              emissive={index % 2 === 0 ? '#8a3455' : '#9b6724'}
-              emissiveIntensity={0.18}
-              roughness={0.75}
-            />
-          </mesh>
-        )
-      })}
     </group>
   )
 }
