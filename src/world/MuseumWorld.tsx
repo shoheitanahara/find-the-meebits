@@ -1,5 +1,6 @@
 import { Buildings } from './Buildings'
 import { Ground } from './Ground'
+import { MatchHallDecor } from './MatchHallDecor'
 import { Ocean } from './Ocean'
 import { Plaza } from './Plaza'
 import { Props } from './Props'
@@ -14,6 +15,7 @@ export function MuseumWorld() {
       <Plaza />
       <Buildings />
       <Props />
+      <MatchHallDecor />
     </group>
   )
 }

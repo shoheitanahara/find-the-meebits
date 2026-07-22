@@ -54,13 +54,6 @@ export const PLANTER_POSITIONS: Array<[number, number]> = [
 const FOUNTAIN_CENTER = { x: 0, z: 3.4 }
 const FOUNTAIN_RADIUS = 2.05
 
-/** 建物本体（box 7×5）と入口ドア幅。入口は通り抜け可能にして自動遷移を残す。 */
-const BUILDING_HALF_WIDTH = 3.5
-const BUILDING_HALF_DEPTH = 2.5
-const DOOR_HALF_WIDTH = 1.2
-/** 正面から奥へ開けるアルコーブ深さ（建物内部に少し入れる）。 */
-const DOOR_ALCOVE_DEPTH = 2.05
-
 /** ベンチのローカル半サイズ（座席 2.25 × 0.65）。 */
 const BENCH_LOCAL_HALF_X = 1.18
 const BENCH_LOCAL_HALF_Z = 0.42
@@ -92,31 +85,33 @@ function boxFromCenter(
 
 /**
  * アトラクション建物の当たり。
- * 左右の翼 + 背面ブロックでドア中央を空け、入口トリガーまで歩けるようにする。
+ * 各棟の footprint に合わせ、左右の翼 + 背面でドア中央を空けて入口まで歩けるようにする。
  */
 function buildAttractionObstacles(): ObstacleBox[] {
   const boxes: ObstacleBox[] = []
 
   for (const attraction of TOP_ATTRACTIONS) {
-    const { x: ax, z: az } = attraction
-    const wingWidth = BUILDING_HALF_WIDTH - DOOR_HALF_WIDTH
-    const wingCenterOffset = DOOR_HALF_WIDTH + wingWidth / 2
+    const { x: ax, z: az, footprint, infoBoardLocal } = attraction
+    const { halfWidth, halfDepth, doorHalfWidth, alcoveDepth, extraBoxes } = footprint
+    const wingWidth = halfWidth - doorHalfWidth
+    const wingCenterOffset = doorHalfWidth + wingWidth / 2
 
-    // 左右の翼（建物全奥行き）
     boxes.push(
-      boxFromCenter(ax - wingCenterOffset, az, wingWidth / 2, BUILDING_HALF_DEPTH),
-      boxFromCenter(ax + wingCenterOffset, az, wingWidth / 2, BUILDING_HALF_DEPTH),
+      boxFromCenter(ax - wingCenterOffset, az, wingWidth / 2, halfDepth),
+      boxFromCenter(ax + wingCenterOffset, az, wingWidth / 2, halfDepth),
     )
 
-    // 背面ブロック（正面アルコーブを残す）
-    const backHalfDepth = (BUILDING_HALF_DEPTH * 2 - DOOR_ALCOVE_DEPTH) / 2
-    const backCenterZ = az - BUILDING_HALF_DEPTH + backHalfDepth
-    boxes.push(boxFromCenter(ax, backCenterZ, BUILDING_HALF_WIDTH, backHalfDepth))
+    const backHalfDepth = (halfDepth * 2 - alcoveDepth) / 2
+    const backCenterZ = az - halfDepth + backHalfDepth
+    boxes.push(boxFromCenter(ax, backCenterZ, halfWidth, backHalfDepth))
 
-    // 入口脇の説明看板
-    const infoBoardX = ax + (ax > 0 ? -4.2 : 4.2)
-    const infoBoardZ = az + 3.25
-    boxes.push(boxFromCenter(infoBoardX, infoBoardZ, INFO_BOARD_HALF_X, INFO_BOARD_HALF_Z))
+    for (const extra of extraBoxes ?? []) {
+      boxes.push(boxFromCenter(ax + extra.x, az + extra.z, extra.halfX, extra.halfZ))
+    }
+
+    boxes.push(
+      boxFromCenter(ax + infoBoardLocal[0], az + infoBoardLocal[1], INFO_BOARD_HALF_X, INFO_BOARD_HALF_Z),
+    )
   }
 
   return boxes

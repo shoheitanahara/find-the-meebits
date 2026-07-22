@@ -1,5 +1,16 @@
 import type { AttractionId } from './topStore'
 
+export type AttractionFootprint = {
+  /** 本体の半幅・半奥行き（ローカル） */
+  halfWidth: number
+  halfDepth: number
+  doorHalfWidth: number
+  /** 正面から奥へ開けるアルコーブ深さ */
+  alcoveDepth: number
+  /** 追加の当たりボックス（ローカル中心・半サイズ） */
+  extraBoxes?: Array<{ x: number; z: number; halfX: number; halfZ: number }>
+}
+
 export type Attraction = {
   id: AttractionId
   title: string
@@ -16,7 +27,11 @@ export type Attraction = {
   roofColor: string
   x: number
   z: number
+  /** 入口トリガーのワールド Z（正面すぐ前） */
   entranceZ: number
+  footprint: AttractionFootprint
+  /** 説明看板のローカル xz */
+  infoBoardLocal: [number, number]
 }
 
 export const TOP_ATTRACTIONS: Attraction[] = [
@@ -32,16 +47,28 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       en: 'THE LOST MEEBIT',
       ja: '待っているMeebit',
     },
-    color: '#74364a',
-    roofColor: '#33202f',
-    x: -13,
-    z: -8.5,
-    entranceZ: -5.3,
+    color: '#d4cdc2',
+    roofColor: '#3a3530',
+    x: -14.5,
+    z: -10.2,
+    entranceZ: -6.4,
+    footprint: {
+      halfWidth: 5.2,
+      halfDepth: 3.4,
+      doorHalfWidth: 1.35,
+      alcoveDepth: 2.4,
+      // 両翼
+      extraBoxes: [
+        { x: -4.6, z: 0.2, halfX: 1.4, halfZ: 2.2 },
+        { x: 4.6, z: 0.2, halfX: 1.4, halfZ: 2.2 },
+      ],
+    },
+    infoBoardLocal: [5.8, 3.6],
   },
   {
     id: 'traits',
     title: 'TRAIT HUNT',
-    subtitle: 'The Gallery',
+    subtitle: 'The Match Hall',
     description: {
       en: 'Hair, clothes, accessories!\nFind the Meebits that match\nthe trait clues.',
       ja: '髪型、服、アクセサリー！\nヒントと同じ特徴を持つ\nMeebitを探そう！',
@@ -50,11 +77,19 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       en: 'MATCH THE TRAITS!',
       ja: '同じ特徴を探そう！',
     },
-    color: '#28576b',
-    roofColor: '#163142',
+    color: '#143848',
+    roofColor: '#0a1c28',
     x: 0,
-    z: -11,
-    entranceZ: -7.8,
+    z: -12.5,
+    entranceZ: -8.9,
+    footprint: {
+      // 円筒タワーを AABB で近似
+      halfWidth: 3.2,
+      halfDepth: 3.2,
+      doorHalfWidth: 1.25,
+      alcoveDepth: 2.2,
+    },
+    infoBoardLocal: [4.6, 3.4],
   },
   {
     id: 'street',
@@ -68,10 +103,19 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       en: 'THE REPEATING ALLEY',
       ja: '繰り返す夜の路地',
     },
-    color: '#5a3d72',
-    roofColor: '#2e213f',
-    x: 13,
-    z: -8.5,
-    entranceZ: -5.3,
+    color: '#7a4538',
+    roofColor: '#241820',
+    x: 14.5,
+    z: -10.2,
+    entranceZ: -6.4,
+    footprint: {
+      halfWidth: 2.6,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.3,
+      // L字の横棟
+      extraBoxes: [{ x: -3.4, z: -0.6, halfX: 2.0, halfZ: 2.4 }],
+    },
+    infoBoardLocal: [-5.2, 3.5],
   },
 ]

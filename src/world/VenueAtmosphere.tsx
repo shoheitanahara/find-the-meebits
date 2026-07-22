@@ -1,5 +1,5 @@
 import type { VenueId } from '../game/venueConfig'
-import { getVenueTheme } from '../game/venueConfig'
+import { getVenueTheme, isMatchHallVenue } from '../game/venueConfig'
 import { getFogDistances, isMobilePerfMode } from '../game/perfConfig'
 
 type VenueAtmosphereProps = {
@@ -9,8 +9,9 @@ type VenueAtmosphereProps = {
 export function VenueAtmosphere({ venueId }: VenueAtmosphereProps) {
   const theme = getVenueTheme(venueId)
   const museumFog = getFogDistances()
-  const fogNear = venueId === 'club' || !isMobilePerfMode() ? theme.fogNear : museumFog.near
-  const fogFar = venueId === 'club' || !isMobilePerfMode() ? theme.fogFar : museumFog.far
+  const useThemeFog = venueId === 'club' || isMatchHallVenue(venueId) || !isMobilePerfMode()
+  const fogNear = useThemeFog ? theme.fogNear : museumFog.near
+  const fogFar = useThemeFog ? theme.fogFar : museumFog.far
 
   return (
     <>

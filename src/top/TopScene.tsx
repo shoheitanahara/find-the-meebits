@@ -17,7 +17,8 @@ import { useDialogueStore } from '../dialogue/dialogueStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
 import { VrmSculpture } from '../world/VrmSculpture'
-import { TOP_ATTRACTIONS, type Attraction } from './topConfig'
+import { TOP_ATTRACTIONS } from './topConfig'
+import { AttractionBuilding } from './AttractionBuilding'
 import {
   FEATURED_BOARD_POSITION,
   type DailyParkLineup,
@@ -42,11 +43,11 @@ import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
-const HUB_BOUNDS_X = 18.5
-const HUB_MIN_Z = -9.3
+const HUB_BOUNDS_X = 20.5
+const HUB_MIN_Z = -12.8
 const HUB_MAX_Z = 14
-const ENTER_DISTANCE = 3.1
-const ENTRANCE_HALF_WIDTH = 1.15
+const ENTER_DISTANCE = 3.4
+const ENTRANCE_HALF_WIDTH = 1.35
 const ENTRANCE_TRIGGER_DEPTH = 0.7
 const TOP_NPC_WALK_SPEED = 1.15
 const TOP_NPC_WALK_PATTERNS = [
@@ -477,190 +478,6 @@ function ClassicBench({
           </mesh>
         </group>
       ))}
-    </group>
-  )
-}
-
-function AttractionBuilding({
-  attraction,
-  locale,
-  onEnter,
-}: {
-  attraction: Attraction
-  locale: 'en' | 'ja'
-  onEnter: (id: AttractionId) => void
-}) {
-  const accentColor =
-    attraction.id === 'find' ? '#f4c76b' : attraction.id === 'traits' ? '#69d4ed' : '#d894e8'
-  const infoBoardX = attraction.x > 0 ? -4.2 : 4.2
-
-  return (
-    <group
-      position={[attraction.x, 0, attraction.z]}
-      onClick={(event) => {
-        event.stopPropagation()
-        onEnter(attraction.id)
-      }}
-    >
-      <mesh position={[0, 2.175, 0]} castShadow receiveShadow>
-        <boxGeometry args={[7, 4.35, 5]} />
-        <meshStandardMaterial color={attraction.color} roughness={0.72} metalness={0.08} />
-      </mesh>
-      <mesh position={[0, 5.45, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <coneGeometry args={[5.1, 2.2, 4]} />
-        <meshStandardMaterial color={attraction.roofColor} roughness={0.6} metalness={0.22} />
-      </mesh>
-      <mesh position={[0, 6.65, 0]}>
-        <sphereGeometry args={[0.16, 12, 10]} />
-        <meshStandardMaterial color="#e4bd6f" emissive="#b47b2d" emissiveIntensity={0.5} metalness={0.72} roughness={0.26} />
-      </mesh>
-      <mesh position={[0, 7.05, 0]}>
-        <coneGeometry args={[0.16, 0.72, 12]} />
-        <meshStandardMaterial color="#d5ab5e" metalness={0.72} roughness={0.28} />
-      </mesh>
-      <mesh position={[0, 4.35, 2.54]}>
-        <boxGeometry args={[7.05, 0.09, 0.12]} />
-        <meshStandardMaterial color="#ad8747" emissive="#8b632b" emissiveIntensity={0.32} metalness={0.72} roughness={0.28} />
-      </mesh>
-      {[-3.15, 3.15].map((x) => (
-        <mesh key={`column-${x}`} position={[x, 2.18, 2.57]}>
-          <boxGeometry args={[0.16, 4.2, 0.16]} />
-          <meshStandardMaterial color="#9c7b48" metalness={0.55} roughness={0.38} />
-        </mesh>
-      ))}
-      {[-2.15, 2.15].map((x) => (
-        <group key={`window-frame-${x}`} position={[x, 1.8, 2.66]}>
-          <mesh>
-            <boxGeometry args={[1.5, 1.82, 0.11]} />
-            <meshStandardMaterial color="#b18b50" metalness={0.58} roughness={0.35} />
-          </mesh>
-          <mesh position={[0, 0, 0.07]}>
-            <boxGeometry args={[1.22, 1.54, 0.08]} />
-            <meshStandardMaterial color="#ffe1a4" emissive={accentColor} emissiveIntensity={0.85} roughness={0.24} />
-          </mesh>
-          <mesh position={[0, 0, 0.13]}>
-            <boxGeometry args={[0.06, 1.5, 0.05]} />
-            <meshStandardMaterial color="#725b3d" metalness={0.45} roughness={0.4} />
-          </mesh>
-          <mesh position={[0, 0, 0.13]}>
-            <boxGeometry args={[1.18, 0.06, 0.05]} />
-            <meshStandardMaterial color="#725b3d" metalness={0.45} roughness={0.4} />
-          </mesh>
-        </group>
-      ))}
-      <mesh position={[0, 0.16, 2.72]}>
-        <boxGeometry args={[2.8, 0.3, 1.25]} />
-        <meshStandardMaterial color="#17131a" roughness={0.7} />
-      </mesh>
-      <mesh position={[0, 1.55, 2.54]}>
-        <boxGeometry args={[2.3, 3.1, 0.18]} />
-        <meshStandardMaterial color="#08090d" roughness={0.65} />
-      </mesh>
-      <mesh position={[0, 2.95, 3.08]} rotation={[Math.PI / 10, 0, 0]}>
-        <boxGeometry args={[3.15, 0.12, 1.05]} />
-        <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={0.24} metalness={0.2} roughness={0.52} />
-      </mesh>
-      {[-1.32, 1.32].map((x) => (
-        <mesh key={`awning-bracket-${x}`} position={[x, 2.66, 2.78]}>
-          <boxGeometry args={[0.07, 0.68, 0.07]} />
-          <meshStandardMaterial color="#b59050" metalness={0.62} roughness={0.34} />
-        </mesh>
-      ))}
-      <mesh position={[0, 3.75, 2.65]}>
-        <boxGeometry args={[5.6, 1.15, 0.22]} />
-        <meshStandardMaterial
-          color="#17131a"
-          emissive="#7f5b24"
-          emissiveIntensity={0.34}
-          roughness={0.5}
-          metalness={0.25}
-        />
-      </mesh>
-      <Text
-        position={[0, 3.78, 2.78]}
-        fontSize={0.52}
-        color="#f6df9d"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={5.1}
-      >
-        {attraction.title}
-      </Text>
-      <Text
-        position={[0, 3.15, 2.7]}
-        fontSize={0.24}
-        color="#c5bda9"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {attraction.subtitle}
-      </Text>
-      <pointLight position={[0, 2.2, 3.8]} intensity={9} distance={9} color={accentColor} />
-      <AttractionInfoBoard
-        position={[infoBoardX, 0, 3.25]}
-        accentColor={accentColor}
-        description={attraction.description[locale]}
-        heading={attraction.storyTitle[locale]}
-      />
-    </group>
-  )
-}
-
-function AttractionInfoBoard({
-  position,
-  accentColor,
-  description,
-  heading,
-}: {
-  position: [number, number, number]
-  accentColor: string
-  description: string
-  heading: string
-}) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.12, 0]}>
-        <boxGeometry args={[2.9, 0.24, 1.05]} />
-        <meshStandardMaterial color="#29242c" roughness={0.62} />
-      </mesh>
-      {[-1.12, 1.12].map((x) => (
-        <mesh key={x} position={[x, 1.15, 0]}>
-          <cylinderGeometry args={[0.055, 0.075, 2.15, 10]} />
-          <meshStandardMaterial color="#a8864d" metalness={0.66} roughness={0.34} />
-        </mesh>
-      ))}
-      <mesh position={[0, 1.55, 0.04]}>
-        <boxGeometry args={[3.05, 1.58, 0.16]} />
-        <meshStandardMaterial
-          color="#17151d"
-          emissive={accentColor}
-          emissiveIntensity={0.08}
-          metalness={0.18}
-          roughness={0.5}
-        />
-      </mesh>
-      <Text
-        position={[0, 1.98, 0.15]}
-        fontSize={0.18}
-        color={accentColor}
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={2.6}
-      >
-        {heading}
-      </Text>
-      <Text
-        position={[0, 1.46, 0.15]}
-        fontSize={0.2}
-        lineHeight={1.45}
-        color="#f1eadc"
-        anchorX="center"
-        anchorY="middle"
-        textAlign="center"
-        maxWidth={2.65}
-      >
-        {description}
-      </Text>
     </group>
   )
 }
