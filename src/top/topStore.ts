@@ -14,6 +14,7 @@ type TopState = {
     meebitNumber: number,
     spawn?: { x: number; z: number; rotationY: number },
   ) => void
+  setMeebitNumber: (meebitNumber: number) => void
   setMovement: (x: number, z: number, rotationY: number, isMoving: boolean) => void
   setNearestAttraction: (attraction: AttractionId | null) => void
 }
@@ -36,6 +37,7 @@ export const useTopStore = create<TopState>((set) => ({
       isMoving: false,
       nearestAttraction: null,
     }),
+  setMeebitNumber: (meebitNumber) => set({ meebitNumber }),
   setMovement: (x, z, rotationY, isMoving) =>
     set({ x, z, rotationY, isMoving }),
   setNearestAttraction: (nearestAttraction) => set({ nearestAttraction }),

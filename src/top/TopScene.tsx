@@ -6,11 +6,15 @@ import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
 import { useVRMModel } from '../avatar/useVRMModel'
-import { CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE } from '../game/gameConfig'
+import { INTERACTION_DISTANCE, CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE } from '../game/gameConfig'
+import { isTouchUiMode } from '../game/perfConfig'
 import { formatTraitDisplayName } from '../game/traitHunt'
 import { getLocale } from '../i18n/locale'
 import type { MeebitTraitMap } from '../data/meebitTraits'
 import { useTouchControlsStore } from '../stores/touchControlsStore'
+import { useNpcStore } from '../stores/npcStore'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
 import { VrmSculpture } from '../world/VrmSculpture'
 import { TOP_ATTRACTIONS, type Attraction } from './topConfig'
@@ -20,6 +24,8 @@ import {
   type DailyThemeTrait,
   type DailyVisitor,
 } from './dailyFeatured'
+import { setParkDialogueContext } from './interactWithParkNpc'
+import { parkNpcIdFor, registerParkNpcs } from './parkNpcRegistry'
 import {
   BENCH_PLACEMENTS,
   LAMP_POSITIONS,
@@ -48,6 +54,19 @@ const movement = new Vector2()
 const cameraOffset = new Vector3(CAMERA_FOLLOW_OFFSET_XZ[0], 6.5, CAMERA_FOLLOW_OFFSET_XZ[1])
 const cameraPosition = new Vector3()
 const cameraTarget = new Vector3()
+const playerPosition = new Vector3()
+const npcPosition = new Vector3()
+const midpoint = new Vector3()
+const dialogueDirection = new Vector3()
+const dialogueSide = new Vector3()
+const dialogueCameraDirection = new Vector3()
+const dialogueCameraDirectionAlt = new Vector3()
+const dialogueCandidatePosition = new Vector3()
+const dialogueCameraHeight = new Vector3(0, 2.35, 0)
+const dialogueLookAtHeight = new Vector3(0, 1.55, 0)
+const mobileDialogueCameraHeight = new Vector3(0, 2.1, 0)
+const mobileDialogueLookAtHeight = new Vector3(0, 1.15, 0)
+const lookAtOffset = new Vector3(0, 1.4, 0)
 
 export function TopScene({
   onEnter,
@@ -105,20 +124,83 @@ export function TopScene({
           onEnter={onEnter}
         />
       ))}
-      <TopNpcCrowd visitors={lineup.visitors} />
+      <TopNpcCrowd
+        visitors={lineup.visitors}
+        featuredId={lineup.featuredId}
+        themeTrait={lineup.themeTrait}
+      />
       <TopPlayer />
       <TopPlayerController onEnter={onEnter} />
+      <ParkNpcProximitySystem />
     </>
   )
 }
 
-/** Hunt 本編と同じ固定オフセットで、プレイヤーだけを追従するカメラ。 */
+/** Hunt 本編と同じ固定オフセット追従。会話中は NPC との中間へ寄る。 */
 function TopFollowCamera() {
   useFrame(({ camera }, delta) => {
     const player = useTopStore.getState()
+    const dialogue = useDialogueStore.getState()
+    const isMobile = isTouchUiMode()
 
-    cameraPosition.set(player.x, 0, player.z).add(cameraOffset)
-    cameraTarget.set(player.x, 1.4, player.z)
+    playerPosition.set(player.x, 0, player.z)
+
+    if (dialogue.isOpen && dialogue.activeNpcId) {
+      const liveNpcPosition = useNpcStore.getState().npcPositions[dialogue.activeNpcId]
+
+      if (liveNpcPosition) {
+        npcPosition.set(liveNpcPosition[0], liveNpcPosition[1], liveNpcPosition[2])
+        midpoint.copy(playerPosition).add(npcPosition).multiplyScalar(0.5)
+        dialogueDirection.copy(playerPosition).sub(npcPosition)
+
+        if (dialogueDirection.lengthSq() < 0.001) {
+          dialogueDirection.set(0, 0, 1)
+        }
+
+        dialogueDirection.normalize()
+        dialogueSide.set(-dialogueDirection.z, 0, dialogueDirection.x).normalize()
+
+        const sideScale = isMobile ? 0.55 : 0.72
+        const forwardScale = isMobile ? 0.35 : 0.48
+        const cameraDistance = isMobile ? 5.8 : 4.6
+        const cameraHeight = isMobile ? mobileDialogueCameraHeight : dialogueCameraHeight
+        const lookAtHeight = isMobile ? mobileDialogueLookAtHeight : dialogueLookAtHeight
+
+        let bestScore = Number.POSITIVE_INFINITY
+
+        for (const sideSign of [-1, 1] as const) {
+          dialogueCameraDirectionAlt
+            .copy(dialogueSide)
+            .multiplyScalar(sideSign * sideScale)
+            .addScaledVector(dialogueDirection, forwardScale)
+            .normalize()
+
+          dialogueCandidatePosition
+            .copy(midpoint)
+            .addScaledVector(dialogueCameraDirectionAlt, cameraDistance)
+            .add(cameraHeight)
+
+          const travelCost = dialogueCandidatePosition.distanceToSquared(camera.position)
+          const cameraSideBias =
+            dialogueCandidatePosition.z < midpoint.z ? 18 : dialogueCandidatePosition.z > midpoint.z ? -2 : 0
+          const score = travelCost + cameraSideBias
+
+          if (score < bestScore) {
+            bestScore = score
+            dialogueCameraDirection.copy(dialogueCameraDirectionAlt)
+            cameraPosition.copy(dialogueCandidatePosition)
+          }
+        }
+
+        cameraTarget.copy(midpoint).add(lookAtHeight)
+        camera.position.lerp(cameraPosition, 1 - Math.exp(-delta * 8))
+        camera.lookAt(cameraTarget)
+        return
+      }
+    }
+
+    cameraPosition.copy(playerPosition).add(cameraOffset)
+    cameraTarget.copy(playerPosition).add(lookAtOffset)
     camera.position.lerp(cameraPosition, 1 - Math.exp(-delta * 5))
     camera.lookAt(cameraTarget)
   })
@@ -813,10 +895,33 @@ function isTopNpcPositionWalkable(x: number, z: number) {
   return isParkPositionWalkable(x, z, NPC_COLLISION_RADIUS)
 }
 
-function TopNpcCrowd({ visitors }: { visitors: DailyVisitor[] }) {
+function TopNpcCrowd({
+  visitors,
+  featuredId,
+  themeTrait,
+}: {
+  visitors: DailyVisitor[]
+  featuredId: number
+  themeTrait: DailyThemeTrait
+}) {
   const started = useTopStore((state) => state.started)
   // visitors（日次固定ID）だけ依存。位置はマウントごとにランダム。
   const spawns = useMemo(() => createTopNpcSpawns(visitors), [visitors])
+
+  useEffect(() => {
+    setParkDialogueContext(featuredId, themeTrait)
+    registerParkNpcs(
+      visitors.map((visitor) => ({
+        id: parkNpcIdFor(visitor.meebitNumber),
+        meebitNumber: visitor.meebitNumber,
+        matched: visitor.matched,
+        isFeatured: visitor.meebitNumber === featuredId,
+      })),
+    )
+    return () => {
+      useNpcStore.getState().setNearestNpcId(null)
+    }
+  }, [visitors, featuredId, themeTrait])
 
   if (!started) return null
 
@@ -829,8 +934,39 @@ function TopNpcCrowd({ visitors }: { visitors: DailyVisitor[] }) {
   )
 }
 
+/** プレイヤーに近い来場者を nearest としてマーク（赤いピン用）。 */
+function ParkNpcProximitySystem() {
+  useFrame(() => {
+    const top = useTopStore.getState()
+    if (!top.started) return
+    if (useDialogueStore.getState().isOpen) return
+
+    const positions = useNpcStore.getState().npcPositions
+    let nearestId: string | null = null
+    let nearestDistance = INTERACTION_DISTANCE
+
+    for (const [npcId, position] of Object.entries(positions)) {
+      const distance = Math.hypot(position[0] - top.x, position[2] - top.z)
+      if (distance <= nearestDistance) {
+        nearestDistance = distance
+        nearestId = npcId
+      }
+    }
+
+    const current = useNpcStore.getState().nearestNpcId
+    if (current !== nearestId) {
+      useNpcStore.getState().setNearestNpcId(nearestId)
+    }
+  })
+
+  return null
+}
+
 function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
   const groupRef = useRef<Group>(null)
+  const npcId = parkNpcIdFor(spawn.meebitNumber)
+  const isNearest = useNpcStore((state) => state.nearestNpcId === npcId)
+  const isDialogueActive = useDialogueStore((state) => state.activeNpcId === npcId)
   const walkPattern = TOP_NPC_WALK_PATTERNS[spawn.walkPattern]
   // 初期歩行状態も index 由来で固定（リロードで挙動がぶれない）
   const isWalkingRef = useRef((index * 17) % 10 > 3)
@@ -858,6 +994,30 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
     const group = groupRef.current
     localTimeRef.current += safeDelta
     behaviorTimerRef.current -= safeDelta
+
+    if (group) {
+      useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
+    }
+
+    // 会話中は止まってプレイヤーを向く
+    if (isDialogueActive && group) {
+      isWalkingRef.current = false
+      const player = useTopStore.getState()
+      const faceY = Math.atan2(player.x - group.position.x, player.z - group.position.z)
+      rotationYRef.current = faceY
+      targetRotationYRef.current = faceY
+      group.rotation.y = faceY
+      group.position.y = 0.06
+      applyVRMLocomotion(vrmRef.current, {
+        elapsedTime: localTimeRef.current,
+        isMoving: false,
+        isRunning: false,
+        idleOffset: index * 0.61,
+        walkPhaseOffset,
+      })
+      update(safeDelta)
+      return
+    }
 
     if (behaviorTimerRef.current <= 0) {
       isWalkingRef.current = !isWalkingRef.current
@@ -915,6 +1075,31 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       rotation={[0, spawn.rotationY, 0]}
     >
       {vrmScene ? <primitive object={vrmScene} scale={VRM_WORLD_SCALE} /> : null}
+      {isNearest ? <ParkInteractionPin /> : null}
+    </group>
+  )
+}
+
+function ParkInteractionPin() {
+  const pinRef = useRef<Group>(null)
+
+  useFrame((state) => {
+    if (!pinRef.current) return
+    pinRef.current.position.y = 2.35 + Math.sin(state.clock.elapsedTime * 4) * 0.025
+  })
+
+  return (
+    <group ref={pinRef} position={[0, 2.35, 0]}>
+      <mesh>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshStandardMaterial
+          color="#b91c1c"
+          roughness={0.92}
+          metalness={0}
+          transparent
+          opacity={0.82}
+        />
+      </mesh>
     </group>
   )
 }
@@ -958,6 +1143,8 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
   useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
       if (event.code !== 'Enter' && event.code !== 'Space') return
+      // 会話中は DialogueSystem 側が Enter を使う
+      if (useDialogueStore.getState().isOpen) return
       const nearest = nearestRef.current
       if (nearest) onEnter(nearest)
     }
@@ -969,15 +1156,18 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     const state = useTopStore.getState()
     const controls = controlsRef.current
     const touch = useTouchControlsStore.getState()
+    const movementLocked = usePlayerStore.getState().movementLocked
     movement.set(0, 0)
 
-    if (touch.joystickActive) {
-      movement.set(touch.joystickX, touch.joystickY)
-    } else {
-      if (controls.forward) movement.y -= 1
-      if (controls.backward) movement.y += 1
-      if (controls.left) movement.x -= 1
-      if (controls.right) movement.x += 1
+    if (!movementLocked) {
+      if (touch.joystickActive) {
+        movement.set(touch.joystickX, touch.joystickY)
+      } else {
+        if (controls.forward) movement.y -= 1
+        if (controls.backward) movement.y += 1
+        if (controls.left) movement.x -= 1
+        if (controls.right) movement.x += 1
+      }
     }
 
     const moving = movement.lengthSq() > 0.001
@@ -1004,6 +1194,8 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     }
 
     useTopStore.getState().setMovement(x, z, rotationY, moving)
+
+    if (useDialogueStore.getState().isOpen) return
 
     let nearest: AttractionId | null = null
     let nearestDistance = Number.POSITIVE_INFINITY

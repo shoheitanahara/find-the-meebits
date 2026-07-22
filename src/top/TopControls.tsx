@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useTouchControlsStore } from '../stores/touchControlsStore'
+import { useNpcStore } from '../stores/npcStore'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { ui } from '../i18n/ui'
+import {
+  advanceParkDialogue,
+  interactWithNearestParkNpc,
+} from './interactWithParkNpc'
+import { getParkNpcById } from './parkNpcRegistry'
+import { unlockAudioIfNeeded } from '../ui/sfx'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -8,8 +17,52 @@ const KNOB_SIZE = 44
 export function TopMobileControls() {
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
-      <VirtualJoystick />
+      <div className="flex items-end justify-between gap-3">
+        <VirtualJoystick />
+        <ParkTalkButton />
+      </div>
     </div>
+  )
+}
+
+function ParkTalkButton() {
+  const nearestNpcId = useNpcStore((state) => state.nearestNpcId)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+  const lines = useDialogueStore((state) => state.lines)
+  const currentIndex = useDialogueStore((state) => state.currentIndex)
+  const t = ui()
+  const canTalk = Boolean(nearestNpcId && getParkNpcById(nearestNpcId))
+  const isLastLine = currentIndex >= lines.length - 1
+
+  if (isDialogueOpen) {
+    return (
+      <button
+        type="button"
+        className="pointer-events-auto mb-2 rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition active:scale-95"
+        onClick={() => {
+          void unlockAudioIfNeeded()
+          advanceParkDialogue()
+        }}
+      >
+        {isLastLine ? t.done : t.nextLine}
+      </button>
+    )
+  }
+
+  if (!canTalk) return <div className="w-24" />
+
+  return (
+    <button
+      type="button"
+      className="pointer-events-auto mb-2 rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition active:scale-95"
+      onClick={() => {
+        void unlockAudioIfNeeded().then(() => {
+          interactWithNearestParkNpc()
+        })
+      }}
+    >
+      Talk
+    </button>
   )
 }
 
