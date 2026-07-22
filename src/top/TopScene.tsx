@@ -6,8 +6,9 @@ import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
 import { useVRMModel } from '../avatar/useVRMModel'
-import { INTERACTION_DISTANCE, CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE } from '../game/gameConfig'
+import { INTERACTION_DISTANCE, CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE, CREATOR_MEEBIT_ID } from '../game/gameConfig'
 import { isTouchUiMode } from '../game/perfConfig'
+import { CREATOR_VRM_LOAD_PRIORITY } from '../game/perfConfig'
 import { formatTraitDisplayName } from '../game/traitHunt'
 import { getLocale } from '../i18n/locale'
 import type { MeebitTraitMap } from '../data/meebitTraits'
@@ -26,7 +27,7 @@ import {
   type DailyVisitor,
 } from './dailyFeatured'
 import { setParkDialogueContext } from './interactWithParkNpc'
-import { parkNpcIdFor, registerParkNpcs } from './parkNpcRegistry'
+import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs } from './parkNpcRegistry'
 import { ParkSeasonDecor, PARK_SIDE_TREE_XZ } from './ParkSeasonDecor'
 import { ParkSummerShore } from './ParkSummerShore'
 import { getParkSeason, getParkSeasonLook, type ParkSeasonLook } from './parkSeason'
@@ -743,14 +744,15 @@ function TopNpcCrowd({
 
   useEffect(() => {
     setParkDialogueContext(featuredId, themeTrait)
-    registerParkNpcs(
-      visitors.map((visitor) => ({
+    registerParkNpcs([
+      ...visitors.map((visitor) => ({
         id: parkNpcIdFor(visitor.meebitNumber),
         meebitNumber: visitor.meebitNumber,
         matched: visitor.matched,
         isFeatured: visitor.meebitNumber === featuredId,
       })),
-    )
+      parkCreatorRecord(),
+    ])
     return () => {
       useNpcStore.getState().setNearestNpcId(null)
     }
@@ -763,6 +765,7 @@ function TopNpcCrowd({
       {spawns.map((spawn, index) => (
         <TopNpc key={`${spawn.meebitNumber}-${index}`} spawn={spawn} index={index} />
       ))}
+      <ParkCreatorNpc />
     </group>
   )
 }
@@ -793,6 +796,117 @@ function ParkNpcProximitySystem() {
   })
 
   return null
+}
+
+/** 看板そばからスタートし、来場者と同じくパーク内を歩き回る作成者。 */
+function ParkCreatorNpc() {
+  const groupRef = useRef<Group>(null)
+  const npcId = parkCreatorNpcId()
+  const isNearest = useNpcStore((state) => state.nearestNpcId === npcId)
+  const isDialogueActive = useDialogueStore((state) => state.activeNpcId === npcId)
+  const walkPattern = TOP_NPC_WALK_PATTERNS[1]
+  const isWalkingRef = useRef(true)
+  const behaviorTimerRef = useRef(walkPattern.walkSeconds[0] + 1.2)
+  const rotationYRef = useRef(PARK_CREATOR_ROTATION_Y)
+  const targetRotationYRef = useRef(PARK_CREATOR_ROTATION_Y)
+  const localTimeRef = useRef(0.4)
+  const walkPhaseOffset = getNpcWalkPhaseOffset(7)
+  const { vrmRef, vrmScene, update } = useVRMModel(
+    CREATOR_MEEBIT_ID,
+    true,
+    CREATOR_VRM_LOAD_PRIORITY,
+    true,
+    true,
+  )
+
+  useFrame((_, delta) => {
+    const safeDelta = Math.min(Math.max(delta, 0), 0.05)
+    const group = groupRef.current
+    localTimeRef.current += safeDelta
+    behaviorTimerRef.current -= safeDelta
+
+    if (group) {
+      useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
+    }
+
+    if (isDialogueActive && group) {
+      isWalkingRef.current = false
+      const player = useTopStore.getState()
+      const faceY = Math.atan2(player.x - group.position.x, player.z - group.position.z)
+      rotationYRef.current = faceY
+      targetRotationYRef.current = faceY
+      group.rotation.y = faceY
+      group.position.y = 0.06
+      applyVRMLocomotion(vrmRef.current, {
+        elapsedTime: localTimeRef.current,
+        isMoving: false,
+        isRunning: false,
+        idleOffset: 0.2,
+        walkPhaseOffset,
+      })
+      update(safeDelta)
+      return
+    }
+
+    if (behaviorTimerRef.current <= 0) {
+      isWalkingRef.current = !isWalkingRef.current
+      behaviorTimerRef.current = isWalkingRef.current
+        ? MathUtils.randFloat(walkPattern.walkSeconds[0], walkPattern.walkSeconds[1])
+        : MathUtils.randFloat(walkPattern.idleSeconds[0], walkPattern.idleSeconds[1])
+
+      if (isWalkingRef.current) {
+        targetRotationYRef.current += MathUtils.randFloatSpread(walkPattern.turnSpread)
+      }
+    }
+
+    if (group && isWalkingRef.current) {
+      const angleDelta = Math.atan2(
+        Math.sin(targetRotationYRef.current - rotationYRef.current),
+        Math.cos(targetRotationYRef.current - rotationYRef.current),
+      )
+      rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 2.4))
+
+      const nextX =
+        group.position.x + Math.sin(rotationYRef.current) * TOP_NPC_WALK_SPEED * safeDelta
+      const nextZ =
+        group.position.z + Math.cos(rotationYRef.current) * TOP_NPC_WALK_SPEED * safeDelta
+
+      if (isTopNpcPositionWalkable(nextX, nextZ)) {
+        group.position.x = nextX
+        group.position.z = nextZ
+      } else {
+        rotationYRef.current += MathUtils.randFloat(Math.PI * 0.55, Math.PI * 1.15)
+        targetRotationYRef.current = rotationYRef.current
+        behaviorTimerRef.current = Math.min(behaviorTimerRef.current, 0.6)
+      }
+      group.rotation.y = rotationYRef.current
+    }
+
+    if (group) {
+      group.position.y =
+        0.06 + Math.sin(localTimeRef.current * 1.6 + walkPhaseOffset) * 0.03
+    }
+
+    applyVRMLocomotion(vrmRef.current, {
+      elapsedTime: localTimeRef.current,
+      isMoving: isWalkingRef.current,
+      isRunning: false,
+      idleOffset: 0.2,
+      walkPhaseOffset,
+    })
+    update(safeDelta)
+  })
+
+  return (
+    <group ref={groupRef} position={PARK_CREATOR_POSITION} rotation={[0, PARK_CREATOR_ROTATION_Y, 0]}>
+      {vrmScene ? (
+        <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
+      ) : (
+        <MeebitSilhouette />
+      )}
+      {isNearest ? <ParkInteractionPin /> : null}
+    </group>
+  )
 }
 
 function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {

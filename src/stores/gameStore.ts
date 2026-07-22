@@ -567,7 +567,9 @@ function warmStartActiveVrmNpcIds(profiles: NPCProfile[]) {
 
   const nextIds = new Set<string>()
   const maxWarmup = getNpcMaxConcurrentVrm()
-  nextIds.add(CREATOR_NPC_ID)
+  if (profiles.some((npc) => npc.id === CREATOR_NPC_ID)) {
+    nextIds.add(CREATOR_NPC_ID)
+  }
 
   for (const npc of sorted) {
     if (nextIds.size >= maxWarmup) {

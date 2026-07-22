@@ -12,12 +12,13 @@ import {
   type MeebitTraitMap,
   type MeebitTraitsDataset,
 } from '../data/meebitTraits'
+import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 
 export const DAILY_VISITOR_COUNT = 30
 export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v5'
+const STORAGE_KEY = 'meebits-park-daily-v6'
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
 export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 5.15]
@@ -102,12 +103,16 @@ function pickFeaturedId(dataset: MeebitTraitsDataset, rng: () => number): number
   // 欠損トレイトを避けるため、シード順に最大 64 回まで再抽選。
   for (let attempt = 0; attempt < 64; attempt += 1) {
     const id = 1 + Math.floor(rng() * MEEBIT_ID_MAX)
+    if (id === CREATOR_MEEBIT_ID) continue
     if (getMeebitTraitsFromDataset(dataset, id)) return id
   }
 
   const ids = Object.keys(dataset.byId)
     .map(Number)
-    .filter((id) => Number.isFinite(id) && id >= 1 && id <= MEEBIT_ID_MAX)
+    .filter(
+      (id) =>
+        Number.isFinite(id) && id >= 1 && id <= MEEBIT_ID_MAX && id !== CREATOR_MEEBIT_ID,
+    )
     .sort((a, b) => a - b)
   if (ids.length === 0) {
     throw new Error('[dailyFeatured] traits dataset has no valid meebit ids')
@@ -191,7 +196,7 @@ function buildLineupFromScratch(
 
   for (const key of Object.keys(dataset.byId)) {
     const id = Number(key)
-    if (!Number.isFinite(id) || id === featuredId) continue
+    if (!Number.isFinite(id) || id === featuredId || id === CREATOR_MEEBIT_ID) continue
     const traits = dataset.byId[key]
     if (!traits) continue
     allOtherIds.push(id)

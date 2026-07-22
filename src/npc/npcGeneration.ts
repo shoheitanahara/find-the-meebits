@@ -107,6 +107,14 @@ export function buildNpcProfiles(
 ): NPCProfile[] {
   const meebitNumbers =
     options?.meebitNumbers ?? pickRandomMeebitNumbers(wanderingNpcCount)
+
+  // Shawn T. Art は Club（DJ）のみ。Museum / Trait Hunt には出さない（Park へ移設）。
+  if (venueId !== 'club') {
+    return meebitNumbers.map((meebitNumber, index) =>
+      createNpcProfile(index, meebitNumber, [], venueId),
+    )
+  }
+
   const creator = getCreatorNpcForVenue(venueId)
   const existingSpawns: Array<[number, number]> = [[creator.position[0], creator.position[2]]]
   const wanderingNpcs = meebitNumbers.map((meebitNumber, index) =>
@@ -128,6 +136,11 @@ function getCreatorNpcForVenue(venueId: VenueId): NPCProfile {
   }
 
   return creatorNpc
+}
+
+/** Museum / Park 共通の作成者セリフ（EN） */
+export function getCreatorDialogueLinesEn() {
+  return creatorNpc.dialogues
 }
 
 export function getCreatorNpc(venueId: VenueId = 'museum') {

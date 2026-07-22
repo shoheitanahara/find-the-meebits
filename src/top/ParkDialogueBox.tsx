@@ -27,8 +27,12 @@ export function ParkDialogueBox() {
 
   const isLastLine = currentIndex >= lines.length - 1
   const isCurrentAvatar = playerMeebitNumber === npc.meebitNumber
-  const role = getParkRoleLabel(npc.isFeatured, npc.matched)
-  const name = `Meebit #${npc.meebitNumber}`
+  const role = npc.isCreator
+    ? getLocale() === 'ja'
+      ? '作成者'
+      : 'Creator'
+    : getParkRoleLabel(npc.isFeatured, npc.matched)
+  const name = npc.isCreator ? 'Shawn T. Art' : `Meebit #${npc.meebitNumber}`
 
   const handleUseAvatar = () => {
     if (isCurrentAvatar) return

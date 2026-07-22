@@ -145,9 +145,12 @@ export function NPCVrmLodSystem() {
       eligibleCandidates.push({ id: entry.id, distance: entry.distance })
     }
 
-    const forcedNpcIds = [CREATOR_NPC_ID, dialogueNpcId, nearestNpcId].filter(
-      (npcId): npcId is string => Boolean(npcId),
-    )
+    const hasCreator = npcProfiles.some((npc) => npc.id === CREATOR_NPC_ID)
+    const forcedNpcIds = [
+      hasCreator ? CREATOR_NPC_ID : null,
+      dialogueNpcId,
+      nearestNpcId,
+    ].filter((npcId): npcId is string => Boolean(npcId))
 
     setActiveVrmNpcIds(
       selectActiveVrmNpcIds(eligibleCandidates, forcedNpcIds, getNpcMaxConcurrentVrm()),

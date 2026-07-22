@@ -1,5 +1,7 @@
 import { formatTraitDisplayName } from '../game/traitHunt'
+import { getMuseumCreatorDialogueJa } from '../i18n/dialogue'
 import { getLocale } from '../i18n/locale'
+import { getCreatorDialogueLinesEn } from '../npc/npcGeneration'
 import type { DialogueLine } from '../npc/npcTypes'
 import type { DailyThemeTrait } from './dailyFeatured'
 import type { ParkNpcRecord } from './parkNpcRegistry'
@@ -23,6 +25,27 @@ function fillTheme(text: string, theme: DailyThemeTrait) {
   return text.replaceAll('{theme}', themeLabel(theme)).replaceAll('{value}', theme.traitValue)
 }
 
+function selectCreatorParkLines(talkCount: number): DialogueLine[] {
+  const locale = getLocale()
+  const pool = locale === 'ja' ? getMuseumCreatorDialogueJa() : getCreatorDialogueLinesEn()
+  const greet =
+    locale === 'ja'
+      ? 'やあ。ぼくは Shawn T. Art。このパークの作成者だよ。'
+      : 'Hey — I’m Shawn T. Art, the creator of this Park.'
+  const body = pool[seededIndex(CREATOR_SEED, talkCount, pool.length)] ?? pool[0]
+
+  return [
+    { id: `creator-greet-${talkCount}`, text: greet, category: 'greeting' },
+    {
+      id: body?.id ?? `creator-body-${talkCount}`,
+      text: body?.text ?? '...',
+      category: body?.category ?? 'world',
+    },
+  ]
+}
+
+const CREATOR_SEED = 11143
+
 /**
  * パーク来場者のセリフを 1〜2 行選ぶ。
  * 挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）を組み合わせる。
@@ -33,6 +56,10 @@ export function selectParkDialogueLines(
   featuredId: number,
   themeTrait: DailyThemeTrait,
 ): DialogueLine[] {
+  if (npc.isCreator) {
+    return selectCreatorParkLines(talkCount)
+  }
+
   const locale = getLocale()
   const pools: ParkDialoguePools = locale === 'ja' ? PARK_DIALOGUE_JA : PARK_DIALOGUE_EN
   const seed = npc.meebitNumber
