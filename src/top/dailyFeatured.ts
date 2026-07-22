@@ -1,6 +1,9 @@
 /**
  * 日付（JST）シードで「本日の主役」と来場者30体を決定的に選ぶ。
  * 誰がアクセスしても同日は同じラインナップになる。
+ *
+ * マッチ枠15体: 主役から選んだ「本日の共通トレイト」1つを共有する Meebit。
+ * 残り15体: 未選定プールからの完全ランダム。
  */
 
 import {
@@ -14,10 +17,15 @@ export const DAILY_VISITOR_COUNT = 30
 export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v3'
+const STORAGE_KEY = 'meebits-park-daily-v4'
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
 export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 5.15]
+
+export type DailyThemeTrait = {
+  traitType: string
+  traitValue: string
+}
 
 export type DailyVisitor = {
   meebitNumber: number
@@ -28,12 +36,15 @@ export type DailyParkLineup = {
   dateKey: string
   featuredId: number
   featuredTraits: MeebitTraitMap
+  /** 本日のマッチ枠の基準になるトレイト1つ。 */
+  themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
   dateKey: string
   featuredId: number
+  themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
 }
 
@@ -72,12 +83,9 @@ export function createSeededRng(seed: number): () => number {
   }
 }
 
-/** 主役と1つでもトレイト（キー・値）が一致すれば true。 */
-export function sharesAnyTrait(a: MeebitTraitMap, b: MeebitTraitMap): boolean {
-  for (const [key, value] of Object.entries(a)) {
-    if (b[key] !== undefined && b[key] === value) return true
-  }
-  return false
+export function hasThemeTrait(traits: MeebitTraitMap | null | undefined, theme: DailyThemeTrait) {
+  if (!traits) return false
+  return traits[theme.traitType] === theme.traitValue
 }
 
 function shuffleInPlace<T>(items: T[], rng: () => number): T[] {
@@ -97,7 +105,6 @@ function pickFeaturedId(dataset: MeebitTraitsDataset, rng: () => number): number
     if (getMeebitTraitsFromDataset(dataset, id)) return id
   }
 
-  // フォールバック: dataset 先頭の有効 ID（決定的にソート）
   const ids = Object.keys(dataset.byId)
     .map(Number)
     .filter((id) => Number.isFinite(id) && id >= 1 && id <= MEEBIT_ID_MAX)
@@ -106,6 +113,58 @@ function pickFeaturedId(dataset: MeebitTraitsDataset, rng: () => number): number
     throw new Error('[dailyFeatured] traits dataset has no valid meebit ids')
   }
   return ids[Math.floor(rng() * ids.length)] ?? ids[0]
+}
+
+/**
+ * 主役のトレイトから「本日の共通点」を1つ選ぶ。
+ * マッチ枠を満たせる候補を優先し、その中では出現数が少ない（特徴的な）トレイトを好む。
+ */
+function pickThemeTrait(
+  featuredTraits: MeebitTraitMap,
+  featuredId: number,
+  dataset: MeebitTraitsDataset,
+  rng: () => number,
+): DailyThemeTrait {
+  const entries = Object.entries(featuredTraits)
+  if (entries.length === 0) {
+    throw new Error(`[dailyFeatured] featured #${featuredId} has no traits`)
+  }
+
+  // 1パスで各候補トレイトの他 Meebit 数を集計
+  const counts = new Map<string, number>()
+  for (const [traitType, traitValue] of entries) {
+    counts.set(`${traitType}::${traitValue}`, 0)
+  }
+  for (const key of Object.keys(dataset.byId)) {
+    const id = Number(key)
+    if (!Number.isFinite(id) || id === featuredId) continue
+    const traits = dataset.byId[key]
+    if (!traits) continue
+    for (const [traitType, traitValue] of entries) {
+      if (traits[traitType] === traitValue) {
+        const mapKey = `${traitType}::${traitValue}`
+        counts.set(mapKey, (counts.get(mapKey) ?? 0) + 1)
+      }
+    }
+  }
+
+  const neededOthers = DAILY_MATCHED_VISITOR_COUNT - 1
+  const scored = entries.map(([traitType, traitValue]) => ({
+    theme: { traitType, traitValue },
+    others: counts.get(`${traitType}::${traitValue}`) ?? 0,
+  }))
+
+  // シードで並べ替えてから、充足 → 希少さの順で安定ソート
+  shuffleInPlace(scored, rng)
+  scored.sort((a, b) => {
+    const aOk = a.others >= neededOthers ? 0 : 1
+    const bOk = b.others >= neededOthers ? 0 : 1
+    if (aOk !== bOk) return aOk - bOk
+    if (a.others !== b.others) return a.others - b.others
+    return 0
+  })
+
+  return scored[0]?.theme ?? { traitType: entries[0][0], traitValue: entries[0][1] }
 }
 
 function buildLineupFromScratch(
@@ -119,7 +178,8 @@ function buildLineupFromScratch(
     throw new Error(`[dailyFeatured] missing traits for featured #${featuredId}`)
   }
 
-  // トレイト共有候補と、全体プール（フィラーは全体からランダム）
+  const themeTrait = pickThemeTrait(featuredTraits, featuredId, dataset, rng)
+
   const matchedIds: number[] = []
   const allOtherIds: number[] = []
 
@@ -129,7 +189,7 @@ function buildLineupFromScratch(
     const traits = dataset.byId[key]
     if (!traits) continue
     allOtherIds.push(id)
-    if (sharesAnyTrait(featuredTraits, traits)) {
+    if (hasThemeTrait(traits, themeTrait)) {
       matchedIds.push(id)
     }
   }
@@ -139,11 +199,11 @@ function buildLineupFromScratch(
   const visitors: DailyVisitor[] = []
   const used = new Set<number>()
 
-  // 来場者の1体は必ず主役本人（銅像と同じ Meebit がパークを歩く）
+  // 来場者の1体は必ず主役本人
   visitors.push({ meebitNumber: featuredId, matched: true })
   used.add(featuredId)
 
-  // 共通トレイト枠（主役本人を含めて DAILY_MATCHED_VISITOR_COUNT）
+  // 同じ themeTrait を持つ Meebit でマッチ枠を埋める
   for (const id of matchedIds) {
     if (visitors.filter((v) => v.matched).length >= DAILY_MATCHED_VISITOR_COUNT) break
     if (used.has(id)) continue
@@ -151,7 +211,7 @@ function buildLineupFromScratch(
     visitors.push({ meebitNumber: id, matched: true })
   }
 
-  // 残りは未選定プールからの完全ランダム（トレイト非一致に限定しない）
+  // 残りは未選定プールからの完全ランダム
   const randomPool = allOtherIds.filter((id) => !used.has(id))
   shuffleInPlace(randomPool, rng)
   for (const id of randomPool) {
@@ -160,20 +220,25 @@ function buildLineupFromScratch(
     const traits = dataset.byId[String(id)]
     visitors.push({
       meebitNumber: id,
-      // 表示・集計用。選出枠としてはランダム枠
-      matched: traits ? sharesAnyTrait(featuredTraits, traits) : false,
+      matched: hasThemeTrait(traits, themeTrait),
     })
   }
 
-  // 来場者の並びも日次で固定
   shuffleInPlace(visitors, rng)
 
   return {
     dateKey,
     featuredId,
     featuredTraits,
+    themeTrait,
     visitors,
   }
+}
+
+function isValidThemeTrait(value: unknown): value is DailyThemeTrait {
+  if (!value || typeof value !== 'object') return false
+  const theme = value as DailyThemeTrait
+  return typeof theme.traitType === 'string' && typeof theme.traitValue === 'string'
 }
 
 function readStoredLineup(dateKey: string): StoredDailyLineup | null {
@@ -185,6 +250,7 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
     if (
       parsed?.dateKey !== dateKey ||
       typeof parsed.featuredId !== 'number' ||
+      !isValidThemeTrait(parsed.themeTrait) ||
       !Array.isArray(parsed.visitors) ||
       parsed.visitors.length !== DAILY_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
@@ -203,6 +269,7 @@ function writeStoredLineup(lineup: DailyParkLineup) {
     const payload: StoredDailyLineup = {
       dateKey: lineup.dateKey,
       featuredId: lineup.featuredId,
+      themeTrait: lineup.themeTrait,
       visitors: lineup.visitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
@@ -217,10 +284,12 @@ function hydrateFromStored(
 ): DailyParkLineup | null {
   const featuredTraits = getMeebitTraitsFromDataset(dataset, stored.featuredId)
   if (!featuredTraits) return null
+  if (!hasThemeTrait(featuredTraits, stored.themeTrait)) return null
   return {
     dateKey: stored.dateKey,
     featuredId: stored.featuredId,
     featuredTraits,
+    themeTrait: stored.themeTrait,
     visitors: stored.visitors,
   }
 }

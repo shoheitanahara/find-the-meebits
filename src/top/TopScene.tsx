@@ -17,6 +17,7 @@ import { TOP_ATTRACTIONS, type Attraction } from './topConfig'
 import {
   FEATURED_BOARD_POSITION,
   type DailyParkLineup,
+  type DailyThemeTrait,
   type DailyVisitor,
 } from './dailyFeatured'
 import {
@@ -91,6 +92,7 @@ export function TopScene({
       <FeaturedInfoBoard
         featuredId={lineup.featuredId}
         featuredTraits={lineup.featuredTraits}
+        themeTrait={lineup.themeTrait}
         locale={locale}
       />
       <ParkLamps />
@@ -565,17 +567,21 @@ function AttractionInfoBoard({
   )
 }
 
-/** 本日の主役のトレイトを噴水脇に掲示する（見出し＋ID＋2列トレイト）。 */
+/** 本日の主役のトレイトを噴水脇に掲示する（見出し＋ID＋共通点＋2列トレイト）。 */
 function FeaturedInfoBoard({
   featuredId,
   featuredTraits,
+  themeTrait,
   locale,
 }: {
   featuredId: number
   featuredTraits: MeebitTraitMap
+  themeTrait: DailyThemeTrait
   locale: 'en' | 'ja'
 }) {
   const heading = locale === 'ja' ? '本日の主役' : "TODAY'S STAR"
+  const linkLabel = locale === 'ja' ? '本日の共通点' : "TODAY'S LINK"
+  const themeLine = `${themeTrait.traitType} · ${formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue)}`
   const orderedTraits = orderFeaturedTraits(featuredTraits)
   const mid = Math.ceil(orderedTraits.length / 2)
   const leftTraits = orderedTraits.slice(0, mid)
@@ -604,7 +610,6 @@ function FeaturedInfoBoard({
         />
       </mesh>
 
-      {/* ヘッダー帯（余白を詰めてコンパクトに） */}
       <mesh position={[0, 2.02, 0.05]}>
         <boxGeometry args={[3.25, 0.38, 0.04]} />
         <meshStandardMaterial color="#221c28" roughness={0.55} metalness={0.12} />
@@ -634,8 +639,37 @@ function FeaturedInfoBoard({
         <meshStandardMaterial color="#d4b46a" emissive="#8b632b" emissiveIntensity={0.35} />
       </mesh>
 
-      <FeaturedTraitColumn traits={leftTraits} position={[-0.82, 1.25, 0.15]} />
-      <FeaturedTraitColumn traits={rightTraits} position={[0.82, 1.25, 0.15]} />
+      {/* 本日の共通トレイト（マッチ枠15体の基準） */}
+      <Text
+        position={[0, 1.64, 0.15]}
+        fontSize={0.1}
+        color="#caa75b"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {linkLabel}
+      </Text>
+      <Text
+        position={[0, 1.48, 0.15]}
+        fontSize={0.14}
+        color="#ffe7b0"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={3.05}
+      >
+        {themeLine}
+      </Text>
+
+      <FeaturedTraitColumn
+        traits={leftTraits}
+        themeTrait={themeTrait}
+        position={[-0.82, 1.05, 0.15]}
+      />
+      <FeaturedTraitColumn
+        traits={rightTraits}
+        themeTrait={themeTrait}
+        position={[0.82, 1.05, 0.15]}
+      />
     </group>
   )
 }
@@ -675,23 +709,28 @@ function orderFeaturedTraits(traits: MeebitTraitMap): Array<[string, string]> {
 
 function FeaturedTraitColumn({
   traits,
+  themeTrait,
   position,
 }: {
   traits: Array<[string, string]>
+  themeTrait: DailyThemeTrait
   position: [number, number, number]
 }) {
   if (traits.length === 0) return null
 
-  // 1トレイト1行で2列に収める（「Type · Human」形式）
+  // テーマ以外のトレイトを通常色で列表示（テーマは上段で強調済み）
   const lines = traits
+    .filter(([type, value]) => !(type === themeTrait.traitType && value === themeTrait.traitValue))
     .map(([type, value]) => `${type} · ${formatTraitDisplayName(type, value)}`)
     .join('\n')
+
+  if (!lines) return null
 
   return (
     <Text
       position={position}
-      fontSize={0.118}
-      lineHeight={1.32}
+      fontSize={0.11}
+      lineHeight={1.28}
       color="#d8cfc0"
       anchorX="center"
       anchorY="middle"
