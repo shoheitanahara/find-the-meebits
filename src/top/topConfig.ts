@@ -118,4 +118,33 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: [-5.2, 3.5],
   },
+  {
+    id: 'mountain',
+    title: 'MOUNTAIN CLIMB',
+    subtitle: 'Under Construction',
+    description: {
+      en: 'A voxel peak is rising\nin the park.\nClimb when you are ready.',
+      ja: 'パークにボクセルの山が\n建設中。\n準備ができたら登ろう。',
+    },
+    storyTitle: {
+      en: 'CLIMB THE PEAK',
+      ja: '山頂を目指せ',
+    },
+    color: '#6a7a58',
+    roofColor: '#e8eef4',
+    x: 30,
+    z: -6.5,
+    entranceZ: -2.7,
+    footprint: {
+      halfWidth: 3.6,
+      halfDepth: 3.8,
+      doorHalfWidth: 1.25,
+      alcoveDepth: 2.4,
+      extraBoxes: [
+        { x: -3.0, z: -1.4, halfX: 1.2, halfZ: 1.6 },
+        { x: 3.0, z: -1.2, halfX: 1.1, halfZ: 1.5 },
+      ],
+    },
+    infoBoardLocal: [-5.6, 4.2],
+  },
 ]

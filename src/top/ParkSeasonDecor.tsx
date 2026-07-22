@@ -1,5 +1,6 @@
 import { PalmTree } from '../world/PalmTree'
 import type { ParkSeason } from './parkSeason'
+import { PARK_HUB } from './parkLayout'
 
 export type ParkTreePlacement = {
   position: [number, number, number]
@@ -12,29 +13,30 @@ export type ParkTreePlacement = {
  * 左右並木の足元（夜仕様の Tree 用。季節デコでは置き換えない）。
  */
 export const PARK_SIDE_TREE_XZ = [
-  [-21.5, -11],
-  [-21.5, -4],
-  [-21.5, 3],
-  [-21.5, 10],
-  [21.5, -11],
-  [21.5, -4],
-  [21.5, 3],
-  [21.5, 10],
+  [-PARK_HUB.treeX, -12],
+  [-PARK_HUB.treeX, -4],
+  [-PARK_HUB.treeX, 4],
+  [-PARK_HUB.treeX, 12],
+  [PARK_HUB.treeX, -12],
+  [PARK_HUB.treeX, 4],
+  [PARK_HUB.treeX, -4],
+  [PARK_HUB.treeX, 12],
 ] as const
 
 /** 夏のみ: 島の外縁に椰子を置く */
 function getSummerPerimeterPalms(): ParkTreePlacement[] {
-  const count = 12
+  const count = 16
   const placements: ParkTreePlacement[] = []
+  const { palmRadius, groundZ } = PARK_HUB
 
   for (let index = 0; index < count; index += 1) {
     const t = (index / count) * Math.PI * 2 + 0.2
-    const radius = 28.5 + Math.sin(t * 3) * 1.1 + (index % 3) * 0.35
+    const radius = palmRadius + Math.sin(t * 3) * 0.9 + (index % 3) * 0.3
     const x = Math.cos(t) * radius
-    const z = Math.sin(t) * radius + 1
+    const z = Math.sin(t) * radius + groundZ
 
     // 正面入口付近は空ける
-    if (z > 12 && Math.abs(x) < 10) continue
+    if (z > groundZ + 13 && Math.abs(x) < 14) continue
 
     placements.push({
       position: [x, 0, z],

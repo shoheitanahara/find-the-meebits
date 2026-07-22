@@ -40,16 +40,14 @@ import {
   isParkPositionWalkable,
   resolveParkMovement,
 } from './topCollisions'
+import { PARK_HUB } from './parkLayout'
 import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
-const HUB_BOUNDS_X = 20.5
-const HUB_MIN_Z = -12.8
-const HUB_MAX_Z = 14
-const ENTER_DISTANCE = 3.4
-const ENTRANCE_HALF_WIDTH = 1.35
-const ENTRANCE_TRIGGER_DEPTH = 0.7
+const ENTER_DISTANCE = 3.6
+const ENTRANCE_HALF_WIDTH = 1.45
+const ENTRANCE_TRIGGER_DEPTH = 0.55
 const TOP_NPC_WALK_SPEED = 1.15
 const TOP_NPC_WALK_PATTERNS = [
   { walkSeconds: [4.5, 8], idleSeconds: [0.8, 1.8], turnSpread: Math.PI * 0.35 },
@@ -97,7 +95,7 @@ export function TopScene({
         position={[0, 6.5, 18]}
         fov={45}
         near={0.1}
-        far={100}
+        far={140}
       />
       <TopFollowCamera />
       <ambientLight intensity={look.ambientIntensity} color={look.ambientColor} />
@@ -106,20 +104,20 @@ export function TopScene({
       />
       <directionalLight
         castShadow
-        position={[-14, 20, 10]}
+        position={[-16, 22, 12]}
         intensity={look.directionalIntensity}
         color={look.directionalColor}
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-32}
-        shadow-camera-right={32}
-        shadow-camera-top={32}
-        shadow-camera-bottom={-32}
+        shadow-camera-left={-58}
+        shadow-camera-right={58}
+        shadow-camera-top={58}
+        shadow-camera-bottom={-58}
         shadow-bias={-0.0002}
       />
       <pointLight
         position={[0, 9, 2]}
         intensity={look.accentPointIntensity}
-        distance={38}
+        distance={56}
         color={look.accentPointColor}
       />
       {/* PBR の metalness は環境反射がないとほぼ効かない。弱めの IBL を足す。 */}
@@ -231,6 +229,18 @@ function TopFollowCamera() {
 }
 
 function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonLook }) {
+  const {
+    groundZ,
+    islandRadius,
+    plazaRadius,
+    pathSizeX,
+    pathSizeZ,
+    paverWidth,
+    pathEdgeX,
+    pathEdgeLength,
+    oceanPlane,
+  } = PARK_HUB
+
   return (
     <group>
       {look.useSummerShore ? (
@@ -238,8 +248,8 @@ function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonL
       ) : (
         <>
           {/* 島の外側を覆う、月明かりを反射する海。 */}
-          <mesh position={[0, -0.42, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[180, 180]} />
+          <mesh position={[0, -0.42, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[oceanPlane, oceanPlane]} />
             <meshStandardMaterial
               color={look.oceanColor}
               emissive={look.oceanEmissive}
@@ -248,33 +258,38 @@ function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonL
               roughness={0.24}
             />
           </mesh>
-          <mesh position={[0, -0.25, 0]} receiveShadow>
-            <cylinderGeometry args={[26, 27, 0.5, 64]} />
+          <mesh position={[0, -0.25, groundZ]} receiveShadow>
+            <cylinderGeometry args={[islandRadius, islandRadius + 1, 0.5, 64]} />
             <meshStandardMaterial color={look.islandColor} roughness={0.92} />
           </mesh>
         </>
       )}
-      <mesh position={[0, 0.015, 1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[25.3, 64]} />
+      <mesh position={[0, 0.015, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <circleGeometry args={[plazaRadius, 64]} />
         <meshStandardMaterial color={look.plazaColor} roughness={0.88} metalness={0.08} />
       </mesh>
-      <mesh position={[0, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[29, 31]} />
+      <mesh position={[0, 0.035, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[pathSizeX, pathSizeZ]} />
         <meshStandardMaterial color={look.pathColor} roughness={0.82} metalness={0.08} />
       </mesh>
       {/* 大判の敷石で中央通りに奥行きと素材感を加える。 */}
-      {Array.from({ length: 16 }, (_, index) => 14.2 - index * 1.9).map((z, index) => (
-        <mesh key={`paver-${z}`} position={[0, 0.055, z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-          <planeGeometry args={[28.6, 1.72]} />
+      {Array.from({ length: 24 }, (_, index) => 18 - index * 1.9).map((z, index) => (
+        <mesh
+          key={`paver-${z}`}
+          position={[0, 0.055, z]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow
+        >
+          <planeGeometry args={[paverWidth, 1.72]} />
           <meshStandardMaterial
             color={index % 2 === 0 ? look.paverColorA : look.paverColorB}
             roughness={0.9}
           />
         </mesh>
       ))}
-      {[-14.45, 14.45].map((x) => (
-        <mesh key={`path-edge-${x}`} position={[x, 0.07, 0.9]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.18, 30.8]} />
+      {[-pathEdgeX, pathEdgeX].map((x) => (
+        <mesh key={`path-edge-${x}`} position={[x, 0.07, groundZ]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.18, pathEdgeLength]} />
           <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
         </mesh>
       ))}
@@ -427,22 +442,24 @@ function ParkDetails({ benchProp }: { benchProp: ParkBenchPropKind }) {
         />
       ))}
       {[-1, 1].map((side) => (
-        <group key={`railing-${side}`} position={[side * 20.2, 0, 1]}>
-          {Array.from({ length: 14 }, (_, index) => -11.5 + index * 1.9).map((z) => (
-            <group key={z} position={[0, 0, z]}>
-              <mesh position={[0, 0.55, 0]}>
-                <cylinderGeometry args={[0.035, 0.05, 1.1, 8]} />
-                <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
-              </mesh>
-              <mesh position={[0, 1.16, 0]}>
-                <coneGeometry args={[0.09, 0.28, 8]} />
-                <meshStandardMaterial color="#b28c4d" metalness={0.7} roughness={0.3} />
-              </mesh>
-            </group>
-          ))}
+        <group key={`railing-${side}`} position={[side * PARK_HUB.railingX, 0, PARK_HUB.railingZ]}>
+          {Array.from({ length: 22 }, (_, index) => -PARK_HUB.railingHalfLength + 0.4 + index * 1.85).map(
+            (z) => (
+              <group key={z} position={[0, 0, z]}>
+                <mesh position={[0, 0.55, 0]}>
+                  <cylinderGeometry args={[0.035, 0.05, 1.1, 8]} />
+                  <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
+                </mesh>
+                <mesh position={[0, 1.16, 0]}>
+                  <coneGeometry args={[0.09, 0.28, 8]} />
+                  <meshStandardMaterial color="#b28c4d" metalness={0.7} roughness={0.3} />
+                </mesh>
+              </group>
+            ),
+          )}
           {[0.48, 0.92].map((y) => (
-            <mesh key={y} position={[0, y, 0.85]}>
-              <boxGeometry args={[0.05, 0.05, 24.8]} />
+            <mesh key={y} position={[0, y, 0]}>
+              <boxGeometry args={[0.05, 0.05, PARK_HUB.railingHalfLength * 2]} />
               <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
             </mesh>
           ))}
@@ -721,7 +738,9 @@ function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
 }
 
 function isTopNpcPositionWalkable(x: number, z: number) {
-  if (Math.abs(x) > 18.2 || z < -5 || z > 13.3) return false
+  if (Math.abs(x) > PARK_HUB.boundsX - 2 || z < PARK_HUB.minZ + 2 || z > PARK_HUB.maxZ - 1.5) {
+    return false
+  }
   // 入口トリガー付近は NPC を寄せない（プレイヤーの入場を邪魔しない）
   for (const attraction of TOP_ATTRACTIONS) {
     if (Math.hypot(x - attraction.x, z - attraction.entranceZ) < 2.8) return false
@@ -1124,8 +1143,16 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
 
     if (moving) {
       movement.normalize()
-      const nextX = MathUtils.clamp(x + movement.x * MOVE_SPEED * delta, -HUB_BOUNDS_X, HUB_BOUNDS_X)
-      const nextZ = MathUtils.clamp(z + movement.y * MOVE_SPEED * delta, HUB_MIN_Z, HUB_MAX_Z)
+      const nextX = MathUtils.clamp(
+        x + movement.x * MOVE_SPEED * delta,
+        -PARK_HUB.boundsX,
+        PARK_HUB.boundsX,
+      )
+      const nextZ = MathUtils.clamp(
+        z + movement.y * MOVE_SPEED * delta,
+        PARK_HUB.minZ,
+        PARK_HUB.maxZ,
+      )
       const resolved = resolveParkMovement(x, z, nextX, nextZ, PLAYER_COLLISION_RADIUS)
       x = resolved.x
       z = resolved.z
@@ -1146,15 +1173,22 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
 
     let nearest: AttractionId | null = null
     let nearestDistance = Number.POSITIVE_INFINITY
+    let insideAnyEntrance = false
+
     for (const attraction of TOP_ATTRACTIONS) {
+      const alcoveMinZ = attraction.entranceZ - attraction.footprint.alcoveDepth
       const isInsideEntrance =
         Math.abs(x - attraction.x) <= ENTRANCE_HALF_WIDTH &&
-        z <= attraction.entranceZ - ENTRANCE_TRIGGER_DEPTH
+        z <= attraction.entranceZ - ENTRANCE_TRIGGER_DEPTH &&
+        z >= alcoveMinZ
 
-      if (isInsideEntrance && !isEnteringRef.current) {
-        isEnteringRef.current = true
-        onEnter(attraction.id)
-        return
+      if (isInsideEntrance) {
+        insideAnyEntrance = true
+        if (!isEnteringRef.current) {
+          isEnteringRef.current = true
+          onEnter(attraction.id)
+          return
+        }
       }
 
       const distance = Math.hypot(x - attraction.x, z - attraction.entranceZ)
@@ -1163,6 +1197,11 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
         nearestDistance = distance
       }
     }
+
+    if (!insideAnyEntrance) {
+      isEnteringRef.current = false
+    }
+
     if (nearest !== nearestRef.current) {
       nearestRef.current = nearest
       useTopStore.getState().setNearestAttraction(nearest)

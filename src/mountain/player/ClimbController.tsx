@@ -140,7 +140,7 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     // 固定視点: 後方から前方。蛇行に合わせて X を強く追従
     const fx = MOUNTAIN.camXFollow
     cameraPos.set(body.x * fx, body.y + MOUNTAIN.camHeight, body.z + MOUNTAIN.camBack)
-    cameraTarget.set(body.x * (fx * 0.85), body.y + 1.4, body.z - MOUNTAIN.camLookAhead)
+    cameraTarget.set(body.x * (fx * 0.85), body.y + 1.25, body.z - MOUNTAIN.camLookAhead)
     state.camera.position.lerp(cameraPos, 1 - Math.exp(-dt * 5))
     state.camera.lookAt(cameraTarget)
   })

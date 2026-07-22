@@ -1,5 +1,6 @@
 import { MathUtils } from 'three'
 import { FEATURED_BOARD_POSITION } from './dailyFeatured'
+import { PARK_HUB } from './parkLayout'
 import { TOP_ATTRACTIONS } from './topConfig'
 
 /** プレイヤーの水平当たり半径。 */
@@ -21,34 +22,57 @@ type ObstacleCircle = {
   radius: number
 }
 
-/** ベンチ配置（見た目と共有）。rotationY は足元の向き。 */
+/**
+ * ベンチ配置（見た目と共有）。
+ * 外側レーン寄りに置き、アトラクション入口の動線は空ける。
+ */
 export const BENCH_PLACEMENTS = [
-  [-16.8, 8, Math.PI / 2],
-  [16.8, 8, -Math.PI / 2],
-  [-16.8, -1.5, Math.PI / 2],
-  [16.8, -1.5, -Math.PI / 2],
+  [-26, 11, Math.PI / 2],
+  [26, 11, -Math.PI / 2],
+  [-26, 3, Math.PI / 2],
+  [26, 3, -Math.PI / 2],
+  [-26, -5, Math.PI / 2],
+  [26, -5, -Math.PI / 2],
+  [-18, -12, 0],
+  [18, -12, 0],
 ] as const
 
-/** 街灯の足元座標（見た目と共有）。 */
+/**
+ * 街灯の足元座標（見た目と共有）。
+ * 中央並木レーン + 中間レーン。入口正面には置かない。
+ */
 export const LAMP_POSITIONS: Array<[number, number]> = [
-  [-8.5, 10],
-  [8.5, 10],
-  [-8.5, 5],
-  [8.5, 5],
-  [-8.5, 0],
-  [8.5, 0],
-  [-17.5, 10],
-  [17.5, 10],
-  [-18, 0],
-  [18, 0],
+  // 中央通り沿い
+  [-10, 12],
+  [10, 12],
+  [-10, 5],
+  [10, 5],
+  [-10, -1],
+  [10, -1],
+  [-10, -8],
+  [10, -8],
+  // 中間レーン（建物と柵のあいだ）
+  [-22, 10],
+  [22, 10],
+  [-22, 2],
+  [22, 2],
+  [-22, -7],
+  [22, -7],
+  // 外周寄り（入口 X を避ける）
+  [-34, 8],
+  [34, 9],
+  [-34, -1],
+  [34, 1],
 ]
 
 /** 花壇プランターの足元座標（見た目と共有）。 */
 export const PLANTER_POSITIONS: Array<[number, number]> = [
-  [-17, 12],
-  [17, 12],
-  [-17, 3.2],
-  [17, 3.2],
+  [-26, 14],
+  [26, 14],
+  [-26, -0.5],
+  [26, -0.5],
+  [-18, -8],
+  [18, -8],
 ]
 
 const FOUNTAIN_CENTER = { x: 0, z: 3.4 }
@@ -136,6 +160,15 @@ function buildFeaturedBoardObstacle(): ObstacleBox {
   )
 }
 
+/** 左右の柵。見た目の railingX と一致させる。 */
+function buildRailingObstacles(): ObstacleBox[] {
+  const { railingX, railingHalfThickness, railingZ, railingHalfLength } = PARK_HUB
+  return [
+    boxFromCenter(-railingX, railingZ, railingHalfThickness, railingHalfLength),
+    boxFromCenter(railingX, railingZ, railingHalfThickness, railingHalfLength),
+  ]
+}
+
 function buildCircleObstacles(): ObstacleCircle[] {
   const circles: ObstacleCircle[] = [
     { x: FOUNTAIN_CENTER.x, z: FOUNTAIN_CENTER.z, radius: FOUNTAIN_RADIUS },
@@ -155,6 +188,7 @@ const PARK_BOX_OBSTACLES = [
   ...buildAttractionObstacles(),
   ...buildBenchObstacles(),
   buildFeaturedBoardObstacle(),
+  ...buildRailingObstacles(),
 ]
 const PARK_CIRCLE_OBSTACLES = buildCircleObstacles()
 

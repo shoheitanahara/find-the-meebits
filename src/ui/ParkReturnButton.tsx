@@ -47,7 +47,9 @@ export function ParkReturnButton() {
       ? 'street'
       : pathSegments.includes('v2')
         ? 'traits'
-        : 'find'
+        : pathSegments.includes('mountain')
+          ? 'mountain'
+          : 'find'
     window.location.assign(`${parkPath}?from=${attractionId}`)
   }
 

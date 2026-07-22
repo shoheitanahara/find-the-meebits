@@ -24,7 +24,7 @@ const copy = {
   en: {
     eyebrow: 'Find the Meebits',
     title: 'Meebits Park',
-    subtitle: 'Choose your Meebit and explore three attractions.',
+    subtitle: 'Choose your Meebit and explore the park attractions.',
     avatar: 'Your Meebit',
     random: 'Random',
     enterPark: 'Enter the Park',
@@ -37,12 +37,13 @@ const copy = {
       find: 'Find the Meebit',
       traits: 'Trait Hunt',
       street: '8th Street',
+      mountain: 'Mountain Climb',
     },
   },
   ja: {
     eyebrow: 'Find the Meebits',
     title: 'ミービッツ・パーク',
-    subtitle: '自分のMeebitを選んで、3つのアトラクションを巡ろう。',
+    subtitle: '自分のMeebitを選んで、パークのアトラクションを巡ろう。',
     avatar: 'あなたのMeebit',
     random: 'ランダム',
     enterPark: 'パークに入る',
@@ -55,6 +56,7 @@ const copy = {
       find: 'Find the Meebit',
       traits: 'トレイトハント',
       street: '8番ストリート',
+      mountain: '山登り',
     },
   },
 } as const
@@ -63,14 +65,17 @@ function getAttractionPath(id: AttractionId) {
   const localePrefix = getLocale() === 'ja' ? '/jp' : ''
   if (id === 'find') return `${localePrefix}/find-the-meebit`
   if (id === 'traits') return `${localePrefix}/v2`
-  return `${localePrefix}/8th-street`
+  if (id === 'street') return `${localePrefix}/8th-street`
+  return `${localePrefix}/mountain`
 }
 
 function getReturningAttractionId(): AttractionId | null {
   if (typeof window === 'undefined') return null
 
   const from = new URLSearchParams(window.location.search).get('from')
-  return from === 'find' || from === 'traits' || from === 'street' ? from : null
+  return from === 'find' || from === 'traits' || from === 'street' || from === 'mountain'
+    ? from
+    : null
 }
 
 export function TopApp() {

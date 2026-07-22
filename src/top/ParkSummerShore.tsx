@@ -2,53 +2,65 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { buildShoreRing } from '../world/wavyShoreGeometry'
 import type { ParkSeasonLook } from './parkSeason'
+import { PARK_HUB } from './parkLayout'
 
 /**
  * Park 向け夏の海〜砂浜。
- * 単純な重ね平面方式。円形島スケールに合わせた half を使う。
+ * PARK_HUB の島半径と中心 z に合わせ、広場が砂からはみ出さないようにする。
  */
 export function ParkSummerShore({ look }: { look: ParkSeasonLook }) {
+  const {
+    groundZ,
+    shoreDryHalf,
+    shoreWetHalf,
+    shoreShallowHalf,
+    shoreDryCorner,
+    shoreWetCorner,
+    shoreShallowCorner,
+    oceanPlane,
+  } = PARK_HUB
+
   const drySandGeo = useMemo(() => {
     const ring = buildShoreRing({
-      half: 27,
-      cornerRadius: 20,
-      waveAmp: 0.85,
+      half: shoreDryHalf,
+      cornerRadius: shoreDryCorner,
+      waveAmp: 0.9,
       wavesAround: 5,
       samples: 96,
       phase: 0.25,
     })
     return filledShapeFromRing(ring)
-  }, [])
+  }, [shoreDryHalf, shoreDryCorner])
 
   const wetSandGeo = useMemo(() => {
     const ring = buildShoreRing({
-      half: 31,
-      cornerRadius: 22,
+      half: shoreWetHalf,
+      cornerRadius: shoreWetCorner,
       waveAmp: 1.1,
       wavesAround: 5,
       samples: 96,
       phase: 0.4,
     })
     return filledShapeFromRing(ring)
-  }, [])
+  }, [shoreWetHalf, shoreWetCorner])
 
   const shallowGeo = useMemo(() => {
     const ring = buildShoreRing({
-      half: 36,
-      cornerRadius: 24,
+      half: shoreShallowHalf,
+      cornerRadius: shoreShallowCorner,
       waveAmp: 1.35,
       wavesAround: 6,
       samples: 96,
       phase: 0.65,
     })
     return filledShapeFromRing(ring)
-  }, [])
+  }, [shoreShallowHalf, shoreShallowCorner])
 
   return (
-    <group>
+    <group position={[0, 0, groundZ]}>
       {/* 最下層: 深い海 */}
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.42, 0]}>
-        <planeGeometry args={[180, 180]} />
+        <planeGeometry args={[oceanPlane, oceanPlane]} />
         <meshStandardMaterial
           color={look.oceanColor}
           emissive={look.oceanEmissive}

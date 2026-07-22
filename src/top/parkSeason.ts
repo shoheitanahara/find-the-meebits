@@ -109,8 +109,8 @@ export type ParkSeasonLook = {
 const NIGHT_LOOK: ParkSeasonLook = {
   backgroundColor: '#111a33',
   fogColor: '#17233d',
-  fogNear: 34,
-  fogFar: 82,
+  fogNear: 48,
+  fogFar: 130,
   showStars: true,
   ambientIntensity: 0.82,
   ambientColor: '#c4c9eb',

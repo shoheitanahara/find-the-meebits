@@ -7,6 +7,7 @@ import { useTopStore } from '../top/topStore'
 import { ClimbController, useMountainKeyboardBridge } from './player/ClimbController'
 import { MountainMobileControls } from './player/MobileControls'
 import { useMountainStore } from './store'
+import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { ClearOverlay, ClimbHud, TitleScreen } from './ui/Screens'
 import { MountainAtmosphere, VoxelMountain } from './world/VoxelMountain'
 
@@ -32,7 +33,7 @@ function MountainScene() {
 
   return (
     <>
-      <PerspectiveCamera makeDefault fov={48} near={0.1} far={280} position={[0, 8, 16]} />
+      <PerspectiveCamera makeDefault fov={50} near={0.1} far={280} position={[0, 5, 10]} />
       <MountainAtmosphere />
       <VoxelMountain />
       <ClimbController enabled={enabled} />
@@ -71,6 +72,7 @@ export function MountainApp() {
       <TitleScreen />
       <ClimbHud />
       <ClearOverlay />
+      <ParkReturnButton />
       {phase === 'playing' ? <MountainMobileControls /> : null}
     </main>
   )

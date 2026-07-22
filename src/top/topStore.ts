@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AttractionId = 'find' | 'traits' | 'street'
+export type AttractionId = 'find' | 'traits' | 'street' | 'mountain'
 
 type TopState = {
   started: boolean

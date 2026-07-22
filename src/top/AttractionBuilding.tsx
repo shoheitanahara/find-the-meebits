@@ -4,10 +4,10 @@ import type { AttractionId } from './topStore'
 
 /**
  * Park アトラクションのランドマーク入口。
- * シルエットを大きく変え、入口ドアさえあれば遷移は維持される。
  * - find: ドーム付き美術館
  * - traits: ネオン円筒タワー
  * - street: L字レンガ町屋＋アーチ
+ * - mountain: ボクセル山＋建設中看板
  */
 export function AttractionBuilding({
   attraction,
@@ -19,7 +19,13 @@ export function AttractionBuilding({
   onEnter: (id: AttractionId) => void
 }) {
   const accent =
-    attraction.id === 'find' ? '#d4b46a' : attraction.id === 'traits' ? '#5ee0ff' : '#e8a0ff'
+    attraction.id === 'find'
+      ? '#d4b46a'
+      : attraction.id === 'traits'
+        ? '#5ee0ff'
+        : attraction.id === 'street'
+          ? '#e8a0ff'
+          : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -38,8 +44,10 @@ export function AttractionBuilding({
           roofColor={attraction.roofColor}
           accent={accent}
         />
-      ) : (
+      ) : attraction.id === 'street' ? (
         <AlleyLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : (
+        <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
 
       <EntrancePortal
@@ -47,13 +55,15 @@ export function AttractionBuilding({
         frontZ={frontZ}
         doorHalfWidth={attraction.footprint.doorHalfWidth}
       />
-      {/* 入口ドア直上（目線で読める高さ） */}
       <TitleBanner
         attraction={attraction}
         accent={accent}
         y={3.95}
         z={frontZ + 0.28}
       />
+      {attraction.id === 'mountain' ? (
+        <ConstructionSignBoard position={[2.8, 0, frontZ + 1.1]} locale={locale} />
+      ) : null}
       <pointLight position={[0, 2.4, frontZ + 1.4]} intensity={12} distance={12} color={accent} />
       <AttractionInfoBoard
         position={[attraction.infoBoardLocal[0], 0, attraction.infoBoardLocal[1]]}
@@ -61,6 +71,104 @@ export function AttractionBuilding({
         description={attraction.description[locale]}
         heading={attraction.storyTitle[locale]}
       />
+    </group>
+  )
+}
+
+/** ボクセル風の山エントランス（基壇＋積みブロック＋雪頂） */
+function MountainLandmark({
+  color,
+  snowColor,
+  accent,
+}: {
+  color: string
+  snowColor: string
+  accent: string
+}) {
+  const dirt = '#8b6914'
+  const stone = '#7a7e78'
+  const tiers: Array<{ y: number; w: number; d: number; h: number; c: string }> = [
+    { y: 0.45, w: 7.2, d: 7.4, h: 0.9, c: dirt },
+    { y: 1.35, w: 6.2, d: 6.4, h: 1.0, c: color },
+    { y: 2.4, w: 5.0, d: 5.1, h: 1.1, c: color },
+    { y: 3.45, w: 3.8, d: 3.9, h: 1.0, c: stone },
+    { y: 4.4, w: 2.6, d: 2.7, h: 0.95, c: stone },
+    { y: 5.25, w: 1.7, d: 1.8, h: 0.8, c: snowColor },
+  ]
+
+  return (
+    <group>
+      {tiers.map((tier, index) => (
+        <mesh key={index} position={[0, tier.y, -0.35]} castShadow receiveShadow>
+          <boxGeometry args={[tier.w, tier.h, tier.d]} />
+          <meshStandardMaterial color={tier.c} roughness={0.92} />
+        </mesh>
+      ))}
+      {/* 脇の岩塊 */}
+      <mesh position={[-2.8, 1.5, -1.4]} castShadow receiveShadow>
+        <boxGeometry args={[2.4, 2.8, 3.2]} />
+        <meshStandardMaterial color={stone} roughness={0.94} />
+      </mesh>
+      <mesh position={[2.6, 1.3, -1.0]} castShadow receiveShadow>
+        <boxGeometry args={[2.1, 2.4, 2.8]} />
+        <meshStandardMaterial color={dirt} roughness={0.93} />
+      </mesh>
+      {/* 足場の足 */}
+      {[-2.2, 2.2].map((x) => (
+        <mesh key={`pole-${x}`} position={[x, 2.1, 2.6]} castShadow>
+          <cylinderGeometry args={[0.08, 0.1, 4.2, 8]} />
+          <meshStandardMaterial color="#c4a060" metalness={0.35} roughness={0.45} />
+        </mesh>
+      ))}
+      <mesh position={[0, 4.15, 2.6]} castShadow>
+        <boxGeometry args={[4.6, 0.12, 0.12]} />
+        <meshStandardMaterial color={accent} metalness={0.4} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 5.85, -0.2]} castShadow>
+        <cylinderGeometry args={[0.06, 0.07, 1.4, 8]} />
+        <meshStandardMaterial color="#d8c8a0" />
+      </mesh>
+      <mesh position={[0.45, 6.35, -0.2]} castShadow>
+        <boxGeometry args={[0.9, 0.55, 0.06]} />
+        <meshStandardMaterial color="#e85d4c" emissive="#e85d4c" emissiveIntensity={0.35} />
+      </mesh>
+    </group>
+  )
+}
+
+/** 建設中看板（Mountain 入口前のみ） */
+function ConstructionSignBoard({
+  position,
+  locale,
+  scale = 1,
+}: {
+  position: [number, number, number]
+  locale: 'en' | 'ja'
+  scale?: number
+}) {
+  const title = locale === 'ja' ? '建設中' : 'UNDER CONSTRUCTION'
+  const sub = locale === 'ja' ? 'Mountain Climb' : 'Mountain Climb'
+
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, 1.05, 0]} castShadow>
+        <cylinderGeometry args={[0.07, 0.09, 2.1, 8]} />
+        <meshStandardMaterial color="#8a7050" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 2.35, 0.05]} castShadow>
+        <boxGeometry args={[2.4, 1.35, 0.12]} />
+        <meshStandardMaterial color="#1a1510" roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 2.35, 0.12]}>
+        <boxGeometry args={[2.2, 1.15, 0.04]} />
+        <meshStandardMaterial color="#c9a24a" emissive="#c9a24a" emissiveIntensity={0.12} roughness={0.55} />
+      </mesh>
+      <Text position={[0, 2.55, 0.16]} fontSize={0.28} color="#1a1208" anchorX="center" anchorY="middle">
+        {title}
+      </Text>
+      <Text position={[0, 2.15, 0.16]} fontSize={0.18} color="#3a2a10" anchorX="center" anchorY="middle">
+        {sub}
+      </Text>
     </group>
   )
 }
