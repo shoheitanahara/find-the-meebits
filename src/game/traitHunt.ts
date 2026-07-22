@@ -29,8 +29,22 @@ const STAGE_COUNT = 3
 /** Match Museum stage 1–3 crowd sizes (PC 200→, SP 100→). */
 const PC_TRAIT_HUNT_NPC_COUNTS = [200, 250, 300] as const
 const SP_TRAIT_HUNT_NPC_COUNTS = [100, 125, 150] as const
+/** Trait types that are too hard / subtle for Trait Hunt quests. */
+const EXCLUDED_TRAIT_TYPES = new Set([
+  'Earring',
+  'Necklace',
+  'Pants',
+  'Tattoo',
+  'Shoes',
+])
+/** Specific trait values excluded regardless of type. */
+const EXCLUDED_TRAIT_VALUES = new Set(['Snoutz Skull Tee'])
 const poolsFile = traitHuntPools as TraitHuntPoolsFile
 const poolSetCache = new Map<string, Set<number>>()
+
+function isExcludedTraitQuest(quest: TraitQuest) {
+  return EXCLUDED_TRAIT_TYPES.has(quest.traitType) || EXCLUDED_TRAIT_VALUES.has(quest.traitValue)
+}
 
 export function getTraitPool(poolKey: string): number[] {
   return poolsFile.pools[poolKey] ?? []
@@ -69,7 +83,7 @@ function pickRandomTraitQuests(count: number, avoidPoolKeys: Set<string> = new S
   for (const poolKey of Object.keys(poolsFile.pools)) {
     if (avoidPoolKeys.has(poolKey)) continue
     const quest = questFromPoolKey(poolKey)
-    if (!quest) continue
+    if (!quest || isExcludedTraitQuest(quest)) continue
     const list = byType.get(quest.traitType) ?? []
     list.push(quest)
     byType.set(quest.traitType, list)
