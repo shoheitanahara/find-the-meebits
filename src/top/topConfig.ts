@@ -59,8 +59,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       alcoveDepth: 2.4,
       // 両翼
       extraBoxes: [
-        { x: -4.6, z: 0.2, halfX: 1.4, halfZ: 2.2 },
-        { x: 4.6, z: 0.2, halfX: 1.4, halfZ: 2.2 },
+        { x: -4.5, z: 0.2, halfX: 1.3, halfZ: 2.2 },
+        { x: 4.5, z: 0.2, halfX: 1.3, halfZ: 2.2 },
       ],
     },
     infoBoardLocal: [5.8, 3.6],

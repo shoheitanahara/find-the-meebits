@@ -96,8 +96,8 @@ function MuseumLandmark({
         <meshStandardMaterial color={color} roughness={0.86} />
       </mesh>
 
-      {/* 両翼 */}
-      {[-4.8, 4.8].map((x) => (
+      {/* 両翼（中央本館 半幅 3.2 に内側を密着） */}
+      {[-4.5, 4.5].map((x) => (
         <mesh key={`wing-${x}`} position={[x, 1.7, 0.3]} castShadow receiveShadow>
           <boxGeometry args={[2.6, 3.4, 4.2]} />
           <meshStandardMaterial color="#c4bdb2" roughness={0.88} />
