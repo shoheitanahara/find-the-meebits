@@ -1,17 +1,25 @@
 # Active Context
 
-最終更新: 2026-07-22
+最終更新: 2026-07-24
 
 ## 直近の作業サマリー
 
-### Meebits Park（`/`）ハブ新設 + ルーティング刷新（最新）
+### Park 配置の凍結（最新）
+
+- **Canonical Default Layout** を `memory-bank/parkDesigner.md` §14 に記録（2026-07-24）
+- 正本コード: `src/top/parkZones.ts`（家具・ゲート・Coming Soon）+ `src/top/topConfig.ts`（建物）
+- 封印門は本ゲートと同品質（開口・橋・門・通過不可衝突）
+- Coming Soon は南西／南東の建設中ランドマーク棟
+- 以降の Park レイアウト変更は §14 とコードをセットで更新すること
+
+### Meebits Park（`/`）ハブ新設 + ルーティング刷新
 
 - **ルート変更**: `/` `/jp` = Meebits Park（`top`）。旧本編は `/find-the-meebit` へ移設。**互換リダイレクトなし**
   - `src/game/appEdition.ts` で判定。SPA fallback は `vite.config.ts` + `vercel.json` 両方に追加
 - **パーク（`src/top/`）**:
   - `TopApp.tsx` — アバター選択カード（番号/ランダム + 実 VRM プレビュー）→ 入場。`?from=<attractionId>` があれば自動 start(spawn)（選択カードスキップ、該当建物前へ）
-  - `TopScene.tsx` — `TopFollowCamera`（本編相当の追従）、3 建物、噴水 + #11143 銅像（`VrmSculpture` の `hidePedestal`）、NPC 30 体（3 種歩行、会話/衝突なし、`exclusive:true` で T ポーズ回避）、ベンチ衝突、夜 + 海の演出
-  - `topConfig.ts` — `TOP_ATTRACTIONS`（find/traits/street）: 座標・色・説明看板（`storyTitle`/`description` EN/JA）
+  - `TopScene.tsx` — `TopFollowCamera`（本編相当の追従）、ゾーン切替、噴水、NPC、外周キット
+  - `topConfig.ts` / `parkZones.ts` — アトラクション・家具・ゲート（§14）
   - `topStore.ts` — `start(spawn?)` でスポーン座標指定可
 - **共通ヘッダー**: `ParkReturnButton` を全ゲームに無条件マウント（左「Meebits Park」/右「Back to Top」）。確認ダイアログ付き。既存 UI（タイマー/HUD/言語切替）はヘッダー分だけ下げた
 - **ページメタ**: `src/game/pageMetadata.ts` の `applyPageMetadata(edition, locale)` を `App.tsx` で edition 変化時に適用
