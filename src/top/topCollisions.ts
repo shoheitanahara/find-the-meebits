@@ -1,5 +1,5 @@
 import { MathUtils } from 'three'
-import { FEATURED_BOARD_POSITION } from './dailyFeatured'
+import { FEATURED_BOARD_POSITION, FOUNTAIN_CENTER_Z } from './dailyFeatured'
 import { getAttractionsForZone } from './topConfig'
 import {
   DEFAULT_PARK_ZONE,
@@ -32,7 +32,7 @@ type ObstacleCircle = {
   radius: number
 }
 
-const FOUNTAIN_CENTER = { x: 0, z: 3.4 }
+const FOUNTAIN_CENTER = { x: 0, z: FOUNTAIN_CENTER_Z }
 const FOUNTAIN_RADIUS = 2.05
 
 const BENCH_LOCAL_HALF_X = 1.18

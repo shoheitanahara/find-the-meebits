@@ -84,15 +84,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     color: '#143848',
     roofColor: '#0a1c28',
     x: 0,
-    z: -12.5,
-    entranceZ: -8.9,
+    z: -6.8,
+    entranceZ: -3.2,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.2,
       doorHalfWidth: 1.25,
       alcoveDepth: 2.2,
     },
-    infoBoardLocal: [4.6, 3.4],
+    infoBoardLocal: [4.6, 3.8],
   },
   {
     id: 'street',

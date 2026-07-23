@@ -21,7 +21,10 @@ export const MEEBIT_ID_MAX = 20000
 const STORAGE_KEY = 'meebits-park-daily-v6'
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
-export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 5.15]
+export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 6.75]
+
+/** 噴水・銅像の中心 Z（看板・衝突と共有）。 */
+export const FOUNTAIN_CENTER_Z = 5.0
 
 export type DailyThemeTrait = {
   traitType: string

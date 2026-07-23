@@ -281,7 +281,7 @@ function MuseumLandmark({
   )
 }
 
-/** Trait Hunt: 背の高いネオン円筒タワー */
+/** Trait Hunt: ネオン円筒タワー（他棟と揃う高さ） */
 function TraitTowerLandmark({
   color,
   roofColor,
@@ -296,21 +296,21 @@ function TraitTowerLandmark({
   return (
     <group>
       {/* 基壇ディスク */}
-      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[3.6, 3.8, 0.4, 24]} />
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[3.4, 3.55, 0.32, 24]} />
         <meshStandardMaterial color="#0d1822" metalness={0.35} roughness={0.5} />
       </mesh>
 
-      {/* 本体タワー */}
-      <mesh position={[0, 4.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[2.55, 2.85, 8.0, 24]} />
+      {/* 本体タワー（旧 8m → 約 4m） */}
+      <mesh position={[0, 2.2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[2.45, 2.7, 4.0, 24]} />
         <meshStandardMaterial color={color} metalness={0.22} roughness={0.48} />
       </mesh>
 
       {/* ネオンリング */}
-      {[2.2, 4.4, 6.6].map((y, index) => (
+      {[1.15, 2.25, 3.35].map((y, index) => (
         <mesh key={`ring-${y}`} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.7 + index * 0.05, 0.08, 8, 40]} />
+          <torusGeometry args={[2.55 + index * 0.04, 0.07, 8, 40]} />
           <meshStandardMaterial
             color={neon[index % neon.length]}
             emissive={neon[index % neon.length]}
@@ -325,10 +325,10 @@ function TraitTowerLandmark({
         return (
           <mesh
             key={`vneon-${index}`}
-            position={[Math.cos(a) * 2.7, 4.2, Math.sin(a) * 2.7]}
+            position={[Math.cos(a) * 2.55, 2.2, Math.sin(a) * 2.55]}
             castShadow
           >
-            <boxGeometry args={[0.1, 7.6, 0.1]} />
+            <boxGeometry args={[0.09, 3.7, 0.09]} />
             <meshStandardMaterial
               color={neon[index % neon.length]}
               emissive={neon[index % neon.length]}
@@ -338,15 +338,15 @@ function TraitTowerLandmark({
         )
       })}
 
-      {/* トレイト見本オーブ */}
-      {[-1, 1].map((side) =>
-        [0, 1, 2].map((row) => (
+      {/* トレイト見本オーブ（2段） */}
+      {([-1, 1] as const).map((side) =>
+        [0, 1].map((row) => (
           <mesh
             key={`orb-${side}-${row}`}
-            position={[side * 3.15, 2.4 + row * 1.35, 1.1]}
+            position={[side * 3.05, 1.45 + row * 1.15, 1.05]}
             castShadow
           >
-            <sphereGeometry args={[0.32, 14, 12]} />
+            <sphereGeometry args={[0.28, 14, 12]} />
             <meshStandardMaterial
               color={neon[(row + (side > 0 ? 1 : 0)) % neon.length]}
               emissive={neon[(row + (side > 0 ? 1 : 0)) % neon.length]}
@@ -358,16 +358,16 @@ function TraitTowerLandmark({
       )}
 
       {/* 上空ディスク屋根 */}
-      <mesh position={[0, 8.5, 0]} castShadow>
-        <cylinderGeometry args={[3.4, 2.4, 0.55, 24]} />
+      <mesh position={[0, 4.35, 0]} castShadow>
+        <cylinderGeometry args={[3.1, 2.2, 0.42, 24]} />
         <meshStandardMaterial color={roofColor} metalness={0.4} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 8.85, 0]}>
-        <torusGeometry args={[2.6, 0.1, 8, 40]} />
+      <mesh position={[0, 4.62, 0]}>
+        <torusGeometry args={[2.35, 0.09, 8, 40]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.3} />
       </mesh>
-      <mesh position={[0, 9.35, 0]} castShadow>
-        <sphereGeometry args={[0.55, 16, 12]} />
+      <mesh position={[0, 5.0, 0]} castShadow>
+        <sphereGeometry args={[0.42, 16, 12]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.0} />
       </mesh>
     </group>

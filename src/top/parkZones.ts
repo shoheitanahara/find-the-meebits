@@ -153,12 +153,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
      * - 建物 footprint / 入口前に木・ベンチを重ねない
      */
     benches: [
-      [-6.5, 3.4, Math.PI / 2],
-      [6.5, 3.4, -Math.PI / 2],
+      [-6.5, 5.0, Math.PI / 2],
+      [6.5, 5.0, -Math.PI / 2],
     ],
     planters: [
-      [-6.5, 1.85],
-      [6.5, 1.85],
+      [-6.5, 3.45],
+      [6.5, 3.45],
     ],
     lamps: [
       [-9, 6.5],
@@ -211,12 +211,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     hasFeaturedBoard: false,
     hasNpcCrowd: false,
     benches: [
-      [-6.5, 3.4, Math.PI / 2],
-      [6.5, 3.4, -Math.PI / 2],
+      [-6.5, 5.0, Math.PI / 2],
+      [6.5, 5.0, -Math.PI / 2],
     ],
     planters: [
-      [-6.5, 1.85],
-      [6.5, 1.85],
+      [-6.5, 3.45],
+      [6.5, 3.45],
     ],
     lamps: [
       [-9, 6.5],

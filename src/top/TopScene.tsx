@@ -22,6 +22,7 @@ import { getAttractionsForZone } from './topConfig'
 import { AttractionBuilding } from './AttractionBuilding'
 import {
   FEATURED_BOARD_POSITION,
+  FOUNTAIN_CENTER_Z,
   type DailyParkLineup,
   type DailyThemeTrait,
   type DailyVisitor,
@@ -364,7 +365,7 @@ function HubGround({
       ))}
       {showFountain ? (
         <>
-          <mesh position={[0, 0.05, 3.4]} rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh position={[0, 0.05, FOUNTAIN_CENTER_Z]} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[2.2, 2.85, 48]} />
             <meshStandardMaterial color={look.fountainRingColor} metalness={0.25} roughness={0.62} />
           </mesh>
@@ -383,7 +384,7 @@ function HubGround({
 
 function Fountain() {
   return (
-    <group position={[0, 0, 3.4]}>
+    <group position={[0, 0, FOUNTAIN_CENTER_Z]}>
       <mesh position={[0, 0.18, 0]} receiveShadow>
         <cylinderGeometry args={[1.82, 1.95, 0.34, 48]} />
         <meshStandardMaterial color="#8c806f" metalness={0.24} roughness={0.58} />
@@ -408,7 +409,7 @@ function Fountain() {
 /** 噴水中央の本日の主役銅像。丸い石柱の上に立たせる。 */
 function FountainStatue({ featuredId }: { featuredId: number }) {
   return (
-    <group position={[0, 0, 3.4]}>
+    <group position={[0, 0, FOUNTAIN_CENTER_Z]}>
       <mesh position={[0, 0.95, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.62, 0.78, 1.1, 32]} />
         <meshStandardMaterial color="#c9a06a" metalness={0.62} roughness={0.36} />
