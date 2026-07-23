@@ -23,7 +23,7 @@ type TopState = {
   zoneTransitioning: boolean
   start: (
     meebitNumber: number,
-    spawn?: { x: number; z: number; rotationY: number; zoneId?: ParkZoneId },
+    spawn?: { x?: number; z?: number; rotationY?: number; zoneId?: ParkZoneId },
   ) => void
   setMeebitNumber: (meebitNumber: number) => void
   setMovement: (x: number, z: number, rotationY: number, isMoving: boolean) => void
