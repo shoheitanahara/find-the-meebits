@@ -12,7 +12,7 @@
 export type ParkSeason = 'default' | 'spring' | 'summer' | 'autumn' | 'winter'
 
 /** ベンチ横オブジェの差し替えキー（実装は ParkBenchProp.tsx） */
-export type ParkBenchPropKind = 'flowers' | 'beachSet' | 'surfboard'
+export type ParkBenchPropKind = 'flowers' | 'beachSet' | 'surfboard' | 'campRock'
 
 /** ここを変えるだけで Park の季節が切り替わる */
 export const PARK_SEASON: ParkSeason = 'summer'
@@ -80,10 +80,8 @@ export type ParkSeasonLook = {
   environmentPreset: ParkEnvironmentPreset
   environmentIntensity: number
 
-  oceanColor: string
-  oceanEmissive: string
-  oceanEmissiveIntensity: number
-  islandColor: string
+  /** 地区床（崖の内側）。海・砂浜は使わない */
+  districtColor: string
   plazaColor: string
   pathColor: string
   paverColorA: string
@@ -94,13 +92,9 @@ export type ParkSeasonLook = {
   lampLightIntensity: number
   lampEmissiveIntensity: number
 
-  /** Museum と同系の砂浜レイヤを島の外側に使うか */
-  useSummerShore: boolean
-  /** 島外周に椰子を置くか（左右の列木は常に夜仕様のまま） */
-  usePerimeterPalms: boolean
   /**
    * ベンチ横オブジェ。
-   * 'beachSet' | 'surfboard' | 'flowers' — 夏は beachSet 推奨（夜でも読める）
+   * 'beachSet' | 'surfboard' | 'flowers' | 'campRock'
    */
   benchProp: ParkBenchPropKind
 }
@@ -109,8 +103,8 @@ export type ParkSeasonLook = {
 const NIGHT_LOOK: ParkSeasonLook = {
   backgroundColor: '#111a33',
   fogColor: '#17233d',
-  fogNear: 48,
-  fogFar: 130,
+  fogNear: 28,
+  fogFar: 72,
   showStars: true,
   ambientIntensity: 0.82,
   ambientColor: '#c4c9eb',
@@ -123,10 +117,7 @@ const NIGHT_LOOK: ParkSeasonLook = {
   accentPointColor: '#ffd38a',
   environmentPreset: 'night',
   environmentIntensity: 0.55,
-  oceanColor: '#0b4163',
-  oceanEmissive: '#0d5275',
-  oceanEmissiveIntensity: 0.2,
-  islandColor: '#3a3440',
+  districtColor: '#2a2430',
   plazaColor: '#303746',
   pathColor: '#554d52',
   paverColorA: '#5e565b',
@@ -135,20 +126,13 @@ const NIGHT_LOOK: ParkSeasonLook = {
   fountainRingColor: '#7b6648',
   lampLightIntensity: 14,
   lampEmissiveIntensity: 3.2,
-  useSummerShore: false,
-  usePerimeterPalms: false,
   benchProp: 'flowers',
 }
 
-/** 夜のパークはそのまま。外側の海・砂浜・ヤシとベンチ横だけ夏仕様。 */
+/** 夏: ライトな床トーン＋ベンチ小物（外周海は使わない） */
 const SUMMER_LOOK: ParkSeasonLook = {
   ...NIGHT_LOOK,
-  oceanColor: '#2a9fd6',
-  oceanEmissive: '#1a7fb0',
-  oceanEmissiveIntensity: 0.1,
-  islandColor: '#e6d2a0',
-  useSummerShore: true,
-  usePerimeterPalms: true,
+  districtColor: '#3a3440',
   benchProp: 'beachSet',
 }
 

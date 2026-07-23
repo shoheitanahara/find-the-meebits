@@ -11,12 +11,14 @@ import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { getDailyParkLineup, type DailyParkLineup } from './dailyFeatured'
 import { getParkSeason } from './parkSeason'
 import { TopMobileControls } from './TopControls'
-import { TOP_ATTRACTIONS } from './topConfig'
+import { TOP_ATTRACTIONS, getAttractionById } from './topConfig'
 import { TopScene } from './TopScene'
 import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { useTopStore, type AttractionId } from './topStore'
+import { getParkZone, getZoneForAttraction } from './parkZones'
+import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { ui } from '../i18n/ui'
 
@@ -85,6 +87,9 @@ export function TopApp() {
   const showSummerVer = getParkSeason() === 'summer'
   const started = useTopStore((state) => state.started)
   const nearestAttraction = useTopStore((state) => state.nearestAttraction)
+  const nearestGateId = useTopStore((state) => state.nearestGateId)
+  const activeZoneId = useTopStore((state) => state.activeZoneId)
+  const zoneTransitioning = useTopStore((state) => state.zoneTransitioning)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const savedMeebit = usePlayerStore((state) => state.meebitNumber)
   const [meebitInput, setMeebitInput] = useState(String(savedMeebit))
@@ -113,13 +118,17 @@ export function TopApp() {
   useLayoutEffect(() => {
     if (!returningAttractionId || !lineup) return
 
-    const attraction = TOP_ATTRACTIONS.find((item) => item.id === returningAttractionId)
+    const attraction = getAttractionById(returningAttractionId)
     if (!attraction) return
 
+    const zoneId = getZoneForAttraction(returningAttractionId)
+    setParkCollisionZone(zoneId)
     useTopStore.getState().start(usePlayerStore.getState().meebitNumber, {
       x: attraction.x,
+      // 入口のすぐ北（手前側）。建物は南向き入口なので、外へ向く = +Z = 0
       z: attraction.entranceZ + 2.2,
-      rotationY: Math.PI,
+      rotationY: 0,
+      zoneId,
     })
 
     // 帰還判定だけをURLから消し、更新後は通常のパークURLとして扱う。
@@ -142,7 +151,8 @@ export function TopApp() {
     const meebitNumber = normalizePlayerMeebitNumber(meebitInput)
     setMeebitInput(String(meebitNumber))
     usePlayerStore.getState().setMeebitNumber(meebitNumber)
-    useTopStore.getState().start(meebitNumber)
+    setParkCollisionZone('plaza')
+    useTopStore.getState().start(meebitNumber, { zoneId: 'plaza' })
     void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
   }
 
@@ -152,9 +162,23 @@ export function TopApp() {
     void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
   }
 
-  const nearest = nearestAttraction
-    ? TOP_ATTRACTIONS.find((attraction) => attraction.id === nearestAttraction)
+  const nearest = nearestAttraction ? getAttractionById(nearestAttraction) : null
+  const nearestGate = nearestGateId
+    ? getParkZone(activeZoneId).gates.find((gate) => gate.id === nearestGateId) ?? null
     : null
+
+  const enterNearestGate = () => {
+    if (!nearestGate) return
+    const store = useTopStore.getState()
+    if (store.zoneTransitioning) return
+    store.setZoneTransitioning(true)
+    playSfx('uiConfirm')
+    window.setTimeout(() => {
+      setParkCollisionZone(nearestGate.targetZone)
+      useTopStore.getState().setActiveZone(nearestGate.targetZone, nearestGate.targetSpawn)
+      useTopStore.getState().setZoneTransitioning(false)
+    }, 280)
+  }
 
   const showSelectionCard = !started && !isReturningFromGame
   const parkReady = lineup !== null
@@ -271,12 +295,15 @@ export function TopApp() {
             >
               Meebits Park
             </p>
+            <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
+              {getParkZone(activeZoneId).title[locale]}
+            </p>
             <p className="mt-1.5 hidden text-[0.68rem] text-[#d2c9b7] lg:block">{t.controls}</p>
             <p className="mt-1.5 text-[0.68rem] text-[#d2c9b7] lg:hidden">{t.mobileControls}</p>
             <p className="mt-0.5 text-[0.64rem] text-[#8f897e]">{t.approach}</p>
           </div>
 
-          {nearest && nearestAttraction && !isDialogueOpen ? (
+          {nearest && nearestAttraction && !isDialogueOpen && !nearestGate ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
               <button
                 type="button"
@@ -286,6 +313,22 @@ export function TopApp() {
                 {t.attractions[nearestAttraction]} — {t.enter}
               </button>
             </div>
+          ) : null}
+
+          {nearestGate && !isDialogueOpen ? (
+            <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
+              <button
+                type="button"
+                className="pointer-events-auto rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition hover:bg-[#2a2230] active:scale-95"
+                onClick={enterNearestGate}
+              >
+                {nearestGate.label[locale]} — {t.enter}
+              </button>
+            </div>
+          ) : null}
+
+          {zoneTransitioning ? (
+            <div className="pointer-events-none absolute inset-0 z-50 bg-[#070914]/55 transition-opacity" />
           ) : null}
 
           <TopMobileControls />

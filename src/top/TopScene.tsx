@@ -18,7 +18,7 @@ import { useDialogueStore } from '../dialogue/dialogueStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { playSfx } from '../ui/sfx'
 import { VrmSculpture } from '../world/VrmSculpture'
-import { TOP_ATTRACTIONS } from './topConfig'
+import { getAttractionsForZone } from './topConfig'
 import { AttractionBuilding } from './AttractionBuilding'
 import {
   FEATURED_BOARD_POSITION,
@@ -28,19 +28,19 @@ import {
 } from './dailyFeatured'
 import { setParkDialogueContext } from './interactWithParkNpc'
 import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs } from './parkNpcRegistry'
-import { ParkSeasonDecor, PARK_SIDE_TREE_XZ } from './ParkSeasonDecor'
-import { ParkSummerShore } from './ParkSummerShore'
+import { ParkPerimeter } from './ParkPerimeter'
+import { ParkSeasonDecor } from './ParkSeasonDecor'
 import { getParkSeason, getParkSeasonLook, type ParkSeasonLook } from './parkSeason'
+import { applyZoneLook } from './parkZoneTheme'
 import {
-  BENCH_PLACEMENTS,
-  LAMP_POSITIONS,
   NPC_COLLISION_RADIUS,
-  PLANTER_POSITIONS,
   PLAYER_COLLISION_RADIUS,
   isParkPositionWalkable,
   resolveParkMovement,
+  setParkCollisionZone,
 } from './topCollisions'
-import { PARK_HUB } from './parkLayout'
+import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
+import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
 
@@ -48,6 +48,9 @@ const MOVE_SPEED = 7
 const ENTER_DISTANCE = 3.6
 const ENTRANCE_HALF_WIDTH = 1.45
 const ENTRANCE_TRIGGER_DEPTH = 0.55
+const GATE_ENTER_DISTANCE = 2.8
+const GATE_TRIGGER_HALF = 1.35
+const ZONE_TRANSITION_MS = 280
 const TOP_NPC_WALK_SPEED = 1.15
 const TOP_NPC_WALK_PATTERNS = [
   { walkSeconds: [4.5, 8], idleSeconds: [0.8, 1.8], turnSpread: Math.PI * 0.35 },
@@ -81,7 +84,15 @@ export function TopScene({
 }) {
   const locale = getLocale()
   const season = getParkSeason()
-  const look = getParkSeasonLook(season)
+  const activeZoneId = useTopStore((state) => state.activeZoneId)
+  const zone = getParkZone(activeZoneId)
+  const look = applyZoneLook(activeZoneId, getParkSeasonLook(season))
+  const layout = zone.layout
+  const zoneAttractions = getAttractionsForZone(activeZoneId)
+
+  useEffect(() => {
+    setParkCollisionZone(activeZoneId)
+  }, [activeZoneId])
 
   return (
     <>
@@ -95,7 +106,7 @@ export function TopScene({
         position={[0, 6.5, 18]}
         fov={45}
         near={0.1}
-        far={140}
+        far={120}
       />
       <TopFollowCamera />
       <ambientLight intensity={look.ambientIntensity} color={look.ambientColor} />
@@ -104,39 +115,62 @@ export function TopScene({
       />
       <directionalLight
         castShadow
-        position={[-16, 22, 12]}
+        position={[-14, 20, 10]}
         intensity={look.directionalIntensity}
         color={look.directionalColor}
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-58}
-        shadow-camera-right={58}
-        shadow-camera-top={58}
-        shadow-camera-bottom={-58}
+        shadow-camera-left={-36}
+        shadow-camera-right={36}
+        shadow-camera-top={36}
+        shadow-camera-bottom={-36}
         shadow-bias={-0.0002}
       />
       <pointLight
         position={[0, 9, 2]}
         intensity={look.accentPointIntensity}
-        distance={56}
+        distance={38}
         color={look.accentPointColor}
       />
-      {/* PBR の metalness は環境反射がないとほぼ効かない。弱めの IBL を足す。 */}
       <Environment
         preset={look.environmentPreset}
         environmentIntensity={look.environmentIntensity}
       />
 
-      <HubGround featuredId={lineup.featuredId} look={look} />
-      <ParkSeasonDecor season={season} />
-      <FeaturedInfoBoard
+      <HubGround
         featuredId={lineup.featuredId}
-        featuredTraits={lineup.featuredTraits}
-        themeTrait={lineup.themeTrait}
-        locale={locale}
+        look={look}
+        layout={layout}
+        trees={zone.trees}
+        treeStyle={activeZoneId === 'mountain' ? 'pine' : 'grove'}
+        showFountain={zone.hasFountain}
       />
-      <ParkLamps look={look} />
-      <ParkDetails benchProp={look.benchProp} />
-      {TOP_ATTRACTIONS.map((attraction) => (
+      {zone.perimeter ? (
+        <ParkPerimeter
+          layout={layout}
+          perimeter={zone.perimeter}
+          gates={zone.gates}
+          locale={locale}
+        />
+      ) : null}
+      <ParkSeasonDecor season={season} layout={layout} />
+      {zone.hasFeaturedBoard ? (
+        <FeaturedInfoBoard
+          featuredId={lineup.featuredId}
+          featuredTraits={lineup.featuredTraits}
+          themeTrait={lineup.themeTrait}
+          locale={locale}
+        />
+      ) : null}
+      <ParkLamps look={look} lamps={zone.lamps} />
+      <ParkDetails
+        benchProp={look.benchProp}
+        benches={zone.benches}
+        planters={zone.planters}
+        layout={layout}
+        gates={zone.gates}
+        showRailings={!zone.perimeter}
+      />
+      {zoneAttractions.map((attraction) => (
         <AttractionBuilding
           key={attraction.id}
           attraction={attraction}
@@ -144,16 +178,51 @@ export function TopScene({
           onEnter={onEnter}
         />
       ))}
-      <TopNpcCrowd
-        visitors={lineup.visitors}
-        featuredId={lineup.featuredId}
-        themeTrait={lineup.themeTrait}
-      />
+      {zone.gates.map((gate) => (
+        <ParkZoneGate
+          key={gate.id}
+          gate={gate}
+          locale={locale}
+          onEnter={() => transitionToZone(gate.targetZone, gate.targetSpawn)}
+        />
+      ))}
+      {(zone.comingSoonSlots ?? []).map((slot) => (
+        <ComingSoonPad
+          key={`soon-${slot.x}-${slot.z}`}
+          position={[slot.x, 0, slot.z]}
+          locale={locale}
+          theme={slot.theme ?? (zone.perimeter?.theme === 'mountain' ? 'mountain' : 'classic')}
+          title={slot.title}
+          subtitle={slot.subtitle}
+        />
+      ))}
+      {zone.hasNpcCrowd ? (
+        <TopNpcCrowd
+          visitors={lineup.visitors}
+          featuredId={lineup.featuredId}
+          themeTrait={lineup.themeTrait}
+        />
+      ) : null}
       <TopPlayer />
       <TopPlayerController onEnter={onEnter} />
-      <ParkNpcProximitySystem />
+      {zone.hasNpcCrowd ? <ParkNpcProximitySystem /> : null}
     </>
   )
+}
+
+function transitionToZone(
+  zoneId: ParkZoneId,
+  spawn: { x: number; z: number; rotationY: number },
+) {
+  const store = useTopStore.getState()
+  if (store.zoneTransitioning || store.activeZoneId === zoneId) return
+  store.setZoneTransitioning(true)
+  playSfx('uiConfirm')
+  window.setTimeout(() => {
+    setParkCollisionZone(zoneId)
+    useTopStore.getState().setActiveZone(zoneId, spawn)
+    useTopStore.getState().setZoneTransitioning(false)
+  }, ZONE_TRANSITION_MS)
 }
 
 /** Hunt 本編と同じ固定オフセット追従。会話中は NPC との中間へ寄る。 */
@@ -228,42 +297,43 @@ function TopFollowCamera() {
   return null
 }
 
-function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonLook }) {
+function HubGround({
+  featuredId,
+  look,
+  layout,
+  trees,
+  treeStyle = 'grove',
+  showFountain,
+}: {
+  featuredId: number
+  look: ParkSeasonLook
+  layout: ParkZoneLayout
+  trees: ReadonlyArray<readonly [number, number]>
+  treeStyle?: 'grove' | 'pine'
+  showFountain: boolean
+}) {
   const {
     groundZ,
-    islandRadius,
+    districtHalfX,
+    districtHalfZ,
     plazaRadius,
     pathSizeX,
     pathSizeZ,
     paverWidth,
     pathEdgeX,
     pathEdgeLength,
-    oceanPlane,
-  } = PARK_HUB
+  } = layout
+
+  const paverCount = Math.max(12, Math.ceil(pathSizeZ / 1.9))
+  const paverStart = Math.floor(layout.maxZ) - 1
 
   return (
     <group>
-      {look.useSummerShore ? (
-        <ParkSummerShore look={look} />
-      ) : (
-        <>
-          {/* 島の外側を覆う、月明かりを反射する海。 */}
-          <mesh position={[0, -0.42, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[oceanPlane, oceanPlane]} />
-            <meshStandardMaterial
-              color={look.oceanColor}
-              emissive={look.oceanEmissive}
-              emissiveIntensity={look.oceanEmissiveIntensity}
-              metalness={0.45}
-              roughness={0.24}
-            />
-          </mesh>
-          <mesh position={[0, -0.25, groundZ]} receiveShadow>
-            <cylinderGeometry args={[islandRadius, islandRadius + 1, 0.5, 64]} />
-            <meshStandardMaterial color={look.islandColor} roughness={0.92} />
-          </mesh>
-        </>
-      )}
+      {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
+      <mesh position={[0, -0.08, groundZ]} receiveShadow>
+        <boxGeometry args={[districtHalfX * 2, 0.2, districtHalfZ * 2]} />
+        <meshStandardMaterial color={look.districtColor} roughness={0.94} />
+      </mesh>
       <mesh position={[0, 0.015, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[plazaRadius, 64]} />
         <meshStandardMaterial color={look.plazaColor} roughness={0.88} metalness={0.08} />
@@ -272,8 +342,7 @@ function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonL
         <planeGeometry args={[pathSizeX, pathSizeZ]} />
         <meshStandardMaterial color={look.pathColor} roughness={0.82} metalness={0.08} />
       </mesh>
-      {/* 大判の敷石で中央通りに奥行きと素材感を加える。 */}
-      {Array.from({ length: 24 }, (_, index) => 18 - index * 1.9).map((z, index) => (
+      {Array.from({ length: paverCount }, (_, index) => paverStart - index * 1.9).map((z, index) => (
         <mesh
           key={`paver-${z}`}
           position={[0, 0.055, z]}
@@ -293,15 +362,19 @@ function HubGround({ featuredId, look }: { featuredId: number; look: ParkSeasonL
           <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
         </mesh>
       ))}
-      <mesh position={[0, 0.05, 3.4]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[2.2, 2.85, 48]} />
-        <meshStandardMaterial color={look.fountainRingColor} metalness={0.25} roughness={0.62} />
-      </mesh>
-      <Fountain />
-      <FountainStatue featuredId={featuredId} />
-      {PARK_SIDE_TREE_XZ.map(([x, z]) => (
+      {showFountain ? (
+        <>
+          <mesh position={[0, 0.05, 3.4]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[2.2, 2.85, 48]} />
+            <meshStandardMaterial color={look.fountainRingColor} metalness={0.25} roughness={0.62} />
+          </mesh>
+          <Fountain />
+          <FountainStatue featuredId={featuredId} />
+        </>
+      ) : null}
+      {trees.map(([x, z]) => (
         <group key={`${x}-${z}`} position={[x, 0, 0]}>
-          <Tree z={z} />
+          {treeStyle === 'pine' ? <PineTree z={z} /> : <Tree z={z} />}
         </group>
       ))}
     </group>
@@ -382,10 +455,43 @@ function Tree({ z }: { z: number }) {
   )
 }
 
-function ParkLamps({ look }: { look: ParkSeasonLook }) {
+/** マインクラフト風の針葉樹（段々のボクセル葉） */
+function PineTree({ z }: { z: number }) {
+  return (
+    <group position={[0, 0, z]}>
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.7, 0.4, 0.7]} />
+        <meshStandardMaterial color="#5a4a38" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.3, 0]} castShadow>
+        <boxGeometry args={[0.28, 2.2, 0.28]} />
+        <meshStandardMaterial color="#4a3a28" roughness={0.92} />
+      </mesh>
+      {[
+        { y: 2.1, s: 1.55 },
+        { y: 2.75, s: 1.2 },
+        { y: 3.3, s: 0.9 },
+        { y: 3.75, s: 0.55 },
+      ].map((tier) => (
+        <mesh key={tier.y} position={[0, tier.y, 0]} castShadow>
+          <boxGeometry args={[tier.s, 0.55, tier.s]} />
+          <meshStandardMaterial color={tier.y > 3 ? '#2f6a38' : '#3a7a40'} roughness={0.93} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function ParkLamps({
+  look,
+  lamps,
+}: {
+  look: ParkSeasonLook
+  lamps: ReadonlyArray<readonly [number, number]>
+}) {
   return (
     <group>
-      {LAMP_POSITIONS.map(([x, z]) => (
+      {lamps.map(([x, z]) => (
         <group key={`${x}-${z}`} position={[x, 0, z]}>
           <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.23, 0.3, 0.24, 12]} />
@@ -427,13 +533,36 @@ function ParkLamps({ look }: { look: ParkSeasonLook }) {
   )
 }
 
-function ParkDetails({ benchProp }: { benchProp: ParkBenchPropKind }) {
+function ParkDetails({
+  benchProp,
+  benches,
+  planters,
+  layout,
+  gates,
+  showRailings,
+}: {
+  benchProp: ParkBenchPropKind
+  benches: ReadonlyArray<readonly [number, number, number]>
+  planters: ReadonlyArray<readonly [number, number]>
+  layout: ParkZoneLayout
+  gates: ReadonlyArray<ParkGateDef>
+  showRailings: boolean
+}) {
+  const postSpacing = 1.85
+  const postCount = Math.max(12, Math.ceil((layout.railingHalfLength * 2) / postSpacing))
+  const openingHalf = (gate: ParkGateDef) => {
+    const yaw = gate.yaw ?? 0
+    const projected =
+      gate.halfWidth * Math.abs(Math.cos(yaw)) + gate.alcoveDepth * Math.abs(Math.sin(yaw))
+    return projected + 1.1
+  }
+
   return (
     <group>
-      {BENCH_PLACEMENTS.map(([x, z, rotationY], index) => (
+      {benches.map(([x, z, rotationY], index) => (
         <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
       ))}
-      {PLANTER_POSITIONS.map(([x, z], index) => (
+      {planters.map(([x, z], index) => (
         <ParkBenchProp
           key={`bench-prop-${index}`}
           kind={benchProp}
@@ -441,30 +570,64 @@ function ParkDetails({ benchProp }: { benchProp: ParkBenchPropKind }) {
           index={index}
         />
       ))}
-      {[-1, 1].map((side) => (
-        <group key={`railing-${side}`} position={[side * PARK_HUB.railingX, 0, PARK_HUB.railingZ]}>
-          {Array.from({ length: 22 }, (_, index) => -PARK_HUB.railingHalfLength + 0.4 + index * 1.85).map(
-            (z) => (
-              <group key={z} position={[0, 0, z]}>
-                <mesh position={[0, 0.55, 0]}>
-                  <cylinderGeometry args={[0.035, 0.05, 1.1, 8]} />
-                  <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
-                </mesh>
-                <mesh position={[0, 1.16, 0]}>
-                  <coneGeometry args={[0.09, 0.28, 8]} />
-                  <meshStandardMaterial color="#b28c4d" metalness={0.7} roughness={0.3} />
-                </mesh>
+      {showRailings
+        ? ([-1, 1] as const).map((side) => {
+            const gate = gates.find((g) => Math.sign(g.x) === side)
+            const openHalf = gate ? openingHalf(gate) : 0
+            const gateLocalZ = gate ? gate.z - layout.railingZ : 0
+            const posts = Array.from(
+              { length: postCount },
+              (_, index) => -layout.railingHalfLength + 0.4 + index * postSpacing,
+            ).filter((z) => !gate || Math.abs(z - gateLocalZ) > openHalf)
+
+            const railSegments: Array<{ z: number; length: number }> = []
+            if (!gate) {
+              railSegments.push({ z: 0, length: layout.railingHalfLength * 2 })
+            } else {
+              const railMin = -layout.railingHalfLength
+              const railMax = layout.railingHalfLength
+              const openMin = gateLocalZ - openHalf
+              const openMax = gateLocalZ + openHalf
+              if (openMin > railMin + 0.2) {
+                railSegments.push({
+                  z: (railMin + openMin) * 0.5,
+                  length: openMin - railMin,
+                })
+              }
+              if (openMax < railMax - 0.2) {
+                railSegments.push({
+                  z: (openMax + railMax) * 0.5,
+                  length: railMax - openMax,
+                })
+              }
+            }
+
+            return (
+              <group key={`railing-${side}`} position={[side * layout.railingX, 0, layout.railingZ]}>
+                {posts.map((z) => (
+                  <group key={z} position={[0, 0, z]}>
+                    <mesh position={[0, 0.55, 0]}>
+                      <cylinderGeometry args={[0.035, 0.05, 1.1, 8]} />
+                      <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
+                    </mesh>
+                    <mesh position={[0, 1.16, 0]}>
+                      <coneGeometry args={[0.09, 0.28, 8]} />
+                      <meshStandardMaterial color="#b28c4d" metalness={0.7} roughness={0.3} />
+                    </mesh>
+                  </group>
+                ))}
+                {[0.48, 0.92].flatMap((y) =>
+                  railSegments.map((seg) => (
+                    <mesh key={`${y}-${seg.z}`} position={[0, y, seg.z]}>
+                      <boxGeometry args={[0.05, 0.05, seg.length]} />
+                      <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
+                    </mesh>
+                  )),
+                )}
               </group>
-            ),
-          )}
-          {[0.48, 0.92].map((y) => (
-            <mesh key={y} position={[0, y, 0]}>
-              <boxGeometry args={[0.05, 0.05, PARK_HUB.railingHalfLength * 2]} />
-              <meshStandardMaterial color="#3b3540" metalness={0.72} roughness={0.32} />
-            </mesh>
-          ))}
-        </group>
-      ))}
+            )
+          })
+        : null}
     </group>
   )
 }
@@ -738,12 +901,15 @@ function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
 }
 
 function isTopNpcPositionWalkable(x: number, z: number) {
-  if (Math.abs(x) > PARK_HUB.boundsX - 2 || z < PARK_HUB.minZ + 2 || z > PARK_HUB.maxZ - 1.5) {
+  const layout = getParkZone('plaza').layout
+  if (Math.abs(x) > layout.boundsX - 2 || z < layout.minZ + 2 || z > layout.maxZ - 1.5) {
     return false
   }
-  // 入口トリガー付近は NPC を寄せない（プレイヤーの入場を邪魔しない）
-  for (const attraction of TOP_ATTRACTIONS) {
+  for (const attraction of getAttractionsForZone('plaza')) {
     if (Math.hypot(x - attraction.x, z - attraction.entranceZ) < 2.8) return false
+  }
+  for (const gate of getParkZone('plaza').gates) {
+    if (Math.hypot(x - gate.x, z - gate.z) < 3.2) return false
   }
   return isParkPositionWalkable(x, z, NPC_COLLISION_RADIUS)
 }
@@ -1104,13 +1270,22 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
   const controlsRef = useKeyboardControls()
   const footstepTimer = useRef(0)
   const nearestRef = useRef<AttractionId | null>(null)
+  const nearestGateRef = useRef<string | null>(null)
   const isEnteringRef = useRef(false)
+  const isGateCrossingRef = useRef(false)
 
   useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
       if (event.code !== 'Enter' && event.code !== 'Space') return
-      // 会話中は DialogueSystem 側が Enter を使う
       if (useDialogueStore.getState().isOpen) return
+      const store = useTopStore.getState()
+      if (store.nearestGateId) {
+        const gate = getParkZone(store.activeZoneId).gates.find((item) => item.id === store.nearestGateId)
+        if (gate) {
+          transitionToZone(gate.targetZone, gate.targetSpawn)
+          return
+        }
+      }
       const nearest = nearestRef.current
       if (nearest) onEnter(nearest)
     }
@@ -1120,6 +1295,10 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
 
   useFrame((_, delta) => {
     const state = useTopStore.getState()
+    if (state.zoneTransitioning) return
+
+    const zone = getParkZone(state.activeZoneId)
+    const layout = zone.layout
     const controls = controlsRef.current
     const touch = useTouchControlsStore.getState()
     const movementLocked = usePlayerStore.getState().movementLocked
@@ -1145,13 +1324,13 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
       movement.normalize()
       const nextX = MathUtils.clamp(
         x + movement.x * MOVE_SPEED * delta,
-        -PARK_HUB.boundsX,
-        PARK_HUB.boundsX,
+        -layout.boundsX,
+        layout.boundsX,
       )
       const nextZ = MathUtils.clamp(
         z + movement.y * MOVE_SPEED * delta,
-        PARK_HUB.minZ,
-        PARK_HUB.maxZ,
+        layout.minZ,
+        layout.maxZ,
       )
       const resolved = resolveParkMovement(x, z, nextX, nextZ, PLAYER_COLLISION_RADIUS)
       x = resolved.x
@@ -1175,7 +1354,7 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     let nearestDistance = Number.POSITIVE_INFINITY
     let insideAnyEntrance = false
 
-    for (const attraction of TOP_ATTRACTIONS) {
+    for (const attraction of getAttractionsForZone(state.activeZoneId)) {
       const alcoveMinZ = attraction.entranceZ - attraction.footprint.alcoveDepth
       const isInsideEntrance =
         Math.abs(x - attraction.x) <= ENTRANCE_HALF_WIDTH &&
@@ -1198,13 +1377,44 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
       }
     }
 
-    if (!insideAnyEntrance) {
-      isEnteringRef.current = false
+    let nearestGateId: string | null = null
+    let nearestGateDistance = Number.POSITIVE_INFINITY
+    let insideGate = false
+
+    for (const gate of zone.gates) {
+      const yaw = gate.yaw ?? 0
+      const dx = x - gate.x
+      const dz = z - gate.z
+      const localX = dx * Math.cos(-yaw) - dz * Math.sin(-yaw)
+      const localZ = dx * Math.sin(-yaw) + dz * Math.cos(-yaw)
+      const inCorridor =
+        Math.abs(localZ) <= GATE_TRIGGER_HALF && Math.abs(localX) <= gate.alcoveDepth + 0.5
+      if (inCorridor) {
+        insideGate = true
+        if (!isGateCrossingRef.current) {
+          isGateCrossingRef.current = true
+          transitionToZone(gate.targetZone, gate.targetSpawn)
+          return
+        }
+      }
+
+      const distance = Math.hypot(dx, dz)
+      if (distance < GATE_ENTER_DISTANCE && distance < nearestGateDistance) {
+        nearestGateId = gate.id
+        nearestGateDistance = distance
+      }
     }
+
+    if (!insideAnyEntrance) isEnteringRef.current = false
+    if (!insideGate) isGateCrossingRef.current = false
 
     if (nearest !== nearestRef.current) {
       nearestRef.current = nearest
       useTopStore.getState().setNearestAttraction(nearest)
+    }
+    if (nearestGateId !== nearestGateRef.current) {
+      nearestGateRef.current = nearestGateId
+      useTopStore.getState().setNearestGateId(nearestGateId)
     }
   })
 

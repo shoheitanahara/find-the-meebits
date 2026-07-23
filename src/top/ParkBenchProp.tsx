@@ -3,11 +3,12 @@ import type { ParkBenchPropKind } from './parkSeason'
 
 /**
  * ベンチ横オブジェ。
- * `parkSeason.ts` の look.benchProp で季節ごとに差し替える。
+ * `parkSeason.ts` / ゾーン look の benchProp で差し替える。
  *
- * - flowers: 既存の花壇プランター
- * - beachSet: パラソル＋ビーチボール（夏おすすめ・夜でもシルエットが読める）
- * - surfboard: 立てかけサーフボード（シンプルで夏感強め）
+ * - flowers: 花壇プランター
+ * - beachSet: パラソル＋ビーチボール
+ * - surfboard: 立てかけサーフボード
+ * - campRock: ボクセル岩＋苔（マウンテン地区）
  */
 export type { ParkBenchPropKind }
 
@@ -22,6 +23,7 @@ export function ParkBenchProp({
 }) {
   if (kind === 'beachSet') return <BeachSet position={position} variant={index} />
   if (kind === 'surfboard') return <SurfboardStand position={position} variant={index} />
+  if (kind === 'campRock') return <CampRockPile position={position} variant={index} />
   return <FlowerPlanter position={position} />
 }
 
@@ -227,6 +229,47 @@ function SurfboardStand({
           </mesh>
         )
       })}
+    </group>
+  )
+}
+
+/** マウンテン地区: ボクセル岩の小さな山（マインクラフト風） */
+function CampRockPile({
+  position,
+  variant,
+}: {
+  position: [number, number, number]
+  variant: number
+}) {
+  const stones = [
+    { x: 0, y: 0.35, z: 0, s: [0.9, 0.7, 0.85] as const, c: '#6a6e68' },
+    { x: 0.45, y: 0.28, z: 0.2, s: [0.55, 0.55, 0.5] as const, c: '#7a8078' },
+    { x: -0.4, y: 0.25, z: -0.15, s: [0.5, 0.5, 0.55] as const, c: '#5a5e58' },
+    { x: 0.1, y: 0.75, z: -0.05, s: [0.48, 0.45, 0.42] as const, c: '#8a9080' },
+  ] as const
+  const moss = variant % 2 === 0 ? '#4a7a48' : '#3d6a40'
+
+  return (
+    <group position={position} rotation={[0, variant * 0.7, 0]}>
+      {stones.map((stone, index) => (
+        <mesh
+          key={index}
+          position={[stone.x, stone.y, stone.z]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[...stone.s]} />
+          <meshStandardMaterial color={stone.c} roughness={0.95} />
+        </mesh>
+      ))}
+      <mesh position={[0.05, 0.95, 0.08]} castShadow>
+        <boxGeometry args={[0.35, 0.18, 0.35]} />
+        <meshStandardMaterial color={moss} roughness={0.92} />
+      </mesh>
+      <mesh position={[-0.15, 0.55, 0.25]} castShadow>
+        <boxGeometry args={[0.22, 0.12, 0.22]} />
+        <meshStandardMaterial color={moss} roughness={0.92} />
+      </mesh>
     </group>
   )
 }

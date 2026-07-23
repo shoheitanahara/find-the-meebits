@@ -1,4 +1,5 @@
 import type { AttractionId } from './topStore'
+import type { ParkZoneId } from './parkZones'
 
 export type AttractionFootprint = {
   /** 本体の半幅・半奥行き（ローカル） */
@@ -13,6 +14,7 @@ export type AttractionFootprint = {
 
 export type Attraction = {
   id: AttractionId
+  zoneId: ParkZoneId
   title: string
   subtitle: string
   description: {
@@ -25,6 +27,7 @@ export type Attraction = {
   }
   color: string
   roofColor: string
+  /** 所属ゾーン内のワールド XZ */
   x: number
   z: number
   /** 入口トリガーのワールド Z（正面すぐ前） */
@@ -37,6 +40,7 @@ export type Attraction = {
 export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'find',
+    zoneId: 'plaza',
     title: 'FIND THE MEEBIT',
     subtitle: 'The Museum',
     description: {
@@ -49,7 +53,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#d4cdc2',
     roofColor: '#3a3530',
-    x: -14.5,
+    x: -16,
     z: -10.2,
     entranceZ: -6.4,
     footprint: {
@@ -57,7 +61,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       halfDepth: 3.4,
       doorHalfWidth: 1.35,
       alcoveDepth: 2.4,
-      // 両翼
       extraBoxes: [
         { x: -4.5, z: 0.2, halfX: 1.3, halfZ: 2.2 },
         { x: 4.5, z: 0.2, halfX: 1.3, halfZ: 2.2 },
@@ -67,6 +70,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   },
   {
     id: 'traits',
+    zoneId: 'plaza',
     title: 'TRAIT HUNT',
     subtitle: 'The Match Hall',
     description: {
@@ -83,7 +87,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     z: -12.5,
     entranceZ: -8.9,
     footprint: {
-      // 円筒タワーを AABB で近似
       halfWidth: 3.2,
       halfDepth: 3.2,
       doorHalfWidth: 1.25,
@@ -93,6 +96,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   },
   {
     id: 'street',
+    zoneId: 'plaza',
     title: '8TH STREET',
     subtitle: 'The Night Alley',
     description: {
@@ -105,7 +109,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#7a4538',
     roofColor: '#241820',
-    x: 14.5,
+    x: 16,
     z: -10.2,
     entranceZ: -6.4,
     footprint: {
@@ -113,18 +117,18 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       halfDepth: 3.5,
       doorHalfWidth: 1.15,
       alcoveDepth: 2.3,
-      // L字の横棟
       extraBoxes: [{ x: -3.4, z: -0.6, halfX: 2.0, halfZ: 2.4 }],
     },
     infoBoardLocal: [-5.2, 3.5],
   },
   {
     id: 'mountain',
+    zoneId: 'mountain',
     title: 'MOUNTAIN CLIMB',
     subtitle: 'Under Construction',
     description: {
-      en: 'A voxel peak is rising\nin the park.\nClimb when you are ready.',
-      ja: 'パークにボクセルの山が\n建設中。\n準備ができたら登ろう。',
+      en: 'A voxel peak is rising\nin the district.\nClimb when you are ready.',
+      ja: '地区にボクセルの山が\n建設中。\n準備ができたら登ろう。',
     },
     storyTitle: {
       en: 'CLIMB THE PEAK',
@@ -132,9 +136,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#6a7a58',
     roofColor: '#e8eef4',
-    x: 30,
-    z: -6.5,
-    entranceZ: -2.7,
+    x: 0,
+    z: -7,
+    entranceZ: -3.2,
     footprint: {
       halfWidth: 3.6,
       halfDepth: 3.8,
@@ -148,3 +152,11 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     infoBoardLocal: [-5.6, 4.2],
   },
 ]
+
+export function getAttractionsForZone(zoneId: ParkZoneId) {
+  return TOP_ATTRACTIONS.filter((attraction) => attraction.zoneId === zoneId)
+}
+
+export function getAttractionById(id: AttractionId) {
+  return TOP_ATTRACTIONS.find((attraction) => attraction.id === id) ?? null
+}
