@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getLocale } from '../../i18n/locale'
+import { JumpIcon } from '../../ui/mobile/MobileActionIcons'
 import { MOUNTAIN } from '../config'
 import { useMountainControlsStore } from '../controlsStore'
 
@@ -22,7 +23,7 @@ export function MountainMobileControls() {
         <VirtualJoystick />
         <button
           type="button"
-          className="pointer-events-auto mb-2 h-16 w-16 rounded-full border border-white/40 bg-black/45 text-xs font-bold uppercase tracking-wide text-white shadow-xl backdrop-blur active:scale-95"
+          className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
           onPointerDown={(event) => {
             event.preventDefault()
             useMountainControlsStore.getState().setJumpPressed(true)
@@ -30,7 +31,8 @@ export function MountainMobileControls() {
           onPointerUp={() => useMountainControlsStore.getState().setJumpPressed(false)}
           onPointerCancel={() => useMountainControlsStore.getState().setJumpPressed(false)}
         >
-          {t.jump}
+          <JumpIcon />
+          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{t.jump}</span>
         </button>
       </div>
     </div>

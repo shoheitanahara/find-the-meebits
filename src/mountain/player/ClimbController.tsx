@@ -72,7 +72,8 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
 
     if (controls.joystickActive) {
       inputX = controls.joystickX
-      inputZ = -controls.joystickY
+      // スティック上 = 画面上方向 = 山頂（-Z）。W キーと同じ向き。
+      inputZ = controls.joystickY
     }
 
     const inputLen = Math.hypot(inputX, inputZ)

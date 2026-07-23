@@ -9,6 +9,7 @@ import {
 } from './interactWithParkNpc'
 import { getParkNpcById } from './parkNpcRegistry'
 import { unlockAudioIfNeeded } from '../ui/sfx'
+import { DoneIcon, InspectIcon, NextIcon } from '../ui/mobile/MobileActionIcons'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -38,30 +39,36 @@ function ParkTalkButton() {
     return (
       <button
         type="button"
-        className="pointer-events-auto mb-2 rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition active:scale-95"
-        onClick={() => {
+        className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
+        onPointerDown={(event) => {
+          event.preventDefault()
           void unlockAudioIfNeeded()
           advanceParkDialogue()
         }}
       >
-        {isLastLine ? t.done : t.nextLine}
+        {isLastLine ? <DoneIcon /> : <NextIcon />}
+        <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+          {isLastLine ? t.done : t.nextLine}
+        </span>
       </button>
     )
   }
 
-  if (!canTalk) return <div className="w-24" />
+  if (!canTalk) return <div className="h-20 w-20 shrink-0" />
 
   return (
     <button
       type="button"
-      className="pointer-events-auto mb-2 rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition active:scale-95"
-      onClick={() => {
+      className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
+      onPointerDown={(event) => {
+        event.preventDefault()
         void unlockAudioIfNeeded().then(() => {
           interactWithNearestParkNpc()
         })
       }}
     >
-      Talk
+      <InspectIcon />
+      <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{t.inspectAction}</span>
     </button>
   )
 }
