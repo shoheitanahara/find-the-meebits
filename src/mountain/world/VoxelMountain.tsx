@@ -180,7 +180,7 @@ function MinecraftVoid() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime
-    const pulse = 0.18 + Math.sin(t * 1.4) * 0.05
+    const pulse = 0.32 + Math.sin(t * 1.4) * 0.08
     if (lavaRef.current) {
       const mat = lavaRef.current.material as { emissiveIntensity?: number }
       if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = pulse
@@ -202,8 +202,8 @@ function MinecraftVoid() {
         <boxGeometry args={[154, 1.1, 374]} />
         <meshStandardMaterial
           color="#2a0608"
-          emissive="#6a1010"
-          emissiveIntensity={0.2}
+          emissive="#8a1818"
+          emissiveIntensity={0.34}
           roughness={0.85}
           metalness={0.15}
         />
@@ -211,20 +211,22 @@ function MinecraftVoid() {
       <mesh position={[0, -1.88, -120]}>
         <boxGeometry args={[152, 0.08, 372]} />
         <meshStandardMaterial
-          color="#4a0c0c"
-          emissive="#8a1810"
-          emissiveIntensity={0.25}
+          color="#5a1010"
+          emissive="#a02018"
+          emissiveIntensity={0.4}
           transparent
-          opacity={0.35}
+          opacity={0.42}
           depthWrite={false}
           roughness={0.9}
         />
       </mesh>
       <MagmaPatches cells={magmaCells} />
-      <pointLight position={[0, -1.2, 10]} intensity={7} distance={30} color="#6a1410" />
-      <pointLight position={[0, -1.2, -40]} intensity={6} distance={28} color="#5a1010" />
-      <pointLight position={[6, -1.2, -90]} intensity={5} distance={26} color="#4a0c0c" />
-      <pointLight position={[-5, -1.2, -120]} intensity={4.5} distance={24} color="#3a0808" />
+      <pointLight position={[0, -1.0, 10]} intensity={11} distance={36} color="#8a2018" />
+      <pointLight position={[0, -1.0, -40]} intensity={9} distance={34} color="#7a1810" />
+      <pointLight position={[6, -1.0, -90]} intensity={8} distance={32} color="#6a1410" />
+      <pointLight position={[-5, -1.0, -120]} intensity={7} distance={30} color="#5a1010" />
+      <pointLight position={[0, -1.0, -180]} intensity={6.5} distance={30} color="#4a0c0c" />
+      <pointLight position={[0, -1.0, -240]} intensity={6} distance={28} color="#3a0808" />
     </group>
   )
 }
@@ -252,8 +254,8 @@ function MagmaPatches({ cells }: { cells: { x: number; z: number; shade: number 
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial
         color="#1e0506"
-        emissive="#5a1210"
-        emissiveIntensity={0.28}
+        emissive="#7a1810"
+        emissiveIntensity={0.42}
         roughness={0.88}
       />
     </instancedMesh>
@@ -263,20 +265,25 @@ function MagmaPatches({ cells }: { cells: { x: number; z: number; shade: number 
 export function MountainAtmosphere() {
   return (
     <>
-      <color attach="background" args={['#6a90b0']} />
+      <color attach="background" args={['#5a7a98']} />
       {/* far を伸ばし、約50層コース先のゴール旗が中盤からも見えるようにする */}
-      <fog attach="fog" args={['#6a90b0', 65, 320]} />
-      <ambientLight intensity={0.62} />
-      <hemisphereLight args={['#d0e0f0', '#2a1010', 0.75]} />
+      <fog attach="fog" args={['#5a7a98', 55, 300]} />
+      {/* 環境光を抑え、斜光で崖・穴の立体感を出す */}
+      <ambientLight intensity={0.34} />
+      <hemisphereLight args={['#c8d8ea', '#1a0808', 0.48]} />
       <directionalLight
         castShadow
-        position={[28, 55, 22]}
-        intensity={1.25}
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-70}
-        shadow-camera-right={70}
-        shadow-camera-top={70}
-        shadow-camera-bottom={-70}
+        position={[42, 48, 18]}
+        intensity={1.65}
+        shadow-mapSize={[1536, 1536]}
+        shadow-bias={-0.00035}
+        shadow-normalBias={0.04}
+        shadow-camera-left={-80}
+        shadow-camera-right={80}
+        shadow-camera-top={80}
+        shadow-camera-bottom={-80}
+        shadow-camera-near={10}
+        shadow-camera-far={220}
       />
     </>
   )

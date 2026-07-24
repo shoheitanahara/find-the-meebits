@@ -451,47 +451,48 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     const n = hash2(x, z)
     const n2 = hash2(x - 11, z + 5)
 
-    // 高さは傾向のみ。帯内は半々近く隣接材を混ぜる
+    // 下層は草・土多め。上に行くほど石・雪の傾向
     if (h >= snowLine) {
-      if (n < 0.28) return 'stone'
-      if (n < 0.4) return 'darkStone'
+      if (n < 0.22) return 'stone'
+      if (n < 0.32) return 'darkStone'
       return 'snow'
     }
     if (h <= def.startElev + 1 && (Math.abs(x) > 6 || z > def.zStart - 8)) {
-      if (n < 0.35) return 'grass'
-      if (n < 0.5) return 'dirt'
-      return 'sand'
-    }
-    if (t >= 0.7) {
-      if (n < 0.22) return 'snow'
-      if (n < 0.48) return 'darkStone'
-      if (n < 0.68) return 'gravel'
-      if (n < 0.82) return 'dirt'
-      return 'stone'
-    }
-    if (t >= 0.4) {
-      if (n < 0.2) return 'stone'
-      if (n < 0.42) return 'dirt'
-      if (n < 0.58) return 'gravel'
-      if (n < 0.72) return n2 < 0.5 ? 'grass' : 'stone'
-      return 'darkStone'
-    }
-    if (t >= 0.18) {
-      if (n < 0.22) return 'grass'
-      if (n < 0.4) return 'gravel'
-      if (n < 0.55) return 'darkStone'
-      if (n < 0.7) return n2 < 0.45 ? 'stone' : 'grass'
+      if (n < 0.45) return 'grass'
+      if (n < 0.7) return 'sand'
       return 'dirt'
     }
-    if (h <= def.startElev + 2 && nearestLaneDist(x, z) > 3) {
-      if (n < 0.4) return 'sand'
-      if (n < 0.6) return 'dirt'
-      return 'grass'
+    if (t >= 0.7) {
+      if (n < 0.12) return 'snow'
+      if (n < 0.4) return 'darkStone'
+      if (n < 0.55) return 'gravel'
+      if (n < 0.7) return 'dirt'
+      return 'stone'
     }
-    if (n < 0.28) return 'dirt'
-    if (n < 0.42) return 'gravel'
-    if (n < 0.52) return 'sand'
-    return 'grass'
+    if (t >= 0.45) {
+      // 中腹上: 土〜暗石
+      if (n < 0.12) return 'stone'
+      if (n < 0.35) return 'dirt'
+      if (n < 0.48) return 'grass'
+      if (n < 0.6) return 'gravel'
+      return 'darkStone'
+    }
+    if (t >= 0.22) {
+      // 中腹下: 土・草が主
+      if (n < 0.55) return 'dirt'
+      if (n < 0.82) return 'grass'
+      if (n < 0.92) return 'gravel'
+      return n2 < 0.5 ? 'darkStone' : 'dirt'
+    }
+    // 低所: ほぼ草、あとは土・少し砂
+    if (h <= def.startElev + 2 && nearestLaneDist(x, z) > 3) {
+      if (n < 0.55) return 'grass'
+      if (n < 0.8) return 'sand'
+      return 'dirt'
+    }
+    if (n < 0.72) return 'grass'
+    if (n < 0.92) return 'dirt'
+    return 'sand'
   }
 
   const heights = new Map<string, number>()
