@@ -39,7 +39,7 @@ const copy = {
       find: 'Find the Meebit',
       traits: 'Trait Hunt',
       street: '8th Street',
-      mountain: 'Mountain Climb',
+      mountain: 'Mt. Meeb',
     },
   },
   ja: {
@@ -58,7 +58,7 @@ const copy = {
       find: 'Find the Meebit',
       traits: 'トレイトハント',
       street: '8番ストリート',
-      mountain: '山登り',
+      mountain: 'Mt. Meeb',
     },
   },
 } as const

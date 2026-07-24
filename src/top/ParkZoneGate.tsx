@@ -1,5 +1,13 @@
 import { Text } from '@react-three/drei'
+import { useLayoutEffect, useMemo, useRef } from 'react'
+import { InstancedMesh, Object3D } from 'three'
 import type { ParkGateDef } from './parkZones'
+import {
+  blockKindFromTint,
+  createBlockMaterial,
+  VoxelBlockMat,
+  type BlockKind,
+} from './VoxelBlockMat'
 
 const MOSS = '#6a7a58'
 const MOSS_DARK = '#556348'
@@ -16,6 +24,8 @@ const GOLD = '#c9a24a'
 
 /** マイクラ調の基本ボクセル辺長 */
 const VOX = 0.5
+
+const scratch = new Object3D()
 
 type VoxelCell = {
   x: number
@@ -340,20 +350,64 @@ function VoxelRidge({ position }: { position: [number, number, number] }) {
 }
 
 function VoxelMesh({ cells }: { cells: VoxelCell[] }) {
+  const batches = useMemo(() => {
+    const byKind = new Map<BlockKind, VoxelCell[]>()
+    for (const cell of cells) {
+      const kind = blockKindFromTint(cell.color)
+      const list = byKind.get(kind) ?? []
+      list.push(cell)
+      byKind.set(kind, list)
+    }
+    return [...byKind.entries()].map(([kind, group]) => ({ kind, cells: group }))
+  }, [cells])
+
   return (
     <group>
-      {cells.map((cell, index) => (
-        <mesh
-          key={index}
-          position={[cell.x, cell.y, cell.z]}
-          castShadow
-          receiveShadow
-        >
-          <boxGeometry args={[VOX * 0.98, VOX * 0.98, VOX * 0.98]} />
-          <meshStandardMaterial color={cell.color} roughness={0.94} />
-        </mesh>
+      {batches.map((batch) => (
+        <VoxelKindBatch key={batch.kind} kind={batch.kind} cells={batch.cells} scale={VOX * 0.98} />
       ))}
     </group>
+  )
+}
+
+function VoxelKindBatch({
+  kind,
+  cells,
+  scale,
+  thinY,
+}: {
+  kind: BlockKind
+  cells: VoxelCell[]
+  scale: number
+  thinY?: number
+}) {
+  const meshRef = useRef<InstancedMesh>(null)
+  const material = useMemo(() => {
+    if (kind === 'grass') return createBlockMaterial('grass', 'top')
+    return createBlockMaterial(kind)
+  }, [kind])
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    const sy = thinY ?? scale
+    cells.forEach((cell, index) => {
+      scratch.position.set(cell.x, cell.y, cell.z)
+      scratch.scale.set(scale, sy, scale)
+      scratch.updateMatrix()
+      mesh.setMatrixAt(index, scratch.matrix)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    mesh.computeBoundingSphere()
+  }, [cells, scale, thinY])
+
+  if (cells.length === 0) return null
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, cells.length]} castShadow receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <primitive object={material} attach="material" />
+    </instancedMesh>
   )
 }
 
@@ -366,29 +420,43 @@ function ApproachPath({
   length: number
   width: number
 }) {
-  const tilesX = Math.round(length / VOX)
-  const tilesZ = Math.max(3, Math.round(width / VOX))
-  const cells: VoxelCell[] = []
+  const batches = useMemo(() => {
+    const tilesX = Math.round(length / VOX)
+    const tilesZ = Math.max(3, Math.round(width / VOX))
+    const cells: VoxelCell[] = []
 
-  for (let ix = 0; ix < tilesX; ix++) {
-    for (let iz = -Math.floor(tilesZ / 2); iz <= Math.floor(tilesZ / 2); iz++) {
-      const checker = (ix + iz + 20) % 2 === 0
-      cells.push({
-        x: faceSign * (0.4 + (ix + 0.5) * VOX),
-        y: VOX * 0.12,
-        z: (iz + 0.5) * VOX * 0.92,
-        color: checker ? '#7a7264' : '#635c50',
-      })
+    for (let ix = 0; ix < tilesX; ix++) {
+      for (let iz = -Math.floor(tilesZ / 2); iz <= Math.floor(tilesZ / 2); iz++) {
+        const checker = (ix + iz + 20) % 2 === 0
+        cells.push({
+          x: faceSign * (0.4 + (ix + 0.5) * VOX),
+          y: VOX * 0.12,
+          z: (iz + 0.5) * VOX * 0.92,
+          color: checker ? '#7a7264' : '#635c50',
+        })
+      }
     }
-  }
+
+    const byKind = new Map<BlockKind, VoxelCell[]>()
+    for (const cell of cells) {
+      const kind = blockKindFromTint(cell.color)
+      const list = byKind.get(kind) ?? []
+      list.push(cell)
+      byKind.set(kind, list)
+    }
+    return [...byKind.entries()].map(([kind, group]) => ({ kind, cells: group }))
+  }, [faceSign, length, width])
 
   return (
     <group>
-      {cells.map((cell, index) => (
-        <mesh key={index} position={[cell.x, cell.y, cell.z]} receiveShadow>
-          <boxGeometry args={[VOX * 0.96, VOX * 0.22, VOX * 0.9]} />
-          <meshStandardMaterial color={cell.color} roughness={0.95} />
-        </mesh>
+      {batches.map((batch) => (
+        <VoxelKindBatch
+          key={batch.kind}
+          kind={batch.kind}
+          cells={batch.cells}
+          scale={VOX * 0.96}
+          thinY={VOX * 0.22}
+        />
       ))}
     </group>
   )
@@ -527,29 +595,29 @@ function MountainComingSoonShell() {
       {/* 石基壇 */}
       <mesh position={[0, 0.18, 0]} castShadow receiveShadow>
         <boxGeometry args={[6.4, 0.36, 5.8]} />
-        <meshStandardMaterial color="#5a4a38" roughness={0.94} />
+        <VoxelBlockMat kind="dirt" />
       </mesh>
       <mesh position={[0, 0.4, 0]} receiveShadow>
         <boxGeometry args={[5.8, 0.12, 5.2]} />
-        <meshStandardMaterial color="#6a7a58" roughness={0.9} />
+        <VoxelBlockMat kind="grass" face="top" />
       </mesh>
 
       {/* 未完成のボクセル躯体（高さムラ） */}
       {[
-        { x: -1.6, z: -0.4, w: 2.6, h: 2.8, d: 2.4, c: '#6a6e68' },
-        { x: 1.5, z: -0.6, w: 2.4, h: 3.6, d: 2.2, c: '#4a4e48' },
-        { x: 0.1, z: -1.6, w: 2.0, h: 1.8, d: 1.6, c: '#8a8e82' },
-        { x: -2.2, z: 1.0, w: 1.5, h: 1.4, d: 1.5, c: '#5a8a48' },
+        { x: -1.6, z: -0.4, w: 2.6, h: 2.8, d: 2.4, kind: 'stone' as const },
+        { x: 1.5, z: -0.6, w: 2.4, h: 3.6, d: 2.2, kind: 'darkStone' as const },
+        { x: 0.1, z: -1.6, w: 2.0, h: 1.8, d: 1.6, kind: 'stone' as const },
+        { x: -2.2, z: 1.0, w: 1.5, h: 1.4, d: 1.5, kind: 'grass' as const },
       ].map((b) => (
         <mesh key={`${b.x}-${b.z}`} position={[b.x, 0.45 + b.h * 0.5, b.z]} castShadow receiveShadow>
           <boxGeometry args={[b.w, b.h, b.d]} />
-          <meshStandardMaterial color={b.c} roughness={0.95} />
+          <VoxelBlockMat kind={b.kind} face={b.kind === 'grass' ? 'top' : 'all'} />
         </mesh>
       ))}
       {/* 雪っぽい頂部ブロック */}
       <mesh position={[1.5, 4.25, -0.6]} castShadow>
         <boxGeometry args={[1.6, 0.45, 1.4]} />
-        <meshStandardMaterial color="#e8eef4" roughness={0.85} />
+        <VoxelBlockMat kind="snow" />
       </mesh>
 
       {/* 足場 */}
@@ -557,23 +625,23 @@ function MountainComingSoonShell() {
         <group key={`scaffold-${x}`}>
           <mesh position={[x, 1.6, 1.6]} castShadow>
             <boxGeometry args={[0.14, 3.2, 0.14]} />
-            <meshStandardMaterial color="#7a5a38" roughness={0.88} />
+            <VoxelBlockMat kind="path" />
           </mesh>
           <mesh position={[x, 1.6, -1.8]} castShadow>
             <boxGeometry args={[0.14, 3.2, 0.14]} />
-            <meshStandardMaterial color="#7a5a38" roughness={0.88} />
+            <VoxelBlockMat kind="path" />
           </mesh>
           <mesh position={[x, 2.4, -0.1]} castShadow>
             <boxGeometry args={[0.12, 0.12, 3.5]} />
-            <meshStandardMaterial color="#6a4a30" roughness={0.85} />
+            <VoxelBlockMat kind="path" />
           </mesh>
         </group>
       ))}
       <mesh position={[0, 2.45, 1.6]} castShadow>
         <boxGeometry args={[5.3, 0.1, 0.7]} />
-        <meshStandardMaterial color="#8a6a42" roughness={0.86} />
+        <VoxelBlockMat kind="path" />
       </mesh>
-      {/* 青シート */}
+      {/* 青シートはそのまま（非ボクセル小物） */}
       <mesh position={[0.2, 3.1, 0.4]} rotation={[0.08, 0.2, -0.12]} castShadow>
         <boxGeometry args={[3.4, 0.06, 2.6]} />
         <meshStandardMaterial color="#3a6a9a" roughness={0.7} metalness={0.05} />
@@ -581,11 +649,11 @@ function MountainComingSoonShell() {
       {/* 資材箱 */}
       <mesh position={[-2.4, 0.55, 2.0]} castShadow>
         <boxGeometry args={[1.1, 0.7, 0.9]} />
-        <meshStandardMaterial color="#6a4a28" roughness={0.9} />
+        <VoxelBlockMat kind="dirt" />
       </mesh>
       <mesh position={[2.3, 0.45, 2.1]} castShadow>
         <boxGeometry args={[0.9, 0.55, 0.7]} />
-        <meshStandardMaterial color="#5a3a20" roughness={0.9} />
+        <VoxelBlockMat kind="dirt" />
       </mesh>
     </group>
   )

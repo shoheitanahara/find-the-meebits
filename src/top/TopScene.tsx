@@ -41,6 +41,7 @@ import {
   setParkCollisionZone,
 } from './topCollisions'
 import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
+import { MountainVoxelGround } from './MountainVoxelGround'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
@@ -143,6 +144,7 @@ export function TopScene({
         layout={layout}
         trees={zone.trees}
         treeStyle={activeZoneId === 'mountain' ? 'pine' : 'grove'}
+        voxelGround={activeZoneId === 'mountain'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -304,6 +306,7 @@ function HubGround({
   layout,
   trees,
   treeStyle = 'grove',
+  voxelGround = false,
   showFountain,
 }: {
   featuredId: number
@@ -311,6 +314,7 @@ function HubGround({
   layout: ParkZoneLayout
   trees: ReadonlyArray<readonly [number, number]>
   treeStyle?: 'grove' | 'pine'
+  voxelGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -330,39 +334,45 @@ function HubGround({
 
   return (
     <group>
-      {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
-      <mesh position={[0, -0.08, groundZ]} receiveShadow>
-        <boxGeometry args={[districtHalfX * 2, 0.2, districtHalfZ * 2]} />
-        <meshStandardMaterial color={look.districtColor} roughness={0.94} />
-      </mesh>
-      <mesh position={[0, 0.015, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[plazaRadius, 64]} />
-        <meshStandardMaterial color={look.plazaColor} roughness={0.88} metalness={0.08} />
-      </mesh>
-      <mesh position={[0, 0.035, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[pathSizeX, pathSizeZ]} />
-        <meshStandardMaterial color={look.pathColor} roughness={0.82} metalness={0.08} />
-      </mesh>
-      {Array.from({ length: paverCount }, (_, index) => paverStart - index * 1.9).map((z, index) => (
-        <mesh
-          key={`paver-${z}`}
-          position={[0, 0.055, z]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          receiveShadow
-        >
-          <planeGeometry args={[paverWidth, 1.72]} />
-          <meshStandardMaterial
-            color={index % 2 === 0 ? look.paverColorA : look.paverColorB}
-            roughness={0.9}
-          />
-        </mesh>
-      ))}
-      {[-pathEdgeX, pathEdgeX].map((x) => (
-        <mesh key={`path-edge-${x}`} position={[x, 0.07, groundZ]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.18, pathEdgeLength]} />
-          <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
-        </mesh>
-      ))}
+      {voxelGround ? (
+        <MountainVoxelGround layout={layout} />
+      ) : (
+        <>
+          {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
+          <mesh position={[0, -0.08, groundZ]} receiveShadow>
+            <boxGeometry args={[districtHalfX * 2, 0.2, districtHalfZ * 2]} />
+            <meshStandardMaterial color={look.districtColor} roughness={0.94} />
+          </mesh>
+          <mesh position={[0, 0.015, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <circleGeometry args={[plazaRadius, 64]} />
+            <meshStandardMaterial color={look.plazaColor} roughness={0.88} metalness={0.08} />
+          </mesh>
+          <mesh position={[0, 0.035, groundZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[pathSizeX, pathSizeZ]} />
+            <meshStandardMaterial color={look.pathColor} roughness={0.82} metalness={0.08} />
+          </mesh>
+          {Array.from({ length: paverCount }, (_, index) => paverStart - index * 1.9).map((z, index) => (
+            <mesh
+              key={`paver-${z}`}
+              position={[0, 0.055, z]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              receiveShadow
+            >
+              <planeGeometry args={[paverWidth, 1.72]} />
+              <meshStandardMaterial
+                color={index % 2 === 0 ? look.paverColorA : look.paverColorB}
+                roughness={0.9}
+              />
+            </mesh>
+          ))}
+          {[-pathEdgeX, pathEdgeX].map((x) => (
+            <mesh key={`path-edge-${x}`} position={[x, 0.07, groundZ]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.18, pathEdgeLength]} />
+              <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
+            </mesh>
+          ))}
+        </>
+      )}
       {showFountain ? (
         <>
           <mesh position={[0, 0.05, FOUNTAIN_CENTER_Z]} rotation={[-Math.PI / 2, 0, 0]}>

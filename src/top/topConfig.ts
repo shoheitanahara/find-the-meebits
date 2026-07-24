@@ -124,15 +124,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'mountain',
     zoneId: 'mountain',
-    title: 'MOUNTAIN CLIMB',
-    subtitle: 'Under Construction',
+    title: 'MT. MEEB',
+    subtitle: 'Now Open',
     description: {
-      en: 'A voxel peak is rising\nin the district.\nClimb when you are ready.',
-      ja: '地区にボクセルの山が\n建設中。\n準備ができたら登ろう。',
+      en: 'Scale the voxel mountain\nwith jumps and dashes.\n20 stages up to 1000m.',
+      ja: 'ジャンプとダッシュで\nボクセルの山を登ろう。\n全20ステージ・約1000m。',
     },
     storyTitle: {
-      en: 'CLIMB THE PEAK',
-      ja: '山頂を目指せ',
+      en: 'CLIMB MT. MEEB',
+      ja: 'Mt. Meeb へ登れ',
     },
     color: '#6a7a58',
     roofColor: '#e8eef4',

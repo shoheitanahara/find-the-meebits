@@ -1,6 +1,7 @@
 import { Text } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { ParkGateDef, ParkZoneLayout } from './parkZones'
+import { VoxelBlockMat } from './VoxelBlockMat'
 import {
   buildPerimeterSpec,
   getBridgePlacement,
@@ -323,9 +324,8 @@ function VoxelCliff({
             receiveShadow
           >
             <boxGeometry args={[Math.max(tw, 0.4), h * 0.96, Math.max(td, 0.4)]} />
-            <meshStandardMaterial
-              color={tier === tiers - 1 ? MT_STONE_LIGHT : tier === 0 ? MT_STONE_DARK : MT_STONE}
-              roughness={0.96}
+            <VoxelBlockMat
+              kind={tier === tiers - 1 ? 'stone' : tier === 0 ? 'darkStone' : 'stone'}
             />
           </mesh>
         )
@@ -339,7 +339,7 @@ function VoxelCliff({
             axis === 'z' ? sz * 0.92 : sz * 1.05,
           ]}
         />
-        <meshStandardMaterial color={MT_GRASS} roughness={0.9} />
+        <VoxelBlockMat kind="grass" face="top" />
       </mesh>
       <mesh position={[0, sy * 0.5 - 0.05, 0]} receiveShadow>
         <boxGeometry
@@ -349,7 +349,7 @@ function VoxelCliff({
             axis === 'z' ? sz * 0.88 : sz * 0.98,
           ]}
         />
-        <meshStandardMaterial color={MT_DIRT} roughness={0.95} />
+        <VoxelBlockMat kind="dirt" />
       </mesh>
     </group>
   )
@@ -392,10 +392,11 @@ function GateWallReveal({
           <group key={`${side}-wing-${dir}`} position={position}>
             <mesh castShadow receiveShadow>
               <boxGeometry args={size} />
-              <meshStandardMaterial
-                color={mountain ? MT_STONE : STONE_LIGHT}
-                roughness={mountain ? 0.95 : 0.88}
-              />
+              {mountain ? (
+                <VoxelBlockMat kind="stone" />
+              ) : (
+                <meshStandardMaterial color={STONE_LIGHT} roughness={0.88} />
+              )}
             </mesh>
             {mountain ? (
               <>
@@ -407,7 +408,7 @@ function GateWallReveal({
                         : [wing * 0.7, h * 0.55, t * 1.15]
                     }
                   />
-                  <meshStandardMaterial color={MT_STONE_DARK} roughness={0.96} />
+                  <VoxelBlockMat kind="darkStone" />
                 </mesh>
                 <mesh position={[0, h * 0.5 + 0.14, 0]} castShadow>
                   <boxGeometry
@@ -417,7 +418,7 @@ function GateWallReveal({
                         : [wing * 1.1, 0.32, t * 1.2]
                     }
                   />
-                  <meshStandardMaterial color={MT_GRASS} roughness={0.9} />
+                  <VoxelBlockMat kind="grass" face="top" />
                 </mesh>
               </>
             ) : (
@@ -919,11 +920,11 @@ function MountainSealedGate({
     <group>
       <mesh position={[0, 0.08, 0.5]} receiveShadow>
         <boxGeometry args={[halfW * 1.6, 0.16, 1.4]} />
-        <meshStandardMaterial color={MT_DIRT} roughness={0.95} />
+        <VoxelBlockMat kind="dirt" />
       </mesh>
       <mesh position={[0, 0.14, 0.5]} receiveShadow>
         <boxGeometry args={[halfW * 1.2, 0.08, 1.05]} />
-        <meshStandardMaterial color="#5a6a48" roughness={0.92} />
+        <VoxelBlockMat kind="grass" face="top" />
       </mesh>
 
       {/* 左右の岩塔 */}
@@ -931,28 +932,28 @@ function MountainSealedGate({
         <group key={s} position={[0.15, 0, s * rockZ]}>
           <mesh position={[0, 1.1, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.35, 2.2, 1.35]} />
-            <meshStandardMaterial color={MT_STONE} roughness={0.95} />
+            <VoxelBlockMat kind="stone" />
           </mesh>
           <mesh position={[s * 0.15, 2.35, 0.1]} castShadow>
             <boxGeometry args={[1.1, 1.5, 1.1]} />
-            <meshStandardMaterial color={MT_STONE_DARK} roughness={0.96} />
+            <VoxelBlockMat kind="darkStone" />
           </mesh>
           <mesh position={[0, 3.35, 0]} castShadow>
             <boxGeometry args={[0.85, 1.0, 0.85]} />
-            <meshStandardMaterial color={MT_STONE_LIGHT} roughness={0.94} />
+            <VoxelBlockMat kind="stone" />
           </mesh>
           <mesh position={[0, 4.0, 0]} castShadow>
             <boxGeometry args={[0.55, 0.55, 0.55]} />
-            <meshStandardMaterial color="#e8eef4" roughness={0.85} />
+            <VoxelBlockMat kind="snow" />
           </mesh>
           <mesh position={[0, 2.25 + 0.05, 0]} castShadow>
             <boxGeometry args={[1.45, 0.28, 1.45]} />
-            <meshStandardMaterial color={MT_GRASS} roughness={0.9} />
+            <VoxelBlockMat kind="grass" face="top" />
           </mesh>
           {/* 足元の小岩 */}
           <mesh position={[0.55, 0.35, s * 0.4]} castShadow>
             <boxGeometry args={[0.55, 0.7, 0.5]} />
-            <meshStandardMaterial color={MT_STONE_DARK} roughness={0.95} />
+            <VoxelBlockMat kind="darkStone" />
           </mesh>
         </group>
       ))}
@@ -960,15 +961,15 @@ function MountainSealedGate({
       {/* アーチ梁 */}
       <mesh position={[0, 3.45, 0]} castShadow>
         <boxGeometry args={[0.7, 0.55, halfW * 2.05]} />
-        <meshStandardMaterial color={MT_STONE} roughness={0.94} />
+        <VoxelBlockMat kind="stone" />
       </mesh>
       <mesh position={[0, 3.85, 0]} castShadow>
         <boxGeometry args={[0.85, 0.35, halfW * 1.7]} />
-        <meshStandardMaterial color={MT_GRASS} roughness={0.9} />
+        <VoxelBlockMat kind="grass" face="top" />
       </mesh>
       <mesh position={[0, 4.15, 0]} castShadow>
         <boxGeometry args={[0.5, 0.35, halfW * 0.9]} />
-        <meshStandardMaterial color="#d8e4ec" roughness={0.88} />
+        <VoxelBlockMat kind="snow" />
       </mesh>
 
       {/* 板打ち封印扉 */}

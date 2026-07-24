@@ -1,6 +1,5 @@
-import { MOUNTAIN, pathCenterX } from './config'
+import { MOUNTAIN, getMountainRuntime } from './config'
 import type { VoxelBlock } from './config'
-import { MOUNTAIN_BLOCKS } from './config'
 
 export type PlayerBody = {
   x: number
@@ -10,6 +9,10 @@ export type PlayerBody = {
   vy: number
   vz: number
   onGround: boolean
+}
+
+function activeBlocks(): VoxelBlock[] {
+  return getMountainRuntime().blocks
 }
 
 function blockTop(block: VoxelBlock) {
@@ -25,7 +28,7 @@ function overlapsXZ(body: PlayerBody, block: VoxelBlock, radius: number) {
 }
 
 /** 水平移動後にブロック側面から押し出す（段差のオートステップなし＝全部ジャンプ）。 */
-export function resolveHorizontal(body: PlayerBody, blocks: VoxelBlock[] = MOUNTAIN_BLOCKS) {
+export function resolveHorizontal(body: PlayerBody, blocks: VoxelBlock[] = activeBlocks()) {
   const r = MOUNTAIN.playerRadius
   const feet = body.y
   const head = body.y + MOUNTAIN.playerHeight
@@ -64,12 +67,13 @@ export function resolveHorizontal(body: PlayerBody, blocks: VoxelBlock[] = MOUNT
 }
 
 /** 落下・着地。上からブロック上面に乗ったときだけ接地。 */
-export function resolveVertical(body: PlayerBody, dt: number, blocks: VoxelBlock[] = MOUNTAIN_BLOCKS) {
+export function resolveVertical(body: PlayerBody, dt: number, blocks: VoxelBlock[] = activeBlocks()) {
   body.vy -= MOUNTAIN.gravity * dt
   body.y += body.vy * dt
   body.onGround = false
 
   const r = MOUNTAIN.playerRadius
+  const runtime = getMountainRuntime()
 
   if (body.vy <= 0) {
     for (const block of blocks) {
@@ -97,9 +101,9 @@ export function resolveVertical(body: PlayerBody, dt: number, blocks: VoxelBlock
   }
 
   if (body.y < MOUNTAIN.fallY) {
-    body.x = MOUNTAIN.start.x
-    body.y = MOUNTAIN.start.y
-    body.z = MOUNTAIN.start.z
+    body.x = runtime.start.x
+    body.y = runtime.start.y
+    body.z = runtime.start.z
     body.vx = 0
     body.vy = 0
     body.vz = 0
@@ -108,7 +112,26 @@ export function resolveVertical(body: PlayerBody, dt: number, blocks: VoxelBlock
 }
 
 export function isAtGoal(body: PlayerBody) {
-  const dx = body.x - pathCenterX(MOUNTAIN.goalZ)
-  const dz = body.z - MOUNTAIN.goalZ
-  return body.y >= MOUNTAIN.goalY - 2 && Math.hypot(dx, dz) <= MOUNTAIN.goalRadius
+  const runtime = getMountainRuntime()
+  const dx = body.x - runtime.pathCenterX(runtime.goalZ)
+  const plateauDeep = MOUNTAIN.summitPlateau
+  // 頂点平台のどこに乗ってもクリア（手前斜面では誤クリアしない）
+  return (
+    body.y >= runtime.goalY - 1.25 &&
+    body.z <= runtime.goalZ + 1.6 &&
+    body.z >= runtime.goalZ - plateauDeep - 0.5 &&
+    Math.abs(dx) <= runtime.goalRadius + 2.5
+  )
+}
+
+/** ステージ開始位置へボディをリセット */
+export function resetBodyToStageStart(body: PlayerBody) {
+  const runtime = getMountainRuntime()
+  body.x = runtime.start.x
+  body.y = runtime.start.y
+  body.z = runtime.start.z
+  body.vx = 0
+  body.vy = 0
+  body.vz = 0
+  body.onGround = true
 }

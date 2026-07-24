@@ -8,22 +8,22 @@ import {
   type Material,
 } from 'three'
 import type { BlockKind, VoxelColumn } from '../config'
-import { MOUNTAIN, MOUNTAIN_COLUMNS } from '../config'
+import { getMountainRuntime } from '../config'
 import { getBlockTexture } from '../blockTextures'
+import { useMountainStore } from '../store'
 
 const scratch = new Object3D()
 
 /** 柱インスタンスでソリッドなマイクラ風の山を描画 */
 export function VoxelMountain() {
-  const { tops, shafts } = useMemo(() => splitColumns(MOUNTAIN_COLUMNS), [])
-
+  const terrainVersion = useMountainStore((state) => state.terrainVersion)
+  const runtime = getMountainRuntime()
+  const { tops, shafts } = useMemo(
+    () => splitColumns(runtime.columns),
+    [terrainVersion, runtime.columns],
+  )
   return (
-    <group>
-      <mesh position={[0, -0.35, 14]} receiveShadow>
-        <boxGeometry args={[22, 0.7, 12]} />
-        <meshStandardMaterial color="#5a8f48" roughness={1} />
-      </mesh>
-
+    <group key={terrainVersion}>
       <MinecraftVoid />
 
       {shafts.map((group) => (
@@ -43,15 +43,21 @@ export function VoxelMountain() {
         />
       ))}
 
-      <group position={[0, MOUNTAIN.goalY + 2.5, MOUNTAIN.goalZ]}>
-        <mesh position={[0, 1.1, 0]} castShadow>
-          <cylinderGeometry args={[0.07, 0.09, 2.2, 8]} />
-          <meshStandardMaterial color="#d8c8a0" />
+      {/* ゴール旗 — 頂上平台の上。大きく発光させて見失いにくくする */}
+      <group position={[runtime.pathCenterX(runtime.goalZ), runtime.goalY + 0.5, runtime.goalZ]}>
+        <mesh position={[0, 4.5, 0]} castShadow>
+          <cylinderGeometry args={[0.12, 0.16, 9, 8]} />
+          <meshStandardMaterial color="#f0e4c8" />
         </mesh>
-        <mesh position={[0.5, 1.85, 0]} castShadow>
-          <boxGeometry args={[1.0, 0.65, 0.08]} />
-          <meshStandardMaterial color="#e85d4c" emissive="#e85d4c" emissiveIntensity={0.4} />
+        <mesh position={[1.2, 8.2, 0]} castShadow>
+          <boxGeometry args={[2.4, 1.6, 0.12]} />
+          <meshStandardMaterial color="#ff3a28" emissive="#ff2a18" emissiveIntensity={1.1} />
         </mesh>
+        <mesh position={[0, 9.4, 0]}>
+          <sphereGeometry args={[0.45, 12, 12]} />
+          <meshStandardMaterial color="#ffe08a" emissive="#ffcc55" emissiveIntensity={1.8} />
+        </mesh>
+        <pointLight position={[0, 9, 0]} color="#ff8855" intensity={28} distance={55} decay={2} />
       </group>
     </group>
   )
@@ -161,7 +167,8 @@ function MinecraftVoid() {
 
   const magmaCells = useMemo(() => {
     const cells: { x: number; z: number; shade: number }[] = []
-    for (let z = 6; z >= -148; z -= 2) {
+    // スタート周辺（z≈16）までマグマパッチを伸ばし、落下ポイントを緑ではなく溶岩に
+    for (let z = 22; z >= -290; z -= 2) {
       for (let x = -28; x <= 28; x += 2) {
         const n = Math.abs((x * 17 + z * 31) % 7)
         if (n > 4) continue
@@ -182,16 +189,17 @@ function MinecraftVoid() {
 
   return (
     <group>
-      <mesh position={[0, -5.5, -65]} receiveShadow>
-        <boxGeometry args={[160, 4, 220]} />
+      {/* 中心をスタート寄りにずらし、落下床がスタート地点まで続く */}
+      <mesh position={[0, -5.5, -120]} receiveShadow>
+        <boxGeometry args={[160, 4, 380]} />
         <meshStandardMaterial color="#030204" roughness={1} />
       </mesh>
-      <mesh position={[0, -3.4, -65]} receiveShadow>
-        <boxGeometry args={[156, 1.4, 216]} />
+      <mesh position={[0, -3.4, -120]} receiveShadow>
+        <boxGeometry args={[156, 1.4, 376]} />
         <meshStandardMaterial color="#121014" roughness={0.98} />
       </mesh>
-      <mesh ref={lavaRef} position={[0, -2.45, -65]} receiveShadow>
-        <boxGeometry args={[154, 1.1, 214]} />
+      <mesh ref={lavaRef} position={[0, -2.45, -120]} receiveShadow>
+        <boxGeometry args={[154, 1.1, 374]} />
         <meshStandardMaterial
           color="#2a0608"
           emissive="#6a1010"
@@ -200,8 +208,8 @@ function MinecraftVoid() {
           metalness={0.15}
         />
       </mesh>
-      <mesh position={[0, -1.88, -65]}>
-        <boxGeometry args={[152, 0.08, 212]} />
+      <mesh position={[0, -1.88, -120]}>
+        <boxGeometry args={[152, 0.08, 372]} />
         <meshStandardMaterial
           color="#4a0c0c"
           emissive="#8a1810"
@@ -213,6 +221,7 @@ function MinecraftVoid() {
         />
       </mesh>
       <MagmaPatches cells={magmaCells} />
+      <pointLight position={[0, -1.2, 10]} intensity={7} distance={30} color="#6a1410" />
       <pointLight position={[0, -1.2, -40]} intensity={6} distance={28} color="#5a1010" />
       <pointLight position={[6, -1.2, -90]} intensity={5} distance={26} color="#4a0c0c" />
       <pointLight position={[-5, -1.2, -120]} intensity={4.5} distance={24} color="#3a0808" />
@@ -255,7 +264,8 @@ export function MountainAtmosphere() {
   return (
     <>
       <color attach="background" args={['#6a90b0']} />
-      <fog attach="fog" args={['#6a6064', 40, 130]} />
+      {/* far を伸ばし、約50層コース先のゴール旗が中盤からも見えるようにする */}
+      <fog attach="fog" args={['#6a90b0', 65, 320]} />
       <ambientLight intensity={0.62} />
       <hemisphereLight args={['#d0e0f0', '#2a1010', 0.75]} />
       <directionalLight

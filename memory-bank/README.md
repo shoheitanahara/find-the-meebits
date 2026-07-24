@@ -12,7 +12,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/find-the-meebit` `/jp/find-the-meebit` | `v1` | Find the Meebit（Museum / After Hours） |
 | `/v2` `/jp/v2` | `v2` | Trait Hunt（特徴一致ハント試作） |
 | `/8th-street` `/jp/8th-street` | `8th-street` | 8th Street（一人称・間違い探し系ループ） |
-| `/mountain` `/jp/mountain` | `mountain` | Mountain Climb |
+| `/mountain` `/jp/mountain` | `mountain` | Mt. Meeb |
 
 - ルート判定: `src/game/appEdition.ts`（`getAppEdition`）
 - Park 設計: **[parkDesigner.md](./parkDesigner.md)**（共通骨格・橋ゲート・カージナル導線）

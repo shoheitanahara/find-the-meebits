@@ -114,14 +114,14 @@ Mountain 地区: テーマ `mountain`（苔・土・石・針葉樹・松明・�
 ### アトラクション・スロット（1 エリア最大 3）
 
 四隅または南／北の「カージナルを切らない位置」に最大 3。  
-**座標の正は §14**（Plaza A/B/C・Mountain 本棟＋ Coming Soon 2）。
+**座標の正は §14**（Plaza A/B/C・Mountain 本棟 Mt. Meeb＋ Coming Soon 2）。
 
 | スロット | おおよその位置イメージ | 現行例 |
 |----------|------------------------|--------|
 | A | 南西寄り | Plaza: Find `(-16, -10.2)` |
 | B | 南中央寄り（中央道は空けたまま） | Plaza: Trait `(0, -6.8)` / Mountain: Climb `(0, -7)` |
 | C | 南東寄り | Plaza: Street `(16, -10.2)` |
-| 予備 | Coming Soon 建設中棟 | Mountain: `(-12.5, -11.5)` / `(12.5, -11.0)` |
+| 予備 | Coming Soon（将来アトラクション） | Mountain: `(-12.5, -11.5)` / `(12.5, -11.0)` |
 
 **満杯なら新エリア＋橋ゲート**。既存エリアを押し広げて 4 棟目をねじ込まない。
 
@@ -166,7 +166,7 @@ Park は **ゾーン切替**（フルリロードしない）。描画・衝突�
 | Zone ID | 名前 | 役割 | テーマ |
 |---------|------|------|--------|
 | `plaza` | Meebits Plaza | メインハブ | クラシック園 |
-| `mountain` | Mountain District | 山岳／建設中 | ボクセルマウンテン |
+| `mountain` | Mountain District | 山岳／Mt. Meeb 正式オープン | Mt. Meeb（ボクセル山登り） |
 
 ### ハードルール
 
@@ -415,9 +415,9 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 
 | ID | (x, z) | entranceZ |
 |----|--------|-----------|
-| mountain | (0, -7) | -3.2 |
+| mountain (Mt. Meeb) | (0, -7) | -3.2 |
 
-**Coming Soon 棟**（建設中ランドマーク）
+**Coming Soon 棟**（将来アトラクション予定）
 
 | 名前 | (x, z) |
 |------|--------|

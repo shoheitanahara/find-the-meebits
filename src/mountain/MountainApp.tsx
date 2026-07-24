@@ -8,6 +8,7 @@ import { useMountainStore } from './store'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { ClearOverlay, ClimbHud, TitleScreen } from './ui/Screens'
 import { MountainAtmosphere, VoxelMountain } from './world/VoxelMountain'
+import { MountainTrailNpcs } from './world/MountainTrailNpcs'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -28,12 +29,15 @@ function useTabFrameloop() {
 function MountainScene() {
   const phase = useMountainStore((state) => state.phase)
   const enabled = phase === 'playing'
+  // カメラ far をステージの高さに余裕を持たせる
+  const camFar = 400
 
   return (
     <>
-      <PerspectiveCamera makeDefault fov={50} near={0.1} far={280} position={[0, 5, 10]} />
+      <PerspectiveCamera makeDefault fov={50} near={0.1} far={camFar} position={[0, 5, 10]} />
       <MountainAtmosphere />
       <VoxelMountain />
+      <MountainTrailNpcs />
       <ClimbController enabled={enabled} />
     </>
   )

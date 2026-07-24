@@ -20,8 +20,8 @@ const metadata = {
       description: 'Walk the repeating night alley, spot what changed, and find the way out.',
     },
     mountain: {
-      title: 'Mountain Climb | Meebits Park',
-      description: 'Climb the voxel mountain with jumps and dashes. Reach the summit in a few minutes.',
+      title: 'Mt. Meeb | Meebits Park',
+      description: 'Climb the voxel mountain with jumps and dashes. Clear 20 stages up to 1000m.',
     },
   },
   ja: {
@@ -42,8 +42,8 @@ const metadata = {
       description: '繰り返す夜の路地を歩き、小さな変化を見破って出口を目指そう。',
     },
     mountain: {
-      title: '山登り | Meebits Park',
-      description: 'ボクセルの山をジャンプとダッシュで登り、山頂を目指そう。',
+      title: 'Mt. Meeb | Meebits Park',
+      description: 'ジャンプとダッシュでボクセルの山を登ろう。全20ステージ・約1000m。',
     },
   },
 } as const

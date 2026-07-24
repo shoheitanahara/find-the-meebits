@@ -7,8 +7,8 @@ import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { usePlayerStore } from '../../stores/playerStore'
-import { MOUNTAIN } from '../config'
-import { isAtGoal, resolveHorizontal, resolveVertical, type PlayerBody } from '../collisions'
+import { MOUNTAIN, getMountainRuntime } from '../config'
+import { isAtGoal, resolveHorizontal, resolveVertical, resetBodyToStageStart, type PlayerBody } from '../collisions'
 import { useMountainControlsStore } from '../controlsStore'
 import { useMountainStore } from '../store'
 
@@ -17,18 +17,19 @@ const cameraTarget = new Vector3()
 
 export function ClimbController({ enabled }: { enabled: boolean }) {
   const groupRef = useRef<Group>(null)
-  // Park 入場時に localStorage へ保存された Meebit を使う（ページ遷移後も維持）
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
+  const terrainVersion = useMountainStore((state) => state.terrainVersion)
+  const start = getMountainRuntime().start
   const bodyRef = useRef<PlayerBody>({
-    x: MOUNTAIN.start.x,
-    y: MOUNTAIN.start.y,
-    z: MOUNTAIN.start.z,
+    x: start.x,
+    y: start.y,
+    z: start.z,
     vx: 0,
     vy: 0,
     vz: 0,
     onGround: true,
   })
-  const facingYRef = useRef(Math.PI) // 見た目の向きのみ（カメラには使わない）
+  const facingYRef = useRef(Math.PI)
   const keys = useKeyboardControls()
   const jumpLatchRef = useRef(false)
   const localTimeRef = useRef(0)
@@ -37,19 +38,13 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
   useEffect(() => {
     if (!enabled) return
     const body = bodyRef.current
-    body.x = MOUNTAIN.start.x
-    body.y = MOUNTAIN.start.y
-    body.z = MOUNTAIN.start.z
-    body.vx = 0
-    body.vy = 0
-    body.vz = 0
-    body.onGround = true
+    resetBodyToStageStart(body)
     facingYRef.current = Math.PI
     if (groupRef.current) {
       groupRef.current.position.set(body.x, body.y, body.z)
       groupRef.current.rotation.y = facingYRef.current
     }
-  }, [enabled])
+  }, [enabled, terrainVersion])
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05)
@@ -62,7 +57,6 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     const controls = useMountainControlsStore.getState()
     const keyboard = keys.current
 
-    // ワールド固定軸: W = -Z（山頂方向）, A/D = X
     let inputX = 0
     let inputZ = 0
     if (keyboard.left) inputX -= 1
@@ -72,7 +66,6 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
 
     if (controls.joystickActive) {
       inputX = controls.joystickX
-      // スティック上 = 画面上方向 = 山頂（-Z）。W キーと同じ向き。
       inputZ = controls.joystickY
     }
 
@@ -91,7 +84,6 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     body.vx = inputX * speed
     body.vz = inputZ * speed
 
-    // アバターの向きだけ更新（カメラは固定）
     if (moving) {
       facingYRef.current = Math.atan2(inputX, inputZ)
     }
@@ -115,7 +107,7 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     useMountainStore.getState().reportHeight(body.y)
 
     if (isAtGoal(body) && useMountainStore.getState().phase === 'playing') {
-      useMountainStore.getState().clear()
+      useMountainStore.getState().clearStage()
     }
 
     const group = groupRef.current
@@ -135,7 +127,6 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     })
     update(dt)
 
-    // 固定視点: 後方から前方。蛇行に合わせて X を強く追従
     const fx = MOUNTAIN.camXFollow
     cameraPos.set(body.x * fx, body.y + MOUNTAIN.camHeight, body.z + MOUNTAIN.camBack)
     cameraTarget.set(body.x * (fx * 0.85), body.y + 1.25, body.z - MOUNTAIN.camLookAhead)
@@ -143,8 +134,10 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     state.camera.lookAt(cameraTarget)
   })
 
+  const spawn = getMountainRuntime().start
+
   return (
-    <group ref={groupRef} position={[MOUNTAIN.start.x, MOUNTAIN.start.y, MOUNTAIN.start.z]}>
+    <group ref={groupRef} position={[spawn.x, spawn.y, spawn.z]}>
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

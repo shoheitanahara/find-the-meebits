@@ -187,7 +187,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // 西川のすぐ内側（橋を降りた直後）
         targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテン地区' },
-        subtitle: { en: 'Adventure Ahead', ja: '冒険の入口' },
+        subtitle: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
       },
     ],
   },
@@ -233,15 +233,15 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [12.5, -1.5],
     ],
     comingSoonSlots: [
-      // 南西スロット（山アトラクション・西門・南封印から離す）
+      // 南西スロット（将来アトラクション予定）
       {
         x: -12.5,
         z: -11.5,
         theme: 'mountain',
         title: { en: 'ALPINE LODGE', ja: '山荘ロッジ' },
-        subtitle: { en: 'Under Construction', ja: '建設中' },
+        subtitle: { en: 'Coming Soon', ja: '近日公開' },
       },
-      // 南東スロット
+      // 南東スロット（将来アトラクション予定）
       {
         x: 12.5,
         z: -11.0,
