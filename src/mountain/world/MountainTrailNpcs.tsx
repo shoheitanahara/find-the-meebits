@@ -40,24 +40,27 @@ function hashSeed(seed: number, a: number, b = 0) {
   return n - Math.floor(n)
 }
 
-/** 足場の高さ。穴・遠すぎる柱は null */
-function surfaceYAt(x: number, z: number): number | null {
-  const columns = getMountainColumns()
-  const rx = Math.round(x)
-  const rz = Math.round(z)
-  let best: number | undefined
-  let bestDist = Infinity
-  for (const col of columns) {
+/** 柱高さの O(1) 参照（隣接フォールバックは穴上の浮遊になるので使わない） */
+let heightMapVersion = -1
+let heightMap = new Map<string, number>()
+
+function ensureHeightMap() {
+  const version = getMountainRuntime().version
+  if (version === heightMapVersion) return
+  heightMapVersion = version
+  heightMap = new Map()
+  for (const col of getMountainColumns()) {
     if (col.h <= 0) continue
-    const d = Math.abs(col.x - rx) + Math.abs(col.z - rz)
-    if (d < bestDist) {
-      bestDist = d
-      best = col.h
-    }
-    if (d === 0) break
+    heightMap.set(`${col.x},${col.z}`, col.h)
   }
-  if (best === undefined || bestDist > 1) return null
-  return best + 0.02
+}
+
+/** 足下セルの上面。穴・未生成は null（隣セルに頼らない） */
+function surfaceYAt(x: number, z: number): number | null {
+  ensureHeightMap()
+  const h = heightMap.get(`${Math.round(x)},${Math.round(z)}`)
+  if (h === undefined) return null
+  return h + 0.02
 }
 
 function isWalkable(x: number, z: number, fromY: number): number | null {
@@ -76,13 +79,13 @@ function findSpawnOnGround(def: MountainStageDef, slot: number): { x: number; y:
   for (let attempt = 0; attempt < 24; attempt += 1) {
     const ox = (hashSeed(def.seed, slot, 10 + attempt) - 0.5) * 6
     const oz = (hashSeed(def.seed, slot, 40 + attempt) - 0.5) * 4
-    const x = cx + ox
-    const z = zHome + oz
+    const x = Math.round(cx + ox)
+    const z = Math.round(zHome + oz)
     const y = surfaceYAt(x, z)
     if (y !== null) return { x, y, z }
   }
 
-  const x = cx
+  const x = Math.round(cx)
   const z = zHome
   return { x, y: surfaceYAt(x, z) ?? def.startElev + 0.02, z }
 }
@@ -191,7 +194,8 @@ function MountainTrailNpc({ spawn, index }: { spawn: TrailNpcSpawn; index: numbe
       if (nextY !== null && distHome <= ROAM_RADIUS) {
         group.position.x = nextX
         group.position.z = nextZ
-        group.position.y = MathUtils.lerp(group.position.y, nextY, 1 - Math.exp(-safeDelta * 12))
+        // ボクセル上面へ即接地（lerp だと段差・穴際で一瞬浮いて見える）
+        group.position.y = nextY
       } else {
         // 穴・急段差・徘徊範囲外 → 適当に向きを変える
         const turn = MathUtils.randFloat(Math.PI * 0.45, Math.PI * 1.2) * (Math.random() < 0.5 ? 1 : -1)
@@ -200,6 +204,10 @@ function MountainTrailNpc({ spawn, index }: { spawn: TrailNpcSpawn; index: numbe
         behaviorTimerRef.current = Math.min(behaviorTimerRef.current, 0.55)
       }
       group.rotation.y = rotationYRef.current
+    } else {
+      // 待機中も足下にスナップ（ずれ防止）
+      const grounded = surfaceYAt(group.position.x, group.position.z)
+      if (grounded !== null) group.position.y = grounded
     }
 
     applyVRMLocomotion(vrmRef.current, {
