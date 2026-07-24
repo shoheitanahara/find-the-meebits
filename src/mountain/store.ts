@@ -84,6 +84,8 @@ type MountainState = {
   backToTitle: () => void
   tickElapsed: (dt: number) => void
   reportHeight: (y: number) => void
+  /** DEV: 指定ステージまで解放（永続） */
+  unlockThroughStage: (stageId: number) => void
 }
 
 function beginStage(stageId: number, heightBest: number) {
@@ -160,4 +162,44 @@ export const useMountainStore = create<MountainState>((set, get) => ({
       }
     })
   },
+  unlockThroughStage: (stageId) => {
+    const next = clampStageId(stageId)
+    writeUnlockedStage(next)
+    set({ unlockedStage: next })
+  },
 }))
+
+/**
+ * 開発ビルド専用 URL ブートストラップ。
+ * 例: `/mountain?mtUnlock=all` / `/mountain?mtUnlock=20&mtStage=20`
+ */
+export function applyDevMountainBootstrap() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return
+
+  const params = new URLSearchParams(window.location.search)
+  const unlockRaw = params.get('mtUnlock')
+  const stageRaw = params.get('mtStage')
+
+  if (!unlockRaw && !stageRaw) return
+
+  const store = useMountainStore.getState()
+
+  if (unlockRaw) {
+    const unlockTo =
+      unlockRaw.trim().toLowerCase() === 'all'
+        ? MOUNTAIN_STAGE_COUNT
+        : clampStageId(Number(unlockRaw))
+    store.unlockThroughStage(unlockTo)
+    console.info(`[mountain-dev] unlocked through stage ${unlockTo}`)
+  }
+
+  if (stageRaw) {
+    const stageId = clampStageId(Number(stageRaw))
+    // 未解放ならそのステージまで解放してから開始
+    if (stageId > useMountainStore.getState().unlockedStage) {
+      useMountainStore.getState().unlockThroughStage(stageId)
+    }
+    useMountainStore.getState().start(stageId)
+    console.info(`[mountain-dev] start stage ${stageId}`)
+  }
+}

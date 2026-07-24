@@ -27,9 +27,11 @@ export function TitleScreen() {
   const unlockedStage = useMountainStore((state) => state.unlockedStage)
   const heightBest = useMountainStore((state) => state.heightBest)
   const start = useMountainStore((state) => state.start)
+  const unlockThroughStage = useMountainStore((state) => state.unlockThroughStage)
   const [selected, setSelected] = useState(() => unlockedStage)
   const t = copy[getLocale()]
   const locale = getLocale()
+  const isDev = import.meta.env.DEV
 
   useEffect(() => {
     setSelected((prev) => Math.min(prev, unlockedStage) || unlockedStage)
@@ -51,6 +53,31 @@ export function TitleScreen() {
             {locale === 'ja' ? '最高到達' : 'Best'}{' '}
             <span className="font-mono font-bold">{heightBest.toFixed(0)}m</span>
           </p>
+        ) : null}
+
+        {isDev ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="rounded-full border border-amber-300/50 bg-amber-400/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-amber-100"
+              onClick={() => {
+                unlockThroughStage(MOUNTAIN_STAGE_COUNT)
+                setSelected(MOUNTAIN_STAGE_COUNT)
+              }}
+            >
+              DEV · Unlock all
+            </button>
+            <button
+              type="button"
+              className="rounded-full border border-amber-300/50 bg-amber-400/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-amber-100"
+              onClick={() => {
+                unlockThroughStage(MOUNTAIN_STAGE_COUNT)
+                start(20)
+              }}
+            >
+              DEV · Stage 20
+            </button>
+          </div>
         ) : null}
 
         <div className="mt-5">

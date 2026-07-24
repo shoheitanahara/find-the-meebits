@@ -4,7 +4,7 @@ import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ClimbController, useMountainKeyboardBridge } from './player/ClimbController'
 import { MountainMobileControls } from './player/MobileControls'
-import { useMountainStore } from './store'
+import { useMountainStore, applyDevMountainBootstrap } from './store'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { ClearOverlay, ClimbHud, TitleScreen } from './ui/Screens'
 import { MountainAtmosphere, VoxelMountain } from './world/VoxelMountain'
@@ -48,6 +48,10 @@ export function MountainApp() {
   const frameloop = useTabFrameloop()
   useMountainKeyboardBridge()
   const showWorld = phase !== 'title'
+
+  useEffect(() => {
+    applyDevMountainBootstrap()
+  }, [])
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#87b8d8] text-slate-100">
