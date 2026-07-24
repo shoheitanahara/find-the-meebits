@@ -11,25 +11,54 @@ export type MountainPhase = 'title' | 'playing' | 'stageCleared' | 'allCleared'
 
 const PROGRESS_KEY = 'meebits-mountain-progress-v2'
 
-function readUnlockedStage(): number {
-  if (typeof window === 'undefined') return 1
+type ProgressPayload = {
+  unlockedStage?: number
+  /** 全ステージ共通の最高到達高度（表示m） */
+  heightBestM?: number
+}
+
+function readProgress(): ProgressPayload {
+  if (typeof window === 'undefined') return {}
   try {
     const raw = localStorage.getItem(PROGRESS_KEY)
-    if (!raw) return 1
-    const parsed = JSON.parse(raw) as { unlockedStage?: number }
-    return clampStageId(parsed.unlockedStage ?? 1)
+    if (!raw) return {}
+    return JSON.parse(raw) as ProgressPayload
   } catch {
-    return 1
+    return {}
   }
 }
 
-function writeUnlockedStage(unlockedStage: number) {
+function writeProgress(patch: ProgressPayload) {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ unlockedStage: clampStageId(unlockedStage) }))
+    const next = { ...readProgress(), ...patch }
+    localStorage.setItem(
+      PROGRESS_KEY,
+      JSON.stringify({
+        unlockedStage: clampStageId(next.unlockedStage ?? 1),
+        heightBestM: Math.max(0, next.heightBestM ?? 0),
+      }),
+    )
   } catch {
     // ignore
   }
+}
+
+function readUnlockedStage(): number {
+  return clampStageId(readProgress().unlockedStage ?? 1)
+}
+
+function readHeightBestM(): number {
+  const v = readProgress().heightBestM
+  return typeof v === 'number' && Number.isFinite(v) ? Math.max(0, v) : 0
+}
+
+function writeUnlockedStage(unlockedStage: number) {
+  writeProgress({ unlockedStage: clampStageId(unlockedStage) })
+}
+
+function writeHeightBestM(heightBestM: number) {
+  writeProgress({ heightBestM: Math.max(0, heightBestM) })
 }
 
 function displayHeightFromPlayerY(playerY: number, stageId: number) {
@@ -44,6 +73,7 @@ type MountainState = {
   unlockedStage: number
   terrainVersion: number
   elapsedSec: number
+  /** 全ステージ共通 BEST（localStorage 永続） */
   heightBest: number
   playerY: number
   displayHeightM: number
@@ -56,7 +86,7 @@ type MountainState = {
   reportHeight: (y: number) => void
 }
 
-function beginStage(stageId: number) {
+function beginStage(stageId: number, heightBest: number) {
   const id = clampStageId(stageId)
   const runtime = loadMountainStage(id)
   const display = displayHeightFromPlayerY(runtime.start.y, id)
@@ -65,7 +95,8 @@ function beginStage(stageId: number) {
     terrainVersion: runtime.version,
     phase: 'playing' as const,
     elapsedSec: 0,
-    heightBest: display,
+    // ステージ開始で BEST をリセットしない（通算最高を維持）
+    heightBest,
     playerY: runtime.start.y,
     displayHeightM: display,
   }
@@ -77,14 +108,14 @@ export const useMountainStore = create<MountainState>((set, get) => ({
   unlockedStage: readUnlockedStage(),
   terrainVersion: getMountainRuntime().version,
   elapsedSec: 0,
-  heightBest: getMountainRuntime().start.y,
+  heightBest: readHeightBestM(),
   playerY: getMountainRuntime().start.y,
   displayHeightM: 0,
   start: (stageId) => {
     const unlocked = get().unlockedStage
     const requested = clampStageId(stageId ?? 1)
     const id = Math.min(requested, unlocked)
-    set(beginStage(id))
+    set(beginStage(id, get().heightBest))
   },
   clearStage: () => {
     const { currentStage, unlockedStage } = get()
@@ -96,15 +127,16 @@ export const useMountainStore = create<MountainState>((set, get) => ({
     })
   },
   continueToNextStage: () => {
-    const { currentStage } = get()
+    const { currentStage, heightBest } = get()
     if (currentStage >= MOUNTAIN_STAGE_COUNT) {
       set({ phase: 'allCleared' })
       return
     }
-    set(beginStage(currentStage + 1))
+    set(beginStage(currentStage + 1, heightBest))
   },
   retryStage: () => {
-    set(beginStage(get().currentStage))
+    const { currentStage, heightBest } = get()
+    set(beginStage(currentStage, heightBest))
   },
   backToTitle: () =>
     set({
@@ -118,10 +150,14 @@ export const useMountainStore = create<MountainState>((set, get) => ({
   reportHeight: (y) => {
     const stageId = get().currentStage
     const display = displayHeightFromPlayerY(y, stageId)
-    set((state) => ({
-      playerY: y,
-      displayHeightM: display,
-      heightBest: Math.max(state.heightBest, display),
-    }))
+    set((state) => {
+      const heightBest = Math.max(state.heightBest, display)
+      if (heightBest > state.heightBest) writeHeightBestM(heightBest)
+      return {
+        playerY: y,
+        displayHeightM: display,
+        heightBest,
+      }
+    })
   },
 }))

@@ -25,6 +25,7 @@ const copy = {
 export function TitleScreen() {
   const phase = useMountainStore((state) => state.phase)
   const unlockedStage = useMountainStore((state) => state.unlockedStage)
+  const heightBest = useMountainStore((state) => state.heightBest)
   const start = useMountainStore((state) => state.start)
   const [selected, setSelected] = useState(() => unlockedStage)
   const t = copy[getLocale()]
@@ -45,6 +46,12 @@ export function TitleScreen() {
         <h1 className="mt-2 text-3xl font-black tracking-tight">{t.title}</h1>
         <p className="mt-3 text-sm leading-relaxed text-white/80">{t.blurb}</p>
         <p className="mt-2 text-xs text-white/55">{t.controls}</p>
+        {heightBest > 0 ? (
+          <p className="mt-3 text-sm tabular-nums text-amber-200/90">
+            {locale === 'ja' ? '最高到達' : 'Best'}{' '}
+            <span className="font-mono font-bold">{heightBest.toFixed(0)}m</span>
+          </p>
+        ) : null}
 
         <div className="mt-5">
           <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">
