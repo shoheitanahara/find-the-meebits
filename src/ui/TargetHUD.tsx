@@ -1,7 +1,9 @@
 import { getNpcById } from '../npc/npcData'
 import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
+import { useDialogueStore } from '../dialogue/dialogueStore'
 import { FoundTargetIcon } from './FoundTargetIcon'
+import { dialogueChromeDimClass } from './dialogueChrome'
 import { TARGET_HUD_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
 import { TraitQuestVisual } from './TraitQuestVisual'
@@ -22,6 +24,7 @@ export function TargetHUD() {
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const targetNpcIds = useGameStore((state) => state.targetNpcIds)
   const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const step = getProgressionStep(progressionIndex, venueId)
   const quest = step?.quest
   const targetNpcs = targetNpcIds
@@ -35,6 +38,7 @@ export function TargetHUD() {
   const useCompactGrid = targetCount > 1
   const foundCount = foundTargetNpcIds.length
   const t = ui()
+  const dimClass = dialogueChromeDimClass(isDialogueOpen)
 
   if (!shouldMountPreview || targetCount === 0) {
     return null
@@ -51,7 +55,7 @@ export function TargetHUD() {
       <aside
         className={`pointer-events-none absolute top-16 right-5 z-30 hidden max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/20 bg-neutral-950/85 p-3 text-white shadow-2xl backdrop-blur-md lg:block w-auto ${
           isVisible ? '' : 'invisible'
-        }`}
+        } ${dimClass}`}
         aria-hidden={!isVisible}
       >
         <p className="text-[0.6rem] font-semibold uppercase tracking-[0.28em] text-neutral-400">
@@ -119,7 +123,7 @@ export function TargetHUD() {
         isAnswerReveal
           ? 'border-amber-300/40 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'
-      } ${isVisible ? '' : 'invisible'}`}
+      } ${isVisible ? '' : 'invisible'} ${dimClass}`}
       aria-hidden={!isVisible}
     >
       <p

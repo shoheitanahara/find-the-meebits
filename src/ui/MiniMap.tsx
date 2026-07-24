@@ -5,7 +5,9 @@ import { getNpcById } from '../npc/npcData'
 import { getRemainingTargetNpcIds, useGameStore } from '../stores/gameStore'
 import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
+import { useDialogueStore } from '../dialogue/dialogueStore'
 import type { Vector3Tuple } from '../types/game'
+import { dialogueChromeDimClass } from './dialogueChrome'
 
 /** 進入可能なワールド範囲 (±WORLD_RADIUS) をマップ全体に対応させる */
 function worldToMapPercent(coordinate: number) {
@@ -62,6 +64,7 @@ export function MiniMap() {
   const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const position = usePlayerStore((state) => state.position)
   const rotationY = usePlayerStore((state) => state.rotationY)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const isAnswerReveal = gamePhase === 'timedOut'
   const npcPositions = useNpcStore((state) => (isAnswerReveal ? state.npcPositions : EMPTY_NPC_POSITIONS))
 
@@ -90,7 +93,7 @@ export function MiniMap() {
         isAnswerReveal
           ? 'border-amber-300/35 bg-amber-950/85'
           : 'border-white/20 bg-neutral-950/85'
-      }`}
+      } ${dialogueChromeDimClass(isDialogueOpen)}`}
     >
       <div className="flex items-center justify-between gap-2 lg:gap-4">
         <p

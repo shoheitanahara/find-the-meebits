@@ -21,6 +21,7 @@ import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { ui } from '../i18n/ui'
+import { dialogueChromeDimClass } from '../ui/dialogueChrome'
 
 const copy = {
   en: {
@@ -283,9 +284,7 @@ export function TopApp() {
           <ParkDialogueBox />
           <ParkInteractionPrompt />
           <div
-            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md transition-opacity duration-200 ${
-              isDialogueOpen ? 'opacity-25' : 'opacity-100'
-            }`}
+            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen)}`}
           >
             {showSummerVer ? (
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-sky-300/90">

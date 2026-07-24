@@ -4,10 +4,12 @@ import { getStageLabel, getProgressionStep } from '../../game/gameProgression'
 import { formatTraitDisplayName } from '../../game/traitHunt'
 import { getNpcById } from '../../npc/npcData'
 import { useGameStore } from '../../stores/gameStore'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { getTimerDisplay, shouldShowGameTimer } from '../gameTimerDisplay'
 import { getGameModeLabel } from '../../game/gameMode'
 import { FoundTargetIcon } from '../FoundTargetIcon'
 import { StageRetryButton } from '../StageRetryButton'
+import { dialogueChromeDimClass } from '../dialogueChrome'
 import { TARGET_HUD_PREVIEW_PRIORITY } from '../targetPreviewCache'
 import { TargetPreview } from '../TargetPreview'
 import { TraitQuestVisual } from '../TraitQuestVisual'
@@ -68,6 +70,7 @@ export function MobileTopBar() {
   const foundTargetNpcIds = useGameStore((state) => state.foundTargetNpcIds)
   const startedAt = useGameStore((state) => state.startedAt)
   const clearTimeSeconds = useGameStore((state) => state.clearTimeSeconds)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const [, setTick] = useState(0)
 
   const isAnswerReveal = gamePhase === 'timedOut'
@@ -108,7 +111,9 @@ export function MobileTopBar() {
   const foundCount = foundTargetNpcIds.length
 
   return (
-    <header className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] z-30 lg:hidden">
+    <header
+      className={`pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] z-30 lg:hidden ${dialogueChromeDimClass(isDialogueOpen)}`}
+    >
       <div className="px-2.5 pt-2">
         <div
           className={`${showTimer ? 'w-[min(54vw,22rem)]' : 'w-[min(42vw,16rem)]'} rounded-2xl border px-2.5 py-1.5 shadow-xl backdrop-blur-md ${barTone}`}

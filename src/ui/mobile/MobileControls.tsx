@@ -7,6 +7,7 @@ import { interactWithNearestNpc } from '../../systems/interaction/interactWithNe
 import { useGameStore } from '../../stores/gameStore'
 import { useNpcStore } from '../../stores/npcStore'
 import { useTouchControlsStore } from '../../stores/touchControlsStore'
+import { dialogueChromeDimClass } from '../dialogueChrome'
 import { DoneIcon, InspectIcon, NextIcon } from './MobileActionIcons'
 
 const JOYSTICK_RADIUS = 44
@@ -24,48 +25,49 @@ export function MobileControls() {
   const isLastLine = currentIndex >= lines.length - 1
   const t = ui()
 
-  if (isDialogueOpen) {
-    return (
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
-        <button
-          type="button"
-          className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
-          onPointerDown={(event) => {
-            event.preventDefault()
-            advanceDialogue()
-          }}
-        >
-          {isLastLine ? <DoneIcon /> : <NextIcon />}
-          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
-            {isLastLine ? t.done : t.nextLine}
-          </span>
-        </button>
-      </div>
-    )
-  }
-
-  if (!canMove) {
+  if (!canMove && !isDialogueOpen) {
     return null
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-between px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
-      <VirtualJoystick />
-      {nearestNpc ? (
-        <button
-          type="button"
-          className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
-          onPointerDown={(event) => {
-            event.preventDefault()
-            interactWithNearestNpc()
-          }}
-        >
-          <InspectIcon />
-          <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{ui().inspectAction}</span>
-        </button>
-      ) : (
-        <div className="h-20 w-20 shrink-0" />
-      )}
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className="flex items-end justify-between gap-3">
+        <div className={dialogueChromeDimClass(isDialogueOpen)}>
+          {canMove ? <VirtualJoystick /> : <div className="h-20 w-20 shrink-0" />}
+        </div>
+
+        {isDialogueOpen ? (
+          <button
+            type="button"
+            className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              advanceDialogue()
+            }}
+          >
+            {isLastLine ? <DoneIcon /> : <NextIcon />}
+            <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+              {isLastLine ? t.done : t.nextLine}
+            </span>
+          </button>
+        ) : nearestNpc ? (
+          <button
+            type="button"
+            className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
+            onPointerDown={(event) => {
+              event.preventDefault()
+              interactWithNearestNpc()
+            }}
+          >
+            <InspectIcon />
+            <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+              {ui().inspectAction}
+            </span>
+          </button>
+        ) : (
+          <div className="h-20 w-20 shrink-0" />
+        )}
+      </div>
     </div>
   )
 }

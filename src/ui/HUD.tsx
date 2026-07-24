@@ -2,19 +2,24 @@ import { getProgressionStep, getStageLabel } from '../game/gameProgression'
 import { ui } from '../i18n/ui'
 import { useGameStore } from '../stores/gameStore'
 import { getCachedAppEdition } from '../game/appEdition'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { dialogueChromeDimClass } from './dialogueChrome'
 import { PlayerMeebitLabel } from './PlayerMeebitLabel'
 
 export function HUD() {
   const venueId = useGameStore((state) => state.venueId)
   const progressionIndex = useGameStore((state) => state.progressionIndex)
   const activeNpcCount = useGameStore((state) => state.activeNpcCount)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const step = getProgressionStep(progressionIndex, venueId)
   const t = ui()
   const stageLabel = step ? getStageLabel(step) : t.stage
   const isTraitHunt = getCachedAppEdition() === 'v2'
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 hidden px-5 pb-5 pt-16 sm:px-6 sm:pb-6 lg:block">
+    <div
+      className={`pointer-events-none absolute inset-0 z-10 hidden px-5 pb-5 pt-16 sm:px-6 sm:pb-6 lg:block ${dialogueChromeDimClass(isDialogueOpen)}`}
+    >
       <section className="w-fit rounded-3xl border border-white/40 bg-neutral-950/80 px-5 py-4 text-white shadow-xl shadow-black/20 backdrop-blur-md">
         {isTraitHunt ? (
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/90">
