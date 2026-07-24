@@ -36,6 +36,7 @@ export function interactWithNearestParkNpc(): boolean {
     talkCount,
     parkDialogueContext.featuredId,
     parkDialogueContext.themeTrait,
+    top.activeZoneId,
   )
 
   recordMeebitTalk(npc.meebitNumber, [top.x, 0, top.z])

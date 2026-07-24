@@ -4,8 +4,9 @@ import { getLocale } from '../i18n/locale'
 import { getCreatorDialogueLinesEn } from '../npc/npcGeneration'
 import type { DialogueLine } from '../npc/npcTypes'
 import type { DailyThemeTrait } from './dailyFeatured'
+import { getParkDialoguePools, type ParkDialoguePools } from './parkDialogueExpand'
 import type { ParkNpcRecord } from './parkNpcRegistry'
-import { PARK_DIALOGUE_EN, PARK_DIALOGUE_JA, type ParkDialoguePools } from './parkDialoguePool'
+import type { ParkZoneId } from './parkZones'
 
 function seededIndex(seed: number, talkCount: number, length: number) {
   if (length <= 0) return 0
@@ -48,22 +49,24 @@ const CREATOR_SEED = 11143
 
 /**
  * パーク来場者のセリフを 1〜2 行選ぶ。
- * 挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）を組み合わせる。
+ * plaza / mountain で別プール。挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）。
  */
 export function selectParkDialogueLines(
   npc: ParkNpcRecord,
   talkCount: number,
   featuredId: number,
   themeTrait: DailyThemeTrait,
+  zoneId: ParkZoneId = 'plaza',
 ): DialogueLine[] {
   if (npc.isCreator) {
     return selectCreatorParkLines(talkCount)
   }
 
   const locale = getLocale()
-  const pools: ParkDialoguePools = locale === 'ja' ? PARK_DIALOGUE_JA : PARK_DIALOGUE_EN
+  const pools: ParkDialoguePools = getParkDialoguePools(locale === 'ja' ? 'ja' : 'en', zoneId)
   const seed = npc.meebitNumber
   const lines: DialogueLine[] = []
+  const isMountain = zoneId === 'mountain'
 
   const greeting = pickLine(pools.greetings, seed, talkCount, 11)
   lines.push({
@@ -79,21 +82,30 @@ export function selectParkDialogueLines(
   if (npc.isFeatured) {
     second =
       locale === 'ja'
-        ? `実はぼくが今日の主役 #${featuredId} だよ。噴水の銅像、ぼくだ！`
-        : `Fun fact — I’m today’s star #${featuredId}. That’s me on the fountain!`
+        ? isMountain
+          ? `実はぼくが今日の主役 #${featuredId} だよ。プラザの噴水銅像、ぼくだ！`
+          : `実はぼくが今日の主役 #${featuredId} だよ。噴水の銅像、ぼくだ！`
+        : isMountain
+          ? `Fun fact — I’m today’s star #${featuredId}. That’s me on the plaza fountain!`
+          : `Fun fact — I’m today’s star #${featuredId}. That’s me on the fountain!`
   } else if (npc.matched && branch <= 2) {
     second = fillTheme(pickLine(pools.themeMatched, seed, talkCount, 23), themeTrait)
     if (branch === 0) {
       second = pickLine(pools.featuredMatched, seed, talkCount, 29)
     }
   } else if (branch === 3) {
-    second = pickLine(pools.gameFind, seed, talkCount, 31)
+    second = isMountain
+      ? pickLine(pools.gameMountain, seed, talkCount, 31)
+      : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
-    second = pickLine(pools.gameTraits, seed, talkCount, 37)
+    second = isMountain
+      ? pickLine(pools.gameMountain, seed, talkCount, 37)
+      : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
-    second = pickLine(pools.gameStreet, seed, talkCount, 41)
+    second = isMountain
+      ? pickLine(pools.flavor, seed, talkCount, 41)
+      : pickLine(pools.gameStreet, seed, talkCount, 41)
   } else {
-    // テーマ or 主役の一般言及
     second =
       talkCount % 2 === 0
         ? fillTheme(pickLine(pools.themeAny, seed, talkCount, 43), themeTrait)
@@ -102,7 +114,7 @@ export function selectParkDialogueLines(
 
   // たまにフレーバーで差し替え
   if (seededIndex(seed, talkCount, 10) === 0) {
-    second = pickLine(pools.parkFlavor, seed, talkCount, 53)
+    second = pickLine(pools.flavor, seed, talkCount, 53)
   }
 
   // マッチ時は2行目に共通点を織り込む（3行目は作らない）
