@@ -23,7 +23,8 @@ export const MOUNTAIN = {
   camBack: 8.5,
   camHeight: 5.2,
   camLookAhead: 5.5,
-  camXFollow: 0.9,
+  /** 1 = アバターを画面中央に固定（左右移動でカメラも追従） */
+  camXFollow: 1,
   goalRadius: 2.8,
   dashOuterThreshold: 0.82,
   voxelSize: 1,

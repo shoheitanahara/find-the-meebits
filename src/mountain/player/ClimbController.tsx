@@ -128,8 +128,9 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     update(dt)
 
     const fx = MOUNTAIN.camXFollow
+    // カメラ・注視点ともプレイヤー X を同比率で追従 → 画面中央にアバター
     cameraPos.set(body.x * fx, body.y + MOUNTAIN.camHeight, body.z + MOUNTAIN.camBack)
-    cameraTarget.set(body.x * (fx * 0.85), body.y + 1.25, body.z - MOUNTAIN.camLookAhead)
+    cameraTarget.set(body.x * fx, body.y + 1.25, body.z - MOUNTAIN.camLookAhead)
     state.camera.position.lerp(cameraPos, 1 - Math.exp(-dt * 5))
     state.camera.lookAt(cameraTarget)
   })
