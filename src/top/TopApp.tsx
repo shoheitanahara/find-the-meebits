@@ -282,7 +282,11 @@ export function TopApp() {
           <ParkDialogueSystem />
           <ParkDialogueBox />
           <ParkInteractionPrompt />
-          <div className="pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md">
+          <div
+            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md transition-opacity duration-200 ${
+              isDialogueOpen ? 'opacity-25' : 'opacity-100'
+            }`}
+          >
             {showSummerVer ? (
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-sky-300/90">
                 {uiT.summerVer}

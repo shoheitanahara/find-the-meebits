@@ -209,7 +209,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     spawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
     hasFountain: false,
     hasFeaturedBoard: false,
-    hasNpcCrowd: false,
+    hasNpcCrowd: true,
     benches: [
       [-6.5, 5.0, Math.PI / 2],
       [6.5, 5.0, -Math.PI / 2],

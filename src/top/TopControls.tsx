@@ -16,10 +16,18 @@ const BASE_SIZE = 112
 const KNOB_SIZE = 44
 
 export function TopMobileControls() {
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
       <div className="flex items-end justify-between gap-3">
-        <VirtualJoystick />
+        <div
+          className={`transition-opacity duration-200 ${
+            isDialogueOpen ? 'opacity-25' : 'opacity-100'
+          }`}
+        >
+          <VirtualJoystick />
+        </div>
         <ParkTalkButton />
       </div>
     </div>

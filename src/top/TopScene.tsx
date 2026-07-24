@@ -201,9 +201,11 @@ export function TopScene({
       ))}
       {zone.hasNpcCrowd ? (
         <TopNpcCrowd
-          visitors={lineup.visitors}
+          zoneId={activeZoneId}
+          visitors={activeZoneId === 'mountain' ? lineup.mountainVisitors : lineup.visitors}
           featuredId={lineup.featuredId}
           themeTrait={lineup.themeTrait}
+          includeCreator={activeZoneId === 'plaza'}
         />
       ) : null}
       <TopPlayer />
@@ -858,7 +860,7 @@ type TopNpcSpawn = {
   matched: boolean
 }
 
-function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
+function createTopNpcSpawns(visitors: DailyVisitor[], zoneId: ParkZoneId): TopNpcSpawn[] {
   // ID は日次固定。位置・向きだけ訪問ごとにランダムにして探しがいを出す。
   const spawns: TopNpcSpawn[] = []
   let attempts = 0
@@ -869,7 +871,7 @@ function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
     const x = MathUtils.randFloat(-18, 18)
     const z = MathUtils.randFloat(-4.8, 13)
 
-    if (!isTopNpcPositionWalkable(x, z)) continue
+    if (!isTopNpcPositionWalkable(x, z, zoneId)) continue
     if (spawns.some((spawn) => Math.hypot(spawn.x - x, spawn.z - z) < 1.45)) continue
 
     const visitor = visitors[spawns.length]
@@ -894,7 +896,7 @@ function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
     const radius = 6 + (fallbackIndex % 5) * 1.4 + MathUtils.randFloat(-0.6, 0.6)
     let x = Math.cos(angle) * radius
     let z = 6 + Math.sin(angle) * radius * 0.55
-    if (!isTopNpcPositionWalkable(x, z)) {
+    if (!isTopNpcPositionWalkable(x, z, zoneId)) {
       x = MathUtils.clamp(x, -17, 17)
       z = MathUtils.clamp(z, -4.5, 12.5)
     }
@@ -911,32 +913,41 @@ function createTopNpcSpawns(visitors: DailyVisitor[]): TopNpcSpawn[] {
   return spawns
 }
 
-function isTopNpcPositionWalkable(x: number, z: number) {
-  const layout = getParkZone('plaza').layout
+function isTopNpcPositionWalkable(x: number, z: number, zoneId: ParkZoneId) {
+  const zone = getParkZone(zoneId)
+  const layout = zone.layout
   if (Math.abs(x) > layout.boundsX - 2 || z < layout.minZ + 2 || z > layout.maxZ - 1.5) {
     return false
   }
-  for (const attraction of getAttractionsForZone('plaza')) {
+  for (const attraction of getAttractionsForZone(zoneId)) {
     if (Math.hypot(x - attraction.x, z - attraction.entranceZ) < 2.8) return false
   }
-  for (const gate of getParkZone('plaza').gates) {
+  for (const gate of zone.gates) {
     if (Math.hypot(x - gate.x, z - gate.z) < 3.2) return false
+  }
+  for (const slot of zone.comingSoonSlots ?? []) {
+    if (Math.hypot(x - slot.x, z - slot.z) < 3.5) return false
   }
   return isParkPositionWalkable(x, z, NPC_COLLISION_RADIUS)
 }
 
 function TopNpcCrowd({
+  zoneId,
   visitors,
   featuredId,
   themeTrait,
+  includeCreator = false,
 }: {
+  zoneId: ParkZoneId
   visitors: DailyVisitor[]
   featuredId: number
   themeTrait: DailyThemeTrait
+  /** Shawn は広場のみ */
+  includeCreator?: boolean
 }) {
   const started = useTopStore((state) => state.started)
   // visitors（日次固定ID）だけ依存。位置はマウントごとにランダム。
-  const spawns = useMemo(() => createTopNpcSpawns(visitors), [visitors])
+  const spawns = useMemo(() => createTopNpcSpawns(visitors, zoneId), [visitors, zoneId])
 
   useEffect(() => {
     setParkDialogueContext(featuredId, themeTrait)
@@ -947,21 +958,21 @@ function TopNpcCrowd({
         matched: visitor.matched,
         isFeatured: visitor.meebitNumber === featuredId,
       })),
-      parkCreatorRecord(),
+      ...(includeCreator ? [parkCreatorRecord()] : []),
     ])
     return () => {
       useNpcStore.getState().setNearestNpcId(null)
     }
-  }, [visitors, featuredId, themeTrait])
+  }, [visitors, featuredId, themeTrait, includeCreator])
 
   if (!started) return null
 
   return (
     <group>
       {spawns.map((spawn, index) => (
-        <TopNpc key={`${spawn.meebitNumber}-${index}`} spawn={spawn} index={index} />
+        <TopNpc key={`${zoneId}-${spawn.meebitNumber}-${index}`} spawn={spawn} index={index} />
       ))}
-      <ParkCreatorNpc />
+      {includeCreator ? <ParkCreatorNpc /> : null}
     </group>
   )
 }
@@ -1067,7 +1078,7 @@ function ParkCreatorNpc() {
       const nextZ =
         group.position.z + Math.cos(rotationYRef.current) * TOP_NPC_WALK_SPEED * safeDelta
 
-      if (isTopNpcPositionWalkable(nextX, nextZ)) {
+      if (isTopNpcPositionWalkable(nextX, nextZ, useTopStore.getState().activeZoneId)) {
         group.position.x = nextX
         group.position.z = nextZ
       } else {
@@ -1185,7 +1196,7 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       const nextZ =
         group.position.z + Math.cos(rotationYRef.current) * TOP_NPC_WALK_SPEED * safeDelta
 
-      if (isTopNpcPositionWalkable(nextX, nextZ)) {
+      if (isTopNpcPositionWalkable(nextX, nextZ, useTopStore.getState().activeZoneId)) {
         group.position.x = nextX
         group.position.z = nextZ
       } else {

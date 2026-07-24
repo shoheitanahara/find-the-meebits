@@ -1,9 +1,9 @@
 /**
- * 日付（JST）シードで「本日の主役」と来場者30体を決定的に選ぶ。
+ * 日付（JST）シードで「本日の主役」と来場者を決定的に選ぶ。
  * 誰がアクセスしても同日は同じラインナップになる。
  *
- * マッチ枠15体: 主役から選んだ「本日の共通トレイト」1つを共有する Meebit。
- * 残り15体: 未選定プールからの完全ランダム。
+ * 広場: マッチ枠15体 + ランダム15体（計30）
+ * マウンテン地区: ランダム15体（広場と重複しない）
  */
 
 import {
@@ -16,9 +16,10 @@ import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 
 export const DAILY_VISITOR_COUNT = 30
 export const DAILY_MATCHED_VISITOR_COUNT = 15
+export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v6'
+const STORAGE_KEY = 'meebits-park-daily-v7'
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
 export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 6.75]
@@ -43,6 +44,8 @@ export type DailyParkLineup = {
   /** 本日のマッチ枠の基準になるトレイト1つ。 */
   themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
+  /** マウンテン地区の日替わり来場者（ランダム・広場と非重複）。 */
+  mountainVisitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
@@ -50,6 +53,7 @@ type StoredDailyLineup = {
   featuredId: number
   themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
+  mountainVisitors: DailyVisitor[]
 }
 
 let memoryCache: DailyParkLineup | null = null
@@ -240,12 +244,23 @@ function buildLineupFromScratch(
 
   shuffleInPlace(visitors, rng)
 
+  // マウンテン地区: 広場未使用プールから日替わり15体
+  const mountainRng = createSeededRng(hashStringToSeed(`meebits-park-mountain:${dateKey}`))
+  const mountainPool = allOtherIds.filter((id) => !used.has(id))
+  shuffleInPlace(mountainPool, mountainRng)
+  const mountainVisitors: DailyVisitor[] = []
+  for (const id of mountainPool) {
+    if (mountainVisitors.length >= DAILY_MOUNTAIN_VISITOR_COUNT) break
+    mountainVisitors.push({ meebitNumber: id, matched: false })
+  }
+
   return {
     dateKey,
     featuredId,
     featuredTraits,
     themeTrait,
     visitors,
+    mountainVisitors,
   }
 }
 
@@ -267,6 +282,8 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
       !isValidThemeTrait(parsed.themeTrait) ||
       !Array.isArray(parsed.visitors) ||
       parsed.visitors.length !== DAILY_VISITOR_COUNT ||
+      !Array.isArray(parsed.mountainVisitors) ||
+      parsed.mountainVisitors.length !== DAILY_MOUNTAIN_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
     ) {
       return null
@@ -285,6 +302,7 @@ function writeStoredLineup(lineup: DailyParkLineup) {
       featuredId: lineup.featuredId,
       themeTrait: lineup.themeTrait,
       visitors: lineup.visitors,
+      mountainVisitors: lineup.mountainVisitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
@@ -305,6 +323,7 @@ function hydrateFromStored(
     featuredTraits,
     themeTrait: stored.themeTrait,
     visitors: stored.visitors,
+    mountainVisitors: stored.mountainVisitors,
   }
 }
 
