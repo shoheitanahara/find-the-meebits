@@ -2,7 +2,7 @@ import type { AttractionId } from './topStore'
 import type { ParkPerimeterDef } from './parkPerimeterSpec'
 
 /** Park のエリア ID。1エリア最大3ゲーム。 */
-export type ParkZoneId = 'plaza' | 'mountain'
+export type ParkZoneId = 'plaza' | 'mountain' | 'culture'
 
 export type ParkZoneBounds = {
   boundsX: number
@@ -38,8 +38,8 @@ export type ParkGateDef = {
   halfWidth: number
   /** 通過アルコーブ深さ */
   alcoveDepth: number
-  /** mountain = ボクセル山門、plaza = 広場へ戻る門 */
-  theme: 'mountain' | 'plaza'
+  /** mountain = ボクセル山門、culture = ギャラリー門、plaza = 広場へ戻る門 */
+  theme: 'mountain' | 'plaza' | 'culture'
   /**
    * Yaw（ラジアン）。0 で東西通過。
    * カージナル橋では基本 0（軸平行）。
@@ -57,7 +57,7 @@ export type ComingSoonSlot = {
   x: number
   z: number
   /** 省略時はゾーン外周テーマに追従 */
-  theme?: 'classic' | 'mountain'
+  theme?: 'classic' | 'mountain' | 'culture'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }
@@ -126,6 +126,17 @@ const MOUNTAIN_LAYOUT: ParkZoneLayout = {
   treeX: 22.5,
 }
 
+/** Culture: 同じ床幅。ギャラリー園路はやや広め */
+const CULTURE_LAYOUT: ParkZoneLayout = {
+  ...SHARED_PARK_GROUND,
+  railingX: 26,
+  railingHalfThickness: 0.22,
+  railingZ: 1,
+  railingHalfLength: 15.5,
+  pathEdgeX: 18,
+  treeX: 22.5,
+}
+
 export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   plaza: {
     id: 'plaza',
@@ -137,11 +148,11 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       openings: [
         { side: 'e', kind: 'bridge-gate', gateId: 'plaza-to-mountain' },
         { side: 'w', kind: 'sealed' },
-        { side: 's', kind: 'sealed' },
+        { side: 's', kind: 'bridge-gate', gateId: 'plaza-to-culture' },
         // 北（手前）はゲート以外置かない。将来北ゲートが増えたら bridge-gate のみ追加
       ],
     },
-    spawn: { x: 0, z: 13.5, rotationY: Math.PI },
+    spawn: { x: 0, z: 14.8, rotationY: Math.PI },
     hasFountain: true,
     hasFeaturedBoard: true,
     hasNpcCrowd: true,
@@ -153,24 +164,24 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
      * - 建物 footprint / 入口前に木・ベンチを重ねない
      */
     benches: [
-      [-6.5, 5.0, Math.PI / 2],
-      [6.5, 5.0, -Math.PI / 2],
+      [-6.5, 11.4, Math.PI / 2],
+      [6.5, 11.4, -Math.PI / 2],
     ],
     planters: [
-      [-6.5, 3.45],
-      [6.5, 3.45],
+      [-6.5, 9.85],
+      [6.5, 9.85],
     ],
     lamps: [
-      [-9, 6.5],
-      [9, 6.5],
+      [-9, 12.9],
+      [9, 12.9],
       [-9, 0.5],
       [9, 0.5],
       [-9, -5.5],
       [9, -5.5],
     ],
     trees: [
-      [-12.5, 9.0],
-      [12.5, 9.0],
+      [-12.5, 15.0],
+      [12.5, 15.0],
       [-12.5, -1.5],
       [12.5, -1.5],
     ],
@@ -188,6 +199,20 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテン地区' },
         subtitle: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
+      },
+      {
+        id: 'plaza-to-culture',
+        x: 0,
+        z: -18.4,
+        halfWidth: 2.55,
+        alcoveDepth: 2.6,
+        theme: 'culture',
+        yaw: Math.PI / 2,
+        targetZone: 'culture',
+        // 手前クリア帯の奥寄り・地区内へ南向き
+        targetSpawn: { x: 0, z: 8.0, rotationY: Math.PI },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
+        subtitle: { en: 'Runway · Museum · PFP', ja: 'ランウェイ・博物館・PFP' },
       },
     ],
   },
@@ -256,6 +281,89 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       },
     ],
   },
+  culture: {
+    id: 'culture',
+    title: { en: 'Culture District', ja: 'カルチャー地区' },
+    attractionIds: [],
+    layout: CULTURE_LAYOUT,
+    perimeter: {
+      theme: 'culture',
+      frontClearSides: ['n'],
+      openings: [
+        // 北は手前クリア。戻りゲートは自立門（橋・川なし）
+        { side: 'e', kind: 'sealed' },
+        { side: 'w', kind: 'sealed' },
+        { side: 's', kind: 'sealed' },
+      ],
+    },
+    spawn: { x: 0, z: 8.0, rotationY: Math.PI },
+    hasFountain: false,
+    hasFeaturedBoard: false,
+    hasNpcCrowd: true,
+    benches: [
+      [-6.5, 5.0, Math.PI / 2],
+      [6.5, 5.0, -Math.PI / 2],
+    ],
+    planters: [
+      [-6.5, 3.45],
+      [6.5, 3.45],
+    ],
+    lamps: [
+      [-9, 6.5],
+      [9, 6.5],
+      [-9, 0.5],
+      [9, 0.5],
+      [-9, -5.5],
+      [9, -5.5],
+    ],
+    trees: [
+      [-12.5, 9],
+      [12.5, 9],
+      [-12.5, -1.5],
+      [12.5, -1.5],
+    ],
+    comingSoonSlots: [
+      {
+        x: -12.5,
+        z: -11.5,
+        theme: 'culture',
+        title: { en: 'TRAIT MUSEUM', ja: 'トレイト博物館' },
+        subtitle: { en: 'Find favorites by traits', ja: 'トレイトでお気に入り探し' },
+      },
+      {
+        x: 0,
+        z: -7.0,
+        theme: 'culture',
+        title: { en: 'FASHION RUNWAY', ja: 'ファッションランウェイ' },
+        subtitle: { en: 'Meebits on the catwalk', ja: 'Meebits のファッションショー' },
+      },
+      {
+        x: 12.5,
+        z: -11.0,
+        theme: 'culture',
+        title: { en: 'PFP STUDIO', ja: 'PFPクリエイター' },
+        subtitle: { en: 'Craft your profile look', ja: 'プロフィール用の姿を作る' },
+      },
+    ],
+    gates: [
+      {
+        id: 'culture-to-plaza',
+        x: 0,
+        // 手前クリア辺の北端（カメラ手前の中央に浮かない）
+        z: 16.0,
+        halfWidth: 2.55,
+        alcoveDepth: 2.4,
+        theme: 'plaza',
+        // Three.js: yaw=π/2 でローカル +X → 南(-Z)。接近・敷石が地区側を向く
+        yaw: Math.PI / 2,
+        targetZone: 'plaza',
+        // 南橋のすぐ内側・噴水方向
+        targetSpawn: { x: 0, z: -12.0, rotationY: 0 },
+        label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
+        subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
+      },
+    ],
+  },
 }
 
 export const DEFAULT_PARK_ZONE: ParkZoneId = 'plaza'
@@ -277,7 +385,7 @@ export function readStoredParkZone(): ParkZoneId {
   if (typeof window === 'undefined') return DEFAULT_PARK_ZONE
   try {
     const raw = sessionStorage.getItem(ZONE_STORAGE_KEY)
-    if (raw === 'plaza' || raw === 'mountain') return raw
+    if (raw === 'plaza' || raw === 'mountain' || raw === 'culture') return raw
   } catch {
     // ignore
   }

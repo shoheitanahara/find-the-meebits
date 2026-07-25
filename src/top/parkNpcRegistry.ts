@@ -12,7 +12,7 @@ export type ParkNpcRecord = {
 }
 
 /** 噴水右・看板そば（作成者の定位置） */
-export const PARK_CREATOR_POSITION: [number, number, number] = [5.4, 0, 7.35]
+export const PARK_CREATOR_POSITION: [number, number, number] = [5.4, 0, 13.75]
 /** パーク中央寄りを向く */
 export const PARK_CREATOR_ROTATION_Y = Math.PI * 0.92
 

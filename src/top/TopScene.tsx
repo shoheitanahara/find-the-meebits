@@ -41,6 +41,7 @@ import {
   setParkCollisionZone,
 } from './topCollisions'
 import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
+import { CultureDistrictGround } from './CultureDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
@@ -145,6 +146,7 @@ export function TopScene({
         trees={zone.trees}
         treeStyle={activeZoneId === 'mountain' ? 'pine' : 'grove'}
         voxelGround={activeZoneId === 'mountain'}
+        cultureGround={activeZoneId === 'culture'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -194,7 +196,16 @@ export function TopScene({
           key={`soon-${slot.x}-${slot.z}`}
           position={[slot.x, 0, slot.z]}
           locale={locale}
-          theme={slot.theme ?? (zone.perimeter?.theme === 'mountain' ? 'mountain' : 'classic')}
+          theme={
+            slot.theme ??
+            (zone.perimeter?.theme === 'mountain'
+              ? 'mountain'
+              : zone.id === 'culture'
+                ? 'culture'
+                : 'classic')
+          }
+          title={slot.title}
+          subtitle={slot.subtitle}
         />
       ))}
       {zone.hasNpcCrowd ? (
@@ -307,6 +318,7 @@ function HubGround({
   trees,
   treeStyle = 'grove',
   voxelGround = false,
+  cultureGround = false,
   showFountain,
 }: {
   featuredId: number
@@ -315,6 +327,7 @@ function HubGround({
   trees: ReadonlyArray<readonly [number, number]>
   treeStyle?: 'grove' | 'pine'
   voxelGround?: boolean
+  cultureGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -336,6 +349,8 @@ function HubGround({
     <group>
       {voxelGround ? (
         <MountainVoxelGround layout={layout} />
+      ) : cultureGround ? (
+        <CultureDistrictGround layout={layout} />
       ) : (
         <>
           {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}

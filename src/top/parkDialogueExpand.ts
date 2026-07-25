@@ -498,6 +498,7 @@ const EN_PLAZA_FLAVOR_H = [
   'Golden paths never lie.',
   'Plaza people-watching is elite.',
   'East bridge leads to the mountains —',
+  'South gate opens to Culture —',
 ]
 
 const EN_PLAZA_FLAVOR_T = [
@@ -516,6 +517,7 @@ const EN_PLAZA_FLAVOR_T = [
   'They lead you home.',
   'Better than any feed.',
   'Mt. Meeb and Neon Stack await.',
+  'runway, museum, and PFP await.',
   'Tonight’s mood is soft gold.',
   'Take a slow lap first.',
 ]
@@ -556,6 +558,60 @@ const EN_MT_FLAVOR_T = [
   'try the jelly tower next.',
   'Tonight’s mood is amber stone.',
   'Take a slow ridge lap first.',
+]
+
+const EN_CU_GREET_H = [
+  'Welcome to Culture!',
+  'Hey, fashion guest —',
+  'Gallery vibes tonight.',
+  'You’re in the Culture District.',
+  'Oh, a visitor!',
+  'Runway air feels different here.',
+]
+
+const EN_CU_GREET_T = [
+  'Meebits are the art tonight.',
+  'take a slow lap of the district.',
+  'Marble paths, soft lights.',
+  'Three builds are rising soon.',
+  'Glad you crossed the south gate.',
+  'Stay curious.',
+]
+
+const EN_CU_FLAVOR_H = [
+  'The fashion runway will host',
+  'Trait Museum is for hunting',
+  'PFP Studio is where you’ll craft',
+  'Culture tip:',
+  'I keep walking the marble path —',
+  'South of the plaza,',
+  'When the runway opens,',
+  'The museum will sort Meebits',
+  'PFP Creator is still scaffolding,',
+  'Don’t rush the galleries —',
+  'Champagne light on stone,',
+  'Three coming attractions:',
+  'This district is about Meebits themselves —',
+  'If you love outfits and traits,',
+  'Back through the north gate',
+]
+
+const EN_CU_FLAVOR_T = [
+  'endless Meebit catwalks.',
+  'favorites by traits.',
+  'your profile look.',
+  'read every construction board.',
+  'habit of a gallery night.',
+  'this is where culture blooms.',
+  'expect pure style energy.',
+  'by the details you love.',
+  'but the idea already sparkles.',
+  'savor the rose-lit air.',
+  'classic Culture mood.',
+  'runway, museum, PFP studio.',
+  'looks, traits, and portraits.',
+  'you’re in the right district.',
+  'returns you to the plaza fountain.',
 ]
 
 // ─── Japanese fragments ──────────────────────────────────────────────
@@ -1020,6 +1076,7 @@ const JA_PLAZA_FLAVOR_H = [
   '金の道は裏切らない。',
   '広場の人混みウォッチ、一流。',
   '東の橋の先が山岳地区 —',
+  '南の門の先がカルチャー —',
 ]
 
 const JA_PLAZA_FLAVOR_T = [
@@ -1038,6 +1095,7 @@ const JA_PLAZA_FLAVOR_T = [
   '帰宅ルートだよ。',
   'どんなフィードよりいい。',
   'Mt. Meeb とネオンスタックが待ってるよ。',
+  'ランウェイと博物館と PFP が待ってるよ。',
   '今夜のムードは柔らかい金。',
   'まずゆっくり一周してみて。',
 ]
@@ -1080,14 +1138,89 @@ const JA_MT_FLAVOR_T = [
   'まずゆっくり尾根を一周してみて。',
 ]
 
+const JA_CU_GREET_H = [
+  'カルチャー地区へようこそ！',
+  'ファッション好きのゲストね —',
+  '今夜はギャラリー気分。',
+  'ここはカルチャー地区だよ。',
+  'おっ、来た！',
+  'ランウェイの空気、違うよね。',
+]
+
+const JA_CU_GREET_T = [
+  '今夜の主役は Meebits そのもの。',
+  '地区をゆっくり一周してみて。',
+  '大理石の道と柔らかい光。',
+  '建物はいま3つ、立ち上がり中。',
+  '南の門を越えてきてくれてありがとう。',
+  '好奇心、大事にね。',
+]
+
+const JA_CU_FLAVOR_H = [
+  'ファッションランウェイでは',
+  'トレイト博物館は',
+  'PFPクリエイターでは',
+  'カルチャーのコツ：',
+  '大理石の道を歩きがち —',
+  '広場の南の先が、',
+  'ランウェイが開いたら、',
+  '博物館は好きな細部で',
+  'PFPクリエイターはまだ足場だけど、',
+  'ギャラリーを急がなくていい —',
+  '石にシャンパンライト、',
+  '工事中の3つ：',
+  'この地区は Meebits そのものを楽しむ場所 —',
+  'コーデやトレイトが好きなら、',
+  '北の門をくぐれば',
+]
+
+const JA_CU_FLAVOR_T = [
+  'ひたすらファッションショーをする予定。',
+  'トレイトでお気に入りを探す場所。',
+  'プロフィール用の姿を作るよ。',
+  '工事看板、全部読んでみて。',
+  'ギャラリー夜の癖かも。',
+  'カルチャーが芽吹くところ。',
+  'スタイル全開の空気になるはず。',
+  'Meebits を並べて見せてくれる。',
+  'アイデアだけはもう輝いてる。',
+  'バラ色の空気を味わって。',
+  'カルチャーらしいムードだよ。',
+  'ランウェイ、博物館、PFPスタジオ。',
+  '見た目、トレイト、ポートレート。',
+  '正解の地区に来てるよ。',
+  '広場の噴水へ戻れるよ。',
+]
+
 function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isJa = lang === 'ja'
   const isMt = zone === 'mountain'
+  const isCu = zone === 'culture'
   const j = isJa ? '' : ' '
 
   const greetings = product(
-    isMt ? (isJa ? JA_MT_GREET_H : EN_MT_GREET_H) : isJa ? JA_PLAZA_GREET_H : EN_PLAZA_GREET_H,
-    isMt ? (isJa ? JA_MT_GREET_T : EN_MT_GREET_T) : isJa ? JA_PLAZA_GREET_T : EN_PLAZA_GREET_T,
+    isMt
+      ? isJa
+        ? JA_MT_GREET_H
+        : EN_MT_GREET_H
+      : isCu
+        ? isJa
+          ? JA_CU_GREET_H
+          : EN_CU_GREET_H
+        : isJa
+          ? JA_PLAZA_GREET_H
+          : EN_PLAZA_GREET_H,
+    isMt
+      ? isJa
+        ? JA_MT_GREET_T
+        : EN_MT_GREET_T
+      : isCu
+        ? isJa
+          ? JA_CU_GREET_T
+          : EN_CU_GREET_T
+        : isJa
+          ? JA_PLAZA_GREET_T
+          : EN_PLAZA_GREET_T,
     j,
   )
 
@@ -1122,8 +1255,28 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   )
 
   const flavor = product(
-    isMt ? (isJa ? JA_MT_FLAVOR_H : EN_MT_FLAVOR_H) : isJa ? JA_PLAZA_FLAVOR_H : EN_PLAZA_FLAVOR_H,
-    isMt ? (isJa ? JA_MT_FLAVOR_T : EN_MT_FLAVOR_T) : isJa ? JA_PLAZA_FLAVOR_T : EN_PLAZA_FLAVOR_T,
+    isMt
+      ? isJa
+        ? JA_MT_FLAVOR_H
+        : EN_MT_FLAVOR_H
+      : isCu
+        ? isJa
+          ? JA_CU_FLAVOR_H
+          : EN_CU_FLAVOR_H
+        : isJa
+          ? JA_PLAZA_FLAVOR_H
+          : EN_PLAZA_FLAVOR_H,
+    isMt
+      ? isJa
+        ? JA_MT_FLAVOR_T
+        : EN_MT_FLAVOR_T
+      : isCu
+        ? isJa
+          ? JA_CU_FLAVOR_T
+          : EN_CU_FLAVOR_T
+        : isJa
+          ? JA_PLAZA_FLAVOR_T
+          : EN_PLAZA_FLAVOR_T,
     j,
   )
 

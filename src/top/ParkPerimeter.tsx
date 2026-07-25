@@ -40,13 +40,27 @@ const MT_WATER_FOAM = '#a0d8e8'
 const MT_WOOD = '#7a5a38'
 const MT_MOSS = '#3d6a40'
 
+/** カルチャー（濃紺ギャラリー）パレット */
+const CU_STONE = '#1a2a48'
+const CU_STONE_DARK = '#0e1a30'
+const CU_STONE_LIGHT = '#2a4068'
+const CU_ACCENT = '#6a9ee8'
+const CU_ACCENT_DIM = '#3a6aa8'
+const CU_WATER = '#1a4a7a'
+const CU_WATER_DEEP = '#0c2a48'
+const CU_WATER_FOAM = '#6a9ec8'
+
 function isMountainTheme(spec: PerimeterSpec) {
   return spec.theme === 'mountain'
 }
 
+function isCultureTheme(spec: PerimeterSpec) {
+  return spec.theme === 'culture'
+}
+
 /**
  * エリア外周: 崖・壁・川・滝・橋・封印門。
- * theme=classic → クラシック園 / theme=mountain → ボクセル山岳
+ * theme=classic → クラシック園 / theme=mountain → ボクセル山岳 / theme=culture → 濃紺ギャラリー
  */
 export function ParkPerimeter({
   layout,
@@ -167,7 +181,12 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
 
               return (
                 <group key={`${sideDef.side}-river-${index}`}>
-                  <RiverSegment position={riverPos} size={riverSize} mountain={isMountainTheme(spec)} />
+                  <RiverSegment
+                    position={riverPos}
+                    size={riverSize}
+                    mountain={isMountainTheme(spec)}
+                    culture={isCultureTheme(spec)}
+                  />
                 </group>
               )
             })}
@@ -194,6 +213,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                   position={wallPos}
                   size={wallSize}
                   axis={sideDef.axis}
+                  culture={isCultureTheme(spec)}
                 />
               )
             })}
@@ -217,14 +237,16 @@ function RiverSegment({
   position,
   size,
   mountain = false,
+  culture = false,
 }: {
   position: [number, number, number]
   size: [number, number, number]
   mountain?: boolean
+  culture?: boolean
 }) {
-  const deep = mountain ? MT_WATER_DEEP : WATER_DEEP
-  const mid = mountain ? MT_WATER : WATER
-  const foam = mountain ? MT_WATER_FOAM : WATER_FOAM
+  const deep = mountain ? MT_WATER_DEEP : culture ? CU_WATER_DEEP : WATER_DEEP
+  const mid = mountain ? MT_WATER : culture ? CU_WATER : WATER
+  const foam = mountain ? MT_WATER_FOAM : culture ? CU_WATER_FOAM : WATER_FOAM
   return (
     <group position={position}>
       <mesh receiveShadow>
@@ -259,17 +281,22 @@ function ClassicWall({
   position,
   size,
   axis,
+  culture = false,
 }: {
   position: [number, number, number]
   size: [number, number, number]
   axis: 'x' | 'z'
+  culture?: boolean
 }) {
   const [sx, sy, sz] = size
+  const body = culture ? CU_STONE : STONE
+  const top = culture ? CU_STONE_DARK : STONE_DARK
+  const cap = culture ? CU_ACCENT : GOLD
   return (
     <group position={position}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[sx, sy, sz]} />
-        <meshStandardMaterial color={STONE} roughness={0.92} />
+        <meshStandardMaterial color={body} roughness={0.92} />
       </mesh>
       {/* 控えめな上層バンド（門を隠すほどの崖にはしない） */}
       <mesh position={[0, sy * 0.5 + 0.35, 0]} castShadow receiveShadow>
@@ -280,7 +307,7 @@ function ClassicWall({
             axis === 'z' ? sz : sz * 1.08,
           ]}
         />
-        <meshStandardMaterial color={STONE_DARK} roughness={0.94} />
+        <meshStandardMaterial color={top} roughness={0.94} />
       </mesh>
       <mesh position={[0, sy * 0.5 + 0.78, 0]} castShadow>
         <boxGeometry
@@ -290,7 +317,7 @@ function ClassicWall({
             axis === 'z' ? sz * 1.02 : sz * 1.18,
           ]}
         />
-        <meshStandardMaterial color={GOLD} metalness={0.42} roughness={0.4} />
+        <meshStandardMaterial color={cap} metalness={0.42} roughness={0.4} />
       </mesh>
     </group>
   )
@@ -373,12 +400,15 @@ function GateWallReveal({
   openCenter: number
 }) {
   const mountain = isMountainTheme(spec)
+  const culture = isCultureTheme(spec)
   const wing = mountain ? 1.55 : 1.15
   const h = mountain
     ? Math.min(spec.wallHeight * 0.85, 3.1)
     : Math.min(spec.wallHeight * 0.55, 1.55)
   const t = spec.wallThickness * (mountain ? 1.05 : 0.85)
   const edge = spec.wallOpeningHalf * 0.92
+  const wingColor = culture ? CU_STONE_LIGHT : STONE_LIGHT
+  const capColor = culture ? CU_ACCENT : GOLD
 
   return (
     <group>
@@ -395,7 +425,7 @@ function GateWallReveal({
               {mountain ? (
                 <VoxelBlockMat kind="stone" />
               ) : (
-                <meshStandardMaterial color={STONE_LIGHT} roughness={0.88} />
+                <meshStandardMaterial color={wingColor} roughness={0.88} />
               )}
             </mesh>
             {mountain ? (
@@ -430,7 +460,7 @@ function GateWallReveal({
                       : [wing * 1.05, 0.14, t * 1.15]
                   }
                 />
-                <meshStandardMaterial color={GOLD} metalness={0.45} roughness={0.4} />
+                <meshStandardMaterial color={capColor} metalness={0.45} roughness={0.4} />
               </mesh>
             )}
           </group>
@@ -618,11 +648,14 @@ function BridgeGateApproach({
   const w = spec.bridgeDeckWidth
   const deckTop = 0.08
   const mountain = isMountainTheme(spec)
-  const beam = mountain ? MT_WOOD : STONE_DARK
-  const deck = mountain ? '#8a6a42' : '#7a7268'
-  const plankA = mountain ? '#9a7a50' : '#8a8278'
-  const plankB = mountain ? '#7a5a38' : '#6e675e'
-  const rail = mountain ? MT_WOOD : GOLD
+  const culture = isCultureTheme(spec)
+  const beam = mountain ? MT_WOOD : culture ? CU_STONE_DARK : STONE_DARK
+  const deck = mountain ? '#8a6a42' : culture ? '#1e3050' : '#7a7268'
+  const plankA = mountain ? '#9a7a50' : culture ? '#2a4068' : '#8a8278'
+  const plankB = mountain ? '#7a5a38' : culture ? '#162848' : '#6e675e'
+  const rail = mountain ? MT_WOOD : culture ? CU_ACCENT : GOLD
+  const post = mountain ? MT_STONE_DARK : culture ? CU_STONE : STONE_DARK
+  const under = mountain ? MT_WATER_DEEP : culture ? CU_WATER_DEEP : WATER_DEEP
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
@@ -659,7 +692,7 @@ function BridgeGateApproach({
           {[-0.35, -0.1, 0.15, 0.35].map((t) => (
             <mesh key={t} position={[t * length, 0.42, 0]} castShadow>
               <boxGeometry args={[0.1, 0.7, 0.1]} />
-              <meshStandardMaterial color={mountain ? MT_STONE_DARK : STONE_DARK} roughness={0.85} />
+              <meshStandardMaterial color={post} roughness={0.85} />
             </mesh>
           ))}
         </group>
@@ -682,7 +715,7 @@ function BridgeGateApproach({
       <mesh position={[0, -0.35, 0]}>
         <boxGeometry args={[length * 0.7, 0.2, w * 0.7]} />
         <meshStandardMaterial
-          color={mountain ? MT_WATER_DEEP : WATER_DEEP}
+          color={under}
           transparent
           opacity={0.18}
           depthWrite={false}
@@ -738,17 +771,58 @@ function TorchLantern({ position }: { position: [number, number, number] }) {
   )
 }
 
-function sealedGateCopy(side: CardinalSide, locale: 'en' | 'ja', mountain: boolean) {
+function sealedGateCopy(
+  side: CardinalSide,
+  locale: 'en' | 'ja',
+  mountain: boolean,
+  culture = false,
+) {
   if (locale === 'ja') {
-    if (side === 'e') return { label: mountain ? '東の峰' : '東の庭園', sub: '準備中' }
-    if (side === 'w') return { label: mountain ? '西坑道' : '西の翼', sub: '準備中' }
-    if (side === 'n') return { label: mountain ? '北の谷' : '北門', sub: '準備中' }
-    return { label: mountain ? '坑道入口' : '南の回廊', sub: '準備中' }
+    if (side === 'e') {
+      return {
+        label: mountain ? '東の峰' : culture ? '東ギャラリー' : '東の庭園',
+        sub: '準備中',
+      }
+    }
+    if (side === 'w') {
+      return {
+        label: mountain ? '西坑道' : culture ? '西アトリエ' : '西の翼',
+        sub: '準備中',
+      }
+    }
+    if (side === 'n') {
+      return {
+        label: mountain ? '北の谷' : culture ? '北フォワイエ' : '北門',
+        sub: '準備中',
+      }
+    }
+    return {
+      label: mountain ? '坑道入口' : culture ? '南サロン' : '南の回廊',
+      sub: '準備中',
+    }
   }
-  if (side === 'e') return { label: mountain ? 'EAST PEAK' : 'EAST GARDEN', sub: 'Coming Soon' }
-  if (side === 'w') return { label: mountain ? 'WEST MINE' : 'WEST WING', sub: 'Coming Soon' }
-  if (side === 'n') return { label: mountain ? 'NORTH VALE' : 'NORTH GATE', sub: 'Coming Soon' }
-  return { label: mountain ? 'MINE SHAFT' : 'SOUTH COURT', sub: 'Coming Soon' }
+  if (side === 'e') {
+    return {
+      label: mountain ? 'EAST PEAK' : culture ? 'EAST GALLERY' : 'EAST GARDEN',
+      sub: 'Coming Soon',
+    }
+  }
+  if (side === 'w') {
+    return {
+      label: mountain ? 'WEST MINE' : culture ? 'WEST ATELIER' : 'WEST WING',
+      sub: 'Coming Soon',
+    }
+  }
+  if (side === 'n') {
+    return {
+      label: mountain ? 'NORTH VALE' : culture ? 'NORTH FOYER' : 'NORTH GATE',
+      sub: 'Coming Soon',
+    }
+  }
+  return {
+    label: mountain ? 'MINE SHAFT' : culture ? 'SOUTH SALON' : 'SOUTH COURT',
+    sub: 'Coming Soon',
+  }
 }
 
 /**
@@ -765,8 +839,9 @@ function SealedPortal({
   locale: 'en' | 'ja'
 }) {
   const mountain = isMountainTheme(spec)
+  const culture = isCultureTheme(spec)
   const { x, z, rotationY } = getCardinalGatePlacement(spec, side)
-  const { label, sub } = sealedGateCopy(side, locale, mountain)
+  const { label, sub } = sealedGateCopy(side, locale, mountain, culture)
   const halfW = spec.openingHalf
 
   return (
@@ -774,7 +849,7 @@ function SealedPortal({
       {mountain ? (
         <MountainSealedGate halfW={halfW} label={label} sub={sub} />
       ) : (
-        <ClassicSealedGate halfW={halfW} label={label} sub={sub} />
+        <ClassicSealedGate halfW={halfW} label={label} sub={sub} culture={culture} />
       )}
     </group>
   )
@@ -785,41 +860,51 @@ function ClassicSealedGate({
   halfW,
   label,
   sub,
+  culture = false,
 }: {
   halfW: number
   label: string
   sub: string
+  culture?: boolean
 }) {
   const pillarZ = halfW * 0.92
+  const pillar = culture ? CU_STONE_DARK : '#3a3530'
+  const base = culture ? CU_STONE_LIGHT : STONE_LIGHT
+  const step = culture ? '#1a2844' : '#7a7268'
+  const accent = culture ? CU_ACCENT : GOLD
+  const accentDim = culture ? CU_ACCENT_DIM : GOLD_DIM
+  const arch = culture ? '#0c1528' : '#2a2520'
+  const door = culture ? '#0a1424' : '#1e1a1c'
+  const doorPanel = culture ? '#152038' : '#2a2428'
   return (
     <group>
       {/* 足元敷石 */}
       <mesh position={[0, 0.06, 0.55]} receiveShadow>
         <boxGeometry args={[halfW * 1.55, 0.12, 1.35]} />
-        <meshStandardMaterial color={STONE_LIGHT} roughness={0.86} />
+        <meshStandardMaterial color={base} roughness={0.86} />
       </mesh>
       <mesh position={[0, 0.1, 0.55]} receiveShadow>
         <boxGeometry args={[halfW * 1.25, 0.06, 1.05]} />
-        <meshStandardMaterial color="#7a7268" roughness={0.9} />
+        <meshStandardMaterial color={step} roughness={0.9} />
       </mesh>
 
       {[-pillarZ, pillarZ].map((pz) => (
         <group key={pz} position={[0, 0, pz]}>
           <mesh position={[0, 1.85, 0]} castShadow receiveShadow>
             <boxGeometry args={[0.72, 3.7, 0.72]} />
-            <meshStandardMaterial color="#3a3530" roughness={0.82} />
+            <meshStandardMaterial color={pillar} roughness={0.82} />
           </mesh>
           <mesh position={[0, 0.12, 0.15]} castShadow>
             <boxGeometry args={[0.9, 0.24, 0.9]} />
-            <meshStandardMaterial color={STONE} roughness={0.88} />
+            <meshStandardMaterial color={culture ? CU_STONE : STONE} roughness={0.88} />
           </mesh>
           <mesh position={[0, 3.82, 0]} castShadow>
             <boxGeometry args={[0.9, 0.34, 0.9]} />
-            <meshStandardMaterial color={GOLD} metalness={0.4} roughness={0.42} />
+            <meshStandardMaterial color={accent} metalness={0.4} roughness={0.42} />
           </mesh>
           <mesh position={[0, 4.2, 0]} castShadow>
             <coneGeometry args={[0.24, 0.5, 8]} />
-            <meshStandardMaterial color={GOLD} metalness={0.55} roughness={0.35} />
+            <meshStandardMaterial color={accent} metalness={0.55} roughness={0.35} />
           </mesh>
         </group>
       ))}
@@ -827,40 +912,44 @@ function ClassicSealedGate({
       {/* アーチ梁 */}
       <mesh position={[0, 3.55, 0]} castShadow>
         <boxGeometry args={[0.58, 0.42, halfW * 2.1]} />
-        <meshStandardMaterial color="#2a2520" roughness={0.75} />
+        <meshStandardMaterial color={arch} roughness={0.75} />
       </mesh>
       <mesh position={[0, 3.88, 0]} castShadow>
         <boxGeometry args={[0.42, 0.18, halfW * 1.9]} />
-        <meshStandardMaterial color={GOLD} metalness={0.42} roughness={0.4} />
+        <meshStandardMaterial color={accent} metalness={0.42} roughness={0.4} />
       </mesh>
 
       {/* 封印された鉄扉 */}
       <mesh position={[0, 1.65, 0.08]} castShadow>
         <boxGeometry args={[0.18, 3.15, halfW * 1.55]} />
-        <meshStandardMaterial color="#1e1a1c" metalness={0.72} roughness={0.32} />
+        <meshStandardMaterial color={door} metalness={0.72} roughness={0.32} />
       </mesh>
       {[-0.55, 0.55].map((oz) => (
         <mesh key={oz} position={[0.12, 1.65, oz]} castShadow>
           <boxGeometry args={[0.08, 2.9, halfW * 0.68]} />
-          <meshStandardMaterial color="#2a2428" metalness={0.65} roughness={0.38} />
+          <meshStandardMaterial color={doorPanel} metalness={0.65} roughness={0.38} />
         </mesh>
       ))}
       {/* 横桟・鍵板 */}
       {[0.55, 1.35, 2.15, 2.85].map((y) => (
         <mesh key={y} position={[0.16, y, 0]} castShadow>
           <boxGeometry args={[0.1, 0.08, halfW * 1.5]} />
-          <meshStandardMaterial color={GOLD_DIM} metalness={0.55} roughness={0.4} />
+          <meshStandardMaterial color={accentDim} metalness={0.55} roughness={0.4} />
         </mesh>
       ))}
       <mesh position={[0.22, 1.7, 0]} castShadow>
         <boxGeometry args={[0.14, 0.55, 0.55]} />
-        <meshStandardMaterial color={GOLD} metalness={0.6} roughness={0.35} />
+        <meshStandardMaterial color={accent} metalness={0.6} roughness={0.35} />
       </mesh>
       {/* 鎖 */}
       {([-1, 1] as const).map((s) => (
         <mesh key={s} position={[0.28, 2.4, s * 0.35]} rotation={[0, 0, s * 0.35]} castShadow>
           <cylinderGeometry args={[0.04, 0.04, 1.4, 8]} />
-          <meshStandardMaterial color="#8a7a50" metalness={0.7} roughness={0.35} />
+          <meshStandardMaterial
+            color={culture ? '#5a7aa0' : '#8a7a50'}
+            metalness={0.7}
+            roughness={0.35}
+          />
         </mesh>
       ))}
 
@@ -869,18 +958,23 @@ function ClassicSealedGate({
         <group key={`lantern-${s}`} position={[0.85, 0, s * (halfW * 0.55)]}>
           <mesh position={[0, 1.15, 0]} castShadow>
             <cylinderGeometry args={[0.06, 0.08, 2.2, 8]} />
-            <meshStandardMaterial color={STONE_DARK} roughness={0.85} />
+            <meshStandardMaterial color={culture ? CU_STONE_DARK : STONE_DARK} roughness={0.85} />
           </mesh>
           <mesh position={[0, 2.35, 0]}>
             <sphereGeometry args={[0.2, 12, 12]} />
             <meshStandardMaterial
-              color="#ffe2b0"
-              emissive="#ffe2b0"
+              color={culture ? '#c8e0ff' : '#ffe2b0'}
+              emissive={culture ? '#8eb4e8' : '#ffe2b0'}
               emissiveIntensity={0.75}
               roughness={0.3}
             />
           </mesh>
-          <pointLight position={[0, 2.35, 0]} color="#ffd9a0" intensity={0.65} distance={6} />
+          <pointLight
+            position={[0, 2.35, 0]}
+            color={culture ? '#a8c8f0' : '#ffd9a0'}
+            intensity={0.65}
+            distance={6}
+          />
         </group>
       ))}
 
@@ -892,7 +986,7 @@ function ClassicSealedGate({
         </mesh>
         <mesh position={[0, 4.55, 0.09]}>
           <boxGeometry args={[3.15, 0.75, 0.04]} />
-          <meshStandardMaterial color={GOLD} emissive={GOLD} emissiveIntensity={0.12} roughness={0.5} />
+          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.12} roughness={0.5} />
         </mesh>
         <Text position={[0, 4.7, 0.14]} fontSize={0.24} color="#1a1208" anchorX="center" anchorY="middle">
           {label}

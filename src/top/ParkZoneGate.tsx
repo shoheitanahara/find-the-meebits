@@ -57,6 +57,8 @@ export function ParkZoneGate({
     >
       {gate.theme === 'mountain' ? (
         <MountainPortalGate gate={gate} locale={locale} />
+      ) : gate.theme === 'culture' ? (
+        <CulturePortalGate gate={gate} locale={locale} />
       ) : (
         <PlazaReturnGate gate={gate} locale={locale} />
       )}
@@ -483,6 +485,112 @@ function PortalLantern({ position }: { position: [number, number, number] }) {
   )
 }
 
+/** プラザ側：カルチャー地区への入口（ギャラリーアーチ） */
+function CulturePortalGate({
+  gate,
+  locale,
+}: {
+  gate: ParkGateDef
+  locale: 'en' | 'ja'
+}) {
+  const faceSign = -1
+  const pillarZ = gate.halfWidth * 0.88
+  const accent = '#6a9ee8'
+  const marble = '#2a4068'
+  const marbleDark = '#152038'
+  const highlight = '#8eb4e8'
+
+  return (
+    <group>
+      <ApproachPath faceSign={faceSign} length={1.05} width={gate.halfWidth * 1.0} />
+
+      {[-pillarZ, pillarZ].map((z) => (
+        <group key={z} position={[0, 0, z]}>
+          <mesh position={[0, 1.85, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.7, 3.7, 0.7]} />
+            <meshStandardMaterial color={marbleDark} roughness={0.55} metalness={0.12} />
+          </mesh>
+          <mesh position={[0, 0.12, faceSign * 0.08]} castShadow>
+            <boxGeometry args={[0.92, 0.24, 0.92]} />
+            <meshStandardMaterial color={marble} roughness={0.45} />
+          </mesh>
+          <mesh position={[0, 3.85, 0]} castShadow>
+            <boxGeometry args={[0.88, 0.28, 0.88]} />
+            <meshStandardMaterial color={highlight} metalness={0.45} roughness={0.35} />
+          </mesh>
+          <mesh position={[0, 4.25, 0]} castShadow>
+            <sphereGeometry args={[0.18, 12, 12]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={0.55}
+              roughness={0.35}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* アーチ梁 */}
+      <mesh position={[0, 3.55, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.38, gate.halfWidth * 2.05]} />
+        <meshStandardMaterial color="#0c1528" roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 3.82, 0]} castShadow>
+        <boxGeometry args={[0.36, 0.16, gate.halfWidth * 1.9]} />
+        <meshStandardMaterial color={highlight} metalness={0.4} roughness={0.38} />
+      </mesh>
+
+      {/* ソフトなポータル光 */}
+      <mesh position={[0, 1.75, 0]}>
+        <boxGeometry args={[0.1, 3.2, gate.halfWidth * 1.5]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.5}
+          transparent
+          opacity={0.28}
+        />
+      </mesh>
+      <pointLight
+        position={[faceSign * 0.7, 2.2, 0]}
+        color="#a8c8f0"
+        intensity={1.55}
+        distance={10}
+        decay={2}
+      />
+
+      {([-1, 1] as const).map((side) => (
+        <group key={side} position={[faceSign * 1.15, 0, side * (gate.halfWidth * 0.52)]}>
+          <mesh position={[0, 1.1, 0]} castShadow>
+            <cylinderGeometry args={[0.06, 0.08, 2.2, 8]} />
+            <meshStandardMaterial color={marbleDark} roughness={0.6} />
+          </mesh>
+          <mesh position={[0, 2.35, 0]} castShadow>
+            <boxGeometry args={[0.38, 0.48, 0.38]} />
+            <meshStandardMaterial
+              color="#d0e4ff"
+              emissive={accent}
+              emissiveIntensity={0.7}
+              roughness={0.35}
+            />
+          </mesh>
+          <pointLight position={[0, 2.35, 0]} color="#a8c8f0" intensity={0.7} distance={5} decay={2} />
+        </group>
+      ))}
+
+      {/* 看板（広場から読めるよう −X 向き） */}
+      <group position={[faceSign * 0.45, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <Text position={[0, 4.35, 0]} fontSize={0.24} color="#e8f0ff" anchorX="center" anchorY="middle">
+          {gate.label[locale]}
+        </Text>
+        <Text position={[0, 4.0, 0]} fontSize={0.15} color={highlight} anchorX="center" anchorY="middle">
+          {gate.subtitle[locale]}
+        </Text>
+      </group>
+    </group>
+  )
+}
+
 /** マウンテン側：広場へ戻る門 */
 function PlazaReturnGate({
   gate,
@@ -544,7 +652,10 @@ function PlazaReturnGate({
         />
       ))}
 
-      <group position={[faceSign * 0.45, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <group
+        position={[faceSign * 0.45, 0, 0]}
+        rotation={[0, gate.id === 'culture-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
+      >
         <Text position={[0, 4.25, 0]} fontSize={0.26} color="#f5e6c8" anchorX="center" anchorY="middle">
           {gate.label[locale]}
         </Text>
@@ -561,24 +672,43 @@ export function ComingSoonPad({
   position,
   locale,
   theme = 'mountain',
+  title,
+  subtitle,
 }: {
   position: [number, number, number]
   locale: 'en' | 'ja'
-  theme?: 'classic' | 'mountain'
+  theme?: 'classic' | 'mountain' | 'culture'
+  title?: { en: string; ja: string }
+  subtitle?: { en: string; ja: string }
 }) {
   const heading = locale === 'ja' ? '工事中' : 'UNDER CONSTRUCTION'
   const mountain = theme === 'mountain'
+  const culture = theme === 'culture'
+  const titleText = title?.[locale]
+  const subtitleText = subtitle?.[locale]
 
   return (
     <group position={position}>
-      {mountain ? <MountainComingSoonShell /> : <ClassicComingSoonShell />}
-      <ComingSoonBarricade mountain={mountain} />
-      <ComingSoonSignboard heading={heading} mountain={mountain} />
+      {mountain ? (
+        <MountainComingSoonShell />
+      ) : culture ? (
+        <CultureComingSoonShell />
+      ) : (
+        <ClassicComingSoonShell />
+      )}
+      <ComingSoonBarricade mountain={mountain} culture={culture} />
+      <ComingSoonSignboard
+        heading={heading}
+        mountain={mountain}
+        culture={culture}
+        title={titleText}
+        subtitle={subtitleText}
+      />
       <pointLight
         position={[0, 3.2, 2.8]}
-        intensity={mountain ? 8 : 10}
+        intensity={culture ? 11 : mountain ? 8 : 10}
         distance={11}
-        color={mountain ? '#ffb060' : '#ffd080'}
+        color={culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
       />
     </group>
   )
@@ -695,9 +825,87 @@ function ClassicComingSoonShell() {
   )
 }
 
-function ComingSoonBarricade({ mountain }: { mountain: boolean }) {
-  const stripe = mountain ? '#c4a060' : '#c9a24a'
-  const post = mountain ? '#5a4030' : '#3a3530'
+/** カルチャー地区の工事棟（濃紺ギャラリー躯体＋ランウェイ基壇） */
+function CultureComingSoonShell() {
+  const marble = '#2a4068'
+  const accent = '#6a9ee8'
+  const highlight = '#8eb4e8'
+  const scaffold = '#3a5070'
+
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} castShadow receiveShadow>
+        <boxGeometry args={[6.4, 0.28, 5.8]} />
+        <meshStandardMaterial color="#152038" roughness={0.85} />
+      </mesh>
+      {/* ランウェイ風の細い基壇 */}
+      <mesh position={[0, 0.32, 1.4]} castShadow receiveShadow>
+        <boxGeometry args={[2.2, 0.18, 4.2]} />
+        <meshStandardMaterial color={marble} roughness={0.4} metalness={0.18} />
+      </mesh>
+      <mesh position={[0, 0.42, 1.4]} receiveShadow>
+        <boxGeometry args={[1.7, 0.06, 3.8]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.22}
+          roughness={0.45}
+        />
+      </mesh>
+
+      {/* 未完成ギャラリー壁 */}
+      <mesh position={[-1.5, 1.7, -0.9]} castShadow receiveShadow>
+        <boxGeometry args={[2.6, 3.0, 2.0]} />
+        <meshStandardMaterial color="#1a2a48" roughness={0.72} />
+      </mesh>
+      <mesh position={[1.6, 1.35, -0.6]} castShadow receiveShadow>
+        <boxGeometry args={[2.2, 2.3, 2.2]} />
+        <meshStandardMaterial color="#0e1a30" roughness={0.78} />
+      </mesh>
+      <mesh position={[0.1, 3.05, -0.7]} castShadow>
+        <boxGeometry args={[2.0, 0.28, 1.8]} />
+        <meshStandardMaterial color={highlight} metalness={0.4} roughness={0.4} />
+      </mesh>
+
+      {/* 足場 */}
+      {[-2.55, 2.55].flatMap((x) =>
+        [-1.9, 1.7].map((z) => (
+          <mesh key={`${x}-${z}`} position={[x, 1.75, z]} castShadow>
+            <cylinderGeometry args={[0.08, 0.1, 3.3, 8]} />
+            <meshStandardMaterial color={scaffold} roughness={0.75} />
+          </mesh>
+        )),
+      )}
+      <mesh position={[0, 2.7, 1.7]} castShadow>
+        <boxGeometry args={[5.2, 0.1, 0.5]} />
+        <meshStandardMaterial color={highlight} metalness={0.3} roughness={0.5} />
+      </mesh>
+      <mesh position={[0.2, 3.3, 0.15]} rotation={[0.06, 0.12, -0.08]} castShadow>
+        <boxGeometry args={[3.3, 0.05, 2.5]} />
+        <meshStandardMaterial color="#1a3858" roughness={0.7} />
+      </mesh>
+      {/* 資材箱 */}
+      <mesh position={[-2.3, 0.5, 2.1]} castShadow>
+        <boxGeometry args={[1.0, 0.65, 0.8]} />
+        <meshStandardMaterial color="#1e304c" roughness={0.85} />
+      </mesh>
+      <mesh position={[2.2, 0.42, 2.15]} castShadow>
+        <boxGeometry args={[0.85, 0.5, 0.7]} />
+        <meshStandardMaterial color="#152848" roughness={0.85} />
+      </mesh>
+    </group>
+  )
+}
+
+function ComingSoonBarricade({
+  mountain,
+  culture = false,
+}: {
+  mountain: boolean
+  culture?: boolean
+}) {
+  const stripe = culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
+  const post = culture ? '#1a2a48' : mountain ? '#5a4030' : '#3a3530'
   return (
     <group position={[0, 0, 2.85]}>
       {[-2.4, -0.8, 0.8, 2.4].map((x) => (
@@ -721,28 +929,35 @@ function ComingSoonBarricade({ mountain }: { mountain: boolean }) {
 function ComingSoonSignboard({
   heading,
   mountain,
+  culture = false,
+  title,
+  subtitle,
 }: {
   heading: string
   mountain: boolean
+  culture?: boolean
+  title?: string
+  subtitle?: string
 }) {
-  const accent = mountain ? '#c4a060' : '#c9a24a'
+  const accent = culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
+  const hasDetail = Boolean(title)
   return (
     <group position={[0, 0, 3.35]}>
       <mesh position={[0, 1.15, 0]} castShadow>
         <cylinderGeometry args={[0.07, 0.09, 2.2, 8]} />
         <meshStandardMaterial color="#8a7050" roughness={0.85} />
       </mesh>
-      <mesh position={[0, 2.45, 0.05]} castShadow>
-        <boxGeometry args={[2.9, 1.55, 0.14]} />
+      <mesh position={[0, hasDetail ? 2.65 : 2.45, 0.05]} castShadow>
+        <boxGeometry args={[2.9, hasDetail ? 2.15 : 1.55, 0.14]} />
         <meshStandardMaterial color="#1a1510" roughness={0.7} />
       </mesh>
-      <mesh position={[0, 2.45, 0.13]}>
-        <boxGeometry args={[2.65, 1.3, 0.04]} />
+      <mesh position={[0, hasDetail ? 2.65 : 2.45, 0.13]}>
+        <boxGeometry args={[2.65, hasDetail ? 1.9 : 1.3, 0.04]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.14} roughness={0.52} />
       </mesh>
       <Text
-        position={[0, 2.45, 0.18]}
-        fontSize={0.28}
+        position={[0, hasDetail ? 3.2 : 2.45, 0.18]}
+        fontSize={0.24}
         color="#1a1208"
         anchorX="center"
         anchorY="middle"
@@ -751,6 +966,32 @@ function ComingSoonSignboard({
       >
         {heading}
       </Text>
+      {title ? (
+        <Text
+          position={[0, 2.7, 0.18]}
+          fontSize={0.18}
+          color="#1a1208"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={2.4}
+          textAlign="center"
+        >
+          {title}
+        </Text>
+      ) : null}
+      {subtitle ? (
+        <Text
+          position={[0, 2.35, 0.18]}
+          fontSize={0.13}
+          color="#2a2018"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={2.45}
+          textAlign="center"
+        >
+          {subtitle}
+        </Text>
+      ) : null}
     </group>
   )
 }
