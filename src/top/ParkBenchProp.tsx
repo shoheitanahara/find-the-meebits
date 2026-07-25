@@ -1,12 +1,12 @@
 import { DoubleSide } from 'three'
-import type { ParkBenchPropKind } from './parkSeason'
+import type { ParkBenchPropKind } from './parkLook'
 
 /**
  * ベンチ横オブジェ。
- * `parkSeason.ts` / ゾーン look の benchProp で差し替える。
+ * `parkLook.ts` / ゾーン look の benchProp で差し替える。
  *
  * - flowers: 花壇プランター
- * - beachSet: パラソル＋ビーチボール
+ * - beachSet: パラソル＋ビーチボール（Plaza / Culture / Sea のデフォルト）
  * - surfboard: 立てかけサーフボード
  * - campRock: ボクセル岩＋苔（マウンテン地区）
  */

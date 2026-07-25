@@ -225,7 +225,7 @@ L4 NPC・プレイヤー
 | ゲートメッシュ | `src/top/ParkZoneGate.tsx` |
 | 衝突 | `src/top/topCollisions.ts` |
 | シーン組立 | `src/top/TopScene.tsx` |
-| 季節／テーマ色 | `src/top/parkSeason.ts`（ゾーンテーマへ拡張予定） |
+| 見た目ベース | `src/top/parkLook.ts`（ゾーン差分は `parkZoneTheme.ts`） |
 | 状態 | `src/top/topStore.ts` |
 
 **禁止**: TopScene への座標散在。外周キットは `ParkPerimeter` / `parkPerimeterSpec` に集約。
@@ -269,7 +269,7 @@ L4 NPC・プレイヤー
 
 ### 置き方（プロの揃え）— 現行デフォルトは §14
 
-- **散らさない**。ベンチ＋季節オブジェは噴水／中央園路の **開けた帯** にだけ置く
+- **散らさない**。ベンチ＋パラソル等は噴水／中央園路の **開けた帯** にだけ置く
 - 街灯は **左右対称の均等グリッド**（ランダム禁止）
 - **東西ゲート／封印門の周囲に家具を固めない**（門が主役）
 - **建物と壁の隙間にベンチ・木をねじ込まない**

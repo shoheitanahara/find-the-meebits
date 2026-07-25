@@ -30,8 +30,7 @@ import {
 import { setParkDialogueContext } from './interactWithParkNpc'
 import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs } from './parkNpcRegistry'
 import { ParkPerimeter } from './ParkPerimeter'
-import { ParkSeasonDecor } from './ParkSeasonDecor'
-import { getParkSeason, getParkSeasonLook, type ParkSeasonLook } from './parkSeason'
+import { getParkLook, type ParkBenchPropKind, type ParkLook } from './parkLook'
 import { applyZoneLook } from './parkZoneTheme'
 import {
   NPC_COLLISION_RADIUS,
@@ -45,7 +44,7 @@ import { CultureDistrictGround } from './CultureDistrictGround'
 import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
-import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
+import { ParkBenchProp } from './ParkBenchProp'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
@@ -87,10 +86,9 @@ export function TopScene({
   lineup: DailyParkLineup
 }) {
   const locale = getLocale()
-  const season = getParkSeason()
   const activeZoneId = useTopStore((state) => state.activeZoneId)
   const zone = getParkZone(activeZoneId)
-  const look = applyZoneLook(activeZoneId, getParkSeasonLook(season))
+  const look = applyZoneLook(activeZoneId, getParkLook())
   const layout = zone.layout
   const zoneAttractions = getAttractionsForZone(activeZoneId)
 
@@ -161,7 +159,6 @@ export function TopScene({
           locale={locale}
         />
       ) : null}
-      <ParkSeasonDecor season={season} layout={layout} />
       {zone.hasFeaturedBoard ? (
         <FeaturedInfoBoard
           featuredId={lineup.featuredId}
@@ -337,7 +334,7 @@ function HubGround({
   showFountain,
 }: {
   featuredId: number
-  look: ParkSeasonLook
+  look: ParkLook
   layout: ParkZoneLayout
   trees: ReadonlyArray<readonly [number, number]>
   treeStyle?: 'grove' | 'pine' | 'none'
@@ -533,7 +530,7 @@ function ParkLamps({
   lamps,
   style = 'classic',
 }: {
-  look: ParkSeasonLook
+  look: ParkLook
   lamps: ReadonlyArray<readonly [number, number]>
   style?: 'classic' | 'beach'
 }) {
@@ -556,7 +553,7 @@ function ClassicLamp({
   x,
   z,
 }: {
-  look: ParkSeasonLook
+  look: ParkLook
   x: number
   z: number
 }) {
@@ -606,7 +603,7 @@ function BeachLamp({
   x,
   z,
 }: {
-  look: ParkSeasonLook
+  look: ParkLook
   x: number
   z: number
 }) {
