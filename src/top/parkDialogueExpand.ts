@@ -1,6 +1,6 @@
 /**
  * セリフ断片の組み合わせで地区別プールを生成する。
- * plaza / mountain × EN / JA で各言語あたり約1000本を目指す。
+ * plaza / mountain / culture / sea × EN / JA。
  */
 
 import type { ParkZoneId } from './parkZones'
@@ -82,6 +82,8 @@ const EN_PLAZA_GREET_T = [
   'Feel free to chat with anyone.',
   'The crowd’s in a good mood.',
   'Grab a bench if you need a breather.',
+  'Four districts, one Park night.',
+  'Mountains, culture, sea — all connected.',
 ]
 
 const EN_MT_GREET_H = [
@@ -339,7 +341,7 @@ const EN_FEAT_MT_H = [
 
 const EN_FEAT_MT_T = [
   'down in the plaza? Worth the walk.',
-  'is the talk of both districts tonight.',
+  'is the talk of every district tonight.',
   'the fountain statue.',
   'Mountain guests still care about it.',
   'today’s featured face.',
@@ -478,7 +480,7 @@ const EN_THEME_MATCH_T = [
   'I prove it.',
   'Theme pride!',
   'We’re the daily matching set.',
-  'plaza or mountain — same club.',
+  'plaza, mountain, culture, or sea — same club.',
   'come say hi to the squad.',
 ]
 
@@ -499,6 +501,8 @@ const EN_PLAZA_FLAVOR_H = [
   'Plaza people-watching is elite.',
   'East bridge leads to the mountains —',
   'South gate opens to Culture —',
+  'West gate opens to the Sea District —',
+  'The Park has four districts now —',
 ]
 
 const EN_PLAZA_FLAVOR_T = [
@@ -518,6 +522,8 @@ const EN_PLAZA_FLAVOR_T = [
   'Better than any feed.',
   'Mt. Meeb and Neon Stack await.',
   'runway, museum, and PFP await.',
+  'palms, sand, and a night pier await.',
+  'pick a mood and wander.',
   'Tonight’s mood is soft gold.',
   'Take a slow lap first.',
 ]
@@ -538,6 +544,8 @@ const EN_MT_FLAVOR_H = [
   'Pine rows never lie about the wind.',
   'Trail people-watching is elite.',
   'Neon Stack glows beside the trail.',
+  'West of the plaza is the night beach —',
+  'South of the plaza is Culture —',
 ]
 
 const EN_MT_FLAVOR_T = [
@@ -556,6 +564,8 @@ const EN_MT_FLAVOR_T = [
   'They tell you where the cold comes from.',
   'Better than any feed.',
   'try the jelly tower next.',
+  'salt air and palm silhouettes that way.',
+  'runway lights and cool blue halls.',
   'Tonight’s mood is amber stone.',
   'Take a slow ridge lap first.',
 ]
@@ -563,19 +573,23 @@ const EN_MT_FLAVOR_T = [
 const EN_CU_GREET_H = [
   'Welcome to Culture!',
   'Hey, fashion guest —',
-  'Gallery vibes tonight.',
+  'Cool blue gallery vibes tonight.',
   'You’re in the Culture District.',
   'Oh, a visitor!',
   'Runway air feels different here.',
+  'Suits look sharp under these lights.',
+  'Gallery night, Meebit style.',
 ]
 
 const EN_CU_GREET_T = [
   'Meebits are the art tonight.',
   'take a slow lap of the district.',
-  'Marble paths, soft lights.',
+  'Navy floors, soft blue spotlights.',
   'Three builds are rising soon.',
   'Glad you crossed the south gate.',
   'Stay curious.',
+  'Dress code vibes without the dress code.',
+  'The runway stripe leads the eye.',
 ]
 
 const EN_CU_FLAVOR_H = [
@@ -583,17 +597,19 @@ const EN_CU_FLAVOR_H = [
   'Trait Museum is for hunting',
   'PFP Studio is where you’ll craft',
   'Culture tip:',
-  'I keep walking the marble path —',
+  'I keep walking the runway path —',
   'South of the plaza,',
   'When the runway opens,',
   'The museum will sort Meebits',
   'PFP Creator is still scaffolding,',
   'Don’t rush the galleries —',
-  'Champagne light on stone,',
+  'Cool blue light on navy stone,',
   'Three coming attractions:',
   'This district is about Meebits themselves —',
   'If you love outfits and traits,',
   'Back through the north gate',
+  'Half the crowd here wears suits —',
+  'Compared to the beach or the mountain,',
 ]
 
 const EN_CU_FLAVOR_T = [
@@ -606,47 +622,55 @@ const EN_CU_FLAVOR_T = [
   'expect pure style energy.',
   'by the details you love.',
   'but the idea already sparkles.',
-  'savor the rose-lit air.',
+  'savor the cool blue air.',
   'classic Culture mood.',
   'runway, museum, PFP studio.',
   'looks, traits, and portraits.',
   'you’re in the right district.',
   'returns you to the plaza fountain.',
+  'gallery energy loves a sharp look.',
+  'this place is all about Meebit style.',
 ]
 
 const EN_SEA_GREET_H = [
   'Welcome to the Sea District!',
-  'Smell that salt air?',
-  'Beach vibes tonight.',
+  'Smell that night sea air?',
+  'Night beach vibes.',
   'You’re on the sand side.',
   'Oh, a shoreline guest!',
-  'The boardwalk hums softly.',
+  'Palm silhouettes against the stars.',
+  'Lantern light on warm sand.',
+  'Tide’s quiet tonight.',
 ]
 
 const EN_SEA_GREET_T = [
-  'Tide’s friendly tonight.',
+  'The ocean goes on forever out there.',
   'kick your pace down a notch.',
   'Sand underfoot, stars above.',
   'Three builds rising on the shore.',
   'Glad you crossed the west gate.',
   'Stay sandy.',
+  'Follow the foam line if you get lost.',
+  'The pier gate leads home to the plaza.',
 ]
 
 const EN_SEA_FLAVOR_H = [
-  'Beach Club will be the sunset hang —',
+  'Beach Club will be the night hang —',
   'Tide Pool is for slow shoreline walks.',
   'Pier Stage will host',
   'Sea tip:',
-  'I keep looping the boardwalk —',
+  'I keep looping the sandy path —',
   'West of the plaza,',
   'When the pier opens,',
-  'The cove seals are still closed,',
+  'Those wooden lanterns glow warmer',
   'Don’t rush the shoreline —',
-  'Warm sand, cool water light,',
+  'Warm sand, dark water, soft foam,',
   'Three coming attractions:',
-  'This district is all about the shore —',
-  'If you love beaches and piers,',
-  'Back through the east gate',
+  'This district is all about the night beach —',
+  'If you love palms and piers,',
+  'Back through the east pier gate',
+  'Everyone out here dresses beachy —',
+  'The wavy shore meets the bridge cleanly —',
 ]
 
 const EN_SEA_FLAVOR_T = [
@@ -657,13 +681,15 @@ const EN_SEA_FLAVOR_T = [
   'habit of a beach night.',
   'the sea district begins.',
   'expect lanterns and salt air.',
-  'but the ocean still sparkles.',
+  'than the plaza streetlamps.',
   'savor the foam line.',
   'classic Sea District mood.',
   'club, tide pool, pier stage.',
-  'sand, shells, and sunset.',
+  'sand, palms, and starlight.',
   'you’re in the right district.',
   'returns you to the plaza.',
+  'tube tops and bare chests everywhere.',
+  'perfect spot to step onto the pier.',
 ]
 
 // ─── Japanese fragments ──────────────────────────────────────────────
@@ -712,6 +738,8 @@ const JA_PLAZA_GREET_T = [
   '誰にでも話しかけてみて。',
   '今夜の人混み、機嫌がいいよ。',
   '一息つきたくなったらベンチへ。',
+  '地区は4つ、今夜のパークはひとつ。',
+  '山もカルチャーも海も、全部つながってるよ。',
 ]
 
 const JA_MT_GREET_H = [
@@ -969,7 +997,7 @@ const JA_FEAT_MT_H = [
 
 const JA_FEAT_MT_T = [
   'プラザまで歩く価値あるよ。',
-  '両地区の今夜の話題だよ。',
+  '両地区どころか全区の今夜の話題だよ。',
   '噴水の銅像なんだ。',
   '山岳ゲストも気にしてるよ。',
   '今日の主役の顔を。',
@@ -1108,7 +1136,7 @@ const JA_THEME_MATCH_T = [
   'それが本日の共通点。',
   'テーマ誇り！',
   'ぼくたち日替わりマッチング組。',
-  '広場でも山でも同じクラブ。',
+  '広場でも山でもカルチャーでも海でも、同じクラブ。',
   'チームに話しかけていって。',
 ]
 
@@ -1129,6 +1157,8 @@ const JA_PLAZA_FLAVOR_H = [
   '広場の人混みウォッチ、一流。',
   '東の橋の先が山岳地区 —',
   '南の門の先がカルチャー —',
+  '西の門の先がシーエリア —',
+  'パークにはいま地区が4つある —',
 ]
 
 const JA_PLAZA_FLAVOR_T = [
@@ -1148,6 +1178,8 @@ const JA_PLAZA_FLAVOR_T = [
   'どんなフィードよりいい。',
   'Mt. Meeb とネオンスタックが待ってるよ。',
   'ランウェイと博物館と PFP が待ってるよ。',
+  'ヤシと砂浜と夜の桟橋が待ってるよ。',
+  '気分で地区を選んで歩いてみて。',
   '今夜のムードは柔らかい金。',
   'まずゆっくり一周してみて。',
 ]
@@ -1168,6 +1200,8 @@ const JA_MT_FLAVOR_H = [
   '松並びは風向きを裏切らない。',
   'トレイルの人混みウォッチ、一流。',
   'ネオンスタックがトレイルの脇で光ってる。',
+  '広場の西は夜のビーチ —',
+  '広場の南はカルチャー —',
 ]
 
 const JA_MT_FLAVOR_T = [
@@ -1186,6 +1220,8 @@ const JA_MT_FLAVOR_T = [
   '寒さの出所を教えてくれる。',
   'どんなフィードよりいい。',
   '隣のゼリー塔も試してみて。',
+  '潮風とヤシのシルエット、あっちだよ。',
+  'ランウェイの光とクールな青の廊下。',
   '今夜のムードは琥珀色の石。',
   'まずゆっくり尾根を一周してみて。',
 ]
@@ -1193,19 +1229,23 @@ const JA_MT_FLAVOR_T = [
 const JA_CU_GREET_H = [
   'カルチャー地区へようこそ！',
   'ファッション好きのゲストね —',
-  '今夜はギャラリー気分。',
+  '今夜はクールブルーのギャラリー。',
   'ここはカルチャー地区だよ。',
   'おっ、来た！',
   'ランウェイの空気、違うよね。',
+  'この明かりの下、スーツが映えるね。',
+  'Meebit 流のギャラリーナイト。',
 ]
 
 const JA_CU_GREET_T = [
   '今夜の主役は Meebits そのもの。',
   '地区をゆっくり一周してみて。',
-  '大理石の道と柔らかい光。',
+  '濃紺の床とやわらかい青いスポット。',
   '建物はいま3つ、立ち上がり中。',
   '南の門を越えてきてくれてありがとう。',
   '好奇心、大事にね。',
+  'ドレスコードなしのドレスコード気分。',
+  'ランウェイのストライプが目を導くよ。',
 ]
 
 const JA_CU_FLAVOR_H = [
@@ -1213,17 +1253,19 @@ const JA_CU_FLAVOR_H = [
   'トレイト博物館は',
   'PFPクリエイターでは',
   'カルチャーのコツ：',
-  '大理石の道を歩きがち —',
+  'ランウェイの道を歩きがち —',
   '広場の南の先が、',
   'ランウェイが開いたら、',
   '博物館は好きな細部で',
   'PFPクリエイターはまだ足場だけど、',
   'ギャラリーを急がなくていい —',
-  '石にシャンパンライト、',
+  '濃紺の石にクールブルーの光、',
   '工事中の3つ：',
   'この地区は Meebits そのものを楽しむ場所 —',
   'コーデやトレイトが好きなら、',
   '北の門をくぐれば',
+  'ここの来場者、スーツ率高め —',
+  'ビーチや山と比べると、',
 ]
 
 const JA_CU_FLAVOR_T = [
@@ -1236,47 +1278,55 @@ const JA_CU_FLAVOR_T = [
   'スタイル全開の空気になるはず。',
   'Meebits を並べて見せてくれる。',
   'アイデアだけはもう輝いてる。',
-  'バラ色の空気を味わって。',
+  '青い空気を味わって。',
   'カルチャーらしいムードだよ。',
   'ランウェイ、博物館、PFPスタジオ。',
   '見た目、トレイト、ポートレート。',
   '正解の地区に来てるよ。',
   '広場の噴水へ戻れるよ。',
+  'ギャラリーはシャープな格好が似合う。',
+  'ここは Meebit のスタイルそのもの。',
 ]
 
 const JA_SEA_GREET_H = [
   'シーエリアへようこそ！',
-  '潮の匂い、わかる？',
-  '今夜はビーチ気分。',
+  '夜の潮の匂い、わかる？',
+  '今夜は夜ビーチ気分。',
   '砂浜側だよ。',
   'おっ、海岸のゲスト！',
-  'ボードウォークが小さく鳴ってる。',
+  'ヤシのシルエットが星に映えてる。',
+  'ランタンの光が砂を暖めてる。',
+  '今夜の潮は静かだね。',
 ]
 
 const JA_SEA_GREET_T = [
-  '今夜の潮は優しいよ。',
+  '向こうの海、果てしなく続くよ。',
   '少しペース落として歩いて。',
   '足元は砂、頭上は星。',
   '岸辺に建物が3つ立ち上がり中。',
   '西の門を越えてきてくれてありがとう。',
   '砂を楽しんでいって。',
+  '迷ったら泡のラインをたどって。',
+  '桟橋の門から広場へ戻れるよ。',
 ]
 
 const JA_SEA_FLAVOR_H = [
-  'ビーチクラブは夕暮れのたまり場 —',
+  'ビーチクラブは夜のたまり場 —',
   'タイドプールはゆっくり歩く場所。',
   '桟橋ステージでは',
   'シーのコツ：',
-  'ボードウォークをぐるぐるしがち —',
+  '砂道をぐるぐるしがち —',
   '広場の西の先が、',
   '桟橋が開いたら、',
-  '入り江の封印はまだ閉じてるけど、',
+  '木のランタンは',
   '海岸を急がなくていい —',
-  '温かい砂と涼しい水面の光、',
+  '温かい砂、暗い海、やわらかい泡、',
   '工事中の3つ：',
-  'この地区は海岸そのもの —',
-  'ビーチや桟橋が好きなら、',
-  '東の門をくぐれば',
+  'この地区は夜のビーチそのもの —',
+  'ヤシと桟橋が好きなら、',
+  '東の桟橋ゲートをくぐれば',
+  'ここの格好、ほぼビーチスタイル —',
+  '波打ち際は桟橋の手前でまっすぐになって —',
 ]
 
 const JA_SEA_FLAVOR_T = [
@@ -1287,13 +1337,15 @@ const JA_SEA_FLAVOR_T = [
   'ビーチ夜の癖かも。',
   'シーエリアの始まり。',
   'ランタンと潮風が待つよ。',
-  '海はもう輝いてる。',
+  '広場の街灯より暖かい光だよ。',
   '泡のラインを味わって。',
   'シーらしいムードだよ。',
   'クラブ、タイドプール、桟橋。',
-  '砂、貝殻、夕暮れ。',
+  '砂、ヤシ、星空。',
   '正解の地区に来てるよ。',
   '広場へ戻れるよ。',
+  'チューブトップと上裸だらけ。',
+  '桟橋へ自然に乗れるよ。',
 ]
 
 function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {

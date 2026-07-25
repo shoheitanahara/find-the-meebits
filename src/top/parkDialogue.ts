@@ -49,7 +49,7 @@ const CREATOR_SEED = 11143
 
 /**
  * パーク来場者のセリフを 1〜2 行選ぶ。
- * plaza / mountain で別プール。挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）。
+ * plaza / mountain / culture / sea で別プール。挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）。
  */
 export function selectParkDialogueLines(
   npc: ParkNpcRecord,
