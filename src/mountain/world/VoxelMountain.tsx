@@ -43,21 +43,21 @@ export function VoxelMountain() {
         />
       ))}
 
-      {/* ゴール旗 — 頂上平台の上。大きく発光させて見失いにくくする */}
+      {/* ゴール旗 — 頂上平台の上。見失わない程度に控えめなサイズ */}
       <group position={[runtime.pathCenterX(runtime.goalZ), runtime.goalY + 0.5, runtime.goalZ]}>
-        <mesh position={[0, 4.5, 0]} castShadow>
-          <cylinderGeometry args={[0.12, 0.16, 9, 8]} />
+        <mesh position={[0, 2.4, 0]} castShadow>
+          <cylinderGeometry args={[0.07, 0.09, 4.8, 8]} />
           <meshStandardMaterial color="#f0e4c8" />
         </mesh>
-        <mesh position={[1.2, 8.2, 0]} castShadow>
-          <boxGeometry args={[2.4, 1.6, 0.12]} />
-          <meshStandardMaterial color="#ff3a28" emissive="#ff2a18" emissiveIntensity={1.1} />
+        <mesh position={[0.65, 4.35, 0]} castShadow>
+          <boxGeometry args={[1.3, 0.85, 0.08]} />
+          <meshStandardMaterial color="#ff3a28" emissive="#ff2a18" emissiveIntensity={1.0} />
         </mesh>
-        <mesh position={[0, 9.4, 0]}>
-          <sphereGeometry args={[0.45, 12, 12]} />
-          <meshStandardMaterial color="#ffe08a" emissive="#ffcc55" emissiveIntensity={1.8} />
+        <mesh position={[0, 5.0, 0]}>
+          <sphereGeometry args={[0.22, 12, 12]} />
+          <meshStandardMaterial color="#ffe08a" emissive="#ffcc55" emissiveIntensity={1.5} />
         </mesh>
-        <pointLight position={[0, 9, 0]} color="#ff8855" intensity={28} distance={55} decay={2} />
+        <pointLight position={[0, 4.8, 0]} color="#ff8855" intensity={14} distance={32} decay={2} />
       </group>
     </group>
   )
