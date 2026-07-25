@@ -50,7 +50,7 @@ const metadata = {
       description: 'ジャンプとダッシュでボクセルの山を登ろう。全20ステージ・約1000m。',
     },
     neon: {
-      title: 'ネオン積み山 | Meebits Park',
+      title: 'ネオンスタック | Meebits Park',
       description: 'テトリス風ネオンの崖を、暗黒の奈落の上で登ろう。ゲーム性はMt. Meebと同じ。',
     },
   },

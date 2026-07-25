@@ -141,7 +141,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // 北（手前）はゲート以外置かない。将来北ゲートが増えたら bridge-gate のみ追加
       ],
     },
-    spawn: { x: 0, z: 8, rotationY: Math.PI },
+    spawn: { x: 0, z: 13.5, rotationY: Math.PI },
     hasFountain: true,
     hasFeaturedBoard: true,
     hasNpcCrowd: true,

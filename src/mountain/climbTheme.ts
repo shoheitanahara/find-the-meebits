@@ -82,7 +82,7 @@ const MEEB_THEME: ClimbTheme = {
 const NEON_THEME: ClimbTheme = {
   id: 'neon',
   progressKey: 'meebits-neon-stack-progress-v1',
-  brand: { en: 'Neon Stack', ja: 'ネオン積み山' },
+  brand: { en: 'Neon Stack', ja: 'ネオンスタック' },
   eyebrow: { en: '20 Stages · Neon Abyss', ja: '全20ステージ · ネオン奈落' },
   blurb: {
     en: 'Same climb, different world — tetromino cliffs over a black void. Clear stages to push higher.',

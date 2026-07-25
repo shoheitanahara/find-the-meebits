@@ -61,7 +61,7 @@ const copy = {
       traits: 'トレイトハント',
       street: '8番ストリート',
       mountain: 'Mt. Meeb',
-      neon: 'ネオン積み山',
+      neon: 'ネオンスタック',
     },
   },
 } as const
