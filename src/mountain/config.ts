@@ -8,6 +8,7 @@ import {
   type MountainStageDef,
   MOUNTAIN_STAGE_COUNT,
 } from './stages'
+import { getClimbThemeId } from './climbTheme'
 
 export { MOUNTAIN_STAGE_COUNT, getStageDef, MOUNTAIN_STAGES, clampStageId } from './stages'
 export type { MountainStageDef } from './stages'
@@ -445,12 +446,30 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     return mountain
   }
 
+  const NEON_KINDS: BlockKind[] = [
+    'grass',
+    'dirt',
+    'sand',
+    'stone',
+    'darkStone',
+    'snow',
+    'path',
+    'gravel',
+  ]
+
   const blockKindFor = (x: number, z: number, h: number, _onTrail: boolean): BlockKind => {
+    const n = hash2(x, z)
+    const n2 = hash2(x - 11, z + 5)
+
+    // Neon Stack: 高度帯の傾向なし。セルごとに完全ランダム色
+    if (getClimbThemeId() === 'neon') {
+      const mix = (n * 0.63 + n2 * 0.37) % 1
+      return NEON_KINDS[Math.floor(mix * NEON_KINDS.length)] ?? 'stone'
+    }
+
     const snowLine = def.goalElev - 8
     const rise = Math.max(1, def.goalElev - def.startElev)
     const t = Math.min(1, Math.max(0, (h - def.startElev) / rise))
-    const n = hash2(x, z)
-    const n2 = hash2(x - 11, z + 5)
 
     // 下層は草・土多め。上に行くほど石・雪の傾向
     if (h >= snowLine) {
@@ -605,15 +624,27 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
   }
 }
 
+/**
+ * Neon Stack は Mt. Meeb と同じ難易度パラメータでも、seed だけ別系統にして別コースにする。
+ */
+function stageDefForTheme(stageId: number): MountainStageDef {
+  const base = getStageDef(stageId)
+  if (getClimbThemeId() !== 'neon') return base
+  return {
+    ...base,
+    seed: base.seed * 17 + 9041 + base.id * 433,
+  }
+}
+
 let versionCounter = 0
 let activeRuntime: MountainStageRuntime = {
-  ...buildStageMountainData(getStageDef(1)),
+  ...buildStageMountainData(stageDefForTheme(1)),
   version: ++versionCounter,
 }
 
 /** ステージ地形を差し替える（描画・衝突が追従） */
 export function loadMountainStage(stageId: number): MountainStageRuntime {
-  const def = getStageDef(stageId)
+  const def = stageDefForTheme(stageId)
   activeRuntime = {
     ...buildStageMountainData(def),
     version: ++versionCounter,

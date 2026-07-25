@@ -1,6 +1,6 @@
 /** App edition from URL path. */
 
-export type AppEdition = 'v1' | 'v2' | '8th-street' | 'mountain' | 'top'
+export type AppEdition = 'v1' | 'v2' | '8th-street' | 'mountain' | 'neon' | 'top'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   return pathname.split('/').filter(Boolean)
@@ -8,6 +8,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
+  if (segments.includes('neon-stack')) {
+    return 'neon'
+  }
   if (segments.includes('mountain')) {
     return 'mountain'
   }
@@ -33,7 +36,8 @@ export function isEightStreetEdition(pathname?: string) {
 }
 
 export function isMountainEdition(pathname?: string) {
-  return getAppEdition(pathname) === 'mountain'
+  const edition = getAppEdition(pathname)
+  return edition === 'mountain' || edition === 'neon'
 }
 
 let cachedEdition: AppEdition | null = null

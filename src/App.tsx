@@ -116,7 +116,7 @@ export default function App() {
     )
   }
 
-  if (edition === 'mountain') {
+  if (edition === 'mountain' || edition === 'neon') {
     return (
       <>
         <MountainApp />

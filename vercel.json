@@ -8,6 +8,8 @@
     { "source": "/8th-street/(.*)", "destination": "/index.html" },
     { "source": "/mountain", "destination": "/index.html" },
     { "source": "/mountain/(.*)", "destination": "/index.html" },
+    { "source": "/neon-stack", "destination": "/index.html" },
+    { "source": "/neon-stack/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },
     { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]

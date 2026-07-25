@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
+import { getClimbTheme } from './climbTheme'
 import { ClimbController, useMountainKeyboardBridge } from './player/ClimbController'
 import { MountainMobileControls } from './player/MobileControls'
 import { useMountainStore, applyDevMountainBootstrap } from './store'
@@ -29,7 +30,6 @@ function useTabFrameloop() {
 function MountainScene() {
   const phase = useMountainStore((state) => state.phase)
   const enabled = phase === 'playing'
-  // カメラ far をステージの高さに余裕を持たせる
   const camFar = 400
 
   return (
@@ -43,9 +43,11 @@ function MountainScene() {
   )
 }
 
+/** Mt. Meeb / Neon Stack 共用シェル（世界観は climbTheme） */
 export function MountainApp() {
   const phase = useMountainStore((state) => state.phase)
   const frameloop = useTabFrameloop()
+  const theme = getClimbTheme()
   useMountainKeyboardBridge()
   const showWorld = phase !== 'title'
 
@@ -54,7 +56,7 @@ export function MountainApp() {
   }, [])
 
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#87b8d8] text-slate-100">
+    <main className={`relative h-dvh w-dvw overflow-hidden text-slate-100 ${theme.shellBg}`}>
       {showWorld ? (
         <Canvas
           frameloop={frameloop}

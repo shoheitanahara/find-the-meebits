@@ -1,26 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getLocale } from '../../i18n/locale'
+import { getClimbTheme } from '../climbTheme'
 import { MOUNTAIN_STAGE_COUNT, MOUNTAIN_STAGES } from '../config'
 import { useMountainStore } from '../store'
-
-const copy = {
-  en: {
-    eyebrow: '20 Stages · 1000m',
-    title: 'Mt. Meeb',
-    blurb: 'Winding ledges and gappy cliffs. Clear a stage to unlock the next — 50m each, up to 1000m.',
-    controls: 'WASD — Move (camera follows) · Space — Jump · Shift — Dash',
-    start: 'Start Climb',
-    stage: 'Stage',
-  },
-  ja: {
-    eyebrow: '全20ステージ · 1000m',
-    title: 'Mt. Meeb',
-    blurb: '曲がりくねった棚と隙間だらけの崖。1ステージ50m、クリアで次が解放され約1000mまで登れる。',
-    controls: 'WASD — 移動（カメラ追従）· Space — ジャンプ · Shift — ダッシュ',
-    start: '登り始める',
-    stage: 'ステージ',
-  },
-} as const
 
 export function TitleScreen() {
   const phase = useMountainStore((state) => state.phase)
@@ -29,9 +11,10 @@ export function TitleScreen() {
   const start = useMountainStore((state) => state.start)
   const unlockThroughStage = useMountainStore((state) => state.unlockThroughStage)
   const [selected, setSelected] = useState(() => unlockedStage)
-  const t = copy[getLocale()]
   const locale = getLocale()
+  const theme = getClimbTheme()
   const isDev = import.meta.env.DEV
+  const isNeon = theme.id === 'neon'
 
   useEffect(() => {
     setSelected((prev) => Math.min(prev, unlockedStage) || unlockedStage)
@@ -40,16 +23,29 @@ export function TitleScreen() {
   if (phase !== 'title') return null
 
   const playStage = Math.min(Math.max(1, selected), unlockedStage)
+  const brand = theme.brand[locale]
+  const accentBtn = isNeon
+    ? 'bg-fuchsia-400 text-[#12081c] hover:bg-cyan-300'
+    : 'bg-white text-[#0c1520] hover:bg-sky-50'
+  const panelBorder = isNeon ? 'border-fuchsia-400/40' : 'border-white/30'
+  const panelBg = isNeon ? 'bg-[#0a0614]/88' : 'bg-[#0c1520]/75'
+  const eyebrowColor = isNeon ? 'text-cyan-300/90' : 'text-sky-200/90'
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-gradient-to-b from-[#6a9fc0] via-[#87b8d8] to-[#3d6b3a] px-4">
-      <section className="w-full max-w-md rounded-3xl border border-white/30 bg-[#0c1520]/75 p-6 text-white shadow-2xl backdrop-blur-md">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/90">{t.eyebrow}</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">{t.title}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-white/80">{t.blurb}</p>
-        <p className="mt-2 text-xs text-white/55">{t.controls}</p>
+    <div className={`pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-4 ${theme.titleGradient}`}>
+      <section className={`w-full max-w-md rounded-3xl border ${panelBorder} ${panelBg} p-6 text-white shadow-2xl backdrop-blur-md`}>
+        <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${eyebrowColor}`}>
+          {theme.eyebrow[locale]}
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight">{brand}</h1>
+        <p className="mt-3 text-sm leading-relaxed text-white/80">{theme.blurb[locale]}</p>
+        <p className="mt-2 text-xs text-white/55">
+          {locale === 'ja'
+            ? 'WASD — 移動（カメラ追従）· Space — ジャンプ · Shift — ダッシュ'
+            : 'WASD — Move (camera follows) · Space — Jump · Shift — Dash'}
+        </p>
         {heightBest > 0 ? (
-          <p className="mt-3 text-sm tabular-nums text-amber-200/90">
+          <p className={`mt-3 text-sm tabular-nums ${isNeon ? 'text-cyan-200/90' : 'text-amber-200/90'}`}>
             {locale === 'ja' ? '最高到達' : 'Best'}{' '}
             <span className="font-mono font-bold">{heightBest.toFixed(0)}m</span>
           </p>
@@ -82,7 +78,7 @@ export function TitleScreen() {
 
         <div className="mt-5">
           <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">
-            {t.stage}
+            {locale === 'ja' ? 'ステージ' : 'Stage'}
           </p>
           <div className="grid grid-cols-5 gap-1.5">
             {MOUNTAIN_STAGES.map((stage) => {
@@ -98,7 +94,9 @@ export function TitleScreen() {
                     locked
                       ? 'cursor-not-allowed bg-white/5 text-white/25'
                       : active
-                        ? 'bg-white text-[#0c1520]'
+                        ? isNeon
+                          ? 'bg-cyan-300 text-[#12081c]'
+                          : 'bg-white text-[#0c1520]'
                         : 'bg-white/15 text-white hover:bg-white/25'
                   }`}
                 >
@@ -114,10 +112,10 @@ export function TitleScreen() {
 
         <button
           type="button"
-          className="mt-6 w-full rounded-full bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#0c1520] transition hover:bg-sky-50 active:scale-[0.99]"
+          className={`mt-6 w-full rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.16em] transition active:scale-[0.99] ${accentBtn}`}
           onClick={() => start(playStage)}
         >
-          {locale === 'ja' ? `${t.stage} ${playStage} を開始` : `Start Stage ${playStage}`}
+          {locale === 'ja' ? `ステージ ${playStage} を開始` : `Start Stage ${playStage}`}
         </button>
       </section>
     </div>
@@ -133,6 +131,7 @@ export function ClearOverlay() {
   const retryStage = useMountainStore((state) => state.retryStage)
   const continueToNextStage = useMountainStore((state) => state.continueToNextStage)
   const locale = getLocale()
+  const isNeon = getClimbTheme().id === 'neon'
 
   if (phase !== 'stageCleared' && phase !== 'allCleared') return null
 
@@ -143,8 +142,18 @@ export function ClearOverlay() {
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-      <section className="w-full max-w-md rounded-3xl border border-amber-200/40 bg-[#101820]/92 p-6 text-center text-white shadow-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+      <section
+        className={`w-full max-w-md rounded-3xl border p-6 text-center text-white shadow-2xl ${
+          isNeon
+            ? 'border-fuchsia-300/40 bg-[#10081c]/92'
+            : 'border-amber-200/40 bg-[#101820]/92'
+        }`}
+      >
+        <p
+          className={`text-xs font-semibold uppercase tracking-[0.28em] ${
+            isNeon ? 'text-cyan-200' : 'text-amber-200'
+          }`}
+        >
           {isAllClear
             ? locale === 'ja'
               ? '全ステージ制覇！'
@@ -161,7 +170,9 @@ export function ClearOverlay() {
           {!isAllClear ? (
             <button
               type="button"
-              className="rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#101820]"
+              className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider ${
+                isNeon ? 'bg-cyan-300 text-[#12081c]' : 'bg-white text-[#101820]'
+              }`}
               onClick={() => continueToNextStage()}
             >
               {locale === 'ja'
@@ -196,6 +207,7 @@ export function ClimbHud() {
   const displayHeightM = useMountainStore((state) => state.displayHeightM)
   const heightBest = useMountainStore((state) => state.heightBest)
   const locale = getLocale()
+  const theme = getClimbTheme()
 
   if (phase !== 'playing') return null
 
@@ -203,21 +215,25 @@ export function ClimbHud() {
   const seconds = Math.floor(elapsedSec % 60)
 
   return (
-    <div className="pointer-events-none absolute left-3 top-[calc(env(safe-area-inset-top)+3.25rem)] z-20 rounded-xl border border-white/25 bg-black/50 px-3 py-2.5 text-white backdrop-blur">
+    <div
+      className={`pointer-events-none absolute left-3 top-[calc(env(safe-area-inset-top)+3.25rem)] z-20 rounded-xl border px-3 py-2.5 text-white backdrop-blur ${
+        theme.id === 'neon'
+          ? 'border-fuchsia-400/35 bg-[#0a0614]/70'
+          : 'border-white/25 bg-black/50'
+      }`}
+    >
       <p className="text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
-        Mt. Meeb · {currentStage}/{MOUNTAIN_STAGE_COUNT}
-      </p>
-      <p className="mt-0.5 font-mono text-lg font-bold tabular-nums">
-        {minutes}:{String(seconds).padStart(2, '0')}
+        {theme.brand[locale]} · {currentStage}/{MOUNTAIN_STAGE_COUNT}
       </p>
       <div className="mt-1.5 space-y-0.5 border-t border-white/15 pt-1.5 text-xs">
-        <p className="tabular-nums text-amber-200/95">
-          {locale === 'ja' ? '高度' : 'Alt'}{' '}
-          <span className="font-mono font-bold">{displayHeightM.toFixed(0)}m</span>
+        <p className="font-mono tabular-nums">
+          {minutes}:{String(seconds).padStart(2, '0')}
         </p>
-        <p className="tabular-nums text-white/65">
-          {locale === 'ja' ? '最高' : 'Best'}{' '}
-          <span className="font-mono">{heightBest.toFixed(0)}m</span>
+        <p className="tabular-nums">
+          {locale === 'ja' ? '高度' : 'Height'} {displayHeightM.toFixed(0)}m
+        </p>
+        <p className="tabular-nums text-white/70">
+          BEST {heightBest.toFixed(0)}m
         </p>
       </div>
     </div>

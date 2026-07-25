@@ -23,6 +23,10 @@ const metadata = {
       title: 'Mt. Meeb | Meebits Park',
       description: 'Climb the voxel mountain with jumps and dashes. Clear 20 stages up to 1000m.',
     },
+    neon: {
+      title: 'Neon Stack | Meebits Park',
+      description: 'Climb tetromino neon cliffs over a black abyss. Same climb, darker world — 20 stages.',
+    },
   },
   ja: {
     top: {
@@ -44,6 +48,10 @@ const metadata = {
     mountain: {
       title: 'Mt. Meeb | Meebits Park',
       description: 'ジャンプとダッシュでボクセルの山を登ろう。全20ステージ・約1000m。',
+    },
+    neon: {
+      title: 'ネオン積み山 | Meebits Park',
+      description: 'テトリス風ネオンの崖を、暗黒の奈落の上で登ろう。ゲーム性はMt. Meebと同じ。',
     },
   },
 } as const

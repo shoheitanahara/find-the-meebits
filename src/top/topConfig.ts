@@ -151,6 +151,36 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: [-5.6, 4.2],
   },
+  {
+    id: 'neon',
+    zoneId: 'mountain',
+    title: 'NEON STACK',
+    subtitle: 'Now Open',
+    description: {
+      en: 'Jelly cliffs. Black void.\nClimb — or drop.',
+      ja: 'ゼリーの崖。奈落の空。\n登れ。落ちるな。',
+    },
+    storyTitle: {
+      en: 'STACK UP',
+      ja: '積んで登れ',
+    },
+    color: '#1a0a30',
+    roofColor: '#ff2bd6',
+    x: -12.5,
+    z: -11.5,
+    entranceZ: -8.0,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [-5.2, 4.0],
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

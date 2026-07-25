@@ -2,6 +2,8 @@ import { Text } from '@react-three/drei'
 import type { Attraction } from './topConfig'
 import type { AttractionId } from './topStore'
 import { VoxelBlockMat } from './VoxelBlockMat'
+import type { BlockKind } from '../mountain/config'
+import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
 
 /**
  * Park アトラクションのランドマーク入口。
@@ -9,6 +11,7 @@ import { VoxelBlockMat } from './VoxelBlockMat'
  * - traits: ネオン円筒タワー
  * - street: L字レンガ町屋＋アーチ
  * - mountain: ボクセル山エントランス（Mt. Meeb）
+ * - neon: テトリス風積みブロック塔（Neon Stack）
  */
 export function AttractionBuilding({
   attraction,
@@ -26,7 +29,9 @@ export function AttractionBuilding({
         ? '#5ee0ff'
         : attraction.id === 'street'
           ? '#e8a0ff'
-          : '#c4a060'
+          : attraction.id === 'neon'
+            ? '#ff2bd6'
+            : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -47,6 +52,8 @@ export function AttractionBuilding({
         />
       ) : attraction.id === 'street' ? (
         <AlleyLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : attraction.id === 'neon' ? (
+        <NeonStackLandmark accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -124,6 +131,80 @@ function MountainLandmark({
         <boxGeometry args={[0.9, 0.55, 0.06]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} />
       </mesh>
+    </group>
+  )
+}
+
+/** テトリス風ネオン積み塔 — コースと同じゼリーブロック質感 */
+function NeonStackLandmark({ accent }: { accent: string }) {
+  const blocks: Array<{
+    x: number
+    y: number
+    z: number
+    w: number
+    h: number
+    d: number
+    kind: BlockKind | null
+  }> = [
+    { x: 0, y: 0.35, z: -0.2, w: 6.4, h: 0.7, d: 6.2, kind: null },
+    { x: -1.4, y: 1.15, z: -0.4, w: 2.4, h: 0.9, d: 2.4, kind: 'grass' },
+    { x: 1.0, y: 1.15, z: -0.3, w: 2.8, h: 0.9, d: 2.2, kind: 'stone' },
+    { x: -0.2, y: 2.1, z: -0.5, w: 3.6, h: 0.95, d: 2.6, kind: 'dirt' },
+    { x: -1.6, y: 3.05, z: -0.6, w: 1.8, h: 0.9, d: 1.8, kind: 'gravel' },
+    { x: 0.6, y: 3.05, z: -0.55, w: 2.6, h: 0.9, d: 1.9, kind: 'darkStone' },
+    { x: -0.3, y: 4.0, z: -0.7, w: 2.2, h: 0.95, d: 2.0, kind: 'sand' },
+    { x: 0.1, y: 4.95, z: -0.75, w: 1.5, h: 0.85, d: 1.5, kind: 'path' },
+  ]
+
+  return (
+    <group>
+      {blocks.map((b, index) => (
+        <mesh
+          key={index}
+          position={[b.x, b.y, b.z]}
+          castShadow
+          receiveShadow
+          material={
+            b.kind
+              ? getNeonBlockMaterial(b.kind, 'top')
+              : undefined
+          }
+        >
+          <boxGeometry args={[b.w, b.h, b.d]} />
+          {!b.kind ? (
+            <meshStandardMaterial
+              color="#12081c"
+              emissive="#1a0830"
+              emissiveIntensity={0.12}
+              roughness={0.7}
+            />
+          ) : null}
+        </mesh>
+      ))}
+      <mesh
+        position={[-2.7, 1.6, -1.3]}
+        castShadow
+        material={getNeonBlockMaterial('stone', 'shaft')}
+      >
+        <boxGeometry args={[1.6, 2.4, 1.6]} />
+      </mesh>
+      <mesh
+        position={[2.6, 1.4, -1.1]}
+        castShadow
+        material={getNeonBlockMaterial('darkStone', 'shaft')}
+      >
+        <boxGeometry args={[1.5, 2.0, 1.5]} />
+      </mesh>
+      <mesh position={[0, 5.7, -0.6]} castShadow>
+        <cylinderGeometry args={[0.05, 0.06, 1.1, 8]} />
+        <meshStandardMaterial color="#9aa0b8" />
+      </mesh>
+      <mesh position={[0.4, 6.1, -0.6]} castShadow>
+        <boxGeometry args={[0.8, 0.45, 0.05]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} />
+      </mesh>
+      <pointLight position={[0, 3.2, 1.2]} intensity={7} distance={10} color="#a04090" />
+      <pointLight position={[-1.5, 2.4, 0.8]} intensity={4.5} distance={8} color="#3a8068" />
     </group>
   )
 }

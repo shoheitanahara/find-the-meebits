@@ -41,6 +41,7 @@ const copy = {
       traits: 'Trait Hunt',
       street: '8th Street',
       mountain: 'Mt. Meeb',
+      neon: 'Neon Stack',
     },
   },
   ja: {
@@ -60,6 +61,7 @@ const copy = {
       traits: 'トレイトハント',
       street: '8番ストリート',
       mountain: 'Mt. Meeb',
+      neon: 'ネオン積み山',
     },
   },
 } as const
@@ -69,6 +71,7 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'find') return `${localePrefix}/find-the-meebit`
   if (id === 'traits') return `${localePrefix}/v2`
   if (id === 'street') return `${localePrefix}/8th-street`
+  if (id === 'neon') return `${localePrefix}/neon-stack`
   return `${localePrefix}/mountain`
 }
 
@@ -76,7 +79,7 @@ function getReturningAttractionId(): AttractionId | null {
   if (typeof window === 'undefined') return null
 
   const from = new URLSearchParams(window.location.search).get('from')
-  return from === 'find' || from === 'traits' || from === 'street' || from === 'mountain'
+  return from === 'find' || from === 'traits' || from === 'street' || from === 'mountain' || from === 'neon'
     ? from
     : null
 }

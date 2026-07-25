@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { getClimbTheme } from './climbTheme'
 import {
   clampStageId,
   getMountainRuntime,
@@ -9,7 +10,7 @@ import {
 
 export type MountainPhase = 'title' | 'playing' | 'stageCleared' | 'allCleared'
 
-const PROGRESS_KEY = 'meebits-mountain-progress-v2'
+const PROGRESS_KEY = getClimbTheme().progressKey
 
 type ProgressPayload = {
   unlockedStage?: number
@@ -171,7 +172,7 @@ export const useMountainStore = create<MountainState>((set, get) => ({
 
 /**
  * 開発ビルド専用 URL ブートストラップ。
- * 例: `/mountain?mtUnlock=all` / `/mountain?mtUnlock=20&mtStage=20`
+ * 例: `/mountain?mtUnlock=all` / `/neon-stack?mtUnlock=20&mtStage=20`
  */
 export function applyDevMountainBootstrap() {
   if (!import.meta.env.DEV || typeof window === 'undefined') return
@@ -183,6 +184,7 @@ export function applyDevMountainBootstrap() {
   if (!unlockRaw && !stageRaw) return
 
   const store = useMountainStore.getState()
+  const theme = getClimbTheme().id
 
   if (unlockRaw) {
     const unlockTo =
@@ -190,7 +192,7 @@ export function applyDevMountainBootstrap() {
         ? MOUNTAIN_STAGE_COUNT
         : clampStageId(Number(unlockRaw))
     store.unlockThroughStage(unlockTo)
-    console.info(`[mountain-dev] unlocked through stage ${unlockTo}`)
+    console.info(`[${theme}-dev] unlocked through stage ${unlockTo}`)
   }
 
   if (stageRaw) {
@@ -200,6 +202,6 @@ export function applyDevMountainBootstrap() {
       useMountainStore.getState().unlockThroughStage(stageId)
     }
     useMountainStore.getState().start(stageId)
-    console.info(`[mountain-dev] start stage ${stageId}`)
+    console.info(`[${theme}-dev] start stage ${stageId}`)
   }
 }

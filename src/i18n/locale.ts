@@ -43,6 +43,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/mountain' : '/mountain'
   }
 
+  if (segments.includes('neon-stack')) {
+    return locale === 'ja' ? '/jp/neon-stack' : '/neon-stack'
+  }
+
   if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }
