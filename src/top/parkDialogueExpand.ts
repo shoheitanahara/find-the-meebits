@@ -614,6 +614,58 @@ const EN_CU_FLAVOR_T = [
   'returns you to the plaza fountain.',
 ]
 
+const EN_SEA_GREET_H = [
+  'Welcome to the Sea District!',
+  'Smell that salt air?',
+  'Beach vibes tonight.',
+  'You’re on the sand side.',
+  'Oh, a shoreline guest!',
+  'The boardwalk hums softly.',
+]
+
+const EN_SEA_GREET_T = [
+  'Tide’s friendly tonight.',
+  'kick your pace down a notch.',
+  'Sand underfoot, stars above.',
+  'Three builds rising on the shore.',
+  'Glad you crossed the west gate.',
+  'Stay sandy.',
+]
+
+const EN_SEA_FLAVOR_H = [
+  'Beach Club will be the sunset hang —',
+  'Tide Pool is for slow shoreline walks.',
+  'Pier Stage will host',
+  'Sea tip:',
+  'I keep looping the boardwalk —',
+  'West of the plaza,',
+  'When the pier opens,',
+  'The cove seals are still closed,',
+  'Don’t rush the shoreline —',
+  'Warm sand, cool water light,',
+  'Three coming attractions:',
+  'This district is all about the shore —',
+  'If you love beaches and piers,',
+  'Back through the east gate',
+]
+
+const EN_SEA_FLAVOR_T = [
+  'bring a soft evening mood.',
+  'Watch your footing near wet sand.',
+  'Meebits shows over the water.',
+  'read every construction board.',
+  'habit of a beach night.',
+  'the sea district begins.',
+  'expect lanterns and salt air.',
+  'but the ocean still sparkles.',
+  'savor the foam line.',
+  'classic Sea District mood.',
+  'club, tide pool, pier stage.',
+  'sand, shells, and sunset.',
+  'you’re in the right district.',
+  'returns you to the plaza.',
+]
+
 // ─── Japanese fragments ──────────────────────────────────────────────
 
 const JA_PLAZA_GREET_H = [
@@ -1192,37 +1244,96 @@ const JA_CU_FLAVOR_T = [
   '広場の噴水へ戻れるよ。',
 ]
 
+const JA_SEA_GREET_H = [
+  'シーエリアへようこそ！',
+  '潮の匂い、わかる？',
+  '今夜はビーチ気分。',
+  '砂浜側だよ。',
+  'おっ、海岸のゲスト！',
+  'ボードウォークが小さく鳴ってる。',
+]
+
+const JA_SEA_GREET_T = [
+  '今夜の潮は優しいよ。',
+  '少しペース落として歩いて。',
+  '足元は砂、頭上は星。',
+  '岸辺に建物が3つ立ち上がり中。',
+  '西の門を越えてきてくれてありがとう。',
+  '砂を楽しんでいって。',
+]
+
+const JA_SEA_FLAVOR_H = [
+  'ビーチクラブは夕暮れのたまり場 —',
+  'タイドプールはゆっくり歩く場所。',
+  '桟橋ステージでは',
+  'シーのコツ：',
+  'ボードウォークをぐるぐるしがち —',
+  '広場の西の先が、',
+  '桟橋が開いたら、',
+  '入り江の封印はまだ閉じてるけど、',
+  '海岸を急がなくていい —',
+  '温かい砂と涼しい水面の光、',
+  '工事中の3つ：',
+  'この地区は海岸そのもの —',
+  'ビーチや桟橋が好きなら、',
+  '東の門をくぐれば',
+]
+
+const JA_SEA_FLAVOR_T = [
+  '柔らかい夜のムードになるはず。',
+  '濡れた砂の手前、足元注意。',
+  '水面の上で Meebits ショー。',
+  '工事看板、全部読んでみて。',
+  'ビーチ夜の癖かも。',
+  'シーエリアの始まり。',
+  'ランタンと潮風が待つよ。',
+  '海はもう輝いてる。',
+  '泡のラインを味わって。',
+  'シーらしいムードだよ。',
+  'クラブ、タイドプール、桟橋。',
+  '砂、貝殻、夕暮れ。',
+  '正解の地区に来てるよ。',
+  '広場へ戻れるよ。',
+]
+
 function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isJa = lang === 'ja'
   const isMt = zone === 'mountain'
   const isCu = zone === 'culture'
+  const isSea = zone === 'sea'
   const j = isJa ? '' : ' '
 
-  const greetings = product(
-    isMt
+  const greetH = isMt
+    ? isJa
+      ? JA_MT_GREET_H
+      : EN_MT_GREET_H
+    : isCu
       ? isJa
-        ? JA_MT_GREET_H
-        : EN_MT_GREET_H
-      : isCu
+        ? JA_CU_GREET_H
+        : EN_CU_GREET_H
+      : isSea
         ? isJa
-          ? JA_CU_GREET_H
-          : EN_CU_GREET_H
+          ? JA_SEA_GREET_H
+          : EN_SEA_GREET_H
         : isJa
           ? JA_PLAZA_GREET_H
-          : EN_PLAZA_GREET_H,
-    isMt
+          : EN_PLAZA_GREET_H
+  const greetT = isMt
+    ? isJa
+      ? JA_MT_GREET_T
+      : EN_MT_GREET_T
+    : isCu
       ? isJa
-        ? JA_MT_GREET_T
-        : EN_MT_GREET_T
-      : isCu
+        ? JA_CU_GREET_T
+        : EN_CU_GREET_T
+      : isSea
         ? isJa
-          ? JA_CU_GREET_T
-          : EN_CU_GREET_T
+          ? JA_SEA_GREET_T
+          : EN_SEA_GREET_T
         : isJa
           ? JA_PLAZA_GREET_T
-          : EN_PLAZA_GREET_T,
-    j,
-  )
+          : EN_PLAZA_GREET_T
+  const greetings = product(greetH, greetT, j)
 
   const gameFind = product(isJa ? JA_FIND_H : EN_FIND_H, isJa ? JA_FIND_T : EN_FIND_T, j)
   const gameTraits = product(isJa ? JA_TRAITS_H : EN_TRAITS_H, isJa ? JA_TRAITS_T : EN_TRAITS_T, j)
@@ -1254,31 +1365,37 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     j,
   )
 
-  const flavor = product(
-    isMt
+  const flavorH = isMt
+    ? isJa
+      ? JA_MT_FLAVOR_H
+      : EN_MT_FLAVOR_H
+    : isCu
       ? isJa
-        ? JA_MT_FLAVOR_H
-        : EN_MT_FLAVOR_H
-      : isCu
+        ? JA_CU_FLAVOR_H
+        : EN_CU_FLAVOR_H
+      : isSea
         ? isJa
-          ? JA_CU_FLAVOR_H
-          : EN_CU_FLAVOR_H
+          ? JA_SEA_FLAVOR_H
+          : EN_SEA_FLAVOR_H
         : isJa
           ? JA_PLAZA_FLAVOR_H
-          : EN_PLAZA_FLAVOR_H,
-    isMt
+          : EN_PLAZA_FLAVOR_H
+  const flavorT = isMt
+    ? isJa
+      ? JA_MT_FLAVOR_T
+      : EN_MT_FLAVOR_T
+    : isCu
       ? isJa
-        ? JA_MT_FLAVOR_T
-        : EN_MT_FLAVOR_T
-      : isCu
+        ? JA_CU_FLAVOR_T
+        : EN_CU_FLAVOR_T
+      : isSea
         ? isJa
-          ? JA_CU_FLAVOR_T
-          : EN_CU_FLAVOR_T
+          ? JA_SEA_FLAVOR_T
+          : EN_SEA_FLAVOR_T
         : isJa
           ? JA_PLAZA_FLAVOR_T
-          : EN_PLAZA_FLAVOR_T,
-    j,
-  )
+          : EN_PLAZA_FLAVOR_T
+  const flavor = product(flavorH, flavorT, j)
 
   return {
     greetings,

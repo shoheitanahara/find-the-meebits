@@ -7,7 +7,7 @@ export type PerimeterOpening =
   | { side: CardinalSide; kind: 'bridge-gate'; gateId: string }
   | { side: CardinalSide; kind: 'sealed' }
 
-export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture'
+export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture' | 'sea'
 
 export type ParkPerimeterDef = {
   theme: ParkPerimeterTheme
@@ -70,6 +70,7 @@ export function buildPerimeterSpec(
   gates: ParkGateDef[],
 ): PerimeterSpec {
   const isMountain = perimeter.theme === 'mountain'
+  const isSea = perimeter.theme === 'sea'
   // 床スケルトンは全区共通。川内側も同じ基準で揃える
   const riverInnerX = Math.min(layout.boundsX - 4.8, 22.2)
   const riverInnerZN = Math.min(layout.maxZ - 2.2, 12.5)
@@ -81,14 +82,15 @@ export function buildPerimeterSpec(
     riverInnerX,
     riverInnerZN,
     riverInnerZS,
-    riverWidth: isMountain ? 3.0 : 2.5,
-    wallThickness: isMountain ? 1.6 : 1.25,
-    wallHeight: isMountain ? 3.6 : 2.85,
-    wallOpeningHalf: isMountain ? 5.4 : 5.2,
+    // sea: 広い海帯。壁寸法は未使用（描画・衝突ともスキップ）
+    riverWidth: isMountain ? 3.0 : isSea ? 5.6 : 2.5,
+    wallThickness: isMountain ? 1.6 : isSea ? 0.2 : 1.25,
+    wallHeight: isMountain ? 3.6 : isSea ? 0.2 : 2.85,
+    wallOpeningHalf: isMountain ? 5.4 : isSea ? 5.6 : 5.2,
     openingHalf: 2.35,
     // 門の通過幅に近いデッキ。川をまたぐ長さは配置側で river に合わせる
     bridgeDeckWidth: 4.0,
-    bridgeLength: isMountain ? 3.6 : 3.2,
+    bridgeLength: isMountain ? 3.6 : isSea ? 3.8 : 3.2,
     frontClearSides: perimeter.frontClearSides ?? ['n'],
     theme: perimeter.theme,
     openings: perimeter.openings,
@@ -222,6 +224,7 @@ export function buildSealedGateObstacleBoxes(spec: PerimeterSpec): PerimeterBox[
 export function buildPerimeterObstacleBoxes(spec: PerimeterSpec): PerimeterBox[] {
   const boxes: PerimeterBox[] = []
   const { cx, cz, riverInnerX, riverInnerZN, riverInnerZS, riverWidth, wallThickness } = spec
+  const isSea = spec.theme === 'sea'
 
   const riverMidX = riverInnerX + riverWidth * 0.5
   const wallMidX = riverInnerX + riverWidth + wallThickness * 0.5
@@ -238,48 +241,58 @@ export function buildPerimeterObstacleBoxes(spec: PerimeterSpec): PerimeterBox[]
     for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'e'), bridgeGap(spec, 'e'))) {
       boxes.push({ x: cx + riverMidX, z: seg.mid, halfX: riverWidth * 0.5, halfZ: seg.half })
     }
-    for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'e'), bridgeWallGap(spec, 'e'))) {
-      boxes.push({ x: cx + wallMidX, z: seg.mid, halfX: wallThickness * 0.5, halfZ: seg.half })
+    if (!isSea) {
+      for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'e'), bridgeWallGap(spec, 'e'))) {
+        boxes.push({ x: cx + wallMidX, z: seg.mid, halfX: wallThickness * 0.5, halfZ: seg.half })
+      }
     }
   }
   if (shouldBuildPerimeterSide(spec, 'w')) {
     for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'w'), bridgeGap(spec, 'w'))) {
       boxes.push({ x: cx - riverMidX, z: seg.mid, halfX: riverWidth * 0.5, halfZ: seg.half })
     }
-    for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'w'), bridgeWallGap(spec, 'w'))) {
-      boxes.push({ x: cx - wallMidX, z: seg.mid, halfX: wallThickness * 0.5, halfZ: seg.half })
+    if (!isSea) {
+      for (const seg of splitAxisSegments(cz, halfSpanZ, openCenterOnSide(spec, 'w'), bridgeWallGap(spec, 'w'))) {
+        boxes.push({ x: cx - wallMidX, z: seg.mid, halfX: wallThickness * 0.5, halfZ: seg.half })
+      }
     }
   }
   if (shouldBuildPerimeterSide(spec, 'n')) {
     for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 'n'), bridgeGap(spec, 'n'))) {
       boxes.push({ x: seg.mid, z: cz + riverMidZN, halfX: seg.half, halfZ: riverWidth * 0.5 })
     }
-    for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 'n'), bridgeWallGap(spec, 'n'))) {
-      boxes.push({ x: seg.mid, z: cz + wallMidZN, halfX: seg.half, halfZ: wallThickness * 0.5 })
+    if (!isSea) {
+      for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 'n'), bridgeWallGap(spec, 'n'))) {
+        boxes.push({ x: seg.mid, z: cz + wallMidZN, halfX: seg.half, halfZ: wallThickness * 0.5 })
+      }
     }
   }
   if (shouldBuildPerimeterSide(spec, 's')) {
     for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 's'), bridgeGap(spec, 's'))) {
       boxes.push({ x: seg.mid, z: cz - riverMidZS, halfX: seg.half, halfZ: riverWidth * 0.5 })
     }
-    for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 's'), bridgeWallGap(spec, 's'))) {
-      boxes.push({ x: seg.mid, z: cz - wallMidZS, halfX: seg.half, halfZ: wallThickness * 0.5 })
+    if (!isSea) {
+      for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 's'), bridgeWallGap(spec, 's'))) {
+        boxes.push({ x: seg.mid, z: cz - wallMidZS, halfX: seg.half, halfZ: wallThickness * 0.5 })
+      }
     }
   }
 
-  for (const sx of [-1, 1] as const) {
-    for (const sz of [-1, 1] as const) {
-      if (sz < 0 && isFrontClearSide(spec, 's')) continue
-      if (sz > 0 && isFrontClearSide(spec, 'n')) continue
-      if (sx < 0 && isFrontClearSide(spec, 'w')) continue
-      if (sx > 0 && isFrontClearSide(spec, 'e')) continue
-      const cornerZ = (sz > 0 ? riverInnerZN : riverInnerZS) + riverWidth * 0.55
-      boxes.push({
-        x: cx + sx * (riverInnerX + riverWidth * 0.55),
-        z: cz + sz * cornerZ,
-        halfX: 0.85,
-        halfZ: 0.85,
-      })
+  if (!isSea) {
+    for (const sx of [-1, 1] as const) {
+      for (const sz of [-1, 1] as const) {
+        if (sz < 0 && isFrontClearSide(spec, 's')) continue
+        if (sz > 0 && isFrontClearSide(spec, 'n')) continue
+        if (sx < 0 && isFrontClearSide(spec, 'w')) continue
+        if (sx > 0 && isFrontClearSide(spec, 'e')) continue
+        const cornerZ = (sz > 0 ? riverInnerZN : riverInnerZS) + riverWidth * 0.55
+        boxes.push({
+          x: cx + sx * (riverInnerX + riverWidth * 0.55),
+          z: cz + sz * cornerZ,
+          halfX: 0.85,
+          halfZ: 0.85,
+        })
+      }
     }
   }
 

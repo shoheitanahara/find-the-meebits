@@ -59,6 +59,8 @@ export function ParkZoneGate({
         <MountainPortalGate gate={gate} locale={locale} />
       ) : gate.theme === 'culture' ? (
         <CulturePortalGate gate={gate} locale={locale} />
+      ) : gate.theme === 'sea' ? (
+        <SeaPortalGate gate={gate} locale={locale} />
       ) : (
         <PlazaReturnGate gate={gate} locale={locale} />
       )}
@@ -591,6 +593,104 @@ function CulturePortalGate({
   )
 }
 
+/** プラザ側：シーエリアへの入口（木の桟橋門） */
+function SeaPortalGate({
+  gate,
+  locale,
+}: {
+  gate: ParkGateDef
+  locale: 'en' | 'ja'
+}) {
+  const faceSign = -1
+  const pillarZ = gate.halfWidth * 0.88
+  const wood = '#8a6a48'
+  const woodDark = '#5a4030'
+  const sand = '#d2b48c'
+  const accent = '#f0c878'
+  const foam = '#a8d8e8'
+
+  return (
+    <group>
+      <ApproachPath faceSign={faceSign} length={1.05} width={gate.halfWidth * 1.0} />
+
+      {[-pillarZ, pillarZ].map((z) => (
+        <group key={z} position={[0, 0, z]}>
+          <mesh position={[0, 1.7, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.6, 3.4, 0.6]} />
+            <meshStandardMaterial color={woodDark} roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 0.12, faceSign * 0.08]} castShadow>
+            <boxGeometry args={[0.85, 0.24, 0.85]} />
+            <meshStandardMaterial color={sand} roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 3.55, 0]} castShadow>
+            <boxGeometry args={[0.78, 0.28, 0.78]} />
+            <meshStandardMaterial color={wood} roughness={0.8} />
+          </mesh>
+          <mesh position={[0, 3.95, 0]} castShadow>
+            <sphereGeometry args={[0.16, 10, 10]} />
+            <meshStandardMaterial color={foam} emissive={foam} emissiveIntensity={0.35} roughness={0.4} />
+          </mesh>
+        </group>
+      ))}
+
+      <mesh position={[0, 3.4, 0]} castShadow>
+        <boxGeometry args={[0.45, 0.32, gate.halfWidth * 2.05]} />
+        <meshStandardMaterial color={woodDark} roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 3.65, 0]} castShadow>
+        <boxGeometry args={[0.32, 0.14, gate.halfWidth * 1.9]} />
+        <meshStandardMaterial color={accent} metalness={0.25} roughness={0.45} />
+      </mesh>
+
+      <mesh position={[0, 1.7, 0]}>
+        <boxGeometry args={[0.1, 3.1, gate.halfWidth * 1.45]} />
+        <meshStandardMaterial
+          color={foam}
+          emissive={foam}
+          emissiveIntensity={0.4}
+          transparent
+          opacity={0.26}
+        />
+      </mesh>
+      <pointLight
+        position={[faceSign * 0.7, 2.1, 0]}
+        color="#c8e8f8"
+        intensity={1.35}
+        distance={10}
+        decay={2}
+      />
+
+      {([-1, 1] as const).map((side) => (
+        <group key={side} position={[faceSign * 1.15, 0, side * (gate.halfWidth * 0.52)]}>
+          <mesh position={[0, 1.05, 0]} castShadow>
+            <cylinderGeometry args={[0.06, 0.08, 2.1, 8]} />
+            <meshStandardMaterial color={woodDark} roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 2.25, 0]} castShadow>
+            <boxGeometry args={[0.36, 0.45, 0.36]} />
+            <meshStandardMaterial
+              color="#e8f4ff"
+              emissive={foam}
+              emissiveIntensity={0.55}
+              roughness={0.35}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      <group position={[faceSign * 0.45, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <Text position={[0, 4.25, 0]} fontSize={0.24} color="#f5e6c8" anchorX="center" anchorY="middle">
+          {gate.label[locale]}
+        </Text>
+        <Text position={[0, 3.9, 0]} fontSize={0.15} color={accent} anchorX="center" anchorY="middle">
+          {gate.subtitle[locale]}
+        </Text>
+      </group>
+    </group>
+  )
+}
+
 /** マウンテン側：広場へ戻る門 */
 function PlazaReturnGate({
   gate,
@@ -654,7 +754,7 @@ function PlazaReturnGate({
 
       <group
         position={[faceSign * 0.45, 0, 0]}
-        rotation={[0, gate.id === 'culture-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
+        rotation={[0, gate.id === 'culture-to-plaza' || gate.id === 'sea-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
       >
         <Text position={[0, 4.25, 0]} fontSize={0.26} color="#f5e6c8" anchorX="center" anchorY="middle">
           {gate.label[locale]}
@@ -677,13 +777,14 @@ export function ComingSoonPad({
 }: {
   position: [number, number, number]
   locale: 'en' | 'ja'
-  theme?: 'classic' | 'mountain' | 'culture'
+  theme?: 'classic' | 'mountain' | 'culture' | 'sea'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }) {
   const heading = locale === 'ja' ? '工事中' : 'UNDER CONSTRUCTION'
   const mountain = theme === 'mountain'
   const culture = theme === 'culture'
+  const sea = theme === 'sea'
   const titleText = title?.[locale]
   const subtitleText = subtitle?.[locale]
 
@@ -693,22 +794,25 @@ export function ComingSoonPad({
         <MountainComingSoonShell />
       ) : culture ? (
         <CultureComingSoonShell />
+      ) : sea ? (
+        <SeaComingSoonShell />
       ) : (
         <ClassicComingSoonShell />
       )}
-      <ComingSoonBarricade mountain={mountain} culture={culture} />
+      <ComingSoonBarricade mountain={mountain} culture={culture} sea={sea} />
       <ComingSoonSignboard
         heading={heading}
         mountain={mountain}
         culture={culture}
+        sea={sea}
         title={titleText}
         subtitle={subtitleText}
       />
       <pointLight
         position={[0, 3.2, 2.8]}
-        intensity={culture ? 11 : mountain ? 8 : 10}
+        intensity={sea ? 10 : culture ? 11 : mountain ? 8 : 10}
         distance={11}
-        color={culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
+        color={sea ? '#c8e8f8' : culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
       />
     </group>
   )
@@ -897,15 +1001,66 @@ function CultureComingSoonShell() {
   )
 }
 
+/** シー地区の工事棟（砂の基壇＋木の躯体） */
+function SeaComingSoonShell() {
+  const sand = '#d2b48c'
+  const wood = '#8a6a48'
+  const woodDark = '#5a4030'
+  const foam = '#a8d8e8'
+
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} castShadow receiveShadow>
+        <boxGeometry args={[6.4, 0.28, 5.8]} />
+        <meshStandardMaterial color="#b89868" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.32, 1.2]} castShadow receiveShadow>
+        <boxGeometry args={[2.4, 0.16, 3.8]} />
+        <meshStandardMaterial color={wood} roughness={0.82} />
+      </mesh>
+      <mesh position={[-1.5, 1.55, -0.8]} castShadow receiveShadow>
+        <boxGeometry args={[2.5, 2.7, 2.0]} />
+        <meshStandardMaterial color={woodDark} roughness={0.85} />
+      </mesh>
+      <mesh position={[1.55, 1.2, -0.5]} castShadow receiveShadow>
+        <boxGeometry args={[2.2, 2.0, 2.2]} />
+        <meshStandardMaterial color="#6e5238" roughness={0.86} />
+      </mesh>
+      <mesh position={[0.1, 2.85, -0.6]} castShadow>
+        <boxGeometry args={[2.0, 0.26, 1.8]} />
+        <meshStandardMaterial color={sand} roughness={0.9} />
+      </mesh>
+      {[-2.5, 2.5].flatMap((x) =>
+        [-1.9, 1.7].map((z) => (
+          <mesh key={`${x}-${z}`} position={[x, 1.7, z]} castShadow>
+            <cylinderGeometry args={[0.08, 0.1, 3.2, 8]} />
+            <meshStandardMaterial color={wood} roughness={0.8} />
+          </mesh>
+        )),
+      )}
+      <mesh position={[0, 2.6, 1.7]} castShadow>
+        <boxGeometry args={[5.2, 0.1, 0.5]} />
+        <meshStandardMaterial color={foam} emissive={foam} emissiveIntensity={0.12} roughness={0.55} />
+      </mesh>
+      <mesh position={[0.2, 3.2, 0.2]} rotation={[0.05, -0.12, 0.06]} castShadow>
+        <boxGeometry args={[3.2, 0.05, 2.4]} />
+        <meshStandardMaterial color="#3a6a88" roughness={0.7} />
+      </mesh>
+    </group>
+  )
+}
+
 function ComingSoonBarricade({
   mountain,
   culture = false,
+  sea = false,
 }: {
   mountain: boolean
   culture?: boolean
+  sea?: boolean
 }) {
-  const stripe = culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
-  const post = culture ? '#1a2a48' : mountain ? '#5a4030' : '#3a3530'
+  const stripe = sea ? '#f0c878' : culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
+  const post = sea ? '#5a4030' : culture ? '#1a2a48' : mountain ? '#5a4030' : '#3a3530'
   return (
     <group position={[0, 0, 2.85]}>
       {[-2.4, -0.8, 0.8, 2.4].map((x) => (
@@ -930,16 +1085,18 @@ function ComingSoonSignboard({
   heading,
   mountain,
   culture = false,
+  sea = false,
   title,
   subtitle,
 }: {
   heading: string
   mountain: boolean
   culture?: boolean
+  sea?: boolean
   title?: string
   subtitle?: string
 }) {
-  const accent = culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
+  const accent = sea ? '#f0c878' : culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
   const hasDetail = Boolean(title)
   return (
     <group position={[0, 0, 3.35]}>

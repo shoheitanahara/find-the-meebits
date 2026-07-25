@@ -50,6 +50,17 @@ const CU_WATER = '#1a4a7a'
 const CU_WATER_DEEP = '#0c2a48'
 const CU_WATER_FOAM = '#6a9ec8'
 
+/** シー（砂浜・海）パレット */
+const SEA_SAND = '#d2b48c'
+const SEA_SAND_DARK = '#b89868'
+const SEA_SAND_WET = '#a89070'
+const SEA_WOOD = '#8a6a48'
+const SEA_WOOD_DARK = '#5a4030'
+const SEA_WATER = '#1a7aaa'
+const SEA_WATER_DEEP = '#0e4a6a'
+const SEA_WATER_FOAM = '#a8d8e8'
+const SEA_ACCENT = '#f0c878'
+
 function isMountainTheme(spec: PerimeterSpec) {
   return spec.theme === 'mountain'
 }
@@ -58,9 +69,13 @@ function isCultureTheme(spec: PerimeterSpec) {
   return spec.theme === 'culture'
 }
 
+function isSeaTheme(spec: PerimeterSpec) {
+  return spec.theme === 'sea'
+}
+
 /**
  * エリア外周: 崖・壁・川・滝・橋・封印門。
- * theme=classic → クラシック園 / theme=mountain → ボクセル山岳 / theme=culture → 濃紺ギャラリー
+ * classic / mountain / culture / sea
  */
 export function ParkPerimeter({
   layout,
@@ -80,11 +95,12 @@ export function ParkPerimeter({
 
   return (
     <group>
-      <RiverAndWalls spec={spec} />
-      <LowCornerMarkers spec={spec} />
-      <CornerWaterfalls spec={spec} />
+      {/* シーは広大な海＋砂浜を SeaDistrictGround が担う。ここは桟橋ゲートだけ */}
+      {!isSeaTheme(spec) ? <RiverAndWalls spec={spec} /> : null}
+      {!isSeaTheme(spec) ? <LowCornerMarkers spec={spec} /> : null}
+      {!isSeaTheme(spec) ? <CornerWaterfalls spec={spec} /> : null}
       <CardinalFeatures spec={spec} locale={locale} />
-      <WallLanterns spec={spec} />
+      {!isSeaTheme(spec) ? <WallLanterns spec={spec} /> : null}
     </group>
   )
 }
@@ -186,11 +202,15 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                     size={riverSize}
                     mountain={isMountainTheme(spec)}
                     culture={isCultureTheme(spec)}
+                    sea={isSeaTheme(spec)}
                   />
                 </group>
               )
             })}
             {wallSegments.map((seg, index) => {
+              // シー地区: 壁・砂丘は一切出さない（海と砂だけ）
+              if (isSeaTheme(spec)) return null
+
               const wallSize: [number, number, number] =
                 sideDef.axis === 'z'
                   ? [wallThickness, wallHeight, seg.half * 2]
@@ -217,7 +237,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                 />
               )
             })}
-            {isGateOpening ? (
+            {isGateOpening && !isSeaTheme(spec) ? (
               <GateWallReveal
                 spec={spec}
                 side={sideDef.side}
@@ -238,41 +258,65 @@ function RiverSegment({
   size,
   mountain = false,
   culture = false,
+  sea = false,
 }: {
   position: [number, number, number]
   size: [number, number, number]
   mountain?: boolean
   culture?: boolean
+  sea?: boolean
 }) {
-  const deep = mountain ? MT_WATER_DEEP : culture ? CU_WATER_DEEP : WATER_DEEP
-  const mid = mountain ? MT_WATER : culture ? CU_WATER : WATER
-  const foam = mountain ? MT_WATER_FOAM : culture ? CU_WATER_FOAM : WATER_FOAM
+  const deep = mountain
+    ? MT_WATER_DEEP
+    : culture
+      ? CU_WATER_DEEP
+      : sea
+        ? SEA_WATER_DEEP
+        : WATER_DEEP
+  const mid = mountain ? MT_WATER : culture ? CU_WATER : sea ? SEA_WATER : WATER
+  const foam = mountain ? MT_WATER_FOAM : culture ? CU_WATER_FOAM : sea ? SEA_WATER_FOAM : WATER_FOAM
+  // 海は少し浅く・広く見せる（Y を下げて砂浜に溶ける感じ）
+  const seaY = sea ? -0.12 : 0
   return (
-    <group position={position}>
+    <group position={[position[0], position[1] + seaY, position[2]]}>
       <mesh receiveShadow>
-        <boxGeometry args={size} />
+        <boxGeometry args={sea ? [size[0], size[1] * 0.85, size[2]] : size} />
         <meshStandardMaterial
           color={deep}
           emissive={mid}
-          emissiveIntensity={0.35}
-          metalness={0.55}
-          roughness={0.18}
+          emissiveIntensity={sea ? 0.48 : 0.35}
+          metalness={sea ? 0.45 : 0.55}
+          roughness={sea ? 0.22 : 0.18}
           transparent
-          opacity={0.92}
+          opacity={sea ? 0.88 : 0.92}
         />
       </mesh>
-      <mesh position={[0, size[1] * 0.42, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, size[1] * (sea ? 0.36 : 0.42), 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[size[0] * 0.92, size[2] * 0.92]} />
         <meshStandardMaterial
           color={mid}
           emissive={foam}
-          emissiveIntensity={0.22}
+          emissiveIntensity={sea ? 0.32 : 0.22}
           transparent
-          opacity={0.35}
+          opacity={sea ? 0.42 : 0.35}
           roughness={0.1}
           metalness={0.6}
         />
       </mesh>
+      {sea ? (
+        <mesh position={[0, size[1] * 0.48, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[size[0] * 0.55, size[2] * 0.55]} />
+          <meshStandardMaterial
+            color="#3a9ec8"
+            emissive={foam}
+            emissiveIntensity={0.2}
+            transparent
+            opacity={0.28}
+            roughness={0.08}
+            metalness={0.5}
+          />
+        </mesh>
+      ) : null}
     </group>
   )
 }
@@ -318,6 +362,47 @@ function ClassicWall({
           ]}
         />
         <meshStandardMaterial color={cap} metalness={0.42} roughness={0.4} />
+      </mesh>
+    </group>
+  )
+}
+
+/** 砂丘バンパー（壁の代わり） */
+function BeachDune({
+  position,
+  size,
+  axis,
+}: {
+  position: [number, number, number]
+  size: [number, number, number]
+  axis: 'x' | 'z'
+}) {
+  const [sx, sy, sz] = size
+  return (
+    <group position={position}>
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[sx, sy, sz]} />
+        <meshStandardMaterial color={SEA_SAND_DARK} roughness={0.96} />
+      </mesh>
+      <mesh position={[0, sy * 0.35, 0]} castShadow receiveShadow>
+        <boxGeometry
+          args={[
+            axis === 'z' ? sx * 1.15 : sx * 0.95,
+            sy * 0.55,
+            axis === 'z' ? sz * 0.95 : sz * 1.15,
+          ]}
+        />
+        <meshStandardMaterial color={SEA_SAND} roughness={0.94} />
+      </mesh>
+      <mesh position={[0, sy * 0.55, 0]} receiveShadow>
+        <boxGeometry
+          args={[
+            axis === 'z' ? sx * 1.25 : sx * 0.85,
+            0.18,
+            axis === 'z' ? sz * 0.85 : sz * 1.25,
+          ]}
+        />
+        <meshStandardMaterial color={SEA_SAND_WET} roughness={0.9} />
       </mesh>
     </group>
   )
@@ -401,14 +486,17 @@ function GateWallReveal({
 }) {
   const mountain = isMountainTheme(spec)
   const culture = isCultureTheme(spec)
-  const wing = mountain ? 1.55 : 1.15
+  const sea = isSeaTheme(spec)
+  const wing = mountain ? 1.55 : sea ? 1.4 : 1.15
   const h = mountain
     ? Math.min(spec.wallHeight * 0.85, 3.1)
-    : Math.min(spec.wallHeight * 0.55, 1.55)
-  const t = spec.wallThickness * (mountain ? 1.05 : 0.85)
+    : sea
+      ? Math.min(spec.wallHeight * 0.9, 1.05)
+      : Math.min(spec.wallHeight * 0.55, 1.55)
+  const t = spec.wallThickness * (mountain ? 1.05 : sea ? 0.95 : 0.85)
   const edge = spec.wallOpeningHalf * 0.92
-  const wingColor = culture ? CU_STONE_LIGHT : STONE_LIGHT
-  const capColor = culture ? CU_ACCENT : GOLD
+  const wingColor = sea ? SEA_SAND : culture ? CU_STONE_LIGHT : STONE_LIGHT
+  const capColor = sea ? SEA_WOOD : culture ? CU_ACCENT : GOLD
 
   return (
     <group>
@@ -425,7 +513,7 @@ function GateWallReveal({
               {mountain ? (
                 <VoxelBlockMat kind="stone" />
               ) : (
-                <meshStandardMaterial color={wingColor} roughness={0.88} />
+                <meshStandardMaterial color={wingColor} roughness={0.9} />
               )}
             </mesh>
             {mountain ? (
@@ -460,7 +548,7 @@ function GateWallReveal({
                       : [wing * 1.05, 0.14, t * 1.15]
                   }
                 />
-                <meshStandardMaterial color={capColor} metalness={0.45} roughness={0.4} />
+                <meshStandardMaterial color={capColor} metalness={sea ? 0.05 : 0.45} roughness={0.5} />
               </mesh>
             )}
           </group>
@@ -525,6 +613,48 @@ function LowCornerMarkers({ spec }: { spec: PerimeterSpec }) {
                     </mesh>
                   </>
                 )}
+              </group>
+            )
+          }),
+      )}
+    </group>
+  )
+}
+
+function BeachCornerMarkers({ spec }: { spec: PerimeterSpec }) {
+  const { cx, cz, riverInnerX, riverWidth } = spec
+  const cornerX = riverInnerX + riverWidth * 0.45
+  return (
+    <group>
+      {([-1, 1] as const).flatMap((sx) =>
+        ([-1, 1] as const)
+          .filter((sz) => {
+            if (sz < 0 && isFrontClearSide(spec, 's')) return false
+            if (sz > 0 && isFrontClearSide(spec, 'n')) return false
+            if (sx < 0 && isFrontClearSide(spec, 'w')) return false
+            if (sx > 0 && isFrontClearSide(spec, 'e')) return false
+            return true
+          })
+          .map((sz) => {
+            const cornerZ = riverInnerOnNS(spec, sz > 0 ? 'n' : 's') + riverWidth * 0.45
+            return (
+              <group key={`beach-corner-${sx}-${sz}`} position={[cx + sx * cornerX, 0, cz + sz * cornerZ]}>
+                <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
+                  <boxGeometry args={[1.6, 0.7, 1.6]} />
+                  <meshStandardMaterial color={SEA_SAND_DARK} roughness={0.96} />
+                </mesh>
+                <mesh position={[0.25, 0.75, -0.15]} castShadow>
+                  <boxGeometry args={[0.9, 0.45, 0.85]} />
+                  <meshStandardMaterial color={SEA_SAND} roughness={0.94} />
+                </mesh>
+                <mesh position={[-0.35, 1.1, 0.3]} castShadow>
+                  <cylinderGeometry args={[0.08, 0.12, 1.8, 8]} />
+                  <meshStandardMaterial color={SEA_WOOD} roughness={0.85} />
+                </mesh>
+                <mesh position={[-0.35, 2.05, 0.3]} castShadow>
+                  <sphereGeometry args={[0.35, 8, 8]} />
+                  <meshStandardMaterial color="#3d7a48" roughness={0.88} />
+                </mesh>
               </group>
             )
           }),
@@ -621,6 +751,8 @@ function CardinalFeatures({
           // 手前クリア辺でもゲート（＋橋アプローチ）は可
           return <BridgeGateApproach key={side} spec={spec} side={side} />
         }
+        // シー: 封印門も橋も出さない（海が続くだけ）
+        if (isSeaTheme(spec)) return null
         // 手前クリア辺: 封印門・壁飾りも禁止（ゲート以外すべて不可）
         if (isFrontClearSide(spec, side)) return null
         return (
@@ -649,13 +781,14 @@ function BridgeGateApproach({
   const deckTop = 0.08
   const mountain = isMountainTheme(spec)
   const culture = isCultureTheme(spec)
-  const beam = mountain ? MT_WOOD : culture ? CU_STONE_DARK : STONE_DARK
-  const deck = mountain ? '#8a6a42' : culture ? '#1e3050' : '#7a7268'
-  const plankA = mountain ? '#9a7a50' : culture ? '#2a4068' : '#8a8278'
-  const plankB = mountain ? '#7a5a38' : culture ? '#162848' : '#6e675e'
-  const rail = mountain ? MT_WOOD : culture ? CU_ACCENT : GOLD
-  const post = mountain ? MT_STONE_DARK : culture ? CU_STONE : STONE_DARK
-  const under = mountain ? MT_WATER_DEEP : culture ? CU_WATER_DEEP : WATER_DEEP
+  const sea = isSeaTheme(spec)
+  const beam = mountain ? MT_WOOD : culture ? CU_STONE_DARK : sea ? SEA_WOOD_DARK : STONE_DARK
+  const deck = mountain ? '#8a6a42' : culture ? '#1e3050' : sea ? '#9a7a55' : '#7a7268'
+  const plankA = mountain ? '#9a7a50' : culture ? '#2a4068' : sea ? '#b89060' : '#8a8278'
+  const plankB = mountain ? '#7a5a38' : culture ? '#162848' : sea ? '#8a6848' : '#6e675e'
+  const rail = mountain ? MT_WOOD : culture ? CU_ACCENT : sea ? SEA_WOOD : GOLD
+  const post = mountain ? MT_STONE_DARK : culture ? CU_STONE : sea ? SEA_WOOD_DARK : STONE_DARK
+  const under = mountain ? MT_WATER_DEEP : culture ? CU_WATER_DEEP : sea ? SEA_WATER_DEEP : WATER_DEEP
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
@@ -685,8 +818,8 @@ function BridgeGateApproach({
             <boxGeometry args={[length * 0.96, 0.1, 0.1]} />
             <meshStandardMaterial
               color={rail}
-              metalness={mountain ? 0.05 : 0.5}
-              roughness={mountain ? 0.85 : 0.35}
+              metalness={mountain || sea ? 0.05 : 0.5}
+              roughness={mountain || sea ? 0.85 : 0.35}
             />
           </mesh>
           {[-0.35, -0.1, 0.15, 0.35].map((t) => (
@@ -701,6 +834,11 @@ function BridgeGateApproach({
         ([-1, 1] as const).map((sideSign) =>
           mountain ? (
             <TorchLantern
+              key={`${end}-${sideSign}`}
+              position={[end * length * 0.42, 0, sideSign * (w * 0.42)]}
+            />
+          ) : sea ? (
+            <PierLantern
               key={`${end}-${sideSign}`}
               position={[end * length * 0.42, 0, sideSign * (w * 0.42)]}
             />
@@ -750,6 +888,34 @@ function BridgeLantern({ position }: { position: [number, number, number] }) {
   )
 }
 
+/** 桟橋用：木ポール＋暖色キューブランタン */
+function PierLantern({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <cylinderGeometry args={[0.07, 0.09, 1.1, 8]} />
+        <meshStandardMaterial color={SEA_WOOD_DARK} roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.18, 0]} castShadow>
+        <boxGeometry args={[0.32, 0.38, 0.32]} />
+        <meshStandardMaterial
+          color="#fff2c8"
+          emissive="#ffb040"
+          emissiveIntensity={0.95}
+          roughness={0.35}
+          transparent
+          opacity={0.92}
+        />
+      </mesh>
+      <mesh position={[0, 1.42, 0]} castShadow>
+        <boxGeometry args={[0.36, 0.06, 0.36]} />
+        <meshStandardMaterial color={SEA_WOOD} roughness={0.88} />
+      </mesh>
+      <pointLight position={[0, 1.18, 0]} color="#ffb060" intensity={0.9} distance={5.5} />
+    </group>
+  )
+}
+
 function TorchLantern({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
@@ -776,51 +942,52 @@ function sealedGateCopy(
   locale: 'en' | 'ja',
   mountain: boolean,
   culture = false,
+  sea = false,
 ) {
   if (locale === 'ja') {
     if (side === 'e') {
       return {
-        label: mountain ? '東の峰' : culture ? '東ギャラリー' : '東の庭園',
+        label: mountain ? '東の峰' : culture ? '東ギャラリー' : sea ? '東桟橋' : '東の庭園',
         sub: '準備中',
       }
     }
     if (side === 'w') {
       return {
-        label: mountain ? '西坑道' : culture ? '西アトリエ' : '西の翼',
+        label: mountain ? '西坑道' : culture ? '西アトリエ' : sea ? '西の入り江' : '西の翼',
         sub: '準備中',
       }
     }
     if (side === 'n') {
       return {
-        label: mountain ? '北の谷' : culture ? '北フォワイエ' : '北門',
+        label: mountain ? '北の谷' : culture ? '北フォワイエ' : sea ? '北ビーチ' : '北門',
         sub: '準備中',
       }
     }
     return {
-      label: mountain ? '坑道入口' : culture ? '南サロン' : '南の回廊',
+      label: mountain ? '坑道入口' : culture ? '南サロン' : sea ? '南ラグーン' : '南の回廊',
       sub: '準備中',
     }
   }
   if (side === 'e') {
     return {
-      label: mountain ? 'EAST PEAK' : culture ? 'EAST GALLERY' : 'EAST GARDEN',
+      label: mountain ? 'EAST PEAK' : culture ? 'EAST GALLERY' : sea ? 'EAST PIER' : 'EAST GARDEN',
       sub: 'Coming Soon',
     }
   }
   if (side === 'w') {
     return {
-      label: mountain ? 'WEST MINE' : culture ? 'WEST ATELIER' : 'WEST WING',
+      label: mountain ? 'WEST MINE' : culture ? 'WEST ATELIER' : sea ? 'WEST COVE' : 'WEST WING',
       sub: 'Coming Soon',
     }
   }
   if (side === 'n') {
     return {
-      label: mountain ? 'NORTH VALE' : culture ? 'NORTH FOYER' : 'NORTH GATE',
+      label: mountain ? 'NORTH VALE' : culture ? 'NORTH FOYER' : sea ? 'NORTH BEACH' : 'NORTH GATE',
       sub: 'Coming Soon',
     }
   }
   return {
-    label: mountain ? 'MINE SHAFT' : culture ? 'SOUTH SALON' : 'SOUTH COURT',
+    label: mountain ? 'MINE SHAFT' : culture ? 'SOUTH SALON' : sea ? 'SOUTH LAGOON' : 'SOUTH COURT',
     sub: 'Coming Soon',
   }
 }
@@ -840,17 +1007,69 @@ function SealedPortal({
 }) {
   const mountain = isMountainTheme(spec)
   const culture = isCultureTheme(spec)
+  const sea = isSeaTheme(spec)
   const { x, z, rotationY } = getCardinalGatePlacement(spec, side)
-  const { label, sub } = sealedGateCopy(side, locale, mountain, culture)
+  const { label, sub } = sealedGateCopy(side, locale, mountain, culture, sea)
   const halfW = spec.openingHalf
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
       {mountain ? (
         <MountainSealedGate halfW={halfW} label={label} sub={sub} />
+      ) : sea ? (
+        <BeachSealedGate halfW={halfW} label={label} sub={sub} />
       ) : (
         <ClassicSealedGate halfW={halfW} label={label} sub={sub} culture={culture} />
       )}
+    </group>
+  )
+}
+
+/** シー封印：木の桟橋門＋閉じた板戸 */
+function BeachSealedGate({
+  halfW,
+  label,
+  sub,
+}: {
+  halfW: number
+  label: string
+  sub: string
+}) {
+  const pillarZ = halfW * 0.92
+  return (
+    <group>
+      <mesh position={[0, 0.06, 0.55]} receiveShadow>
+        <boxGeometry args={[halfW * 1.55, 0.12, 1.35]} />
+        <meshStandardMaterial color={SEA_SAND} roughness={0.92} />
+      </mesh>
+      {[-pillarZ, pillarZ].map((pz) => (
+        <group key={pz} position={[0, 0, pz]}>
+          <mesh position={[0, 1.55, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.55, 3.1, 0.55]} />
+            <meshStandardMaterial color={SEA_WOOD_DARK} roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 3.25, 0]} castShadow>
+            <boxGeometry args={[0.7, 0.28, 0.7]} />
+            <meshStandardMaterial color={SEA_WOOD} roughness={0.8} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 3.15, 0]} castShadow>
+        <boxGeometry args={[0.4, 0.28, halfW * 2.05]} />
+        <meshStandardMaterial color={SEA_WOOD} roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.5, 0.08]} castShadow>
+        <boxGeometry args={[0.16, 2.85, halfW * 1.5]} />
+        <meshStandardMaterial color="#3a2a20" roughness={0.75} />
+      </mesh>
+      <group position={[0.5, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <Text position={[0, 4.0, 0]} fontSize={0.22} color="#f5e6c8" anchorX="center" anchorY="middle">
+          {label}
+        </Text>
+        <Text position={[0, 3.7, 0]} fontSize={0.14} color={SEA_ACCENT} anchorX="center" anchorY="middle">
+          {sub}
+        </Text>
+      </group>
     </group>
   )
 }

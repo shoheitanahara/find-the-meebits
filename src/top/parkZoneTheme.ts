@@ -77,5 +77,39 @@ export function applyZoneLook(zoneId: ParkZoneId, seasonLook: ParkSeasonLook): P
     }
   }
 
+  if (zoneId === 'sea') {
+    return {
+      ...seasonLook,
+      // 夜のビーチ：暗い海と空、星、暖色の街灯が主役
+      backgroundColor: '#081420',
+      fogColor: '#102030',
+      fogNear: 32,
+      fogFar: 140,
+      showStars: true,
+      hemisphereSky: '#3a5578',
+      hemisphereGround: '#1a2830',
+      ambientColor: '#8aa0b8',
+      ambientIntensity: seasonLook.ambientIntensity * 0.78,
+      hemisphereIntensity: seasonLook.hemisphereIntensity * 0.85,
+      directionalIntensity: seasonLook.directionalIntensity * 0.55,
+      directionalColor: '#c8d8f0',
+      accentPointColor: '#f0b868',
+      accentPointIntensity: Math.min(seasonLook.accentPointIntensity * 0.55, 20),
+      environmentPreset: 'night',
+      environmentIntensity: Math.min(seasonLook.environmentIntensity * 0.85, 0.45),
+      districtColor: '#c4a878',
+      plazaColor: '#b89868',
+      pathColor: '#8a6a48',
+      paverColorA: '#b89868',
+      paverColorB: '#a89070',
+      pathEdgeColor: '#f0c878',
+      fountainRingColor: '#8a6a48',
+      // ビーチランタンを効かせる
+      lampLightIntensity: seasonLook.lampLightIntensity * 1.35,
+      lampEmissiveIntensity: seasonLook.lampEmissiveIntensity * 1.25,
+      benchProp: seasonLook.benchProp,
+    }
+  }
+
   return seasonLook
 }

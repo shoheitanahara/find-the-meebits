@@ -68,6 +68,7 @@ export function selectParkDialogueLines(
   const lines: DialogueLine[] = []
   const isMountain = zoneId === 'mountain'
   const isCulture = zoneId === 'culture'
+  const isSea = zoneId === 'sea'
 
   const greeting = pickLine(pools.greetings, seed, talkCount, 11)
   lines.push({
@@ -83,10 +84,10 @@ export function selectParkDialogueLines(
   if (npc.isFeatured) {
     second =
       locale === 'ja'
-        ? isMountain || isCulture
+        ? isMountain || isCulture || isSea
           ? `実はぼくが今日の主役 #${featuredId} だよ。プラザの噴水銅像、ぼくだ！`
           : `実はぼくが今日の主役 #${featuredId} だよ。噴水の銅像、ぼくだ！`
-        : isMountain || isCulture
+        : isMountain || isCulture || isSea
           ? `Fun fact — I’m today’s star #${featuredId}. That’s me on the plaza fountain!`
           : `Fun fact — I’m today’s star #${featuredId}. That’s me on the fountain!`
   } else if (npc.matched && branch <= 2) {
@@ -97,17 +98,17 @@ export function selectParkDialogueLines(
   } else if (branch === 3) {
     second = isMountain
       ? pickLine(pools.gameMountain, seed, talkCount, 31)
-      : isCulture
+      : isCulture || isSea
         ? pickLine(pools.flavor, seed, talkCount, 31)
         : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
     second = isMountain
       ? pickLine(pools.gameNeon, seed, talkCount, 37)
-      : isCulture
+      : isCulture || isSea
         ? pickLine(pools.flavor, seed, talkCount, 37)
         : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
-    second = isMountain || isCulture
+    second = isMountain || isCulture || isSea
       ? pickLine(pools.flavor, seed, talkCount, 41)
       : pickLine(pools.gameStreet, seed, talkCount, 41)
   } else {

@@ -14,6 +14,16 @@ type WavyRingOptions = {
   phase?: number
 }
 
+type WavyRectRingOptions = {
+  halfX: number
+  halfZ: number
+  cornerRadius?: number
+  waveAmp?: number
+  wavesAround?: number
+  samples?: number
+  phase?: number
+}
+
 /**
  * 角丸＋ゆるい波の閉じた輪郭。
  * ShapeGeometry の穴は使わず、ストリップ境界専用。
@@ -27,7 +37,24 @@ export function buildShoreRing({
   phase = 0,
 }: WavyRingOptions): RingPoint[] {
   const radius = Math.min(cornerRadius ?? half * 0.24, half * 0.45)
-  return buildRoundedWavyRing(half, radius, waveAmp, wavesAround, samples, phase)
+  return buildRoundedWavyRing(half, half, radius, waveAmp, wavesAround, samples, phase)
+}
+
+/** 矩形（東西・南北で半幅が違う）の波打ち輪郭 */
+export function buildShoreRingRect({
+  halfX,
+  halfZ,
+  cornerRadius,
+  waveAmp = 1.2,
+  wavesAround = 5,
+  samples = 128,
+  phase = 0,
+}: WavyRectRingOptions): RingPoint[] {
+  const radius = Math.min(
+    cornerRadius ?? Math.min(halfX, halfZ) * 0.28,
+    Math.min(halfX, halfZ) * 0.45,
+  )
+  return buildRoundedWavyRing(halfX, halfZ, radius, waveAmp, wavesAround, samples, phase)
 }
 
 /** 正方形の閉じた輪郭。点数は outer と必ず一致させる */
@@ -121,7 +148,8 @@ function pointOnSquarePerimeter(half: number, s: number): RingPoint {
 }
 
 function buildRoundedWavyRing(
-  half: number,
+  halfX: number,
+  halfZ: number,
   cornerRadius: number,
   waveAmp: number,
   wavesAround: number,
@@ -132,10 +160,11 @@ function buildRoundedWavyRing(
 
   for (let i = 0; i < samples; i += 1) {
     const u = i / samples
-    const { x, y, nx, ny } = pointOnRoundedRect(half, cornerRadius, u)
+    const { x, y, nx, ny } = pointOnRoundedRect(halfX, halfZ, cornerRadius, u)
     const wave =
       Math.sin(u * Math.PI * 2 * wavesAround + phase) * waveAmp +
-      Math.sin(u * Math.PI * 2 * wavesAround * 2.15 + phase * 1.4) * waveAmp * 0.28
+      Math.sin(u * Math.PI * 2 * wavesAround * 2.15 + phase * 1.4) * waveAmp * 0.28 +
+      Math.sin(u * Math.PI * 2 * wavesAround * 0.47 + phase * 2.1) * waveAmp * 0.18
     points.push({
       x: x + nx * wave,
       y: y + ny * wave,
@@ -146,53 +175,68 @@ function buildRoundedWavyRing(
 }
 
 function pointOnRoundedRect(
-  half: number,
+  halfX: number,
+  halfZ: number,
   cornerRadius: number,
   u: number,
 ): { x: number; y: number; nx: number; ny: number } {
-  const r = Math.min(cornerRadius, half * 0.49)
-  const straight = half * 2 - 2 * r
+  const r = Math.min(cornerRadius, halfX * 0.49, halfZ * 0.49)
+  const straightX = halfX * 2 - 2 * r
+  const straightZ = halfZ * 2 - 2 * r
   const arc = (Math.PI / 2) * r
-  const segment = straight + arc
-  const perimeter = segment * 4
+  // 辺: 南(X) → 東(Z) → 北(X) → 西(Z)
+  const segments = [straightX, arc, straightZ, arc, straightX, arc, straightZ, arc]
+  const perimeter = segments.reduce((sum, len) => sum + len, 0)
   let s = ((((u % 1) + 1) % 1) * perimeter)
 
-  for (let side = 0; side < 4; side += 1) {
-    if (s <= straight) {
-      const t = straight > 0 ? s / straight : 0
-      return pointOnStraightSide(half, r, side, t)
+  for (let i = 0; i < segments.length; i += 1) {
+    const len = segments[i]
+    if (s <= len) {
+      const t = len > 0 ? s / len : 0
+      if (i % 2 === 0) {
+        return pointOnStraightSideRect(halfX, halfZ, r, i / 2, t)
+      }
+      return pointOnCornerArcRect(halfX, halfZ, r, (i - 1) / 2, t)
     }
-    s -= straight
-    if (s <= arc) {
-      const t = arc > 0 ? s / arc : 0
-      return pointOnCornerArc(half, r, side, t)
-    }
-    s -= arc
+    s -= len
   }
 
-  return pointOnStraightSide(half, r, 0, 0)
+  return pointOnStraightSideRect(halfX, halfZ, r, 0, 0)
 }
 
-function pointOnStraightSide(half: number, r: number, side: number, t: number) {
-  const span = half * 2 - 2 * r
+function pointOnStraightSideRect(
+  halfX: number,
+  halfZ: number,
+  r: number,
+  side: number,
+  t: number,
+) {
+  const spanX = halfX * 2 - 2 * r
+  const spanZ = halfZ * 2 - 2 * r
   switch (side) {
-    case 0:
-      return { x: -half + r + span * t, y: -half, nx: 0, ny: -1 }
-    case 1:
-      return { x: half, y: -half + r + span * t, nx: 1, ny: 0 }
-    case 2:
-      return { x: half - r - span * t, y: half, nx: 0, ny: 1 }
-    default:
-      return { x: -half, y: half - r - span * t, nx: -1, ny: 0 }
+    case 0: // south (-Z)
+      return { x: -halfX + r + spanX * t, y: -halfZ, nx: 0, ny: -1 }
+    case 1: // east (+X)
+      return { x: halfX, y: -halfZ + r + spanZ * t, nx: 1, ny: 0 }
+    case 2: // north (+Z)
+      return { x: halfX - r - spanX * t, y: halfZ, nx: 0, ny: 1 }
+    default: // west (-X)
+      return { x: -halfX, y: halfZ - r - spanZ * t, nx: -1, ny: 0 }
   }
 }
 
-function pointOnCornerArc(half: number, r: number, side: number, t: number) {
+function pointOnCornerArcRect(
+  halfX: number,
+  halfZ: number,
+  r: number,
+  side: number,
+  t: number,
+) {
   const centers: Array<[number, number, number]> = [
-    [half - r, -half + r, -Math.PI / 2],
-    [half - r, half - r, 0],
-    [-half + r, half - r, Math.PI / 2],
-    [-half + r, -half + r, Math.PI],
+    [halfX - r, -halfZ + r, -Math.PI / 2], // SE
+    [halfX - r, halfZ - r, 0], // NE
+    [-halfX + r, halfZ - r, Math.PI / 2], // NW
+    [-halfX + r, -halfZ + r, Math.PI], // SW
   ]
   const [cx, cy, startAngle] = centers[side]
   const angle = startAngle + t * (Math.PI / 2)

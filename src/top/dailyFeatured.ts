@@ -4,6 +4,8 @@
  *
  * 広場: マッチ枠15体 + ランダム15体（計30）
  * マウンテン地区: ランダム15体（広場と重複しない）
+ * シーエリア: 15体（全員が上裸 / チューブトップ）
+ * カルチャー地区: 15体（スーツが半数）
  */
 
 import {
@@ -17,9 +19,20 @@ import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 export const DAILY_VISITOR_COUNT = 30
 export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
+export const DAILY_SEA_VISITOR_COUNT = 15
+export const DAILY_CULTURE_VISITOR_COUNT = 15
+/** シー来場者は全員ビーチ服 */
+export const SEA_BEACH_SHIRT_MIN_RATIO = 1
+/** カルチャー来場者のうちスーツを最低この割合にする */
+export const CULTURE_SUIT_MIN_RATIO = 0.5
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v7'
+const STORAGE_KEY = 'meebits-park-daily-v9'
+
+/** ビーチらしい上半身（上裸・チューブトップ） */
+const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])
+/** カルチャー向けスーツ */
+const CULTURE_SUIT_SHIRTS = new Set(['Suit', 'Suit Jacket'])
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
 export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 13.15]
@@ -46,6 +59,10 @@ export type DailyParkLineup = {
   visitors: DailyVisitor[]
   /** マウンテン地区の日替わり来場者（ランダム・広場と非重複）。 */
   mountainVisitors: DailyVisitor[]
+  /** シーエリアの日替わり来場者（全員ビーチ服・他地区と非重複）。 */
+  seaVisitors: DailyVisitor[]
+  /** カルチャー地区の日替わり来場者（スーツ半数・他地区と非重複）。 */
+  cultureVisitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
@@ -54,6 +71,8 @@ type StoredDailyLineup = {
   themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
   mountainVisitors: DailyVisitor[]
+  seaVisitors: DailyVisitor[]
+  cultureVisitors: DailyVisitor[]
 }
 
 let memoryCache: DailyParkLineup | null = null
@@ -94,6 +113,87 @@ export function createSeededRng(seed: number): () => number {
 export function hasThemeTrait(traits: MeebitTraitMap | null | undefined, theme: DailyThemeTrait) {
   if (!traits) return false
   return traits[theme.traitType] === theme.traitValue
+}
+
+export function isSeaBeachShirt(traits: MeebitTraitMap | null | undefined) {
+  const shirt = traits?.Shirt
+  return typeof shirt === 'string' && SEA_BEACH_SHIRTS.has(shirt)
+}
+
+export function isCultureSuitShirt(traits: MeebitTraitMap | null | undefined) {
+  const shirt = traits?.Shirt
+  return typeof shirt === 'string' && CULTURE_SUIT_SHIRTS.has(shirt)
+}
+
+/**
+ * 指定トレイトを minRatio 以上確保して来場者を抽選。
+ * 足りない場合のみ非該当で埋める。
+ */
+function pickShirtBiasedVisitors(
+  dataset: MeebitTraitsDataset,
+  availableIds: number[],
+  rng: () => number,
+  count: number,
+  isPreferred: (traits: MeebitTraitMap | null | undefined) => boolean,
+  minRatio: number,
+): DailyVisitor[] {
+  const preferredPool: number[] = []
+  const otherPool: number[] = []
+  for (const id of availableIds) {
+    const traits = dataset.byId[String(id)]
+    if (isPreferred(traits)) preferredPool.push(id)
+    else otherPool.push(id)
+  }
+  shuffleInPlace(preferredPool, rng)
+  shuffleInPlace(otherPool, rng)
+
+  const targetPreferred = Math.min(preferredPool.length, Math.ceil(count * minRatio))
+  const picked: number[] = []
+  for (const id of preferredPool) {
+    if (picked.length >= targetPreferred) break
+    picked.push(id)
+  }
+  // minRatio < 1 のとき残りは preferred 余り → other の順。minRatio = 1 なら preferred のみ優先
+  const fillPool =
+    minRatio >= 1
+      ? [...preferredPool.slice(picked.length), ...otherPool]
+      : [...otherPool, ...preferredPool.slice(picked.length)]
+  for (const id of fillPool) {
+    if (picked.length >= count) break
+    picked.push(id)
+  }
+  shuffleInPlace(picked, rng)
+  return picked.map((meebitNumber) => ({ meebitNumber, matched: false }))
+}
+
+function pickSeaVisitors(
+  dataset: MeebitTraitsDataset,
+  availableIds: number[],
+  rng: () => number,
+): DailyVisitor[] {
+  return pickShirtBiasedVisitors(
+    dataset,
+    availableIds,
+    rng,
+    DAILY_SEA_VISITOR_COUNT,
+    isSeaBeachShirt,
+    SEA_BEACH_SHIRT_MIN_RATIO,
+  )
+}
+
+function pickCultureVisitors(
+  dataset: MeebitTraitsDataset,
+  availableIds: number[],
+  rng: () => number,
+): DailyVisitor[] {
+  return pickShirtBiasedVisitors(
+    dataset,
+    availableIds,
+    rng,
+    DAILY_CULTURE_VISITOR_COUNT,
+    isCultureSuitShirt,
+    CULTURE_SUIT_MIN_RATIO,
+  )
 }
 
 function shuffleInPlace<T>(items: T[], rng: () => number): T[] {
@@ -259,8 +359,21 @@ function buildLineupFromScratch(
   const mountainVisitors: DailyVisitor[] = []
   for (const id of mountainPool) {
     if (mountainVisitors.length >= DAILY_MOUNTAIN_VISITOR_COUNT) break
+    used.add(id)
     mountainVisitors.push({ meebitNumber: id, matched: false })
   }
+
+  // シーエリア: 全員ビーチ服（上裸・チューブトップ）
+  const seaRng = createSeededRng(hashStringToSeed(`meebits-park-sea:${dateKey}`))
+  const seaPool = allOtherIds.filter((id) => !used.has(id))
+  const seaVisitors = pickSeaVisitors(dataset, seaPool, seaRng)
+  for (const visitor of seaVisitors) used.add(visitor.meebitNumber)
+
+  // カルチャー地区: スーツ半数
+  const cultureRng = createSeededRng(hashStringToSeed(`meebits-park-culture:${dateKey}`))
+  const culturePool = allOtherIds.filter((id) => !used.has(id))
+  const cultureVisitors = pickCultureVisitors(dataset, culturePool, cultureRng)
+  for (const visitor of cultureVisitors) used.add(visitor.meebitNumber)
 
   return {
     dateKey,
@@ -269,6 +382,8 @@ function buildLineupFromScratch(
     themeTrait,
     visitors,
     mountainVisitors,
+    seaVisitors,
+    cultureVisitors,
   }
 }
 
@@ -292,6 +407,10 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
       parsed.visitors.length !== DAILY_VISITOR_COUNT ||
       !Array.isArray(parsed.mountainVisitors) ||
       parsed.mountainVisitors.length !== DAILY_MOUNTAIN_VISITOR_COUNT ||
+      !Array.isArray(parsed.seaVisitors) ||
+      parsed.seaVisitors.length !== DAILY_SEA_VISITOR_COUNT ||
+      !Array.isArray(parsed.cultureVisitors) ||
+      parsed.cultureVisitors.length !== DAILY_CULTURE_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
     ) {
       return null
@@ -311,6 +430,8 @@ function writeStoredLineup(lineup: DailyParkLineup) {
       themeTrait: lineup.themeTrait,
       visitors: lineup.visitors,
       mountainVisitors: lineup.mountainVisitors,
+      seaVisitors: lineup.seaVisitors,
+      cultureVisitors: lineup.cultureVisitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
@@ -336,6 +457,8 @@ function hydrateFromStored(
     themeTrait: stored.themeTrait,
     visitors: stored.visitors,
     mountainVisitors: stored.mountainVisitors,
+    seaVisitors: stored.seaVisitors,
+    cultureVisitors: stored.cultureVisitors,
   }
 }
 

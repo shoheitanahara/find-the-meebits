@@ -53,7 +53,9 @@ Meebits Park は **海の島ではなく、テーマランドの連なり**。
 
 Mountain 地区: テーマ `mountain`（苔・土・石・針葉樹・松明・木橋）。西門は崖壁で額縁接続。床色は `parkZoneTheme.ts`。
 
-Culture 地区: テーマ `culture`（濃紺ギャラリー夜・青アクセント・ランウェイ床）。Plaza 南門から入場。戻りは手前クリア帯の自立門。建物は当面 Coming Soon（中央ランウェイ／左博物館／右PFP）。
+Culture 地区: テーマ `culture`（濃紺ギャラリー夜・青アクセント・ランウェイ床）。Plaza 南門から入場。戻りは手前クリア帯の自立門。来場者はスーツ（Suit / Suit Jacket）半数。建物は当面 Coming Soon（中央ランウェイ／左博物館／右PFP）。
+
+Sea 地区: テーマ `sea`（夜のビーチ・曲線の波打ち際・遠くまで続く海・ヤシ・木の桟橋）。Plaza 西門から入場。壁なし。来場者は全員上裸／チューブトップ。建物は当面 Coming Soon（ビーチクラブ／タイドプール／桟橋ステージ）。
 
 ---
 
@@ -360,8 +362,8 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 | 辺 | 開口 |
 |----|------|
 | E | `bridge-gate` → `plaza-to-mountain` |
+| W | `bridge-gate` → `plaza-to-sea` |
 | S | `bridge-gate` → `plaza-to-culture` |
-| W | `sealed`（本ゲート品質・橋あり・通過不可） |
 | N | 手前クリア（物なし） |
 
 **ゲート**
@@ -369,6 +371,7 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 | id | 位置 | targetSpawn |
 |----|------|-------------|
 | `plaza-to-mountain` | `(26.4, 1)` halfW 2.55 | Mountain: `(-19.5, 1)` `rotY=π/2` |
+| `plaza-to-sea` | `(-26.4, 1)` halfW 2.55 yaw=`π` | Sea: `(19.5, 1)` `rotY=-π/2` |
 | `plaza-to-culture` | `(0, -18.4)` halfW 2.55 yaw=`π/2` | Culture: `(0, 8.0)` `rotY=π` |
 
 **アトラクション**（`topConfig.ts`）
@@ -435,6 +438,8 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 
 **世界観**: Meebits そのものを楽しむ地区。濃紺の夜空・クールブルーのスポット・中央ランウェイ床＋ダイヤ格子。
 
+**来場者**: 日替わり15体（`cultureVisitors`）。`Shirt` が `Suit` / `Suit Jacket` の体を半数（50%）優先抽選。
+
 **外周**
 
 | 辺 | 開口 |
@@ -460,7 +465,38 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 
 **家具**: Plaza と同じグリッド。テーマ差は床色・ライトのみ。
 
-### 14.5 封印門の配置ルール
+### 14.5 Sea（砂浜／海）
+
+**スポーン / Plaza からの到着**: `(19.5, 1)` `rotationY=-π/2`（東の海際すぐ内側・西向き）
+
+**世界観**: 夜のビーチ。曲線の波打ち際（東桟橋前だけ直線で接続）・砂の粒模様・暗い海と星空。木のポール＋暖色ランタン。旧夏パークのヤシ。
+
+**来場者**: 日替わり15体（`seaVisitors`）。全員 `Shirt` が `Bare Chest` / `Tube Top` / `No Shirt`。
+
+**外周**
+
+| 辺 | 開口 |
+|----|------|
+| E | `bridge-gate` → `sea-to-plaza`（桟橋のみ） |
+| N / W / S | 開口なし（連続する海） |
+
+**外周の見た目**: 壁・砂丘・封印門・川帯メッシュなし。床側の広大な海プレーン＋砂浜が担当。
+
+**ゲート**
+
+| id | 位置 | targetSpawn（Plaza） |
+|----|------|----------------------|
+| `sea-to-plaza` | `(25.6, 1)` halfW 2.6 yaw=`π` | `(-20.5, 1)` `rotY=π/2` |
+
+**Coming Soon 棟**
+
+| 名前 | (x, z) |
+|------|--------|
+| BEACH CLUB / ビーチクラブ | (-12.5, -11.5) |
+| TIDE POOL / タイドプール | (0, -7.0) |
+| PIER STAGE / 桟橋ステージ | (12.5, -11.0) |
+
+### 14.6 封印門の配置ルール
 
 - 位置: `getCardinalGatePlacement`（壁開口ライン。本ゲートと同系）
 - 橋: `getBridgePlacement`（川の真上。本ゲートと共通）
@@ -468,7 +504,7 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 - 衝突: `buildSealedGateObstacleBoxes`（扉＋柱で通過不可）
 - **手前辺には置かない**
 
-### 14.6 変更しないこと（この配置を壊す操作）
+### 14.7 変更しないこと（この配置を壊す操作）
 
 - 街灯をランダム散布する
 - ゲート帯・建物〜壁の隙間にベンチ／木をねじ込む

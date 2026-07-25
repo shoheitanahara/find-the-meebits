@@ -42,6 +42,7 @@ import {
 } from './topCollisions'
 import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
 import { CultureDistrictGround } from './CultureDistrictGround'
+import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp, type ParkBenchPropKind } from './ParkBenchProp'
@@ -109,7 +110,7 @@ export function TopScene({
         position={[0, 6.5, 18]}
         fov={45}
         near={0.1}
-        far={120}
+        far={activeZoneId === 'sea' ? 280 : 120}
       />
       <TopFollowCamera />
       <ambientLight intensity={look.ambientIntensity} color={look.ambientColor} />
@@ -144,9 +145,12 @@ export function TopScene({
         look={look}
         layout={layout}
         trees={zone.trees}
-        treeStyle={activeZoneId === 'mountain' ? 'pine' : 'grove'}
+        treeStyle={
+          activeZoneId === 'mountain' ? 'pine' : activeZoneId === 'sea' ? 'none' : 'grove'
+        }
         voxelGround={activeZoneId === 'mountain'}
         cultureGround={activeZoneId === 'culture'}
+        seaGround={activeZoneId === 'sea'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -166,7 +170,7 @@ export function TopScene({
           locale={locale}
         />
       ) : null}
-      <ParkLamps look={look} lamps={zone.lamps} />
+      <ParkLamps look={look} lamps={zone.lamps} style={activeZoneId === 'sea' ? 'beach' : 'classic'} />
       <ParkDetails
         benchProp={look.benchProp}
         benches={zone.benches}
@@ -202,7 +206,9 @@ export function TopScene({
               ? 'mountain'
               : zone.id === 'culture'
                 ? 'culture'
-                : 'classic')
+                : zone.id === 'sea'
+                  ? 'sea'
+                  : 'classic')
           }
           title={slot.title}
           subtitle={slot.subtitle}
@@ -211,7 +217,15 @@ export function TopScene({
       {zone.hasNpcCrowd ? (
         <TopNpcCrowd
           zoneId={activeZoneId}
-          visitors={activeZoneId === 'mountain' ? lineup.mountainVisitors : lineup.visitors}
+          visitors={
+            activeZoneId === 'mountain'
+              ? lineup.mountainVisitors
+              : activeZoneId === 'sea'
+                ? lineup.seaVisitors
+                : activeZoneId === 'culture'
+                  ? lineup.cultureVisitors
+                  : lineup.visitors
+          }
           featuredId={lineup.featuredId}
           themeTrait={lineup.themeTrait}
           includeCreator={activeZoneId === 'plaza'}
@@ -319,15 +333,17 @@ function HubGround({
   treeStyle = 'grove',
   voxelGround = false,
   cultureGround = false,
+  seaGround = false,
   showFountain,
 }: {
   featuredId: number
   look: ParkSeasonLook
   layout: ParkZoneLayout
   trees: ReadonlyArray<readonly [number, number]>
-  treeStyle?: 'grove' | 'pine'
+  treeStyle?: 'grove' | 'pine' | 'none'
   voxelGround?: boolean
   cultureGround?: boolean
+  seaGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -351,6 +367,8 @@ function HubGround({
         <MountainVoxelGround layout={layout} />
       ) : cultureGround ? (
         <CultureDistrictGround layout={layout} />
+      ) : seaGround ? (
+        <SeaDistrictGround layout={layout} />
       ) : (
         <>
           {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
@@ -398,11 +416,13 @@ function HubGround({
           <FountainStatue featuredId={featuredId} />
         </>
       ) : null}
-      {trees.map(([x, z]) => (
-        <group key={`${x}-${z}`} position={[x, 0, 0]}>
-          {treeStyle === 'pine' ? <PineTree z={z} /> : <Tree z={z} />}
-        </group>
-      ))}
+      {treeStyle !== 'none'
+        ? trees.map(([x, z]) => (
+            <group key={`${x}-${z}`} position={[x, 0, 0]}>
+              {treeStyle === 'pine' ? <PineTree z={z} /> : <Tree z={z} />}
+            </group>
+          ))
+        : null}
     </group>
   )
 }
@@ -511,50 +531,138 @@ function PineTree({ z }: { z: number }) {
 function ParkLamps({
   look,
   lamps,
+  style = 'classic',
 }: {
   look: ParkSeasonLook
   lamps: ReadonlyArray<readonly [number, number]>
+  style?: 'classic' | 'beach'
 }) {
   return (
     <group>
-      {lamps.map(([x, z]) => (
-        <group key={`${x}-${z}`} position={[x, 0, z]}>
-          <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.23, 0.3, 0.24, 12]} />
-            <meshStandardMaterial color="#2d2930" metalness={0.72} roughness={0.28} />
+      {lamps.map(([x, z]) =>
+        style === 'beach' ? (
+          <BeachLamp key={`${x}-${z}`} look={look} x={x} z={z} />
+        ) : (
+          <ClassicLamp key={`${x}-${z}`} look={look} x={x} z={z} />
+        ),
+      )}
+    </group>
+  )
+}
+
+/** 広場・山・カルチャー用のクラシック街灯 */
+function ClassicLamp({
+  look,
+  x,
+  z,
+}: {
+  look: ParkSeasonLook
+  x: number
+  z: number
+}) {
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.23, 0.3, 0.24, 12]} />
+        <meshStandardMaterial color="#2d2930" metalness={0.72} roughness={0.28} />
+      </mesh>
+      <mesh position={[0, 1.55, 0]} castShadow>
+        <cylinderGeometry args={[0.065, 0.11, 3.1, 12]} />
+        <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
+      </mesh>
+      <mesh position={[0, 2.9, 0]} castShadow>
+        <boxGeometry args={[0.95, 0.06, 0.06]} />
+        <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
+      </mesh>
+      {[-0.42, 0.42].map((lanternX) => (
+        <group key={lanternX} position={[lanternX, 3.05, 0]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.19, 14, 12]} />
+            <meshStandardMaterial
+              color="#fff0bd"
+              emissive="#f6b84f"
+              emissiveIntensity={look.lampEmissiveIntensity}
+            />
           </mesh>
-          <mesh position={[0, 1.55, 0]} castShadow>
-            <cylinderGeometry args={[0.065, 0.11, 3.1, 12]} />
-            <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
+          <mesh position={[0, 0.25, 0]} castShadow>
+            <coneGeometry args={[0.23, 0.22, 8]} />
+            <meshStandardMaterial color="#343039" metalness={0.74} roughness={0.3} />
           </mesh>
-          <mesh position={[0, 2.9, 0]} castShadow>
-            <boxGeometry args={[0.95, 0.06, 0.06]} />
-            <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
-          </mesh>
-          {[-0.42, 0.42].map((lanternX) => (
-            <group key={lanternX} position={[lanternX, 3.05, 0]}>
-              <mesh castShadow>
-                <sphereGeometry args={[0.19, 14, 12]} />
-                <meshStandardMaterial
-                  color="#fff0bd"
-                  emissive="#f6b84f"
-                  emissiveIntensity={look.lampEmissiveIntensity}
-                />
-              </mesh>
-              <mesh position={[0, 0.25, 0]} castShadow>
-                <coneGeometry args={[0.23, 0.22, 8]} />
-                <meshStandardMaterial color="#343039" metalness={0.74} roughness={0.3} />
-              </mesh>
-            </group>
-          ))}
-          <pointLight
-            position={[0, 3.05, 0]}
-            intensity={look.lampLightIntensity}
-            distance={8.5}
-            color="#ffd080"
-          />
         </group>
       ))}
+      <pointLight
+        position={[0, 3.05, 0]}
+        intensity={look.lampLightIntensity}
+        distance={8.5}
+        color="#ffd080"
+      />
+    </group>
+  )
+}
+
+/** ビーチ向け：木のポール＋暖色ランタン */
+function BeachLamp({
+  look,
+  x,
+  z,
+}: {
+  look: ParkSeasonLook
+  x: number
+  z: number
+}) {
+  return (
+    <group position={[x, 0, z]}>
+      {/* 砂の台座 */}
+      <mesh position={[0, 0.06, 0]} receiveShadow>
+        <cylinderGeometry args={[0.32, 0.4, 0.12, 10]} />
+        <meshStandardMaterial color="#c4a880" roughness={0.96} />
+      </mesh>
+      {/* 木のポール */}
+      <mesh position={[0, 1.15, 0]} castShadow>
+        <cylinderGeometry args={[0.09, 0.12, 2.2, 8]} />
+        <meshStandardMaterial color="#6a4a30" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.15, 0]} castShadow>
+        <cylinderGeometry args={[0.095, 0.125, 2.15, 8]} />
+        <meshStandardMaterial color="#8a6848" roughness={0.88} transparent opacity={0.35} />
+      </mesh>
+      {/* 横腕 */}
+      <mesh position={[0.28, 2.35, 0]} rotation={[0, 0, 0.15]} castShadow>
+        <boxGeometry args={[0.55, 0.07, 0.07]} />
+        <meshStandardMaterial color="#5a4030" roughness={0.88} />
+      </mesh>
+      {/* 吊り下げランタン */}
+      <group position={[0.52, 2.05, 0]}>
+        <mesh position={[0, 0.22, 0]} castShadow>
+          <cylinderGeometry args={[0.02, 0.02, 0.28, 6]} />
+          <meshStandardMaterial color="#4a3428" roughness={0.85} />
+        </mesh>
+        <mesh castShadow>
+          <boxGeometry args={[0.28, 0.36, 0.28]} />
+          <meshStandardMaterial
+            color="#fff2c8"
+            emissive="#ffb040"
+            emissiveIntensity={look.lampEmissiveIntensity * 1.15}
+            transparent
+            opacity={0.92}
+            roughness={0.35}
+          />
+        </mesh>
+        <mesh position={[0, 0.22, 0]} castShadow>
+          <boxGeometry args={[0.32, 0.06, 0.32]} />
+          <meshStandardMaterial color="#5a4030" roughness={0.88} />
+        </mesh>
+        <mesh position={[0, -0.2, 0]} castShadow>
+          <cylinderGeometry args={[0.14, 0.16, 0.05, 8]} />
+          <meshStandardMaterial color="#5a4030" roughness={0.88} />
+        </mesh>
+        <pointLight
+          position={[0, 0, 0]}
+          intensity={look.lampLightIntensity * 1.1}
+          distance={9.5}
+          color="#ffb060"
+        />
+      </group>
     </group>
   )
 }
