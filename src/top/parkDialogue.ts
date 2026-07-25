@@ -99,7 +99,7 @@ export function selectParkDialogueLines(
       : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
     second = isMountain
-      ? pickLine(pools.gameMountain, seed, talkCount, 37)
+      ? pickLine(pools.gameNeon, seed, talkCount, 37)
       : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
     second = isMountain

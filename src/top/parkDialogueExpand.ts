@@ -11,6 +11,7 @@ export type ParkDialoguePools = {
   gameTraits: string[]
   gameStreet: string[]
   gameMountain: string[]
+  gameNeon: string[]
   featuredAny: string[]
   featuredMatched: string[]
   themeAny: string[]
@@ -246,7 +247,7 @@ const EN_MT_GAME_T = [
   'Aim for that 1000m dream.',
   'read the blocks before you leap.',
   'Bring patience!',
-  'Respawn and try again.',
+  'Climb back up and try again.',
   'Worth every stumble.',
   'like a parkour postcard.',
   'Don’t freeze on the edge!',
@@ -255,6 +256,38 @@ const EN_MT_GAME_T = [
   'take a victory breath.',
   'BEST height is something to chase.',
   'Torchlight helps, guts help more.',
+]
+
+const EN_NEON_GAME_H = [
+  'Neon Stack is that jelly tower —',
+  'If you like glowing cliffs,',
+  'Neon Stack has the same climb feel,',
+  'Neon tip:',
+  'Later Neon stages get wild.',
+  'Fell into the abyss?',
+  'Clearing a Neon stage feels electric.',
+  'I love those soft jelly blocks —',
+  'Watch the neon edges near gaps.',
+  'Wrong jump on Neon Stack?',
+  'Same jumps, different vibe…',
+  'If you reach the Neon summit,',
+]
+
+const EN_NEON_GAME_T = [
+  'scale the glowing stack!',
+  'try Neon Stack next door.',
+  'but over a black void.',
+  'read the jelly blocks before you leap.',
+  'Bring patience!',
+  'Climb back up and try again.',
+  'Worth every stumble.',
+  'like candy parkour.',
+  'Don’t freeze on the edge!',
+  'Reset your angle and go again.',
+  'pick a lane and glow upward.',
+  'take a neon victory breath.',
+  'chase that BEST height in style.',
+  'Sparkles help, guts help more.',
 ]
 
 const EN_FEAT_H = [
@@ -450,7 +483,7 @@ const EN_THEME_MATCH_T = [
 ]
 
 const EN_PLAZA_FLAVOR_H = [
-  'Three attractions tonight.',
+  'Attractions all around tonight.',
   'I love nights like this —',
   'If you get lost,',
   'The lamps hum softly.',
@@ -458,13 +491,13 @@ const EN_PLAZA_FLAVOR_H = [
   'I keep looping the fountain.',
   'Park tip:',
   'Some guests match the theme;',
-  'You can always hit Back to Top.',
+  'You can always leave a game',
   'The outer water looks endless tonight.',
   'Classic night-park energy.',
-  'Don’t rush all three games —',
+  'Don’t rush every attraction —',
   'Golden paths never lie.',
   'Plaza people-watching is elite.',
-  'Shawn sometimes hangs near the fountain.',
+  'East bridge leads to the mountains —',
 ]
 
 const EN_PLAZA_FLAVOR_T = [
@@ -472,17 +505,17 @@ const EN_PLAZA_FLAVOR_T = [
   'breeze and Meebits everywhere.',
   'follow the gold path back to the fountain.',
   'Weirdly calming for a theme park.',
-  'until an NPC stares at you.',
+  'until someone stares at you.',
   'Habit, maybe.',
   'talk to everyone. Useful rumors exist.',
   'others just vibing.',
-  'We’ll still be here.',
+  'and wander back to the plaza.',
   'Kinda poetic.',
   'Club vibes, no queue.',
   'savor the plaza too.',
   'They lead you home.',
   'Better than any feed.',
-  'Creator energy in the plaza.',
+  'Mt. Meeb and Neon Stack await.',
   'Tonight’s mood is soft gold.',
   'Take a slow lap first.',
 ]
@@ -502,7 +535,7 @@ const EN_MT_FLAVOR_H = [
   'Don’t rush the summit —',
   'Pine rows never lie about the wind.',
   'Trail people-watching is elite.',
-  'Stages stack toward 1000m.',
+  'Neon Stack glows beside the trail.',
 ]
 
 const EN_MT_FLAVOR_T = [
@@ -520,7 +553,7 @@ const EN_MT_FLAVOR_T = [
   'savor the district too.',
   'They tell you where the cold comes from.',
   'Better than any feed.',
-  'Chase your BEST height.',
+  'try the jelly tower next.',
   'Tonight’s mood is amber stone.',
   'Take a slow ridge lap first.',
 ]
@@ -736,7 +769,7 @@ const JA_MT_GAME_T = [
   '1000mの夢を狙おう。',
   '跳ぶ前にブロックを読んで。',
   '粘り強くいこう！',
-  'リスポーンして再挑戦だ。',
+  '立ち上がってもう一回だ。',
   'つまずき全部に価値がある。',
   'パルクールの絵葉書みたい。',
   '縁で固まらないで！',
@@ -745,6 +778,38 @@ const JA_MT_GAME_T = [
   '勝利の一息を。',
   'BEST標高、追いかけがいがあるよ。',
   'トーチも大事、胆力もっと大事。',
+]
+
+const JA_NEON_GAME_H = [
+  'ネオンスタックはあのゼリー塔 —',
+  '光る崖が好きなら、',
+  'ネオンスタックも登りごたえあるよ、',
+  'ネオンのコツ：',
+  'ネオンの後半ステージ、ヤバいよ。',
+  '奈落に落ちた？',
+  'ネオンのステージクリア、電気走る感じ。',
+  'あの柔らかいゼリーブロック、好き —',
+  '穴の手前、ネオンの縁に注意。',
+  'ネオンスタックでジャンプミス？',
+  '同じジャンプ、違う空気…',
+  'ネオンの頂上まで着いたら、',
+]
+
+const JA_NEON_GAME_T = [
+  '光る塔を登ってみて！',
+  '隣のネオンスタック、おすすめ。',
+  '黒い奈落の上を渡る感じ。',
+  '跳ぶ前にゼリーブロックを読んで。',
+  '粘り強くいこう！',
+  '立ち上がってもう一回だ。',
+  'つまずき全部に価値がある。',
+  'キャンディみたいなパルクール。',
+  '縁で固まらないで！',
+  '角度を直してもう一回。',
+  'レーンを選んで光のほうへ。',
+  'ネオンの勝利の一息を。',
+  'BEST標高、かっこよく追いかけよう。',
+  'スパークルも大事、胆力もっと大事。',
 ]
 
 const JA_FEAT_H = [
@@ -940,7 +1005,7 @@ const JA_THEME_MATCH_T = [
 ]
 
 const JA_PLAZA_FLAVOR_H = [
-  'アトラクションは3つ。',
+  '今夜もアトラクションがいっぱい。',
   'こういう夜が好き。',
   '迷ったら金の道をたどって',
   '街灯が小さく鳴ってる。',
@@ -948,13 +1013,13 @@ const JA_PLAZA_FLAVOR_H = [
   '噴水の周りをぐるぐるしがち。',
   'パークのコツ：',
   'ゲストにはテーマ一致組と、',
-  'ゲームからはいつでも Back to Top。',
+  'ゲームを出たら、',
   '島の外の水、今夜は果てしなく見える。',
   'クラシックな夜のパーク感。',
-  '3つ全部急がなくていい。',
+  '全部急がなくていい。',
   '金の道は裏切らない。',
   '広場の人混みウォッチ、一流。',
-  'Shawn、噴水の近くにいることあるよ。',
+  '東の橋の先が山岳地区 —',
 ]
 
 const JA_PLAZA_FLAVOR_T = [
@@ -962,17 +1027,17 @@ const JA_PLAZA_FLAVOR_T = [
   '潮風と Meebit がいっぱい。',
   '噴水に戻ってきてね。',
   'テーマパークなのに落ち着く。',
-  '座るとNPCに見つめられるけど。',
+  '座ると誰かに見つめられるけど。',
   '癖かも。',
   'みんなに話しかけて。役立つ噂があるよ。',
   'ただののんびり組がいる。',
-  'ぼくたちはここにいるよ。',
+  'また広場を歩いてみて。',
   '詩的だよね。',
   'クラブっぽいのに並ばなくていい。',
   '広場も味わっていって。',
   '帰宅ルートだよ。',
   'どんなフィードよりいい。',
-  '作成者の気配がプラザにある。',
+  'Mt. Meeb とネオンスタックが待ってるよ。',
   '今夜のムードは柔らかい金。',
   'まずゆっくり一周してみて。',
 ]
@@ -992,7 +1057,7 @@ const JA_MT_FLAVOR_H = [
   '頂上を急がなくていい。',
   '松並びは風向きを裏切らない。',
   'トレイルの人混みウォッチ、一流。',
-  'ステージは1000mへ積み上がる。',
+  'ネオンスタックがトレイルの脇で光ってる。',
 ]
 
 const JA_MT_FLAVOR_T = [
@@ -1010,7 +1075,7 @@ const JA_MT_FLAVOR_T = [
   '地区の空気も味わっていって。',
   '寒さの出所を教えてくれる。',
   'どんなフィードよりいい。',
-  'BEST標高を追いかけよう。',
+  '隣のゼリー塔も試してみて。',
   '今夜のムードは琥珀色の石。',
   'まずゆっくり尾根を一周してみて。',
 ]
@@ -1030,6 +1095,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const gameTraits = product(isJa ? JA_TRAITS_H : EN_TRAITS_H, isJa ? JA_TRAITS_T : EN_TRAITS_T, j)
   const gameStreet = product(isJa ? JA_STREET_H : EN_STREET_H, isJa ? JA_STREET_T : EN_STREET_T, j)
   const gameMountain = product(isJa ? JA_MT_GAME_H : EN_MT_GAME_H, isJa ? JA_MT_GAME_T : EN_MT_GAME_T, j)
+  const gameNeon = product(isJa ? JA_NEON_GAME_H : EN_NEON_GAME_H, isJa ? JA_NEON_GAME_T : EN_NEON_GAME_T, j)
 
   const featuredAny = product(
     isMt ? (isJa ? JA_FEAT_MT_H : EN_FEAT_MT_H) : isJa ? JA_FEAT_H : EN_FEAT_H,
@@ -1067,6 +1133,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     gameTraits,
     gameStreet,
     gameMountain,
+    gameNeon,
     featuredAny,
     featuredMatched,
     themeAny,
@@ -1093,6 +1160,7 @@ export function countParkDialogueLines(pools: ParkDialoguePools) {
     pools.gameTraits.length +
     pools.gameStreet.length +
     pools.gameMountain.length +
+    pools.gameNeon.length +
     pools.featuredAny.length +
     pools.featuredMatched.length +
     pools.themeAny.length +
