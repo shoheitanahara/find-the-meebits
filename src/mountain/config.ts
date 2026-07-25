@@ -536,23 +536,6 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     }
   }
 
-  for (let z = def.zStart - 8; z >= def.zEnd + 5; z -= 1) {
-    if (z <= goalZ + 16) continue
-    if (hashSeed(def.seed, z, 50) > 0.55) continue
-    const ridge = pathCenterX(z)
-    const peak = trailElev(z) + 8 + Math.floor(hashSeed(def.seed, z, 51) * 10)
-    const side = hashSeed(def.seed, z, 52) > 0.5 ? 1 : -1
-    const dist = 11 + Math.floor(hashSeed(def.seed, z, 53) * 9)
-    setHeight(Math.round(ridge + side * dist), z, Math.max(3, peak - Math.floor(hashSeed(def.seed, z, 54) * 5)))
-    if (hashSeed(def.seed, z, 55) < 0.4) {
-      setHeight(
-        Math.round(ridge - side * (dist - 2)),
-        z,
-        Math.max(2, peak - 6 - Math.floor(hashSeed(def.seed, z, 56) * 4)),
-      )
-    }
-  }
-
   // レーン中心の段差を +1 に矯正
   for (let z = def.zStart - 1; z >= terrainEnd; z -= 1) {
     const elev = trailElev(z)
