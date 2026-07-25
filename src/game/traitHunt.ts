@@ -38,7 +38,11 @@ const EXCLUDED_TRAIT_TYPES = new Set([
   'Shoes',
 ])
 /** Specific trait values excluded regardless of type. */
-const EXCLUDED_TRAIT_VALUES = new Set(['Snoutz Skull Tee'])
+const EXCLUDED_TRAIT_VALUES = new Set([
+  'Snoutz Skull Tee',
+  // VRM 側で色が正しく出ない（Hair/Shirt 等の Color 全般）
+  'Leopard Print',
+])
 const poolsFile = traitHuntPools as TraitHuntPoolsFile
 const poolSetCache = new Map<string, Set<number>>()
 

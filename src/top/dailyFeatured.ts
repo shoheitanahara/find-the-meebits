@@ -129,6 +129,12 @@ function pickFeaturedId(dataset: MeebitTraitsDataset, rng: () => number): number
 
 /** 「本日の共通点」に選ばないトレイト種別 */
 const THEME_TRAIT_EXCLUDED_TYPES = new Set(['Hair Style'])
+/** 「本日の共通点」に選ばないトレイト値（VRM 表示バグなど） */
+const THEME_TRAIT_EXCLUDED_VALUES = new Set(['Leopard Print'])
+
+function isThemeTraitEligible(traitType: string, traitValue: string) {
+  return !THEME_TRAIT_EXCLUDED_TYPES.has(traitType) && !THEME_TRAIT_EXCLUDED_VALUES.has(traitValue)
+}
 
 /**
  * 主役のトレイトから「本日の共通点」を1つ選ぶ。
@@ -141,10 +147,12 @@ function pickThemeTrait(
   rng: () => number,
 ): DailyThemeTrait {
   const allEntries = Object.entries(featuredTraits)
-  const entries = allEntries.filter(([traitType]) => !THEME_TRAIT_EXCLUDED_TYPES.has(traitType))
+  const entries = allEntries.filter(([traitType, traitValue]) =>
+    isThemeTraitEligible(traitType, traitValue),
+  )
   if (entries.length === 0) {
     throw new Error(
-      `[dailyFeatured] featured #${featuredId} has no eligible theme traits (excluded Hair Style)`,
+      `[dailyFeatured] featured #${featuredId} has no eligible theme traits (excluded Hair Style / Leopard Print)`,
     )
   }
 
@@ -317,6 +325,10 @@ function hydrateFromStored(
   const featuredTraits = getMeebitTraitsFromDataset(dataset, stored.featuredId)
   if (!featuredTraits) return null
   if (!hasThemeTrait(featuredTraits, stored.themeTrait)) return null
+  // 除外ルール追加後のキャッシュを破棄して再抽選
+  if (!isThemeTraitEligible(stored.themeTrait.traitType, stored.themeTrait.traitValue)) {
+    return null
+  }
   return {
     dateKey: stored.dateKey,
     featuredId: stored.featuredId,
