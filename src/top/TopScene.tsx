@@ -195,8 +195,6 @@ export function TopScene({
           position={[slot.x, 0, slot.z]}
           locale={locale}
           theme={slot.theme ?? (zone.perimeter?.theme === 'mountain' ? 'mountain' : 'classic')}
-          title={slot.title}
-          subtitle={slot.subtitle}
         />
       ))}
       {zone.hasNpcCrowd ? (

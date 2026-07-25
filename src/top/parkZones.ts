@@ -233,21 +233,17 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [12.5, -1.5],
     ],
     comingSoonSlots: [
-      // 南西スロット（将来アトラクション予定）
+      // 南西スロット（将来アトラクション予定・看板は工事中のみ）
       {
         x: -12.5,
         z: -11.5,
         theme: 'mountain',
-        title: { en: 'ALPINE LODGE', ja: '山荘ロッジ' },
-        subtitle: { en: 'Coming Soon', ja: '近日公開' },
       },
-      // 南東スロット（将来アトラクション予定）
+      // 南東スロット（将来アトラクション予定・看板は工事中のみ）
       {
         x: 12.5,
         z: -11.0,
         theme: 'mountain',
-        title: { en: 'PEAK OUTLOOK', ja: '展望台' },
-        subtitle: { en: 'Coming Soon', ja: '近日公開' },
       },
     ],
     gates: [

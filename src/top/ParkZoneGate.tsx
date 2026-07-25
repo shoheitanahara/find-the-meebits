@@ -561,24 +561,19 @@ export function ComingSoonPad({
   position,
   locale,
   theme = 'mountain',
-  title,
-  subtitle,
 }: {
   position: [number, number, number]
   locale: 'en' | 'ja'
   theme?: 'classic' | 'mountain'
-  title?: { en: string; ja: string }
-  subtitle?: { en: string; ja: string }
 }) {
-  const heading = title?.[locale] ?? (locale === 'ja' ? '新アトラクション' : 'NEW ATTRACTION')
-  const sub = subtitle?.[locale] ?? (locale === 'ja' ? '建設中' : 'UNDER CONSTRUCTION')
+  const heading = locale === 'ja' ? '工事中' : 'UNDER CONSTRUCTION'
   const mountain = theme === 'mountain'
 
   return (
     <group position={position}>
       {mountain ? <MountainComingSoonShell /> : <ClassicComingSoonShell />}
       <ComingSoonBarricade mountain={mountain} />
-      <ComingSoonSignboard heading={heading} sub={sub} mountain={mountain} />
+      <ComingSoonSignboard heading={heading} mountain={mountain} />
       <pointLight
         position={[0, 3.2, 2.8]}
         intensity={mountain ? 8 : 10}
@@ -725,11 +720,9 @@ function ComingSoonBarricade({ mountain }: { mountain: boolean }) {
 
 function ComingSoonSignboard({
   heading,
-  sub,
   mountain,
 }: {
   heading: string
-  sub: string
   mountain: boolean
 }) {
   const accent = mountain ? '#c4a060' : '#c9a24a'
@@ -747,11 +740,16 @@ function ComingSoonSignboard({
         <boxGeometry args={[2.65, 1.3, 0.04]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.14} roughness={0.52} />
       </mesh>
-      <Text position={[0, 2.68, 0.18]} fontSize={0.2} color="#1a1208" anchorX="center" anchorY="middle" maxWidth={2.4} textAlign="center">
+      <Text
+        position={[0, 2.45, 0.18]}
+        fontSize={0.28}
+        color="#1a1208"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={2.4}
+        textAlign="center"
+      >
         {heading}
-      </Text>
-      <Text position={[0, 2.28, 0.18]} fontSize={0.15} color="#3a2a10" anchorX="center" anchorY="middle">
-        {sub}
       </Text>
     </group>
   )
