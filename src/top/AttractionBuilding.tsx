@@ -11,7 +11,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - traits: ネオン円筒タワー
  * - street: L字レンガ町屋＋アーチ
  * - mountain: ボクセル山エントランス（Mt. Meeb）
- * - neon: テトリス風積みブロック塔（Neon Stack）
+ * - neon: テトリス風積みブロック塔（Jerry Mountain）
  */
 export function AttractionBuilding({
   attraction,
@@ -53,7 +53,7 @@ export function AttractionBuilding({
       ) : attraction.id === 'street' ? (
         <AlleyLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'neon' ? (
-        <NeonStackLandmark accent={accent} />
+        <JerryMountainLandmark accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -136,7 +136,7 @@ function MountainLandmark({
 }
 
 /** テトリス風ネオン積み塔 — コースと同じゼリーブロック質感 */
-function NeonStackLandmark({ accent }: { accent: string }) {
+function JerryMountainLandmark({ accent }: { accent: string }) {
   const blocks: Array<{
     x: number
     y: number

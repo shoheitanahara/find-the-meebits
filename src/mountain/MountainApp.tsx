@@ -43,7 +43,7 @@ function MountainScene() {
   )
 }
 
-/** Mt. Meeb / Neon Stack 共用シェル（世界観は climbTheme） */
+/** Mt. Meeb / Jerry Mountain 共用シェル（世界観は climbTheme） */
 export function MountainApp() {
   const phase = useMountainStore((state) => state.phase)
   const frameloop = useTabFrameloop()

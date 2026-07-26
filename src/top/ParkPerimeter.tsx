@@ -161,7 +161,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
         const isGateOpening = isPerimeterGateOpening(opening)
         const riverGap = isGateOpening ? spec.openingHalf : 0
         const wallGap = isGateOpening ? spec.wallOpeningHalf : 0
-        // 本ゲート／封印門とも同じ along（南北は PARK_FAR_SIDE_GATE_X）
+        // 本ゲート／封印門とも同じ along（奥＝北は FAR 左寄り／手前＝南はセンター）
         const openCenter = openCenterOnSide(spec, sideDef.side)
 
         const span = sideDef.axis === 'z' ? halfSpanZ : halfSpanX

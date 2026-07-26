@@ -39,7 +39,7 @@ const copy = {
       traits: 'Trait Hunt',
       street: '8th Street',
       mountain: 'Mt. Meeb',
-      neon: 'Neon Stack',
+      neon: 'Jerry Mountain',
     },
   },
   ja: {
@@ -59,7 +59,7 @@ const copy = {
       traits: 'トレイトハント',
       street: '8番ストリート',
       mountain: 'Mt. Meeb',
-      neon: 'ネオンスタック',
+      neon: 'ジェリーマウンテン',
     },
   },
 } as const

@@ -461,7 +461,7 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     const n = hash2(x, z)
     const n2 = hash2(x - 11, z + 5)
 
-    // Neon Stack: 高度帯の傾向なし。セルごとに完全ランダム色
+    // Jerry Mountain: 高度帯の傾向なし。セルごとに完全ランダム色
     if (getClimbThemeId() === 'neon') {
       const mix = (n * 0.63 + n2 * 0.37) % 1
       return NEON_KINDS[Math.floor(mix * NEON_KINDS.length)] ?? 'stone'
@@ -625,7 +625,7 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 }
 
 /**
- * Neon Stack は Mt. Meeb と同じ難易度パラメータでも、seed だけ別系統にして別コースにする。
+ * Jerry Mountain は Mt. Meeb と同じ難易度パラメータでも、seed だけ別系統にして別コースにする。
  */
 function stageDefForTheme(stageId: number): MountainStageDef {
   const base = getStageDef(stageId)

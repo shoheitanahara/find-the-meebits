@@ -1,8 +1,8 @@
 import type { AttractionId } from './topStore'
-import { PARK_FAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
+import { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
 import { SEA_PALM_TREE_XZ } from './seaPalms'
 
-export { PARK_FAR_SIDE_GATE_X }
+export { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X }
 
 /** Park のエリア ID。1エリア最大3ゲーム。 */
 export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea'
@@ -223,8 +223,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         yaw: Math.PI / 2,
         targetZone: 'culture',
-        // 手前クリア帯の奥寄り・地区内へ南向き（門 X と揃える）
-        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: 8.0, rotationY: Math.PI },
+        // 北門は左寄り → 着地は Culture 入口センター・手前すぐ内側
+        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
         subtitle: { en: 'Runway · Museum · PFP', ja: 'ランウェイ・博物館・PFP' },
       },
@@ -324,7 +324,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         { side: 's', kind: 'sealed' },
       ],
     },
-    spawn: { x: PARK_FAR_SIDE_GATE_X, z: 8.0, rotationY: Math.PI },
+    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -376,8 +376,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     gates: [
       {
         id: 'culture-to-plaza',
-        x: PARK_FAR_SIDE_GATE_X,
-        // 手前クリア辺の北端（左棟と中央の間に寄せ、真正面中央を避ける）
+        x: PARK_NEAR_SIDE_GATE_X,
+        // 手前（南）入口はセンター。北門左寄り／到着センターの共通ルール
         z: 16.0,
         halfWidth: 2.55,
         alcoveDepth: 2.4,
@@ -385,8 +385,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // Three.js: yaw=π/2 でローカル +X → 南(-Z)。接近・敷石が地区側を向く
         yaw: Math.PI / 2,
         targetZone: 'plaza',
-        // 南門のすぐ内側・噴水方向
-        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -12.0, rotationY: 0 },
+        // 対向のプラザ北門（左寄り）すぐ内側・噴水方向へ
+        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
       },

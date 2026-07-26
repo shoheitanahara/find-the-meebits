@@ -261,23 +261,23 @@ const EN_MT_GAME_T = [
 ]
 
 const EN_NEON_GAME_H = [
-  'Neon Stack is that jelly tower —',
+  'Jerry Mountain is that jelly tower —',
   'If you like glowing cliffs,',
-  'Neon Stack has the same climb feel,',
-  'Neon tip:',
-  'Later Neon stages get wild.',
+  'Jerry Mountain has the same climb feel,',
+  'Jerry tip:',
+  'Later Jerry stages get wild.',
   'Fell into the abyss?',
-  'Clearing a Neon stage feels electric.',
+  'Clearing a Jerry stage feels electric.',
   'I love those soft jelly blocks —',
   'Watch the neon edges near gaps.',
-  'Wrong jump on Neon Stack?',
+  'Wrong jump on Jerry Mountain?',
   'Same jumps, different vibe…',
-  'If you reach the Neon summit,',
+  'If you reach the Jerry summit,',
 ]
 
 const EN_NEON_GAME_T = [
   'scale the glowing stack!',
-  'try Neon Stack next door.',
+  'try Jerry Mountain next door.',
   'but over a black void.',
   'read the jelly blocks before you leap.',
   'Bring patience!',
@@ -500,7 +500,7 @@ const EN_PLAZA_FLAVOR_H = [
   'Golden paths never lie.',
   'Plaza people-watching is elite.',
   'East bridge leads to the mountains —',
-  'South gate opens to Culture —',
+  'North gate opens to Culture —',
   'West gate opens to the Sea District —',
   'The Park has four districts now —',
 ]
@@ -520,7 +520,7 @@ const EN_PLAZA_FLAVOR_T = [
   'savor the plaza too.',
   'They lead you home.',
   'Better than any feed.',
-  'Mt. Meeb and Neon Stack await.',
+  'Mt. Meeb and Jerry Mountain await.',
   'runway, museum, and PFP await.',
   'palms, sand, and a night pier await.',
   'pick a mood and wander.',
@@ -543,9 +543,9 @@ const EN_MT_FLAVOR_H = [
   'Don’t rush the summit —',
   'Pine rows never lie about the wind.',
   'Trail people-watching is elite.',
-  'Neon Stack glows beside the trail.',
+  'Jerry Mountain glows beside the trail.',
   'West of the plaza is the night beach —',
-  'South of the plaza is Culture —',
+  'North of the plaza is Culture —',
 ]
 
 const EN_MT_FLAVOR_T = [
@@ -586,7 +586,7 @@ const EN_CU_GREET_T = [
   'take a slow lap of the district.',
   'Navy floors, soft blue spotlights.',
   'Three builds are rising soon.',
-  'Glad you crossed the south gate.',
+  'Glad you crossed the north gate.',
   'Stay curious.',
   'Dress code vibes without the dress code.',
   'The runway stripe leads the eye.',
@@ -598,7 +598,7 @@ const EN_CU_FLAVOR_H = [
   'PFP Studio is where you’ll craft',
   'Culture tip:',
   'I keep walking the runway path —',
-  'South of the plaza,',
+  'North of the plaza,',
   'When the runway opens,',
   'The museum will sort Meebits',
   'PFP Creator is still scaffolding,',
@@ -607,7 +607,7 @@ const EN_CU_FLAVOR_H = [
   'Three coming attractions:',
   'This district is about Meebits themselves —',
   'If you love outfits and traits,',
-  'Back through the north gate',
+  'Back through the south gate',
   'Half the crowd here wears suits —',
   'Compared to the beach or the mountain,',
 ]
@@ -917,23 +917,23 @@ const JA_MT_GAME_T = [
 ]
 
 const JA_NEON_GAME_H = [
-  'ネオンスタックはあのゼリー塔 —',
+  'ジェリーマウンテンはあのゼリー塔 —',
   '光る崖が好きなら、',
-  'ネオンスタックも登りごたえあるよ、',
-  'ネオンのコツ：',
-  'ネオンの後半ステージ、ヤバいよ。',
+  'ジェリーマウンテンも登りごたえあるよ、',
+  'ジェリーのコツ：',
+  'ジェリーの後半ステージ、ヤバいよ。',
   '奈落に落ちた？',
-  'ネオンのステージクリア、電気走る感じ。',
+  'ジェリーのステージクリア、電気走る感じ。',
   'あの柔らかいゼリーブロック、好き —',
   '穴の手前、ネオンの縁に注意。',
-  'ネオンスタックでジャンプミス？',
+  'ジェリーマウンテンでジャンプミス？',
   '同じジャンプ、違う空気…',
-  'ネオンの頂上まで着いたら、',
+  'ジェリーの頂上まで着いたら、',
 ]
 
 const JA_NEON_GAME_T = [
   '光る塔を登ってみて！',
-  '隣のネオンスタック、おすすめ。',
+  '隣のジェリーマウンテン、おすすめ。',
   '黒い奈落の上を渡る感じ。',
   '跳ぶ前にゼリーブロックを読んで。',
   '粘り強くいこう！',
@@ -1156,7 +1156,7 @@ const JA_PLAZA_FLAVOR_H = [
   '金の道は裏切らない。',
   '広場の人混みウォッチ、一流。',
   '東の橋の先が山岳地区 —',
-  '南の門の先がカルチャー —',
+  '北の門の先がカルチャー —',
   '西の門の先がシーエリア —',
   'パークにはいま地区が4つある —',
 ]
@@ -1176,7 +1176,7 @@ const JA_PLAZA_FLAVOR_T = [
   '広場も味わっていって。',
   '帰宅ルートだよ。',
   'どんなフィードよりいい。',
-  'Mt. Meeb とネオンスタックが待ってるよ。',
+  'Mt. Meeb とジェリーマウンテンが待ってるよ。',
   'ランウェイと博物館と PFP が待ってるよ。',
   'ヤシと砂浜と夜の桟橋が待ってるよ。',
   '気分で地区を選んで歩いてみて。',
@@ -1199,9 +1199,9 @@ const JA_MT_FLAVOR_H = [
   '頂上を急がなくていい。',
   '松並びは風向きを裏切らない。',
   'トレイルの人混みウォッチ、一流。',
-  'ネオンスタックがトレイルの脇で光ってる。',
+  'ジェリーマウンテンがトレイルの脇で光ってる。',
   '広場の西は夜のビーチ —',
-  '広場の南はカルチャー —',
+  '広場の北はカルチャー —',
 ]
 
 const JA_MT_FLAVOR_T = [
@@ -1242,7 +1242,7 @@ const JA_CU_GREET_T = [
   '地区をゆっくり一周してみて。',
   '濃紺の床とやわらかい青いスポット。',
   '建物はいま3つ、立ち上がり中。',
-  '南の門を越えてきてくれてありがとう。',
+  '北の門を越えてきてくれてありがとう。',
   '好奇心、大事にね。',
   'ドレスコードなしのドレスコード気分。',
   'ランウェイのストライプが目を導くよ。',
@@ -1254,7 +1254,7 @@ const JA_CU_FLAVOR_H = [
   'PFPクリエイターでは',
   'カルチャーのコツ：',
   'ランウェイの道を歩きがち —',
-  '広場の南の先が、',
+  '広場の北の先が、',
   'ランウェイが開いたら、',
   '博物館は好きな細部で',
   'PFPクリエイターはまだ足場だけど、',
@@ -1263,7 +1263,7 @@ const JA_CU_FLAVOR_H = [
   '工事中の3つ：',
   'この地区は Meebits そのものを楽しむ場所 —',
   'コーデやトレイトが好きなら、',
-  '北の門をくぐれば',
+  '南の門をくぐれば',
   'ここの来場者、スーツ率高め —',
   'ビーチや山と比べると、',
 ]

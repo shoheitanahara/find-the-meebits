@@ -154,7 +154,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'neon',
     zoneId: 'mountain',
-    title: 'NEON STACK',
+    title: 'JERRY MOUNTAIN',
     subtitle: 'Now Open',
     description: {
       en: 'Jelly cliffs. Black void.\nClimb — or drop.',
@@ -166,7 +166,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#1a0a30',
     roofColor: '#ff2bd6',
-    x: -12.5,
+    // 半棟分左寄せ（旧 -12.5 → footprint halfWidth 約 3.2）
+    x: -15.7,
     z: -11.5,
     entranceZ: -8.0,
     footprint: {

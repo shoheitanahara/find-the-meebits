@@ -4,10 +4,18 @@ import type { ParkGateDef, ParkZoneLayout } from './parkZones'
 export type CardinalSide = 'n' | 's' | 'e' | 'w'
 
 /**
- * 奥側（コード南=-Z／画面奥。ユーザー呼称の北側）の門の X。
- * 左棟（約 -16〜-12）と中央棟（0）の間に置き、建物被りを避ける。
+ * 南北ゲートの X ルール（全区共通）:
+ * - 奥側＝口頭の北（コード `'s'` / −Z）→ センターから左寄り（建物被り回避）
+ * - 手前＝口頭の南（コード `'n'` / +Z）→ センター（到着側の入口は真正面）
+ * 出発側の北門は左寄り、くぐった先の地区入口はセンター、という体験に揃える。
  */
 export const PARK_FAR_SIDE_GATE_X = -8
+export const PARK_NEAR_SIDE_GATE_X = 0
+
+/** N/S 辺ゲートの沿軸 X（口頭の北南に対応） */
+export function gateAlongXForNS(side: 'n' | 's') {
+  return side === 's' ? PARK_FAR_SIDE_GATE_X : PARK_NEAR_SIDE_GATE_X
+}
 
 export type PerimeterOpening =
   | { side: CardinalSide; kind: 'bridge-gate'; gateId: string }
@@ -36,7 +44,7 @@ export type PerimeterBox = {
  * Plaza クラシック境界の寸法。
  * 見た目（ParkPerimeter）と衝突（topCollisions）が同じ数値を参照する。
  *
- * 座標メモ: 入場スポーンは +Z 側。カメラから見て手前＝北(+Z)、奥＝南(-Z／アトラクション列)。
+ * 座標メモ: 入場スポーンは +Z 側。手前＝口頭の南(+Z／コード n)、奥＝口頭の北(-Z／コード s)。
  */
 export type PerimeterSpec = {
   cx: number
@@ -167,9 +175,9 @@ function bridgeWallGap(spec: PerimeterSpec, side: CardinalSide) {
 }
 
 function defaultAlongOnSide(spec: PerimeterSpec, side: CardinalSide) {
-  // 東西辺は中央 Z。南北辺は左棟〜中央棟の間（建物被り回避）
+  // 東西辺は中央 Z。南北は FAR=左寄り／NEAR=センター（全区共通）
   if (side === 'e' || side === 'w') return spec.cz
-  return PARK_FAR_SIDE_GATE_X
+  return gateAlongXForNS(side)
 }
 
 export function openCenterOnSide(spec: PerimeterSpec, side: CardinalSide) {
