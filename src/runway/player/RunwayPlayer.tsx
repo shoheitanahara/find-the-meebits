@@ -21,9 +21,9 @@ const WALK_STEP_INTERVAL_SEC = 0.34
 /** パークと同系統の 3rd person 歩行（カメラは室内にクランプ） */
 export function RunwayPlayer({ enabled }: { enabled: boolean }) {
   const groupRef = useRef<Group>(null)
-  const xRef = useRef(RUNWAY.playerStart.x)
-  const zRef = useRef(RUNWAY.playerStart.z)
-  const rotationYRef = useRef(RUNWAY.playerStart.rotationY)
+  const xRef = useRef<number>(RUNWAY.playerStart.x)
+  const zRef = useRef<number>(RUNWAY.playerStart.z)
+  const rotationYRef = useRef<number>(RUNWAY.playerStart.rotationY)
   const localTimeRef = useRef(0)
   const footstepTimerRef = useRef(0)
   const keys = useKeyboardControls()
