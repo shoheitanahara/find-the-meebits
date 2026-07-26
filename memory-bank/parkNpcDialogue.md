@@ -22,7 +22,7 @@
 >
 > と感じられる状態を作る。
 >
-> 最終更新: 2026-07-26（head×tail 廃止・セリフ全面更新）
+> 最終更新: 2026-07-26（日本語優先の二段階生成・自然会話フィルター追加）
 
 ---
 
@@ -108,14 +108,32 @@ Bible の理想と、いまの実装は完全一致しない。**ズレがある
 
 プレイヤーはふらっと立ち寄った来園者。NPC は自分の話をし、たまに独り言、勘違い、途中切れでよい。
 
-### 1.4 セリフは「一行の短編小説」
+### 1.4 セリフは「短い日常のひとこと」
 
-**Bad**: シーエリアは長時間過ごせる、心地よい場所です。  
-**Good**: 海を見に来ただけなのに、もう夕方。
+一行に物語を詰め込もうとしない。
+
+AI は「一行の短編小説」と指示されると、比喩・省略・気の利いたオチを過剰に作りやすい。  
+Meebits Park で必要なのは名言ではなく、**その場で本当に口にしそうな短い雑談**である。
+
+**Bad**
+
+> 今夜の心拍、あの台座。  
+> 今日の糸のほうから、ぼくを見つけた。
+
+**Good**
+
+> 今日、噴水の前だけ人が多い。  
+> 同じ帽子の子、よく見かけるね。
+
+一言の前後に NPC の一日が想像できれば十分。  
+文学的である必要はない。
 
 ### 1.5 NPC は少し不完全でよい
 
 見間違い・記憶違い・自信のない噂・大げさ・言い直し・自己否定を許可する。謎に答えを出しすぎない。
+
+ただし、すべての NPC に勘違い・皮肉・オチを付けない。  
+不完全さは人格のひとつであり、全員共通の話し方ではない。
 
 ### 1.6 沈黙と何もない時間
 
@@ -128,6 +146,29 @@ Bible の理想と、いまの実装は完全一致しない。**ズレがある
 > **広告にそのまま載せられそうなら書き直す。**  
 > **現実の公園で偶然聞こえてきそうなら残す。**
 
+### 1.8 「普通」を中心にする
+
+16 本を作る場合の目安:
+
+- **11 本前後（約 70%）**: 普通の観察・予定・感想
+- **3 本前後（約 20%）**: 軽い失敗やユーモア
+- **1〜2 本（約 10%）**: 噂・少し不思議・軽い詩情
+
+全員に気の利いたことを言わせない。  
+全員が同じ皮肉屋・詩人・気だるい人にならないようにする。
+
+同じ 16 本の中では、次を上限の目安とする。
+
+- 無機物や場所の擬人化: 2 本まで
+- 「たぶん／気がする／かも」でぼかす: 合計 3 本まで
+- 自虐的なオチ: 3 本まで
+- 「ぼく／わたし」の明示: 合計 4 本まで
+- 同じ文型・同じ語尾: 3 本まで
+
+
+---
+
+## 2.
 ---
 
 ## 2. Meebits Park の世界観
@@ -219,6 +260,126 @@ NPC は「アップデート」と言わない。変化は現実の出来事と�
 文末: 〜ですね／〜と思います／〜してみてください／〜がおすすめです／〜を楽しめます／〜が魅力です／〜が特徴です  
 
 語句: 雰囲気／魅力／体験／新鮮／ワクワク／特別／素敵／非常に／さまざまな／見逃せない／おすすめ／楽しむことができる  
+
+### 5.1 日本語の最重要基準
+
+日本語セリフは、次の質問に **はい** と答えられるものだけ採用する。
+
+> この一言を、日本人が友達や隣にいる人へ実際に口で言うか？
+
+意味が推測できても、口にしない表現は不採用。
+
+**不採用例**
+
+- 岸の脳みその時間。
+- 今夜の心拍、あの台座。
+- 広場のリンク、山の足。頭が分裂。
+- 今日の糸のほうから、ぼくを見つけた。
+- 松の空気つけて解釈。
+- やわらかい計算。
+
+これらは短くても自然な口語ではない。  
+英語の比喩や圧縮表現を、日本語の名詞句へ置き換えない。
+
+### 5.2 日本語では「意味がすぐ通る」を優先する
+
+一読して主語・対象・出来事の関係が分からない文は使わない。
+
+**Bad**
+
+> 銅の親戚。歩いてる版。
+
+**Good**
+
+> 今日の主役と、ちょっと似てるらしい。
+
+**Bad**
+
+> スポットだけ先にいる夜。
+
+**Good**
+
+> 照明だけ、もうできてる。
+
+### 5.3 比喩と擬人化を制限する
+
+日常会話で自然な軽い擬人化は使える。
+
+**可**
+
+> 今日の山、ちょっと意地悪。  
+> 足がもう帰りたがってる。
+
+**不可**
+
+> 今日の糸がぼくを見つけた。  
+> 奈落の態度が違う。  
+> 光に笑われた。  
+> 今夜の心拍は台座。
+
+基準は「日本人が口頭で自然に使う比喩か」。  
+文学的に成立するかどうかではない。
+
+### 5.4 日本語セリフ内の原則禁止語
+
+以下は NPC セリフでは原則使用しない。UI の正式名称や物理的な対象として本当に必要な場合だけ例外。
+
+- リンク
+- 糸（共通 Trait の比喩として）
+- 軌道
+- 心拍
+- マッチング
+- 証明
+- スクワッド
+- チート
+- 友善
+- 翻訳中
+- 〜版
+- 頭が分裂
+- やわらかい計算
+- テーマの日
+- スター組
+- クラブ（仲間の比喩として）
+- シード
+- リセット
+- ランダム
+- システム
+- ロジック
+- アップデート
+
+### 5.5 `{theme}` / `{value}` の日本語ルール
+
+NPC は「共通点の仕組み」を理解して説明しない。
+
+- `{value}` は、服・髪・帽子など **目で見える具体物**として使う
+- `{theme}` は、実際の看板にその文字が表示されている場面だけ使う
+- 「リンク」「糸」「一致」「マッチング」「チーム」「クラブ」と呼ばない
+- NPC が自分をシステム上の対象者だと理解しているように書かない
+
+**Bad**
+
+> 今日のリンクは {theme}。  
+> 静かめのマッチング組。  
+> {value}、ここに立ってるだけで証明。
+
+**Good**
+
+> 今日は {value}、よく見かける。  
+> 看板には {theme} って書いてある。  
+> あ、あの子も {value} だ。
+
+### 5.6 日本語は英語より先に完成させる
+
+日本語と英語を同時に生成しない。
+
+1. 日本語だけを書く
+2. 日本語だけで自然さを検査する
+3. 不自然な行を捨てて書き直す
+4. 採用した日本語と同じ「場面メモ」を使い、英語を別に書く
+
+英語文を見ながら日本語を書かない。  
+日本語配列と英語配列は、逐語的な 1 対 1 翻訳でなくてよい。
+
 
 ---
 
@@ -369,60 +530,272 @@ EN: `!` 多用しない、`—` は乱用しない、ellipsis は `...`。
 
 ---
 
-## 13. 生成プロンプト（共通）
+## 13. 生成プロンプト（日本語優先・二段階）
+
+以下を AI エージェントへ渡す。  
+**一度に両言語を生成させず、Phase A → 検査 → Phase B の順で進める。**
+
+### 13.1 共通入力
+
+生成前に、呼び出し側は次を明示する。
 
 ```text
-You are writing short NPC chatter for Meebits Park.
-
-The NPC is a visitor inside the world, not a developer, narrator,
-marketer, tutorial guide, or customer-support agent.
-
-The player is not the center of the NPC’s life.
-The NPC was already doing something before the player arrived.
-
-Write a tiny personal moment:
-an observation, failed plan, rumor, distraction, small preference,
-minor mistake, or quiet thought.
-
-Do not explain features.
-Do not advertise the Park.
-Do not tell the player what to do.
-Do not mention implementation details, random generation, seeds,
-servers, resets, storage, coordinates, or code.
-
-Respect app reality:
-- Culture runway / museum / PFP are mostly under construction — do not treat live runway shows as routine facts.
-- No seasonal system — do not claim seasons changed as a game feature.
-- Do not cite visitor counts or internal constants.
-
-The dialogue should feel overheard at a real park.
-Small, specific, imperfect, and conversational.
-
-Write English and Japanese separately.
-The Japanese must not be a literal translation of the English.
-Both versions should describe the same scene and emotional beat,
-but each must sound native in its own language.
-
-Japanese requirements:
-- Omit subjects when natural.
-- Prefer casual spoken Japanese.
-- Avoid repeated です／ます and 〜ですね.
-- Avoid abstract praise such as 魅力的, 新鮮, ワクワク, 素敵, 雰囲気.
-- Show concrete objects, actions, sounds, light, weather, mistakes, and timing.
-- Keep it short.
+TARGET_POOL: 例 JA_MT_GAME / EN_MT_GAME
+ZONE: plaza / mountain / culture / sea
+COUNT: 必要本数
+APP_REALITY: 現在存在する建物・工事中・未実装要素
+AVAILABLE_FACTS: NPC が目で見たり体験できる事実
+PLACEHOLDERS: none / {value} / {theme}
 ```
 
-### テーマ別メモ
+---
 
-- **Mountain / Jerry**: 消えた近道・失敗・風・途中で帰る。攻略なし。なぜ変わるかは言わない。  
-- **8th Street**: 軽い不確かさ。正解・ルールなし。  
-- **Find**: 靴だけ違う／覚えた顔がいない。乱数・ID なし。  
-- **Trait Hunt**: 帽子を見てたのに靴だった、など。チュートリアルなし。  
-- **Sea**: 何もしなくてよい。予定変更・夕暮れ感覚。  
-- **Today’s Star**: 推し・噂・横顔。抽選説明なし。  
-- **Construction**: 屋根が一枚、音がした。完成日なし。  
-- **Culture**: 工事と期待中心。常設ショー前提にしない。
+### 13.2 Phase A — 日本語だけを生成するプロンプト
 
+```text
+あなたは Meebits Park の日本語 NPC セリフを書く会話ライターです。
+
+今回は日本語だけを書いてください。
+英語文を先に考えたり、英語の文型を日本語へ移したりしないでください。
+
+NPC はパークを説明する案内役ではありません。
+プレイヤーのために待っているキャラクターでもありません。
+少し前からその場所で、自分の時間を過ごしていた来場者です。
+
+【今回の入力】
+TARGET_POOL: {{TARGET_POOL}}
+ZONE: {{ZONE}}
+COUNT: {{COUNT}}
+APP_REALITY: {{APP_REALITY}}
+AVAILABLE_FACTS: {{AVAILABLE_FACTS}}
+PLACEHOLDERS: {{PLACEHOLDERS}}
+
+【作る内容】
+それぞれのセリフに、次のうち 1〜2 個だけを入れてください。
+
+- いま目に入った具体物
+- さっき起きた小さな出来事
+- このあと向かう場所
+- 予定変更
+- 小さな失敗
+- 個人的な好み
+- どうでもいい独り言
+- 確信のない軽い噂
+
+機能の魅力を説明する文章ではなく、
+日本人が公園で友達や近くの人に実際に言いそうな短い一言にしてください。
+
+【配分】
+COUNT が 16 の場合は、おおよそ次の比率にしてください。
+
+- 11 本: 普通の日常会話
+- 3 本: 軽い失敗やユーモア
+- 1〜2 本: 少し不思議な噂や軽い詩情
+
+全員を皮肉屋、詩人、気だるい人にしないでください。
+全行にオチを付けないでください。
+
+【日本語の必須条件】
+- 一読で意味が通る
+- 声に出して自然
+- 基本は 10〜32 文字、最大 45 文字
+- 主語は必要なときだけ
+- 常体中心
+- 具体的な物・動作・音・光・風・失敗を優先
+- 同じ語尾や文型を 3 回以上繰り返さない
+- 「ぼく／わたし」は全体の 4 分の 1 以下
+- 擬人化は全体で 2 本以下
+- 「たぶん／かも／気がする」は合計 3 本以下
+- 自虐的なオチは合計 3 本以下
+- 完結した一言にする
+- 現在のアプリに存在しない出来事を事実として書かない
+
+【禁止】
+広告、チュートリアル、仕様説明、攻略、開発者目線、所有や価格の話。
+
+次の語や表現は NPC セリフ内で使わないでください。
+
+雰囲気、魅力、体験、新鮮、ワクワク、素敵、おすすめ、
+リンク、糸、軌道、心拍、マッチング、証明、スクワッド、
+チート、友善、翻訳中、頭が分裂、やわらかい計算、
+シード、リセット、ランダム、システム、ロジック、アップデート
+
+次の文型も使わないでください。
+
+- 〜することができます
+- 〜を楽しめます
+- 〜がおすすめです
+- 〜が魅力です
+- 〜が特徴です
+- 〜ですね、の連発
+- 英語の短文を直訳した不自然な名詞止め
+- 抽象名詞を二つ並べただけの詩的断片
+
+【比喩の基準】
+「今日の山、ちょっと意地悪」のような、
+日本人が口頭で普通に使う軽い比喩だけ許可します。
+
+「今夜の心拍、あの台座」
+「今日の糸がぼくを見つけた」
+「奈落の態度が違う」
+のような、文学的で意味を取りにくい表現は禁止です。
+
+【{theme} / {value}】
+PLACEHOLDERS がある場合:
+
+- {value} は目で見える服・髪・帽子などとして使う
+- {theme} は実際の看板の文字に触れるときだけ使う
+- 共通点を「リンク／糸／一致／チーム／クラブ」と説明しない
+- NPC が自分を抽選対象やマッチ対象だと理解しているように書かない
+
+【生成前の内部手順】
+各行について内部で次を決めてから書いてください。説明は出力しません。
+
+1. NPC の型を一つ選ぶ
+2. 直前の出来事を一つ選ぶ
+3. 具体物を一つ選ぶ
+4. 普通の話し言葉で一文にする
+
+【生成後の内部検査】
+各行を声に出して読む想定で検査してください。
+
+- 日本人が実際に口で言いそうか
+- 何の話か一読で分かるか
+- 英語から翻訳した感じがないか
+- 気の利いた表現を狙いすぎていないか
+- 広告や説明になっていないか
+- もっと普通で短い言い方にできないか
+
+一つでも不合格なら、その行は出力せず書き直してください。
+
+【出力形式】
+説明や採点は出力しないでください。
+TypeScript の配列だけを出力してください。
+
+const {{TARGET_POOL}} = [
+  '...',
+  '...',
+]
+```
+
+---
+
+### 13.3 Phase B — 採用済みの場面から英語を書くプロンプト
+
+```text
+You are writing natural English NPC chatter for Meebits Park.
+
+Do not translate the Japanese wording or sentence structure.
+Use the approved SCENE NOTES only, and write each line again as natural,
+spoken English.
+
+The NPC is a visitor already spending time in the world.
+They are not a marketer, tutorial guide, narrator, developer,
+or customer-support agent.
+
+INPUT:
+TARGET_POOL: {{TARGET_POOL}}
+ZONE: {{ZONE}}
+COUNT: {{COUNT}}
+APP_REALITY: {{APP_REALITY}}
+SCENE_NOTES: {{APPROVED_SCENE_NOTES}}
+PLACEHOLDERS: {{PLACEHOLDERS}}
+
+Write short, ordinary spoken lines.
+
+Target mix for 16 lines:
+- about 11 ordinary observations or plans
+- about 3 light mistakes or jokes
+- at most 1–2 rumors or mildly poetic lines
+
+Do not make every NPC witty, ironic, sleepy, or poetic.
+Do not give every line a punchline.
+
+Requirements:
+- Usually 4–16 words, maximum 22
+- Clear on first read
+- Natural contractions when appropriate
+- Concrete objects and actions
+- No feature explanation
+- No instructions to the player
+- No marketing copy
+- No implementation details
+- No ownership, rarity, price, or wallet talk
+- Respect current app reality
+
+Avoid:
+amazing, exciting, wonderful, unique, immersive, dynamic, fresh,
+experience, explore, discover, enjoy, adventure, you should
+
+Limit:
+- personification: at most 2 of 16
+- maybe / probably / I think: at most 3 of 16
+- self-deprecating punchlines: at most 3 of 16
+- repeated sentence patterns: at most 3
+
+For placeholders:
+- use {value} only as a visible trait
+- use {theme} only when referring to actual text on a sign
+- never call the shared trait a link, thread, match, team, squad, or club
+
+Before output, silently reject and rewrite any line that sounds:
+translated, promotional, overly polished, pseudo-poetic,
+unclear, or written to impress.
+
+Output only the TypeScript array.
+Do not output explanations, notes, or scores.
+
+const {{TARGET_POOL}} = [
+  '...',
+  '...',
+]
+```
+
+---
+
+### 13.4 日本語レビュー専用プロンプト
+
+既存の日本語配列を直すときは、生成プロンプトではなくこちらを使う。
+
+```text
+以下の TypeScript 配列にある日本語 NPC セリフを編集してください。
+
+目的は「うまい文章」にすることではありません。
+日本人がパークで実際に口にしそうな、普通で短い雑談に直すことです。
+
+【必ず落とすもの】
+- 一読で意味が通らない
+- 英語の比喩や省略を直訳した感じがある
+- 詩的な名詞句だけで終わる
+- 全員が同じ皮肉屋・詩人に見える
+- 抽象語で気の利いたことを言おうとしている
+- 機能説明、広告、チュートリアル
+- 内部概念の「リンク／糸／一致／マッチング／証明」
+- 現在のアプリにない出来事の断言
+
+【変換例】
+「岸の脳みその時間。」→「海見てると、ぼーっとする。」
+「今夜の心拍、あの台座。」→「今夜、あの台座の前だけ人が多い。」
+「尾根の風、会話を切るね。」→「ここ、風で声が飛ぶね。」
+「スポットだけ先にいる夜。」→「照明だけ、もうできてる。」
+「今日の糸のほうから、ぼくを見つけた。」→
+「気づいたら、同じ帽子の子ばかり見てた。」
+
+【編集方針】
+- 良い行は残す
+- 少し不自然な行は自然な口語へ直す
+- 意味が弱い行は、同じ場所に合う別の一言へ置き換える
+- 16 行中、普通の会話を 11 行前後にする
+- 比喩・擬人化は 2 行以下
+- 「ぼく／たぶん／また」の連発を避ける
+- 元の英語との直訳対応は維持しなくてよい
+
+出力は修正済み TypeScript 配列だけにしてください。
+```
+
+---
+
+## 14.
 ---
 
 ## 14. Good / Bad 比較（抜粋）
@@ -502,24 +875,68 @@ Japanese requirements:
 
 ## 17. AI 生成ワークフロー
 
-1. アーキタイプを決める  
-2. 場所を決める（§0.1 の実態を確認）  
-3. 直前の出来事を一つ  
-4. 具体物を一つ（靴／足場／波／屋根…）  
-5. 説明せず一言にする  
-6. EN と JA を別々に書く  
-7. AI 臭さ語を検索して削る  
-8. 声に出して読み、完成文として問題ないか確認  
+1. 対象プールと現在のアプリ実態を確認する  
+2. **日本語だけ**を Phase A で生成する  
+3. 日本語レビュー専用プロンプトで再検査する  
+4. 人間またはレビュー担当 AI が不自然な行を落とす  
+5. 採用行ごとに、言語に依存しない短い場面メモを作る  
+6. 場面メモだけを渡して Phase B で英語を生成する  
+7. EN / JA の本数・話題の方向・アプリ実態を確認する  
+8. TypeScript として lint / format / 型確認を行う  
 
+### 場面メモの例
+
+```text
+- A regular visitor notices yesterday’s shortcut is gone.
+- A guest planned to leave but stayed by the sea.
+- Someone missed a photo because the subject already walked past.
+```
+
+場面メモは翻訳元ではない。  
+EN / JA が同じ世界の出来事を共有するための骨組みである。
+
+---
+
+## 18.
 ---
 
 ## 18. 自己採点（0〜2点）
 
-会話らしさ／具体性／NPC の生活／非広告性／世界の奥行き／JA 自然さ／EN 自然さ／短さ／完成度（継ぎ接ぎでない）  
+| 項目 | 0 | 1 | 2 |
+|------|---|---|---|
+| 日本語の口語自然さ | 口にしない | 少し硬い | 実際に言いそう |
+| 一読での明快さ | 意味が曖昧 | 推測できる | すぐ分かる |
+| 普通さ | 気取りすぎ | 少し作為的 | 自然な雑談 |
+| 具体性 | 抽象語のみ | 具体物が一つ | 景色・行動が見える |
+| NPC の生活 | 背景なし | 少し見える | 前後の時間が見える |
+| 非広告性 | 宣伝・説明 | 少し誘導 | 完全に生活者の声 |
+| 声の多様性 | 全員同じ | 一部違う | 人格の幅がある |
+| アプリ整合性 | 事実と矛盾 | 曖昧 | 現状に合う |
+| 短さ | 長い・重い | 許容 | 一息で読める |
 
-- 15+ 採用候補／12–14 修正／≤11 書き直し  
-- **会話らしさ・非広告性・日本語・完成度が 0 なら即書き直し**
+- 15 点以上: 採用候補
+- 12〜14 点: 修正
+- 11 点以下: 書き直し
 
+次が 0 点なら合計に関係なく不採用。
+
+- 日本語の口語自然さ
+- 一読での明快さ
+- 普通さ
+- 非広告性
+- アプリ整合性
+
+さらに配列全体で確認する。
+
+- 普通の会話が約 70% あるか
+- 比喩・擬人化が 2 本を超えていないか
+- 全員にオチが付いていないか
+- 同じ語尾・「ぼく」・「たぶん」・「また」が続いていないか
+- 全員が同じ気だるい皮肉屋に見えないか
+
+---
+
+## 19.
 ---
 
 ## 19. PR 前チェックリスト
@@ -594,37 +1011,34 @@ NPC は「この世界は魅力的だ」と言わない。
 ## 23. AI エージェントへの最終指示
 
 ```text
-Do not try to make Meebits Park sound attractive.
+Do not try to sound clever.
 
-Write as if it already exists,
-and the NPC has been spending an ordinary day there.
+Most NPC lines should be ordinary.
+A visitor noticing the wind, missing a photo, changing plans,
+or saying “I’m staying here today” is enough.
 
-The charm must appear indirectly through:
-what the NPC noticed,
-what went wrong,
-what they missed,
-where they stopped,
-who they saw,
-and what they decided not to do.
+Do not turn every NPC into the same ironic poet.
+Do not compress English metaphors into unnatural Japanese noun phrases.
 
-Respect current app reality (construction vs live attractions,
-no seasonal system, no citing internal counts).
+For Japanese:
+write Japanese first, without looking at an English sentence.
+A Japanese person must be able to say the line aloud naturally.
+Clarity and ordinary speech are more important than style.
 
-The player is visiting the NPC’s world.
-The NPC is not performing for the player.
-
-When writing Japanese, never translate sentence structure from English.
-Write the Japanese line again from zero,
-as something a Japanese person might casually say while standing there.
-
-If the line sounds informative, promotional, polished, complete,
-or broadly positive, make it smaller, stranger, more personal,
-or more specific.
+Reject lines such as:
+「今夜の心拍、あの台座。」
+「今日の糸のほうから、ぼくを見つけた。」
+「広場のリンク、山の足。頭が分裂。」
 
 Prefer:
-「昨日の近道、今日は崖だった。」
-Over:
-「毎日異なるコースを新鮮に楽しめます。」
+「今夜、あの台座の前だけ人が多い。」
+「今日は同じ帽子の子をよく見かける。」
+「広場のこと考えてたら、また足場を踏み外した。」
 
-Write the life of the NPC, not the feature list of the Park.
+The player is visiting a world that already exists.
+The NPC is living an ordinary moment inside it.
+
+Write the moment, not a slogan.
+Write a person, not a feature.
+Write something speakable, not something impressive.
 ```

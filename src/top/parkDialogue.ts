@@ -85,7 +85,7 @@ export function selectParkDialogueLines(
     second =
       locale === 'ja'
         ? isMountain || isCulture || isSea
-          ? `噴水の銅像、#${featuredId}。ぼく。遠くにいると信じにくいよね。`
+          ? `噴水の銅像、#${featuredId}。ぼく。遠くからだと信じにくいよね。`
           : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
         : isMountain || isCulture || isSea
           ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
@@ -123,12 +123,12 @@ export function selectParkDialogueLines(
     second = pickLine(pools.flavor, seed, talkCount, 53)
   }
 
-  // マッチ時はときどき共通点に寄せる（説明口調にしない）
+  // マッチ時はときどき共通の見た目に触れる（仕組み説明にしない）
   if (npc.matched && !npc.isFeatured && seededIndex(seed, talkCount, 3) === 1) {
     second =
       locale === 'ja'
-        ? `今日の糸、${themeLabel(themeTrait)}。たぶんぼくも。`
-        : `Today’s thread — ${themeLabel(themeTrait)}. Probably me too.`
+        ? `今日は ${themeLabel(themeTrait)}、よく見かける。ぼくもその一人。`
+        : `Seeing a lot of ${themeLabel(themeTrait)} today. I’m one of them.`
   }
 
   lines.push({
