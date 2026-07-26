@@ -49,7 +49,7 @@ const CREATOR_SEED = 11143
 
 /**
  * パーク来場者のセリフを 1〜2 行選ぶ。
- * plaza / mountain / culture / sea で別プール。挨拶 +（ゲーム紹介 / 主役 / 共通点 / フレーバー）。
+ * plaza / mountain / culture / sea で別プール。挨拶 + 本文。
  */
 export function selectParkDialogueLines(
   npc: ParkNpcRecord,
@@ -77,7 +77,7 @@ export function selectParkDialogueLines(
     category: 'greeting',
   })
 
-  // 2行目: マッチ / 主役本人 / ゲーム紹介 / テーマ をローテート
+  // 2行目: マッチ / 主役本人 / ゲーム / テーマ / フレーバー をローテート
   const branch = seededIndex(seed, talkCount, 6)
   let second = ''
 
@@ -85,11 +85,11 @@ export function selectParkDialogueLines(
     second =
       locale === 'ja'
         ? isMountain || isCulture || isSea
-          ? `実はぼくが今日の主役 #${featuredId} だよ。プラザの噴水銅像、ぼくだ！`
-          : `実はぼくが今日の主役 #${featuredId} だよ。噴水の銅像、ぼくだ！`
+          ? `噴水の銅像、#${featuredId}。ぼく。遠くにいると信じにくいよね。`
+          : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
         : isMountain || isCulture || isSea
-          ? `Fun fact — I’m today’s star #${featuredId}. That’s me on the plaza fountain!`
-          : `Fun fact — I’m today’s star #${featuredId}. That’s me on the fountain!`
+          ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
+          : `Fountain statue’s #${featuredId}. That’s me. Looks different from the side.`
   } else if (npc.matched && branch <= 2) {
     second = fillTheme(pickLine(pools.themeMatched, seed, talkCount, 23), themeTrait)
     if (branch === 0) {
@@ -123,12 +123,12 @@ export function selectParkDialogueLines(
     second = pickLine(pools.flavor, seed, talkCount, 53)
   }
 
-  // マッチ時は2行目に共通点を織り込む（3行目は作らない）
+  // マッチ時はときどき共通点に寄せる（説明口調にしない）
   if (npc.matched && !npc.isFeatured && seededIndex(seed, talkCount, 3) === 1) {
     second =
       locale === 'ja'
-        ? `ちなみに今日の共通点は「${themeLabel(themeTrait)}」だよ。`
-        : `By the way, today’s link is “${themeLabel(themeTrait)}”.`
+        ? `今日の糸、${themeLabel(themeTrait)}。たぶんぼくも。`
+        : `Today’s thread — ${themeLabel(themeTrait)}. Probably me too.`
   }
 
   lines.push({

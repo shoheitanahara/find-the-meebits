@@ -38,7 +38,7 @@
 | Find the Meebit | 群衆が常にランダムで新鮮 |
 | Plaza | 噴水 Featured・テーマトレイトが日付で変わる |
 
-NPC はこの魅力を **来場者同士の噂** として伝える（仕様説明にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)。
+NPC はこの魅力を **来場者の生活・失敗・寄り道** としてにじませる（仕様説明・広告口調にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)（Dialogue Bible）。
 
 ### Park レイアウトを触るとき
 

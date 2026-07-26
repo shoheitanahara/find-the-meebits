@@ -26,7 +26,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 3. **[systemPatterns.md](./systemPatterns.md)** — アーキテクチャ・主要ファイル・設計パターン
 4. **[productContext.md](./productContext.md)** — ゲームデザイン・ユーザー嗜好・コンテンツ方針
 5. **[parkDesigner.md](./parkDesigner.md)** — **Park 設計士ノート**（ゾーン／導線／**§14 配置デフォルト**）
-6. **[parkNpcDialogue.md](./parkNpcDialogue.md)** — **NPC セリフ生成ノート**（日替わり・ランダムの魅力／英日トーン）
+6. **[parkNpcDialogue.md](./parkNpcDialogue.md)** — **NPC Dialogue Bible**（来場者の生活として語る／アプリ実態との合わせ方）
 7. **[activeContext.md](./activeContext.md)** — 直近の作業内容・現在の状態
 8. **[progress.md](./progress.md)** — 完了済み・既知の課題・未着手
 

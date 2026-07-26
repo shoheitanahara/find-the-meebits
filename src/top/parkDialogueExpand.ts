@@ -1,9 +1,9 @@
 /**
- * セリフ断片の組み合わせで地区別プールを生成する。
+ * パーク NPC セリフプール（完結した一言の配列）。
  * plaza / mountain / culture / sea × EN / JA。
  *
- * トーン・柱: memory-bank/parkNpcDialogue.md
- * NPC = パークを楽しむ来場者（仕様説明・制作者口調禁止）
+ * 方針: memory-bank/parkNpcDialogue.md
+ * head×tail 結合は使わない（組み合わせ事故を避ける）。
  */
 
 import type { ParkZoneId } from './parkZones'
@@ -24,1163 +24,730 @@ export type ParkDialoguePools = {
 
 type Lang = 'en' | 'ja'
 
-/** heads × tails の直積（重複除去）。 */
-function product(heads: string[], tails: string[], joiner = ' '): string[] {
-  const out: string[] = []
-  const seen = new Set<string>()
-  for (const h of heads) {
-    for (const t of tails) {
-      const line = joiner === '' ? `${h}${t}` : `${h}${joiner}${t}`
-      if (seen.has(line)) continue
-      seen.add(line)
-      out.push(line)
-    }
-  }
-  return out
-}
-
 // ─── English ─────────────────────────────────────────────────────────
 
-const EN_PLAZA_GREET_H = [
-  'Hey there!',
-  'Oh, hello!',
-  'Yo!',
-  'Hi friend!',
-  'Evening!',
-  'Hey!',
-  'Oh hey!',
-  'Welcome!',
-  'Nice timing!',
-  'There you are!',
-  'Hey buddy!',
-  'Look who it is!',
+const EN_PLAZA_GREET = [
+  'Oh. Hey.',
+  'Didn’t see you there.',
+  'Hang on — shoe’s untied.',
+  'I was just… standing here.',
+  'You too?',
+  'Evening.',
+  'Huh. Hi.',
+  'Back already?',
+  'I keep ending up at the fountain.',
+  'Sorry — thinking out loud.',
+  'Nice night for doing nothing.',
+  'I lost my plan somewhere around here.',
+  'Wind’s soft tonight.',
+  'Don’t mind me.',
+  'Was talking to myself. Anyway.',
+  'One more lap. Probably.',
 ]
 
-const EN_PLAZA_GREET_T = [
-  'Perfect night for a Park stroll.',
-  'The lamps are soft tonight.',
-  'Fancy bumping into you here.',
-  'Between attractions already?',
-  'Everyone’s in a chatty mood.',
-  'Got a favorite door yet?',
-  'The plaza feels alive tonight.',
-  'Fresh air and Meebits — yes.',
-  'You look ready for something fun.',
-  'Stick around — rumors travel fast.',
-  'Fountain light hits different tonight.',
-  'Four districts, one wandering night.',
+const EN_MT_GREET = [
+  'Oh. Trail’s loud tonight.',
+  'Pine in my nose again.',
+  'Almost walked off that edge.',
+  'Hey. Watching my feet.',
+  'Torchlight’s doing that flicker thing.',
+  'I was counting jumps. Lost count.',
+  'Cold up here. Kind of like it.',
+  'You climb, or just looking?',
+  'Ridge wind hit me mid-sentence.',
+  'I’m blaming the height for everything.',
+  'Took the long way. On purpose. Sort of.',
+  'Legs still buzzing.',
+  'Don’t trust that ledge. I didn’t.',
+  'Quiet for a mountain night.',
+  'I sat down and forgot why.',
+  'Hi. Need a second.',
 ]
 
-const EN_MT_GREET_H = [
-  'Hey climber!',
-  'Welcome up here!',
-  'Oh, hello!',
-  'Yo!',
-  'Hi trail friend!',
-  'Evening on the ridge!',
-  'Hey!',
-  'Oh hey!',
-  'Nice timing!',
-  'Look who made it!',
-  'Hey buddy!',
-  'Howdy, highlander!',
+const EN_CU_GREET = [
+  'Blue light makes everyone look serious.',
+  'Oh — didn’t hear you.',
+  'I’ve been staring at that board.',
+  'Suits. So many suits.',
+  'This floor’s colder than the plaza.',
+  'I came for the runway. It’s… not ready.',
+  'Someone left footprints in the dust.',
+  'Quiet gallery. Loud thoughts.',
+  'Hey. Lost in the navy.',
+  'Was reading a construction sign. Thrilling.',
+  'Spotlights without a show. Weird mood.',
+  'I keep circling the same stripe.',
+  'Evening. Or whatever this hour is.',
+  'Don’t ask me for directions. I’m guessing.',
+  'Scaffolding’s new. Or I’m late.',
+  'Hi. Just wandering.',
 ]
 
-const EN_MT_GREET_T = [
-  'The air feels thinner — in a good way.',
-  'Pine scent and cliff light tonight.',
-  'Fancy meeting you past the bridge.',
-  'Warming up before today’s route?',
-  'Watch the edges — they don’t forgive.',
-  'Jumping legs ready?',
-  'Mountain nights hit different.',
-  'Torchlight on stone is gorgeous.',
-  'You look ready for a ledge or two.',
-  'Trail chatter’s buzzing tonight.',
-  'Take a breath — the climb can wait a second.',
-  'Today’s cliffs already look curious.',
+const EN_SEA_GREET = [
+  'Tide’s quiet.',
+  'Sand again. Always sand.',
+  'Oh. Didn’t notice you.',
+  'I stopped for a minute. Then another.',
+  'Palm shadows are long tonight.',
+  'Lantern’s warm. Water’s not.',
+  'I had somewhere to be.',
+  'Waves sound farther than they look.',
+  'Hey. Shore brain.',
+  'Shoes full of grit already.',
+  'I keep facing the dark water.',
+  'No rush. Really.',
+  'Foam line pulled me this way.',
+  'Evening by the sea. Sort of.',
+  'I sat down. That was the plan.',
+  'Hi. Listening to nothing.',
 ]
 
-const EN_CU_GREET_H = [
-  'Welcome to Culture!',
-  'Hey, fashion guest —',
-  'Oh, hello!',
-  'Yo!',
-  'Hi!',
-  'Gallery night vibes.',
-  'Hey!',
-  'Oh hey!',
-  'Nice timing!',
-  'Look who crossed over!',
-  'Hey buddy!',
-  'Evening!',
+const EN_FIND = [
+  'Right face. Wrong shoes.',
+  'I memorized one Meeb. The crowd replaced everyone.',
+  'Found them. Then immediately doubted it.',
+  'Same smile. Different everything else.',
+  'I came looking for one and left liking three.',
+  'There is entirely too much of the same hair.',
+  'I should’ve remembered the shoes.',
+  'Lost that Meeb again near the back wall.',
+  'The two who looked different were almost identical.',
+  'Museum tip from me: don’t trust first glances.',
+  'I waved at the wrong one. Twice.',
+  'Clock was loud. Faces were louder.',
+  'Thought I had them. Hat said otherwise.',
+  'Crowd reshuffled while I tied my shoe.',
+  'After Hours can wait. I need one more look.',
+  'I found a favorite who wasn’t the target.',
 ]
 
-const EN_CU_GREET_T = [
-  'Meebits are the art tonight.',
-  'Take a slow lap of the district.',
-  'Cool blue light loves a good outfit.',
-  'Navy floors, soft spotlights — dreamy.',
-  'Glad you came through the north gate.',
-  'Stay curious in these halls.',
-  'Runway stripe pulls the eye, right?',
-  'Suits look sharp under this glow.',
-  'Three builds rising soon — peek around.',
-  'Culture air feels different from the plaza.',
-  'No dress code, all dress-code vibes.',
-  'Wander like you’re already on the catwalk.',
+const EN_TRAITS = [
+  'I watched the hats. It was the shoes.',
+  '“Blue” stops being one color when they stand together.',
+  'I thought I’d remember that hair. I did not.',
+  'Saw the outfit. Forgot the face.',
+  'Thought those were glasses. Eyebrows.',
+  'Up close, none of them look alike.',
+  'Can’t stop noticing shoes today.',
+  'Found the trait. Forgot the word.',
+  'Same shirt, different walk. That threw me.',
+  'I checked earrings last. Should’ve checked first.',
+  'Gallery light lied about the color. Or I did.',
+  'Matching feels like cheating until it doesn’t.',
+  'One accessory flipped the whole hunt.',
+  'I walked past the answer three times.',
+  'Trait Hunt made my eyes tired in a good way.',
+  'I swear that scarf moved rooms.',
 ]
 
-const EN_SEA_GREET_H = [
-  'Welcome to the Sea District!',
-  'Hey, shoreline guest —',
-  'Oh, hello!',
-  'Yo!',
-  'Hi!',
-  'Night beach vibes.',
-  'Hey!',
-  'Oh hey!',
-  'Nice timing!',
-  'Look who hit the sand!',
-  'Hey buddy!',
-  'Evening by the tide!',
+const EN_STREET = [
+  'That corner’s closer than it was.',
+  'Nothing looked wrong. That felt wrong.',
+  'Passed the same walker three times. Maybe they passed me.',
+  'Footsteps stop when I stop.',
+  'Nothing happened. Probably.',
+  'Was that window open before?',
+  'I decided not to look back today.',
+  'Found the exit. It was the entrance.',
+  'Warm lamps. Cold neck.',
+  'Someone rearranged the alley. Or my memory.',
+  'Blinked once. Missed whatever it was.',
+  'Same street. Different shoes on the walkers.',
+  'I’m fine. The silence isn’t.',
+  'White fade hit. I forgot what I was counting.',
+  'Told myself it was nothing. Kept checking.',
+  '8th Street owes me one normal corner.',
 ]
 
-const EN_SEA_GREET_T = [
-  'Smell that quiet night sea?',
-  'Sand underfoot, stars overhead.',
-  'Glad you came through the west gate.',
-  'Lanterns on warm sand — love it.',
-  'Palm silhouettes against the sky.',
-  'Tide’s soft tonight.',
-  'Take it slow on the shore path.',
-  'Pier lights look cozy from here.',
-  'Beach air hits different after the plaza.',
-  'Three shore builds rising soon.',
-  'Kick back — the ocean’s endless tonight.',
-  'Foam line leads you home if you wander.',
+const EN_MT_GAME = [
+  'Yesterday’s shortcut is a cliff now.',
+  'I nailed the first three jumps.',
+  'The summit can wait. I reached the clouds.',
+  'I’m blaming the wind.',
+  'Fell in the same place twice. Definitely the place.',
+  'Up looked far. Down looked worse.',
+  'The mountain woke up annoyed today.',
+  'View halfway up talked me out of climbing.',
+  'I only meant to watch Mt. Meeb for a minute.',
+  'Had a plan. The ledges didn’t.',
+  'That jump looked easy. Looked.',
+  'I’m done. One more try.',
+  'Torchlight helped. Guts didn’t.',
+  'Came back for yesterday’s ledge. It’s gone.',
+  'Three lanes. Picked the rude one.',
+  'Stage one again. Legs already arguing.',
 ]
 
-const EN_FIND_H = [
-  'Find the Meebit is that way —',
-  'If you like hunting faces in a crowd,',
-  'The Museum never shows me the same room twice.',
-  'Every Museum run feels brand new —',
-  'I love that fresh sea of faces.',
-  'Lost in Meebits?',
-  'Museum tip from a guest:',
-  'Wrong Meebit?',
-  'Crowds look alike until they don’t.',
-  'I keep going back because the faces change.',
-  'Hunting one Meebit in a reshuffled crowd —',
-  'If you clear the Museum,',
+const EN_NEON = [
+  'Clear platforms are fine until I remember they’re clear.',
+  'Wasn’t going to look down. Then everything lit up.',
+  'Jerry Mountain feels smug today.',
+  'Yesterday’s neon ledge? Missing.',
+  'Soft blocks. Hard landings.',
+  'I trusted the glow. The glow laughed.',
+  'Same jumps. Meaner void.',
+  'Came for one stage. Stayed for the sparkles. Then fell.',
+  'Jelly looked friendly. Wasn’t.',
+  'I’m blaming the pink one.',
+  'Abyss is patient. I’m not.',
+  'Route remixed itself overnight. Rude.',
+  'One more glow-up. Then I’m done. Then one more.',
+  'Edges are louder when they’re neon.',
+  'I liked last night’s path better. It’s gone.',
+  'Jerry tip: don’t celebrate mid-jump.',
 ]
 
-const EN_FIND_T = [
-  'go chase them in the Museum!',
-  'try Find the Meebit tonight.',
-  'one target, endless almosts.',
-  'talk to folks — rumors help.',
-  'bring focus and soft eyes.',
-  'that’s the Museum rush.',
-  'keep walking — the right one’s somewhere.',
-  'don’t freeze up!',
-  'trust your eyes, not the panic.',
-  'After Hours waits if you make it.',
-  'pure hide-and-seek with style.',
-  'that’s why it never gets stale.',
+const EN_FEAT = [
+  'Today’s Star looks a little sleepy.',
+  'I keep watching the crowd instead of the statue.',
+  'Copper looks warmer from this side.',
+  'Took a photo. Thumb in the frame. Classic.',
+  'That pedestal’s busy tonight.',
+  'I like the Star better from the back.',
+  'Fountain’s loud. Star’s quiet.',
+  'Someone’s circling the statue like it’s a campfire.',
+  'Board’s covered in fingerprints already.',
+  'I came for the Star. Stayed for the gossip.',
+  'Statue didn’t move. I still checked twice.',
+  'Today’s face feels familiar. Or I want it to.',
+  'Metal shouldn’t look that smug.',
+  'I’m not matching. Still staring.',
+  'Plaza heartbeat’s on that pedestal tonight.',
+  'Missed the name. Remembered the hat.',
 ]
 
-const EN_TRAITS_H = [
-  'Trait Hunt is all about the tiny tells —',
-  'Hair, clothes, accessories…',
-  'Feeling stylish?',
-  'Same shirt? Same glasses?',
-  'I missed earrings once and ate dirt.',
-  'Trait Hunt feels like',
-  'Read the clue twice —',
-  'Gallery light helps if you slow down.',
-  'Matching traits is oddly satisfying.',
-  'If you love outfits,',
-  'Today’s lookalike hunt starts with a clue.',
-  'Sharp eyes beat fast feet there.',
+const EN_FEAT_MT = [
+  'Even up here people talk about the fountain Star.',
+  'Hiked down just to squint at the statue. Worth it.',
+  'Trail gossip says today’s Star looks tired.',
+  'I’ll check the pedestal after my legs forgive me.',
+  'Copper and torchlight. Same family somehow.',
+  'Plaza Star followed me up here in conversation only.',
+  'I keep pointing at the valley like the statue’s there.',
+  'Featured face. Mountain air. Odd mix.',
+  'Someone on the ridge described the hat wrong. I think.',
+  'Climb first. Pedestal second. Or reverse. Undecided.',
+  'Heard the Star changed. Haven’t seen it yet.',
+  'Fountain rumors climb faster than I do.',
+  'I’ll believe the board when I can read it again.',
+  'Statue talk on a cliff. Park logic.',
+  'Today’s Star can wait. This ledge can’t.',
+  'Going back down for one more look. Probably.',
 ]
 
-const EN_TRAITS_T = [
-  'spot the lookalikes and smile.',
-  'Trait Hunt lives in the details.',
-  'the gallery is calling.',
-  'Trait Hunt will test you.',
-  'lesson learned the hard way.',
-  'fashion bingo with Meebits.',
-  'one trait can flip everything.',
-  'don’t rush the first glance.',
-  'you’ll see what I mean.',
-  'Trait Hunt is your playground.',
-  'perfect between longer attractions.',
-  'careful walkers win that room.',
+const EN_FEAT_MATCH = [
+  'I’m in the Star’s orbit tonight. Quietly.',
+  'Same vibe as the statue. Different height.',
+  'If the fountain winked, that was me flinching.',
+  'Lookalike duty. Didn’t ask for it.',
+  'We’re scattered on purpose. Or by accident.',
+  'Matching the pedestal. Feeling watched.',
+  'Star team without the plaque.',
+  'I keep getting double-takes. Fair.',
+  'Not the statue. Close enough to confuse people.',
+  'Today chose this look. I just showed up.',
+  'Find the others if you want. I’m resting.',
+  'Spotlight’s imaginary. Still standing in it.',
+  'Copper cousin. Walking edition.',
+  'I waved at my own reflection near the board.',
+  'Matching feels like a soft club.',
+  'Don’t tell the statue. Awkward.',
 ]
 
-const EN_STREET_H = [
-  '8th Street looks the same… until it doesn’t.',
-  'Same alley, different walkers tonight —',
-  'If you like tiny wrongnesses,',
-  'I swear the crowd rearranges itself.',
-  'Warm lamps, cold twists.',
-  'Watch the walkers carefully.',
-  'Every loop, someone’s standing wrong.',
-  '8th Street keeps my spine awake.',
-  'Turn the corner twice.',
-  'The white fade means stay sharp.',
-  'Anomalies shift — that’s the thrill.',
-  'Yesterday’s street guests already feel gone.',
+const EN_THEME = [
+  'Board says {theme}. I’m still translating that into people.',
+  'Lots of {value} drifting past the fountain.',
+  'I keep spotting {value} and forgetting why it matters.',
+  'Today’s link is {theme}. Or so the sign claims.',
+  'Half the plaza is quietly matching. Half isn’t.',
+  'Came for a stroll. Left counting {value}.',
+  'Is it just me, or is {value} everywhere?',
+  'I nodded at a stranger for {theme}. They nodded back. Maybe.',
+  'Fountain board’s sticky with {theme} talk.',
+  'I’m not hunting. I’m noticing. Difference.',
+  '{value} looked better on the statue. Controversial.',
+  'Daily link day. Shoes still untied.',
+  'I asked what {theme} meant. Got three answers.',
+  'Matching thread pulled me across the plaza.',
+  'I’ll believe {value} when I see it twice.',
+  'Sign says {theme}. Crowd says maybe.',
 ]
 
-const EN_STREET_T = [
-  'notice what changed!',
-  'walk into 8th Street and feel it.',
-  'blink and you’ll miss it.',
-  'that’s why I keep looping.',
-  'look twice. Trust your gut.',
-  'one of them isn’t right.',
-  'slow eyes win there.',
-  'don’t sprint past the clues.',
-  'first-person night hits different.',
-  'come taste the unease yourself.',
-  'I’m hooked on those tiny tells.',
-  'keeps the night feeling alive.',
+const EN_THEME_MT = [
+  'Ridge talk mentions {theme}. I’m behind on plaza news.',
+  'Someone said {value} is the link. Sounded sure.',
+  'I’ll look for {theme} after I stop falling.',
+  'Highland gossip: {value}. Take with pine air.',
+  'Climbing with {theme} stuck in my head. Distracting.',
+  'If {value} is today’s thread, the mountain didn’t get the memo.',
+  'Fountain board said {theme}. I only remember the font.',
+  'Trail matching is quieter. Still there.',
+  'Heard {value} three times before lunch. Weird.',
+  'I’ll hunt {theme} downhill. Gravity helps.',
+  'Theme days climb with you whether you like it or not.',
+  '{value} on a ridge. Looks different up here.',
+  'I nodded along about {theme}. Still unclear.',
+  'Plaza link, mountain legs. Split brain.',
+  'Someone matched {value} mid-climb. Priorities.',
+  'I’ll trust {theme} when I see the board again.',
 ]
 
-const EN_MT_GAME_H = [
-  'Mt. Meeb is right there —',
-  'Today’s trail already feels new —',
-  'Yesterday’s ledges are gone.',
-  'I love starting from Stage 1 each morning.',
-  'The mountain remakes itself overnight —',
-  'If you like jumps and dashes,',
-  'Later stages get spicy.',
-  'Fell into a ravine?',
-  'Clearing a stage still feels huge.',
-  'Watch your footing near gaps.',
-  'Three lanes, one rhythm —',
-  'Today’s cliffs have my heart racing.',
+const EN_THEME_MATCH = [
+  'Yeah — {theme} tonight. Soft flex.',
+  'Looking for more {value}. Not hard.',
+  'We’re the quiet matching set.',
+  'If you like {value}, you’re among friends.',
+  'Board wasn’t lying about {theme}.',
+  'I prove {value} by standing here. That’s it.',
+  'Same link, different district air.',
+  'Catch other {theme} guests if you want. I’m slow.',
+  'Matched. Mildly proud. Moving on.',
+  'Today’s thread found me first.',
+  '{value}. Don’t make it weird.',
+  'You’re learning the link. Eyes are good.',
+  'Club without a password: {theme}.',
+  'I keep waving at {value} strangers.',
+  'Matching doesn’t mean I know what I’m doing.',
+  'Say hi to the squad. Or don’t. We’re scattered.',
 ]
 
-const EN_MT_GAME_T = [
-  'scale it with jumps and dashes!',
-  'come chase today’s route.',
-  'fresh cliffs, fresh butterflies.',
-  'it’s exciting, not a chore.',
-  'try the Mt. Meeb climb.',
-  'climb back up and go again.',
-  'read the blocks before you leap.',
-  'don’t freeze on the edge!',
-  'aim for that high dream.',
-  'torchlight helps, guts help more.',
-  'my favorite reason to come back.',
-  'pick the lane that fits you.',
+const EN_PLAZA_FLAVOR = [
+  'I’m meeting someone. I only know the hat color.',
+  'Mountain or sea. Still deciding.',
+  'Walked one lap and forgot my plan.',
+  'Was the statue facing this way earlier?',
+  'There’s a lot of the same hair around the fountain today.',
+  'I came here to choose a direction. I may just stay.',
+  'Fountain sounds louder than the gossip. Barely.',
+  'Gold path keeps pulling me home.',
+  'That Meeb in the red hat circled the fountain three times.',
+  'East bridge smells like pine from here.',
+  'North gate’s busy. South side of me is tired.',
+  'I could hear something from the sea. Or imagined it.',
+  'Bench claimed me. Not arguing.',
+  'Today’s Star can wait. This shadow’s perfect.',
+  'I keep almost leaving. Don’t.',
+  'Plaza’s doing that soft lamp hum again.',
 ]
 
-const EN_NEON_GAME_H = [
-  'Jerry Mountain is that jelly tower —',
-  'Tonight’s glow path feels brand new —',
-  'Yesterday’s neon ledges? Already gone.',
-  'I woke up ready for Stage 1 again.',
-  'Jerry remakes the route daily —',
-  'If you like glowing cliffs,',
-  'Same jumps, different vibe…',
-  'Fell into the abyss?',
-  'Clearing a Jerry stage feels electric.',
-  'Watch the neon edges near gaps.',
-  'Soft jelly blocks, sharp nerves —',
-  'I’m hooked on the daily remix.',
+const EN_MT_FLAVOR = [
+  'Lodge has more roof than yesterday. I think.',
+  'Wind talked me off the next jump.',
+  'Torch shadows make the pines look taller.',
+  'I’m staying on this ridge a minute.',
+  'Construction noise below. Probably.',
+  'Jerry’s glow is cheating from here.',
+  'Came for the climb. Stayed for the cold air.',
+  'Someone passed me going down smiling. Suspicious.',
+  'Path back to the bridge is longer when you’re tired.',
+  'I don’t remember that wall on the build site.',
+  'Clouds moved. Summit mood changed.',
+  'Sitting. Legs negotiating with tomorrow.',
+  'Pine smell stuck to my jacket.',
+  'West of the plaza is sea. I can almost taste salt.',
+  'North rumors say Culture’s still scaffolding. Fits.',
+  'One more look at the ravine. Then I’m done. Then one more.',
 ]
 
-const EN_NEON_GAME_T = [
-  'scale the glowing stack!',
-  'try Jerry Mountain next door.',
-  'come taste today’s route.',
-  'fresh glow, fresh nerves.',
-  'read the jelly before you leap.',
-  'climb back up and glow upward.',
-  'don’t freeze on the edge!',
-  'worth every stumble.',
-  'like candy parkour over a void.',
-  'sparkles help, guts help more.',
-  'that’s why the tower stays exciting.',
-  'pick a lane and go.',
+const EN_CU_FLAVOR = [
+  'There’s one more piece of roof than yesterday.',
+  'I don’t remember that wall.',
+  'Something moved inside. Construction, I think.',
+  'I’ll be here on opening day. If I remember.',
+  'That crane hasn’t moved all day.',
+  'The sign looks more finished than the building.',
+  'I asked what they’re making. They smiled.',
+  'I kind of like visiting the construction.',
+  'Runway stripe with no runway yet. Patience.',
+  'Navy floor’s collecting footprints.',
+  'South gate’s my exit when the blue gets heavy.',
+  'Suits under cool light. Soft parade.',
+  'Scaffolding shadow looks like a coat rack.',
+  'Board promised fashion. Dust delivered.',
+  'I’m waiting for walls to become rooms.',
+  'Gallery night without a show. Still wandered in.',
 ]
 
-const EN_FEAT_H = [
-  'Did you see today’s star',
-  'Today’s featured Meebit',
-  'The fountain idol changes with the day.',
-  'I took a silly selfie with the statue.',
-  'Check the board by the fountain —',
-  'Plaza chatter is all about',
-  'Don’t miss the pedestal —',
-  'Half the guests share a vibe with',
-  'Today’s copper look is a banger.',
-  'If you’re hunting lookalikes,',
-  'New morning, new fountain face —',
-  'That statue is tonight’s heartbeat.',
-]
-
-const EN_FEAT_T = [
-  'by the fountain? Go look!',
-  'is up on the pedestal — hard to miss.',
-  'today’s look is gorgeous.',
-  'no shame. I recommend it.',
-  'you can read the star’s traits.',
-  'today’s featured face.',
-  'start your night there.',
-  'can you tell who’s matching?',
-  'even in metal it pops.',
-  'begin at the fountain.',
-  'it’s my favorite daily ritual.',
-  'worth a slow circle around.',
-]
-
-const EN_FEAT_MT_H = [
-  'Heard about today’s star',
-  'Even up here people talk about',
-  'The plaza fountain has today’s idol.',
-  'I hiked over just to peek at',
-  'Trail chatter mentions',
-  'Don’t forget the plaza pedestal —',
-  'New morning, new fountain face —',
-  'Mountain guests still care about',
-  'After a climb I always check',
-  'Today’s copper look is a banger.',
-  'If you’re hunting lookalikes later,',
-  'That plaza statue is still the heartbeat.',
-]
-
-const EN_FEAT_MT_T = [
-  'down in the plaza? Worth the walk.',
-  'the fountain statue tonight.',
-  'today’s featured face.',
-  'start there after your ridge lap.',
-  'today’s idol a lot.',
-  'torchlight and copper both glow.',
-  'it’s the park’s daily ritual.',
-  'go look when your legs allow.',
-  'can you tell who’s matching?',
-  'even from this altitude it matters.',
-  'begin at the fountain.',
-  'worth crossing the bridge for.',
-]
-
-const EN_FEAT_MATCH_H = [
-  'I’m on today’s star team!',
-  'Look closely…',
-  'Yep — star crew tonight.',
-  'Matching the statue’s vibe…',
-  'I’m soaking in the spotlight',
-  'Not the statue, but close —',
-  'Hunt the other star guests too —',
-  'Same aura as the fountain idol.',
-  'We’re the daily lookalike squad.',
-  'Catch me if you can —',
-  'Being on the star team',
-  'Today chose this look for us.',
-]
-
-const EN_FEAT_MATCH_T = [
-  'same energy as the statue.',
-  'I match today’s featured vibe. See it?',
-  'find us in the crowd!',
-  'I’m the walking edition.',
-  'with today’s featured Meebit.',
-  'I’m in tonight’s spotlight circle.',
-  'we’re scattered on purpose.',
-  'makes me a little proud.',
-  'twins wanted!',
-  'star guest energy.',
-  'come say hi to the squad.',
-  'plaza gold suits us today.',
-]
-
-const EN_THEME_H = [
-  'Today’s shared trait is on the fountain board.',
-  'That little plaza sign',
-  'I love the daily link game —',
-  'Look for “{theme}” energy tonight.',
-  'Half the crowd is quietly matching.',
-  'The daily trait refreshes with the day.',
-  'If you’re collecting lookalikes,',
-  'Theme nights make the plaza buzz.',
-  'Today’s link isn’t random gossip —',
-  'Fresh every day,',
-  'When there’s a daily theme,',
-  'The board says {theme} —',
-]
-
-const EN_THEME_T = [
-  'go peek before you wander far.',
-  'spells out tonight’s link.',
-  'it’s the park’s soft handshake.',
-  'can you spot us?',
-  'start at the fountain board.',
-  'keep your eyes open.',
-  'begin with “{value}”.',
-  '{value} is having a moment.',
-  'it’s written as {theme}.',
-  'that’s why I keep chatting strangers.',
-  'the rumor is usually true.',
-  'follow that thread through the crowd.',
-]
-
-const EN_THEME_MT_H = [
-  'Highland gossip mentions today’s theme —',
-  'Even on the trail we talk about',
-  'Look for “{theme}” energy tonight.',
-  'The daily trait refreshes with the day.',
-  'If you’re collecting lookalikes later,',
-  'Theme nights reach the ridge too.',
-  'I heard the plaza board says {theme}.',
-  'Fresh every day,',
-  'When there’s a daily theme,',
-  'Mountain guests still play the link game —',
-  'After the climb, check the fountain sign.',
-  'Today’s link isn’t just plaza talk —',
-]
-
-const EN_THEME_MT_T = [
-  'worth remembering on the way down.',
-  'the daily handshake of the Park.',
-  'can you spot us?',
-  'keep your eyes open.',
-  'begin with “{value}”.',
-  '{value} is having a moment.',
-  'it’s written as {theme}.',
-  'that’s why trail chat stays lively.',
-  'the rumor climbed up here with us.',
-  'follow that thread later in the plaza.',
-  'soft eyes, sharp theme hunt.',
-  'it ties every district together.',
-]
-
-const EN_THEME_MATCH_H = [
-  'Yes — I’m a {theme} guest tonight.',
-  'Look for more of us with {value}.',
-  'Theme pride!',
-  'We’re the daily matching set.',
-  'If you love {value},',
-  'I prove the board right.',
-  'Same link, different district energy —',
-  'Catch the other {theme} guests —',
-  'Being matched feels lucky tonight.',
-  'Today’s link found me.',
-  'Quiet flex: {value}.',
-  'You’re learning the daily link.',
-]
-
-const EN_THEME_MATCH_T = [
-  'come say hi to the squad.',
-  'we’re sprinkled through the Park.',
-  'spot us and smile.',
-  'plaza, mountain, culture, or sea — same club.',
-  'you’re among friends.',
-  'that’s the fun of tonight.',
-  'keep hunting the thread.',
-  'I wear it proudly.',
-  'nice eyes if you noticed.',
-  'welcome to the matching set.',
-  'the board wasn’t lying.',
-  'glad you asked around.',
-]
-
-const EN_PLAZA_FLAVOR_H = [
-  'This Park never copies yesterday —',
-  'Fresh crowds, fresh trails, fresh rumors —',
-  'I come back because nothing stays still here.',
-  'Every visit feels like a new postcard —',
-  'If you get lost,',
-  'The lamps hum softly.',
-  'I keep looping the fountain.',
-  'Golden paths never lie.',
-  'East bridge leads to the mountains —',
-  'North gate opens to Culture —',
-  'West gate opens to the Sea District —',
-  'Don’t rush every attraction —',
-]
-
-const EN_PLAZA_FLAVOR_T = [
-  'that’s the magic for me.',
-  'wander and you’ll feel it.',
-  'come taste tonight’s version of the Park.',
-  'I’m never bored between the gates.',
-  'follow the gold path back to the fountain.',
-  'weirdly calming for a theme park.',
-  'habit, maybe.',
-  'they lead you home.',
-  'Mt. Meeb and Jerry Mountain await.',
-  'runway lights and cool blue halls await.',
-  'palms, sand, and a night pier await.',
-  'savor the plaza too.',
-]
-
-const EN_MT_FLAVOR_H = [
-  'Today’s cliffs already surprised me —',
-  'Morning climb, brand-new route —',
-  'I love how the mountain remixes itself.',
-  'Jerry Mountain glows beside the trail.',
-  'Torchlight on voxel stone',
-  'If you get lost up here,',
-  'Don’t rush the summit —',
-  'Trail people-watching is elite.',
-  'West of the plaza is the night beach —',
-  'North of the plaza is Culture —',
-  'Pine rows never lie about the wind.',
-  'You can always cross back to the plaza.',
-]
-
-const EN_MT_FLAVOR_T = [
-  'come feel today’s trail yourself.',
-  'my legs are already curious.',
-  'that’s highland joy for me.',
-  'try the jelly tower next door.',
-  'hits different from plaza lamps.',
-  'follow the path back to the bridge gate.',
-  'savor the district air too.',
-  'better than any feed.',
-  'tide and palm silhouettes that way.',
-  'runway lights and cool blue halls.',
-  'warm up, then chase a clear!',
-  'fountain gossip never dies.',
-]
-
-const EN_CU_FLAVOR_H = [
-  'Culture air is all cool blue tonight.',
-  'The runway stripe leads the eye —',
-  'North of the plaza, this gallery mood.',
-  'Three coming attractions:',
-  'Half the crowd here wears suits —',
-  'Don’t rush the galleries —',
-  'Back through the south gate',
-  'PFP Studio is still scaffolding,',
-  'Trait Museum will sort favorites',
-  'When the runway opens,',
-  'Compared to beach or mountain,',
-  'I keep walking the runway path —',
-]
-
-const EN_CU_FLAVOR_T = [
-  'savor the soft spotlights.',
-  'follow it like a quiet catwalk.',
-  'glad you wandered in.',
-  'runway, museum, PFP studio.',
-  'gallery energy loves a sharp look.',
-  'blue air is the point.',
-  'returns you to the plaza fountain.',
-  'but the idea already sparkles.',
-  'by the details you love.',
-  'expect pure style energy.',
-  'this place is all about Meebit style.',
-  'habit of a gallery night.',
-]
-
-const EN_SEA_FLAVOR_H = [
-  'Night beach energy is soft and wide.',
-  'Palm silhouettes against the stars —',
-  'West of the plaza, this shoreline.',
-  'Three shore builds rising:',
-  'Lantern light on warm sand',
-  'Don’t rush the tide line —',
-  'The pier gate leads home —',
-  'Foam guides you if you wander.',
-  'Compared to mountain cliffs,',
-  'I keep looping the sand path —',
-  'Tide’s quiet, sky’s loud.',
-  'Smell that night sea?',
-]
-
-const EN_SEA_FLAVOR_T = [
-  'take a slow shore lap.',
-  'love that postcard feeling.',
-  'glad you crossed over.',
-  'beach club, tide pool, pier stage.',
-  'makes everything feel warmer.',
-  'let the ocean breathe with you.',
-  'back to the plaza lamps.',
-  'habit of a shoreline guest.',
-  'this place softens your pace.',
-  'sand underfoot is the whole mood.',
-  'come feel it yourself.',
-  'endless water, soft nerves.',
+const EN_SEA_FLAVOR = [
+  'I only came to look at the sea. Somehow it’s evening.',
+  'Sand made it into my shoes.',
+  'Waves sound far away today.',
+  'I’m not moving from this spot.',
+  'The sea wasn’t part of the plan.',
+  'That Meeb keeps walking at the same speed as the waves.',
+  'Sunset’s taking its time. Or I am.',
+  'Decided to do nothing. Cleared my schedule.',
+  'Lantern light on wet sand. Soft math.',
+  'Pier’s glowing like it knows a secret.',
+  'Foam erased my footprints. Fair.',
+  'Tide’s quiet. Head’s quieter.',
+  'I keep facing away from the plaza on purpose.',
+  'Salt in the air. Sand in the socks.',
+  'Building by the shore grew a wall. Maybe.',
+  'I’ll leave when the lantern cools. Lying.',
 ]
 
 // ─── Japanese ────────────────────────────────────────────────────────
 
-const JA_PLAZA_GREET_H = [
-  'やあ！',
-  'おっ、こんにちは！',
-  'よー！',
-  'ひゃっほー！',
-  'こんばんは！',
-  'ねえねえ！',
-  'あ、どうも！',
-  'ようこそ！',
-  'いいタイミング！',
-  'いたいた！',
-  'おっす！',
-  '見て見て、誰か来た！',
+const JA_PLAZA_GREET = [
+  'あ、どうも。',
+  'いま靴ひも直してた。',
+  '噴水の前、また来ちゃった。',
+  '計画、どこかで落とした。',
+  'こんばんは。夜の感じ。',
+  'あ、いた。',
+  'ぼーっとしてた。',
+  'また一周しそう。',
+  '風、やわらかい。',
+  '独り言、聞こえてた？',
+  '行き先、まだ決めてない。',
+  '灯りが低い夜だね。',
+  'ベンチ、空いてたから。',
+  'ちょっと一息。',
+  '広場って、止まりやすい。',
+  'やあ。今こっち見てた。',
 ]
 
-const JA_PLAZA_GREET_T = [
-  'パーク散歩に最高の夜だね。',
-  '今夜の灯り、やわらかいよ。',
-  'ここで会うなんて奇遇だね。',
-  'アトラクションの合間？',
-  'みんなおしゃべり気分だよ。',
-  '推しの入口、もう決まった？',
-  '広場、今夜いきてるね。',
-  '空気と Meebit、最高の組み合わせ。',
-  '何か楽しそうな顔してる。',
-  'しばらくいて。噂、すぐ届くよ。',
-  '噴水の光、今夜いい感じ。',
-  '地区が4つ、今夜は全部つながってる。',
+const JA_MT_GREET = [
+  'あ、縁に気をつけて。',
+  '松の匂い、またする。',
+  'ジャンプ数、数え忘れた。',
+  'トーチがちらついてる。',
+  '高いせいにしてる。全部。',
+  '足、まだ震えてる。',
+  '尾根の風、会話を切るね。',
+  '登る？見るだけ？',
+  '長い道、わざと選んだ。たぶん。',
+  'いま座って理由を忘れた。',
+  'あの足場、信用してない。',
+  '山の夜、静かめ。',
+  'ああ。ちょっと待って。',
+  '冷たい空気、好きかも。',
+  '下りと上り、気分が違う。',
+  'やあ。足元見てた。',
 ]
 
-const JA_MT_GREET_H = [
-  'やあ、登山者！',
-  '山へようこそ！',
-  'おっ、こんにちは！',
-  'よー！',
-  'トレイルの友よ！',
-  '尾根のこんばんは！',
-  'ねえねえ！',
-  'あ、どうも！',
-  'いいタイミング！',
-  '来た来た！',
-  'おっす！',
-  'ハイランダー！',
+const JA_CU_GREET = [
+  '青い光、みんな真面目に見える。',
+  '看板、ずっと読んでた。',
+  'スーツ、多いね。',
+  '床、広場より冷たい。',
+  'ランウェイ、まだだよね。',
+  'ほこりに足跡がある。',
+  'スポットだけ先にいる夜。',
+  '同じ線、ぐるぐるしてる。',
+  '工事の札、やけに立派。',
+  '迷ってる。案内はできない。',
+  '足場、増えてない？',
+  'こんばんは。濃紺の中。',
+  '音が少ない。考えが多い。',
+  'あ、今気づいた。',
+  'ぶらぶらしてるだけ。',
+  '影がコート掛けみたい。',
 ]
 
-const JA_MT_GREET_T = [
-  '空気がうすい…いい意味でね。',
-  '松の匂いと崖の灯り、今夜いいよ。',
-  '橋の向こうで会うなんてね。',
-  '今日のルートの前にウォーミングアップ？',
-  '縁は容赦ないからね。',
-  'ジャンプ足、準備できた？',
-  '山の夜は空気が違う。',
-  '石にトーチが映えてきれい。',
-  '棚道、いけそうな顔してる。',
-  'トレイルの噂、今夜アツいよ。',
-  '一息ついてからでも遅くない。',
-  '今日の崖、もう好奇してる顔だね。',
+const JA_SEA_GREET = [
+  '潮、静か。',
+  'また砂。',
+  'あ、いた。',
+  '一分のつもりが、もう少し。',
+  'ヤシの影、長い。',
+  'ランタンは温い。水は違う。',
+  '行くとこ、あったんだけど。',
+  '波の音、遠い。',
+  '岸の脳みその時間。',
+  '靴の中、もう砂。',
+  '暗い海のほう見てた。',
+  '急がない。本気で。',
+  '泡の線につられてきた。',
+  '座るのが予定だった。',
+  '何も聞いてない。いい感じ。',
+  'やあ。潮風。',
 ]
 
-const JA_CU_GREET_H = [
-  'カルチャーへようこそ！',
-  'ファッション好きのゲストね —',
-  'おっ、こんにちは！',
-  'よー！',
-  'やあ！',
-  'ギャラリーナイトだね。',
-  'ねえねえ！',
-  'あ、どうも！',
-  'いいタイミング！',
-  '越えてきたね！',
-  'おっす！',
-  'こんばんは！',
+const JA_FIND = [
+  '顔は合ってた。靴が違った。',
+  '一人覚えたら、群衆が入れ替わった。',
+  '見つけた。直後に疑った。',
+  '笑顔だけ同じ。他は全部違う。',
+  '一人探して、三人好きになった。',
+  '同じ髪、多すぎない？',
+  '靴を覚えるべきだった。',
+  '奥の壁のあたりでまた見失った。',
+  '似てない二人のほうが、似てた。',
+  '一目目は信用しない。今回の教訓。',
+  '違う子に手、振っちゃった。二回。',
+  '時計うるさい。顔もうるさい。',
+  '帽子で負けた。',
+  '靴ひも直してるあいだに入れ替わった。',
+  'After Hours はあと。もう一回見る。',
+  'ターゲットじゃない子が、いちばん好き。',
 ]
 
-const JA_CU_GREET_T = [
-  '今夜の主役は Meebits そのもの。',
-  '地区をゆっくり一周してみて。',
-  'クールブルーの光、コーデ映えるよ。',
-  '濃紺の床とやわらかいスポット、夢みたい。',
-  '北の門を越えてきてくれてありがとう。',
-  'この廊下、好奇心だいじにね。',
-  'ランウェイのストライプ、目を引くよね。',
-  'この明かりの下、スーツが映える。',
-  '建物はいま3つ、立ち上がり中。',
-  '広場とは空気が違うよね。',
-  'ドレスコードなしのドレスコード気分。',
-  'もうランウェイ歩いてる気分でどうぞ。',
+const JA_TRAITS = [
+  '帽子ばっかり見てた。靴だった。',
+  '同じ青でも、並ぶと別物。',
+  'あの髪、覚えたつもりだった。',
+  '服は見た。顔を見てなかった。',
+  '眼鏡だと思ったら眉だった。',
+  '近いと、誰も似てない。',
+  '今日、靴ばっかり気になる。',
+  '特徴は見つけた。名前が出てこない。',
+  '同じシャツ、歩き方が違う。困った。',
+  'ピアス、最後に見た。最初に見るべき。',
+  'ギャラリーの灯り、色を嘘ついた。ぼくかも。',
+  '一致した瞬間、ズルく感じる。すぐ消える。',
+  'アクセ一つで、全部ひっくり返った。',
+  '正解の横、三回通った。',
+  '目、いい意味で疲れた。',
+  'あのスカーフ、部屋移った？',
 ]
 
-const JA_SEA_GREET_H = [
-  'シーエリアへようこそ！',
-  '海岸のゲストね —',
-  'おっ、こんにちは！',
-  'よー！',
-  'やあ！',
-  '夜ビーチ気分だね。',
-  'ねえねえ！',
-  'あ、どうも！',
-  'いいタイミング！',
-  '砂まで来たね！',
-  'おっす！',
-  '潮風のこんばんは！',
+const JA_STREET = [
+  'あの角、さっきより近い。',
+  '誰も変じゃなかった。それが変だった。',
+  '同じ人を三回見た。向こうもそうかも。',
+  '止まると、足音も止まる。',
+  '何もなかったよ。たぶん。',
+  'あの窓、最初から開いてた？',
+  '今日は振り返らないって決めた。',
+  '出口だと思ったら入口だった。',
+  '街灯は温い。うなじは冷たい。',
+  '路地、並べ替えられた。記憶かも。',
+  '瞬き一回。何か逃した。',
+  '道は同じ。歩行者の靴が違う。',
+  'ぼくは平気。沈黙が平気じゃない。',
+  '白いフェードのあと、数を忘れた。',
+  '何もないって自分に言った。また確認した。',
+  '8番ストリート、普通の角を一つ貸して。',
 ]
 
-const JA_SEA_GREET_T = [
-  '夜の潮の匂い、わかる？',
-  '足元は砂、頭上は星。',
-  '西の門を越えてきてくれてありがとう。',
-  'ランタンの光が砂を暖めてる。',
-  'ヤシのシルエット、星に映えてる。',
-  '今夜の潮は静かだね。',
-  '岸辺はゆっくり歩いて。',
-  '桟橋の灯り、ここからかわいいよ。',
-  '広場のあとだと空気がやわらかい。',
-  '岸の建物、いま3つ立ち上がり中。',
-  '海は果てしない。肩の力抜いて。',
-  '迷ったら泡のラインをたどって。',
+const JA_MT_GAME = [
+  '昨日の近道、今日は崖。',
+  '三段目までは完璧だった。',
+  '山頂はまた今度。今日は雲まで。',
+  '風のせいってことにしてる。',
+  '同じ場所で二回落ちた。場所のせい。',
+  '上は遠かった。下はもっと遠かった。',
+  '今日の山、朝から機嫌悪くない？',
+  '途中の景色がよすぎて、登るのやめた。',
+  'Mt. Meeb、一分だけ見るつもりだった。',
+  '計画はあった。足場が同意しなかった。',
+  'あのジャンプ、簡単に見えた。見えただけ。',
+  'もうやめる。あと一回だけ。',
+  'トーチは味方。胆力は欠勤。',
+  '昨日の足場、取りに戻った。なかった。',
+  'レーン三つ。いちばん意地悪なのを選んだ。',
+  'また Stage 1。足が先に文句。',
 ]
 
-const JA_FIND_H = [
-  'Find the Meebit はあっち！',
-  '人混みの中の顔探しが好きなら、',
-  'ミュージアム、入るたびに顔ぶれが新しい。',
-  '同じ顔には二度と会えない気がする。',
-  '群衆が毎回シャッフルされるの、',
-  'Meebit の海に迷子？',
-  'ミュージアムのゲスト心得：',
-  '違う Meebit だった？',
-  '似てる海の中から一人を探すの、',
-  '顔が変わるから何度も入りたくなる。',
-  '新しい顔の海からターゲットを狩る —',
-  'ミュージアムを制覇したら、',
+const JA_NEON = [
+  '透明な足場、信じた瞬間だけ怖い。',
+  '下を見ないつもりだった。光ってて見ちゃった。',
+  'ジェリーマウンテン、今日ちょっと得意顔。',
+  '昨日のネオン棚、いない。',
+  'ブロックはやわらかい。着地は違う。',
+  '光を信じた。光に笑われた。',
+  'ジャンプは同じ。奈落の態度が違う。',
+  '一段のつもり。スパークルで長居。落ちた。',
+  'ジェリー、友善そうに見えた。嘘だった。',
+  'ピンクのせいってことにする。',
+  '奈落は忍耐強い。ぼくは違う。',
+  '夜のうちに道、組み直された。失礼。',
+  'もう一回光ってから終わり。そのあとにもう一回。',
+  '縁、ネオンだとうるさい。',
+  '昨夜の道のほうが好き。もうない。',
+  'ジャンプの途中で喜ばない。今日の教訓。',
 ]
 
-const JA_FIND_T = [
-  '美術館でターゲットを探してね。',
-  'Find the Meebit、今夜おすすめ。',
-  'それが醍醐味だよ。',
-  '話しかけると噂がヒントになるよ。',
-  '集中とやわらかい目で。',
-  'それがミュージアムの興奮だよ。',
-  '歩き続けて。正解はどこかにいる。',
-  '固まらないで！',
-  '焦らず目を信じるんだ。',
-  'After Hours が待ってるよ。',
-  'おしゃれかくれんぼの最高峰。',
-  'だから飽きないんだよね。',
+const JA_FEAT = [
+  '今日の主役、ちょっと眠そう。',
+  '像より、見てる人の服が気になる。',
+  '銅、こっちからだと温く見える。',
+  '写真、親指入った。いつもの。',
+  '台座のまわり、今夜にぎやか。',
+  '今日の主役、後ろ姿のほうが好きかも。',
+  '噴水はうるさい。主役は静か。',
+  '焚き火みたいに、像の周りを回ってる子がいる。',
+  '看板、もう指紋だらけ。',
+  '主役を見に来て、噂で残った。',
+  '像は動いてない。二回確認した。',
+  '今日の顔、知ってる気がする。したいだけかも。',
+  '金属なのに、得意そう。',
+  '一致してない。それでも見てる。',
+  '今夜の心拍、あの台座。',
+  '名前忘れた。帽子だけ覚えた。',
 ]
 
-const JA_TRAITS_H = [
-  'トレイトハントは細部勝負 —',
-  '髪型・服・アクセ…',
-  'おしゃれ好きなら、',
-  '同じシャツ？同じメガネ？',
-  'ピアス見落として負けたことある。',
-  'トレイトハントは、',
-  '手がかりは二度読んで。',
-  'ギャラリーの灯りは、ゆっくり向き。',
-  '特徴が一致した瞬間、',
-  'コーデが好きなら、',
-  '今日の似てる探しは手がかりから。',
-  '速さより観察眼が勝つよ。',
+const JA_FEAT_MT = [
+  '山上でも噴水の主役の話してる。',
+  '像を見に、一度降りた。元は取れた。',
+  '尾根の噂、今日の主役は眠そうらしい。',
+  '足が許したら、台座を見に行く。',
+  '銅とトーチ、親戚みたい。',
+  '会話の中だけ、主役がついてきた。',
+  '谷のほう指差して、像があるみたいに話してる。',
+  '主役の顔と山の空気、変な取り合わせ。',
+  '帽子の説明、誰かが間違ってた。たぶん。',
+  '先に登る？先に台座？決まらない。',
+  '主役、変わったらしい。まだ見てない。',
+  '噴水の噂、ぼくより先に登る。',
+  '看板、また読めるようになったら信じる。',
+  '崖で像の話。パークあるある。',
+  '今日の主役は待てる。この足場は待てない。',
+  'もう一回見に降りる。たぶん。',
 ]
 
-const JA_TRAITS_T = [
-  'お揃いを見つけてニヤリして。',
-  'トレイトハントは細部に宿る。',
-  'ギャラリーが呼んでるよ。',
-  'トレイトハントが試してくる。',
-  '痛いレッスンだった…。',
-  'Meebit 版ファッションビンゴ。',
-  '一つのトレイトで全部変わる。',
-  '最初の一目で焦らないで。',
-  '妙に気持ちいいんだ。',
-  'トレイトハントが遊び場だよ。',
-  '長いアトラクションの合間にぴったり。',
-  '丁寧に歩く人が勝つ部屋だよ。',
+const JA_FEAT_MATCH = [
+  '今夜、主役の軌道にいる。静かに。',
+  '像と同じ気配。身長は違う。',
+  '噴水がウインクしたとしたら、ぼくがびびっただけ。',
+  '似てる係。頼んでない。',
+  '散らばってる。わざと？たまたま？',
+  '台座に寄せてる。見られてる感じ。',
+  '銘板なしのスター組。',
+  '二度見される。まあ妥当。',
+  '像本人じゃない。紛らわしい程度。',
+  '今日のルックに選ばれた。ぼくは来ただけ。',
+  '他も探すならどうぞ。ぼくは休む。',
+  'スポットライトは想像。でも立ってる。',
+  '銅の親戚。歩いてる版。',
+  '看板の前で、自分に手振った。',
+  '似てるの、ゆるいクラブみたい。',
+  '像には言わないで。気まずい。',
 ]
 
-const JA_STREET_H = [
-  '8番ストリート、見た目は同じなのに違う。',
-  '同じ路地なのに、今夜の歩行者が違う。',
-  '小さな「おかしさ」が好きなら、',
-  '人の並び、入れ替わってる気がする。',
-  '温かい街灯、冷たいひねり。',
-  '歩行者をよく見て。',
-  'ループするたび、誰か一人おかしい。',
-  '8番ストリート、背筋が覚えてる。',
-  '角を二度曲がって。',
-  '白いフェードのあとは油断しないで。',
-  '異変の出方が毎回ちがうの、好き。',
-  '昨日の路地の人、もういない感じ。',
+const JA_THEME = [
+  '看板は {theme}。人に翻訳中。',
+  '噴水の前、{value} がよく通る。',
+  '{value} を見つけて、なんで大事か忘れる。',
+  '今日のリンクは {theme}。看板がそう言ってる。',
+  '広場の半分、静かに一致してる。半分は違う。',
+  '散歩のつもりが、{value} を数え始めた。',
+  '{value}、ぼくだけ多くない？',
+  '{theme} で知らない人に会釈した。返ってきた。たぶん。',
+  '噴水の看板、{theme} の話でベタベタ。',
+  '狩ってない。気づいてるだけ。',
+  '{value}、像のほうが似合ってた。異論歓迎。',
+  'リンクの日。靴ひもは解けたまま。',
+  '{theme} の意味、三人に聞いて答えが三つ。',
+  '糸につられて広場を横切った。',
+  '{value}、二回見たら信じる。',
+  '看板は {theme}。人混みは「まあね」。',
 ]
 
-const JA_STREET_T = [
-  '変化に気づけるかな？',
-  '8番ストリートに入って感じてみて。',
-  '瞬きすると逃すよ。',
-  'だからループが止まらない。',
-  '二度見て、直感を信じて。',
-  '誰か一人、おかしいはず。',
-  'ゆっくり見る目が勝つ。',
-  '手がかりを走り抜けないで。',
-  '一人称の夜は空気が違う。',
-  '一度、あの違和感を味わってみて。',
-  '小さな異変にハマってる。',
-  '夜が生きてる感じがする。',
+const JA_THEME_MT = [
+  '尾根でも {theme} の話。広場ニュース遅れてる。',
+  '{value} がリンクらしい。自信ありげだった。',
+  '落ちるのやめてから {theme} 探す。',
+  'ハイランドの噂：{value}。松の空気つけて解釈。',
+  '{theme} が頭に残ったまま登ってる。危ない。',
+  '{value} が今日の糸なら、山は読んでない。',
+  '看板は {theme}。フォントしか覚えてない。',
+  '山の一致、静か。でもある。',
+  '昼前に {value}、三回聞いた。変。',
+  '{theme} は下りで狩る。重力が味方。',
+  'テーマの日は、好き嫌いに関係なくついてくる。',
+  '尾根の {value}、見え方が違う。',
+  '{theme} にうなずいた。中身はまだ。',
+  '広場のリンク、山の足。頭が分裂。',
+  '登りながら {value} 一致してた人、優先順位すごい。',
+  '看板、もう一回読めたら {theme} 信じる。',
 ]
 
-const JA_MT_GAME_H = [
-  'Mt. Meeb はすぐそこ！',
-  '今日のトレイル、もう別物だよ —',
-  '昨日の棚道、もうないみたい。',
-  '毎朝 Stage 1 から始めるの、ワクワクする。',
-  '山が夜のうちに作り直される感じ —',
-  'ジャンプとダッシュが好きなら、',
-  '後半ステージ、熱いよ。',
-  '渓谷に落ちた？',
-  'ステージクリアの快感、まだでかい。',
-  '穴の手前、足元注意。',
-  'レーンは3つ、リズムはひとつ —',
-  '今日の崖、もうドキドキしてる。',
+const JA_THEME_MATCH = [
+  'うん、今夜は {theme}。小さい自慢。',
+  '{value} 仲間、探さなくてもいる。',
+  '静かめのマッチング組。',
+  '{value} 好きなら、友だちに近い。',
+  '看板、{theme} について嘘ついてなかった。',
+  '{value}、ここに立ってるだけで証明。以上。',
+  '同じリンク、地区の空気は違う。',
+  '他の {theme} 探すならどうぞ。ぼくは遅い。',
+  '一致した。ちょっと誇らしい。次。',
+  '今日の糸のほうから、ぼくを見つけた。',
+  '{value}。変にしないで。',
+  'リンク、分かってきたね。目がいい。',
+  'パスワードなしのクラブ：{theme}。',
+  '{value} の見知らぬ人に、手振りがち。',
+  '一致しても、何してるかは分かってない。',
+  'チームに挨拶して。しなくても散らばってる。',
 ]
 
-const JA_MT_GAME_T = [
-  'ジャンプとダッシュで登ってみて！',
-  '今日のルート、一緒に追ってみて。',
-  '新しい崖、新しいドキドキ。',
-  '罰じゃなくて、朝のごほうびだよ。',
-  'Mt. Meeb 登攀、おすすめ。',
-  '立ち上がってもう一回だ。',
-  '跳ぶ前にブロックを読んで。',
-  '縁で固まらないで！',
-  '高い夢を狙おう。',
-  'トーチも大事、胆力もっと大事。',
-  'だからまた来たくなる。',
-  '自分のレーンを選んで。',
+const JA_PLAZA_FLAVOR = [
+  '待ち合わせ、帽子の色しか聞いてない。',
+  '山か海か。まだ決まらない。',
+  '一周したら、予定を忘れた。',
+  'あの像、さっきよりこっち向いてない？',
+  '噴水のまわり、今日は同じ髪型が多い。',
+  '方向を決めるつもりが、居着いた。',
+  '噴水の音、噂より大きい。ぎりぎり。',
+  '金の道、帰路に引き戻す。',
+  '赤い帽子の子、噴水を三周した。',
+  '東の橋、ここから松の匂い。',
+  '北の門はにぎやか。ぼくの南側は疲れてる。',
+  '海のほうから何か聞こえた。気のせいかも。',
+  'ベンチに捕獲された。抗わない。',
+  '今日の主役は待てる。この影がいい。',
+  '出かける直前で、また止まる。',
+  '広場の灯、また小さく鳴ってる。',
 ]
 
-const JA_NEON_GAME_H = [
-  'ジェリーマウンテンはあのゼリー塔 —',
-  '今夜のゼリー道、また新しい —',
-  '昨日のネオン棚、もう消えてる。',
-  '朝から Stage 1、気合い入る。',
-  'ジェリー塔の光ルート、毎日ちがう —',
-  '光る崖が好きなら、',
-  '同じジャンプ、違う空気…',
-  '奈落に落ちた？',
-  'ジェリーのステージクリア、電気走る感じ。',
-  '穴の手前、ネオンの縁に注意。',
-  'やわらかいゼリー、するどい緊張 —',
-  '日替わりリミックスにハマってる。',
+const JA_MT_FLAVOR = [
+  'ロッジの屋根、昨日より増えてる。たぶん。',
+  '風に次のジャンプをやめさせられた。',
+  'トーチの影で、松が高く見える。',
+  'この尾根、もう一分いる。',
+  '下で工事の音。たぶん。',
+  'ジェリーの光、ここからチート。',
+  '登るつもりが、冷たい空気で長居。',
+  '下りで笑ってた人、怪しい。',
+  '疲れてると、橋までの道が長い。',
+  '工事場の壁、前あったっけ。',
+  '雲が動いて、山頂の気分が変わった。',
+  '座ってる。足が明日と交渉中。',
+  '松の匂い、ジャケットについた。',
+  '広場の西は海。塩、想像できる。',
+  '北はカルチャー、まだ足場らしい。納得。',
+  '渓谷、もう一回見る。それで終わり。そのあともう一回。',
 ]
 
-const JA_NEON_GAME_T = [
-  '光る塔を登ってみて！',
-  '隣のジェリーマウンテン、おすすめ。',
-  '今日のルート、味わってみて。',
-  '新しい光、新しい緊張。',
-  '跳ぶ前にゼリーブロックを読んで。',
-  '立ち上がって光のほうへ。',
-  '縁で固まらないで！',
-  'つまずき全部に価値がある。',
-  '奈落の上のキャンディパルクール。',
-  'スパークルも大事、胆力もっと大事。',
-  'だから塔が飽きないんだ。',
-  'レーンを選んで行こう。',
+const JA_CU_FLAVOR = [
+  '屋根、一枚増えてる。',
+  '昨日は壁なかったよね。',
+  '中で音した。工事だと思う。',
+  '完成したら最初に来る。覚えてたら。',
+  'あのクレーン、ずっと同じところ。',
+  '看板だけ先に立派。',
+  '何ができるか聞いた。笑われた。',
+  '工事を見に来るの、ちょっと好き。',
+  'ランウェイの線だけ先にいる。待ち。',
+  '濃紺の床、足跡が増えてる。',
+  '青が重いときは南の門から戻る。',
+  'スーツとクールな光。ゆるい行列。',
+  '足場の影、コート掛けみたい。',
+  '看板はファッション。現場はほこり。',
+  '壁が部屋になるのを待ってる。',
+  'ショーなしのギャラリー夜。それでも来た。',
 ]
 
-const JA_FEAT_H = [
-  '今日の主役、見た？',
-  '本日の Featured Meebit、',
-  '噴水の銅像、日替わりなんだ。',
-  '銅像と変な自撮り撮っちゃった。',
-  '噴水横の看板、見て —',
-  '広場の噂の中心は、',
-  '台座、見逃さないで —',
-  'ゲストの半分くらいが雰囲気リンクしてる、',
-  '今日の銅像ルック、刺さる。',
-  '似てる探ししてるなら、',
-  '朝が来ると噴水の顔が新しい —',
-  'あの銅像が今夜の心拍だよ。',
-]
-
-const JA_FEAT_T = [
-  '噴水のところ！見に行って！',
-  '台座の上だよ。見逃せない。',
-  '今日の見た目、最高。',
-  '恥ずかしがらずおすすめ。',
-  '主役のトレイトが読めるよ。',
-  '今日の推し顔だよ。',
-  '夜のスタートはそこから。',
-  '誰が似てるか分かる？',
-  '金属なのに映える。',
-  'まず噴水へ。',
-  'ぼくの好きな日替わり儀式だよ。',
-  'ゆっくり一周する価値あり。',
-]
-
-const JA_FEAT_MT_H = [
-  '今日の主役の話、聞いた？',
-  'ここ山上でも噂なのは、',
-  'プラザの噴水に今日の偶像がいる。',
-  'のぞきに橋まで降りたよ、',
-  'トレイルの雑談でも出てくる、',
-  'プラザの台座、忘れないで —',
-  '朝が来ると噴水の顔が新しい —',
-  '登山者も気にしてるよ、',
-  '登ったあと必ず見るのは、',
-  '今日の銅像ルック、刺さる。',
-  'あとで似てる探しするなら、',
-  '広場の銅像が、まだ心拍だよ。',
-]
-
-const JA_FEAT_MT_T = [
-  '広場まで歩く価値あるよ。',
-  '噴水の銅像の話。',
-  '今日の推し顔だよ。',
-  '尾根一周のあとにどうぞ。',
-  '今日の偶像の話。',
-  'トーチと銅、どっちも光る。',
-  'パークの日替わり儀式だよ。',
-  '足が動いたら見に行って。',
-  '誰が似てるか分かる？',
-  'この標高からでも大事な話題。',
-  'まず噴水から。',
-  '橋を渡る理由になるよ。',
-]
-
-const JA_FEAT_MATCH_H = [
-  'ぼく、今日の主役チームだよ！',
-  'よく見て…',
-  'そう、今夜はスター組。',
-  '銅像の空気に寄せてる…',
-  'スポットライト浴び気味で、',
-  '銅像本人じゃないけど近い —',
-  '他のスターゲストも探して —',
-  '噴水の偶像と同じオーラ。',
-  'ぼくたち日替わり似てる組。',
-  'つかまえてみて —',
-  'スター組でいるの、',
-  '今日のルック、選ばれちゃった。',
-]
-
-const JA_FEAT_MATCH_T = [
-  '銅像と同じ熱量だよ。',
-  '今日の Featured っぽさ、分かる？',
-  '人混みの中にいるよ！',
-  '歩いてる版だよ。',
-  '今日の主役とつながってる。',
-  '今夜のスポットライト圏内。',
-  'わざと散らばってるんだ。',
-  'ちょっと誇らしい。',
-  'ツイン募集中！',
-  'スターゲスト気分。',
-  'チームに話しかけていって。',
-  '広場の金が似合う夜だよ。',
-]
-
-const JA_THEME_H = [
-  '今日の共通点は噴水の看板だよ。',
-  '広場の小さな看板が、',
-  '日替わりリンク遊び、好き —',
-  '今夜は「{theme}」の気配を探して。',
-  '人混みの半分、静かに一致してる。',
-  '日替わりトレイトは日付で変わる。',
-  '似てる集めしてるなら、',
-  'テーマの夜は広場がざわつく。',
-  '今日のリンク、ただの噂じゃない —',
-  '毎日フレッシュで、',
-  '日替わりテーマがあるとき、',
-  '看板は {theme} って言ってる —',
-]
-
-const JA_THEME_T = [
-  '遠くへ行く前にのぞいてみて。',
-  '今夜のリンクを教えてくれる。',
-  'パークのやわらかい握手だよ。',
-  'ぼくたち見つかるかな？',
-  '噴水の看板からスタート。',
-  '目、開けてて。',
-  'まずは「{value}」から。',
-  '{value} が今アツい。',
-  '表記は {theme} だよ。',
-  'だから知らない人にも話しかけちゃう。',
-  '噂、だいたい当たるよ。',
-  'その糸を人混みでたどって。',
-]
-
-const JA_THEME_MT_H = [
-  'ハイランドの噂でも日替わりテーマの話 —',
-  'トレイルでも話題なのは、',
-  '今夜は「{theme}」の気配を探して。',
-  '日替わりトレイトは日付で変わる。',
-  'あとで似てる集めするなら、',
-  'テーマの夜は尾根まで届く。',
-  '広場の看板は {theme} らしい。',
-  '毎日フレッシュで、',
-  '日替わりテーマがあるとき、',
-  '登山者もリンク遊びに参加してる —',
-  '登ったあと、噴水の看板見てね。',
-  '今日のリンク、広場だけの話じゃない —',
-]
-
-const JA_THEME_MT_T = [
-  '下り道で覚えておくといいよ。',
-  'パークの日替わり握手だよ。',
-  'ぼくたち見つかるかな？',
-  '目、開けてて。',
-  'まずは「{value}」から。',
-  '{value} が今アツい。',
-  '表記は {theme} だよ。',
-  'だから尾根の雑談が生きてる。',
-  '噂、ここまで登ってきたよ。',
-  'あとで広場でその糸をたどって。',
-  'やわらかい目で、テーマ狩り。',
-  '地区ぜんぶをつなぐ糸だよ。',
-]
-
-const JA_THEME_MATCH_H = [
-  'そう、今夜は {theme} 組だよ。',
-  '{value} 仲間をもっと探して。',
-  'テーマ誇り！',
-  'ぼくたち日替わりマッチング組。',
-  '{value} が好きなら、',
-  '看板、証明してるよ。',
-  '同じリンク、地区で空気は違う —',
-  '他の {theme} ゲストも捕まえて —',
-  'マッチしてるの、今夜ラッキー気分。',
-  '今日のリンクがぼくを見つけた。',
-  '静かな自慢：{value}。',
-  '日替わりリンク、覚えてきたね。',
-]
-
-const JA_THEME_MATCH_T = [
-  'チームに話しかけていって。',
-  'パーク中にちらばってるよ。',
-  '見つけてニヤリして。',
-  '広場でも山でも海でもカルチャーでも、同じクラブ。',
-  '友だちの中にいるよ。',
-  '今夜の面白さはそこだよ。',
-  '糸を追い続けて。',
-  '誇らしく着てるよ。',
-  '気づいたなら目がいい。',
-  'マッチング組へようこそ。',
-  '看板、嘘じゃなかったでしょ。',
-  '聞いてくれてありがとう。',
-]
-
-const JA_PLAZA_FLAVOR_H = [
-  'このパーク、昨日のコピーにはならない —',
-  '新しい顔、新しい道、新しい噂 —',
-  '何もじっとしてないから、また来ちゃう。',
-  '来るたびに別の絵葉書みたい —',
-  '迷ったら、',
-  '街灯が小さく鳴ってる。',
-  '噴水の周りをぐるぐるしがち。',
-  '金の道は裏切らない。',
-  '東の橋の先が山岳地区 —',
-  '北の門の先がカルチャー —',
-  '西の門の先がシーエリア —',
-  '全部急がなくていい —',
-]
-
-const JA_PLAZA_FLAVOR_T = [
-  'それがぼくにとっての魔法だよ。',
-  '歩いてると伝わってくるよ。',
-  '今夜バージョンのパーク、味わってみて。',
-  '門と門のあいだ、退屈しない。',
-  '金の道をたどって噴水へ戻ってね。',
-  'テーマパークなのに落ち着く。',
-  '癖かも。',
-  '帰宅ルートだよ。',
-  'Mt. Meeb とジェリーマウンテンが待ってるよ。',
-  'ランウェイの光とクールな青の廊下。',
-  'ヤシと砂浜と夜の桟橋が待ってるよ。',
-  '広場も味わっていって。',
-]
-
-const JA_MT_FLAVOR_H = [
-  '今日の崖、もうびっくりさせられた —',
-  '朝イチの登攀、ルートが新しい —',
-  '山のリミックス、好きすぎる。',
-  'ジェリーマウンテンがトレイルの脇で光ってる。',
-  'ボクセル石のトーチライト、',
-  'ここで迷ったら、',
-  '頂上を急がなくていい —',
-  'トレイルの人混みウォッチ、一流。',
-  '広場の西は夜のビーチ —',
-  '広場の北はカルチャー —',
-  '松並びは風向きを裏切らない。',
-  'いつでも橋を渡ってプラザへ戻れるよ。',
-]
-
-const JA_MT_FLAVOR_T = [
-  '今日のトレイル、自分で感じてみて。',
-  '足がもう好奇してる。',
-  'それがハイランドのよろこびだよ。',
-  '隣のゼリー塔も試してみて。',
-  '広場の街灯とは違う味だよ。',
-  '道をたどって橋の門へ戻ってね。',
-  '地区の空気も味わっていって。',
-  'どんなフィードよりいい。',
-  '潮風とヤシのシルエット、あっちだよ。',
-  'ランウェイの光とクールな青の廊下。',
-  'ウォーミングアップしてからクリア狙い！',
-  '噴水の噂話は消えないよ。',
-]
-
-const JA_CU_FLAVOR_H = [
-  '今夜のカルチャーはクールブルー。',
-  'ランウェイのストライプが目を導く —',
-  '広場の北、このギャラリー気分。',
-  '工事中の3つ：',
-  'ここの来場者、スーツ率高め —',
-  'ギャラリーを急がなくていい —',
-  '南の門をくぐれば',
-  'PFPクリエイターはまだ足場だけど、',
-  'トレイト博物館は',
-  'ランウェイが開いたら、',
-  'ビーチや山と比べると、',
-  'ランウェイの道を歩きがち —',
-]
-
-const JA_CU_FLAVOR_T = [
-  'やわらかいスポットを味わって。',
-  '静かなキャットウォークみたいに。',
-  '来てくれてうれしい。',
-  'ランウェイ、博物館、PFPスタジオ。',
-  'ギャラリーはシャープな格好が似合う。',
-  '青い空気が主役だよ。',
-  '広場の噴水へ戻れるよ。',
-  'アイデアだけはもう輝いてる。',
-  '好きな細部でお気に入りを探す場所。',
-  'スタイル全開の空気になるはず。',
-  'ここは Meebit のスタイルそのもの。',
-  'ギャラリー夜の癖かも。',
-]
-
-const JA_SEA_FLAVOR_H = [
-  '夜のビーチ、広くてやわらかい。',
-  'ヤシのシルエットが星に映えて —',
-  '広場の西、この岸辺。',
-  '岸の3つ：',
-  'ランタンの光が砂を暖めてる。',
-  '波打ち際を急がなくていい —',
-  '桟橋の門が帰り道 —',
-  '迷ったら泡が案内してくれる。',
-  '山の崖と比べると、',
-  '砂道をぐるぐるしがち —',
-  '潮は静か、空はうるさい。',
-  '夜の潮の匂い、わかる？',
-]
-
-const JA_SEA_FLAVOR_T = [
-  'ゆっくり岸を一周してみて。',
-  '絵葉書みたいで好き。',
-  '越えてきてくれてうれしい。',
-  'ビーチクラブ、タイドプール、桟橋ステージ。',
-  'ぜんぶ温かく感じる。',
-  '海と一緒に息して。',
-  '広場の灯りへ戻れるよ。',
-  '海岸ゲストの癖かも。',
-  'ペースが落ちる場所だよ。',
-  '足元の砂がムードそのもの。',
-  '自分で感じてみて。',
-  '果てない水、やわらかい神経。',
+const JA_SEA_FLAVOR = [
+  '海を見に来ただけなのに、もう夕方。',
+  '砂、靴の中まで来た。',
+  '波の音、今日は遠い。',
+  '今日はここから動かない。',
+  '海、予定になかったんだけど。',
+  'あの子、波と同じ速さで歩いてる。',
+  '夕日、ゆっくり。ぼくも。',
+  '何もしないって決めたら、予定が空いた。',
+  '濡れた砂にランタン。やわらかい計算。',
+  '桟橋、秘密知ってるみたいに光ってる。',
+  '泡が足跡を消した。公平。',
+  '潮は静か。頭も静かめ。',
+  'わざと広場と反対を向いてる。',
+  '空気は塩。靴下は砂。',
+  '岸の建物、壁が増えた。かも。',
+  'ランタンが冷めたら帰る。嘘。',
 ]
 
 // ─── build ───────────────────────────────────────────────────────────
@@ -1190,113 +757,62 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isMt = zone === 'mountain'
   const isCu = zone === 'culture'
   const isSea = zone === 'sea'
-  const j = isJa ? '' : ' '
 
-  const greetH = isMt
+  const greetings = isMt
     ? isJa
-      ? JA_MT_GREET_H
-      : EN_MT_GREET_H
+      ? JA_MT_GREET
+      : EN_MT_GREET
     : isCu
       ? isJa
-        ? JA_CU_GREET_H
-        : EN_CU_GREET_H
+        ? JA_CU_GREET
+        : EN_CU_GREET
       : isSea
         ? isJa
-          ? JA_SEA_GREET_H
-          : EN_SEA_GREET_H
+          ? JA_SEA_GREET
+          : EN_SEA_GREET
         : isJa
-          ? JA_PLAZA_GREET_H
-          : EN_PLAZA_GREET_H
-  const greetT = isMt
+          ? JA_PLAZA_GREET
+          : EN_PLAZA_GREET
+
+  const flavor = isMt
     ? isJa
-      ? JA_MT_GREET_T
-      : EN_MT_GREET_T
+      ? JA_MT_FLAVOR
+      : EN_MT_FLAVOR
     : isCu
       ? isJa
-        ? JA_CU_GREET_T
-        : EN_CU_GREET_T
+        ? JA_CU_FLAVOR
+        : EN_CU_FLAVOR
       : isSea
         ? isJa
-          ? JA_SEA_GREET_T
-          : EN_SEA_GREET_T
+          ? JA_SEA_FLAVOR
+          : EN_SEA_FLAVOR
         : isJa
-          ? JA_PLAZA_GREET_T
-          : EN_PLAZA_GREET_T
-  const greetings = product(greetH, greetT, j)
-
-  const gameFind = product(isJa ? JA_FIND_H : EN_FIND_H, isJa ? JA_FIND_T : EN_FIND_T, j)
-  const gameTraits = product(isJa ? JA_TRAITS_H : EN_TRAITS_H, isJa ? JA_TRAITS_T : EN_TRAITS_T, j)
-  const gameStreet = product(isJa ? JA_STREET_H : EN_STREET_H, isJa ? JA_STREET_T : EN_STREET_T, j)
-  const gameMountain = product(isJa ? JA_MT_GAME_H : EN_MT_GAME_H, isJa ? JA_MT_GAME_T : EN_MT_GAME_T, j)
-  const gameNeon = product(isJa ? JA_NEON_GAME_H : EN_NEON_GAME_H, isJa ? JA_NEON_GAME_T : EN_NEON_GAME_T, j)
-
-  const featuredAny = product(
-    isMt ? (isJa ? JA_FEAT_MT_H : EN_FEAT_MT_H) : isJa ? JA_FEAT_H : EN_FEAT_H,
-    isMt ? (isJa ? JA_FEAT_MT_T : EN_FEAT_MT_T) : isJa ? JA_FEAT_T : EN_FEAT_T,
-    j,
-  )
-
-  const featuredMatched = product(
-    isJa ? JA_FEAT_MATCH_H : EN_FEAT_MATCH_H,
-    isJa ? JA_FEAT_MATCH_T : EN_FEAT_MATCH_T,
-    j,
-  )
-
-  const themeAny = product(
-    isMt ? (isJa ? JA_THEME_MT_H : EN_THEME_MT_H) : isJa ? JA_THEME_H : EN_THEME_H,
-    isMt ? (isJa ? JA_THEME_MT_T : EN_THEME_MT_T) : isJa ? JA_THEME_T : EN_THEME_T,
-    j,
-  )
-
-  const themeMatched = product(
-    isJa ? JA_THEME_MATCH_H : EN_THEME_MATCH_H,
-    isJa ? JA_THEME_MATCH_T : EN_THEME_MATCH_T,
-    j,
-  )
-
-  const flavorH = isMt
-    ? isJa
-      ? JA_MT_FLAVOR_H
-      : EN_MT_FLAVOR_H
-    : isCu
-      ? isJa
-        ? JA_CU_FLAVOR_H
-        : EN_CU_FLAVOR_H
-      : isSea
-        ? isJa
-          ? JA_SEA_FLAVOR_H
-          : EN_SEA_FLAVOR_H
-        : isJa
-          ? JA_PLAZA_FLAVOR_H
-          : EN_PLAZA_FLAVOR_H
-  const flavorT = isMt
-    ? isJa
-      ? JA_MT_FLAVOR_T
-      : EN_MT_FLAVOR_T
-    : isCu
-      ? isJa
-        ? JA_CU_FLAVOR_T
-        : EN_CU_FLAVOR_T
-      : isSea
-        ? isJa
-          ? JA_SEA_FLAVOR_T
-          : EN_SEA_FLAVOR_T
-        : isJa
-          ? JA_PLAZA_FLAVOR_T
-          : EN_PLAZA_FLAVOR_T
-  const flavor = product(flavorH, flavorT, j)
+          ? JA_PLAZA_FLAVOR
+          : EN_PLAZA_FLAVOR
 
   return {
     greetings,
-    gameFind,
-    gameTraits,
-    gameStreet,
-    gameMountain,
-    gameNeon,
-    featuredAny,
-    featuredMatched,
-    themeAny,
-    themeMatched,
+    gameFind: isJa ? JA_FIND : EN_FIND,
+    gameTraits: isJa ? JA_TRAITS : EN_TRAITS,
+    gameStreet: isJa ? JA_STREET : EN_STREET,
+    gameMountain: isJa ? JA_MT_GAME : EN_MT_GAME,
+    gameNeon: isJa ? JA_NEON : EN_NEON,
+    featuredAny: isMt
+      ? isJa
+        ? JA_FEAT_MT
+        : EN_FEAT_MT
+      : isJa
+        ? JA_FEAT
+        : EN_FEAT,
+    featuredMatched: isJa ? JA_FEAT_MATCH : EN_FEAT_MATCH,
+    themeAny: isMt
+      ? isJa
+        ? JA_THEME_MT
+        : EN_THEME_MT
+      : isJa
+        ? JA_THEME
+        : EN_THEME,
+    themeMatched: isJa ? JA_THEME_MATCH : EN_THEME_MATCH,
     flavor,
   }
 }
@@ -1328,7 +844,7 @@ export function countParkDialogueLines(pools: ParkDialoguePools) {
   )
 }
 
-/** 後方互換：プラザ EN（生成プール）。 */
+/** 後方互換：プラザ EN。 */
 export const PARK_DIALOGUE_EN = getParkDialoguePools('en', 'plaza')
-/** 後方互換：プラザ JA（生成プール）。 */
+/** 後方互換：プラザ JA。 */
 export const PARK_DIALOGUE_JA = getParkDialoguePools('ja', 'plaza')

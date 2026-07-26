@@ -1,6 +1,6 @@
 /**
  * Meebits Park 来場者のセリフプール（EN / JA）。
- * 実体は断片の組み合わせ展開（地区別・言語あたり約1000本）。
+ * 完結した一言の配列。地区・言語別に `getParkDialoguePools` で取得。
  */
 export {
   countParkDialogueLines,
