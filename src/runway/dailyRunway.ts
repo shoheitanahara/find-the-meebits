@@ -19,7 +19,7 @@ import {
 } from '../top/dailyFeatured'
 
 const MIN_MATCHING = 24
-const AUDIENCE_COUNT = 16
+const AUDIENCE_COUNT = 32
 const ROAMER_COUNT = 0
 
 /** ファッション寄りのトレイト種別を優先 */

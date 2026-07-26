@@ -12,7 +12,7 @@ export const RUNWAY = {
   entranceHalf: 4.2,
 
   /** ランウェイ手前の観客スペースにスポーン（衝突と被らない） */
-  playerStart: { x: 0, z: 12.2, rotationY: Math.PI },
+  playerStart: { x: 0, z: 9.2, rotationY: Math.PI },
   moveSpeed: 7,
   playerRadius: 0.42,
 
@@ -25,12 +25,12 @@ export const RUNWAY = {
   modelWalkSpeed: 1.55,
   pauseSeconds: 2.8,
 
-  /** プレイヤーがパークへ戻る出口（手前） */
+  /** プレイヤーがパークへ戻る出口（手前壁寄り） */
   playerExit: {
     x: 0,
-    z: 14.8,
+    z: 10.6,
     halfX: 1.6,
-    halfZ: 1.1,
+    halfZ: 1.0,
   },
 
   /** より水平寄りの三人称視点 */
@@ -46,16 +46,28 @@ export const RUNWAY = {
     height: 3.6,
   },
 
-  /** 客席ベンチ（左右） */
+  /** 客席ベンチ（左右×2列。1列目の |x|=5.6 を基準に壁側へ ROW_GAP） */
   benches: [
+    // 左・ランウェイ側
     { x: -5.6, z: -6.5, rotationY: Math.PI / 2 },
     { x: -5.6, z: -2.5, rotationY: Math.PI / 2 },
     { x: -5.6, z: 1.5, rotationY: Math.PI / 2 },
     { x: -5.6, z: 6.5, rotationY: Math.PI / 2 },
+    // 左・壁側（2列目）
+    { x: -7.8, z: -6.5, rotationY: Math.PI / 2 },
+    { x: -7.8, z: -2.5, rotationY: Math.PI / 2 },
+    { x: -7.8, z: 1.5, rotationY: Math.PI / 2 },
+    { x: -7.8, z: 6.5, rotationY: Math.PI / 2 },
+    // 右・ランウェイ側
     { x: 5.6, z: -6.5, rotationY: -Math.PI / 2 },
     { x: 5.6, z: -2.5, rotationY: -Math.PI / 2 },
     { x: 5.6, z: 1.5, rotationY: -Math.PI / 2 },
     { x: 5.6, z: 6.5, rotationY: -Math.PI / 2 },
+    // 右・壁側（2列目）
+    { x: 7.8, z: -6.5, rotationY: -Math.PI / 2 },
+    { x: 7.8, z: -2.5, rotationY: -Math.PI / 2 },
+    { x: 7.8, z: 1.5, rotationY: -Math.PI / 2 },
+    { x: 7.8, z: 6.5, rotationY: -Math.PI / 2 },
   ] as const,
 
   colors: {
