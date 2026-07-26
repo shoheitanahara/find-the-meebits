@@ -8,6 +8,8 @@ type NpcState = {
   npcPositions: Record<string, Vector3Tuple>
   setNearestNpcId: (npcId: string | null) => void
   setNpcPosition: (npcId: string, position: Vector3Tuple) => void
+  /** 指定 ID 以外の座標を捨てる（ゾーン切替・パーク入場時の幽霊座標対策） */
+  retainNpcPositions: (npcIds: Iterable<string>) => void
 }
 
 export const useNpcStore = create<NpcState>((set) => ({
@@ -31,5 +33,16 @@ export const useNpcStore = create<NpcState>((set) => ({
           [npcId]: position,
         },
       }
+    }),
+  retainNpcPositions: (npcIds) =>
+    set((state) => {
+      const keep = new Set(npcIds)
+      const next: Record<string, Vector3Tuple> = {}
+      for (const [id, position] of Object.entries(state.npcPositions)) {
+        if (keep.has(id)) next[id] = position
+      }
+      const nearestNpcId =
+        state.nearestNpcId && keep.has(state.nearestNpcId) ? state.nearestNpcId : null
+      return { npcPositions: next, nearestNpcId }
     }),
 }))

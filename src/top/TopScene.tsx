@@ -28,7 +28,7 @@ import {
   type DailyVisitor,
 } from './dailyFeatured'
 import { setParkDialogueContext } from './interactWithParkNpc'
-import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs } from './parkNpcRegistry'
+import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs, getParkNpcById } from './parkNpcRegistry'
 import { ParkPerimeter } from './ParkPerimeter'
 import { getParkLook, type ParkBenchPropKind, type ParkLook } from './parkLook'
 import { applyZoneLook } from './parkZoneTheme'
@@ -55,6 +55,10 @@ const GATE_ENTER_DISTANCE = 2.8
 const GATE_TRIGGER_HALF = 1.35
 const ZONE_TRANSITION_MS = 280
 const TOP_NPC_WALK_SPEED = 1.15
+/** ミュージアム NPC と同じく、会話距離より少し手前で立ち止まる */
+const PLAYER_STOP_DISTANCE = INTERACTION_DISTANCE + 1
+const MIN_PLAYER_PAUSE_SECONDS = 2.2
+const MAX_PLAYER_PAUSE_SECONDS = 4.2
 const TOP_NPC_WALK_PATTERNS = [
   { walkSeconds: [4.5, 8], idleSeconds: [0.8, 1.8], turnSpread: Math.PI * 0.35 },
   { walkSeconds: [3, 6], idleSeconds: [1.5, 3], turnSpread: Math.PI * 0.65 },
@@ -1069,7 +1073,7 @@ function TopNpcCrowd({
 
   useEffect(() => {
     setParkDialogueContext(featuredId, themeTrait)
-    registerParkNpcs([
+    const records = [
       ...visitors.map((visitor) => ({
         id: parkNpcIdFor(visitor.meebitNumber),
         meebitNumber: visitor.meebitNumber,
@@ -1077,7 +1081,10 @@ function TopNpcCrowd({
         isFeatured: visitor.meebitNumber === featuredId,
       })),
       ...(includeCreator ? [parkCreatorRecord()] : []),
-    ])
+    ]
+    registerParkNpcs(records)
+    // 前ゾーン／ミュージアムの座標が残ると、見えなくなった NPC が nearest を奪う
+    useNpcStore.getState().retainNpcPositions(records.map((record) => record.id))
     return () => {
       useNpcStore.getState().setNearestNpcId(null)
     }
@@ -1107,6 +1114,8 @@ function ParkNpcProximitySystem() {
     let nearestDistance = INTERACTION_DISTANCE
 
     for (const [npcId, position] of Object.entries(positions)) {
+      // レジストリ外（前ゾーン・ミュージアムの幽霊）は無視
+      if (!getParkNpcById(npcId)) continue
       const distance = Math.hypot(position[0] - top.x, position[2] - top.z)
       if (distance <= nearestDistance) {
         nearestDistance = distance
@@ -1123,6 +1132,48 @@ function ParkNpcProximitySystem() {
   return null
 }
 
+/**
+ * ミュージアム NPC と同じ近接ポーズ。
+ * 近づくと数秒立ち止まり、離れるかタイマー切れで再開する。
+ */
+function getParkNpcStoppedForPlayer({
+  distance,
+  elapsedTime,
+  isDialogueActive,
+  pauseSeed,
+  playerPauseUntilRef,
+}: {
+  distance: number
+  elapsedTime: number
+  isDialogueActive: boolean
+  pauseSeed: number
+  playerPauseUntilRef: { current: number }
+}) {
+  if (isDialogueActive) {
+    return true
+  }
+
+  if (distance > PLAYER_STOP_DISTANCE) {
+    playerPauseUntilRef.current = 0
+    return false
+  }
+
+  if (playerPauseUntilRef.current === 0) {
+    const pauseNoise = seededNoise(pauseSeed * 4.17 + elapsedTime * 0.41)
+    playerPauseUntilRef.current =
+      elapsedTime +
+      MIN_PLAYER_PAUSE_SECONDS +
+      pauseNoise * (MAX_PLAYER_PAUSE_SECONDS - MIN_PLAYER_PAUSE_SECONDS)
+  }
+
+  return elapsedTime < playerPauseUntilRef.current
+}
+
+function seededNoise(seed: number) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453
+  return value - Math.floor(value)
+}
+
 /** 看板そばからスタートし、来場者と同じくパーク内を歩き回る作成者。 */
 function ParkCreatorNpc() {
   const groupRef = useRef<Group>(null)
@@ -1132,6 +1183,7 @@ function ParkCreatorNpc() {
   const walkPattern = TOP_NPC_WALK_PATTERNS[1]
   const isWalkingRef = useRef(true)
   const behaviorTimerRef = useRef(walkPattern.walkSeconds[0] + 1.2)
+  const playerPauseUntilRef = useRef(0)
   const rotationYRef = useRef(PARK_CREATOR_ROTATION_Y)
   const targetRotationYRef = useRef(PARK_CREATOR_ROTATION_Y)
   const localTimeRef = useRef(0.4)
@@ -1144,20 +1196,30 @@ function ParkCreatorNpc() {
     true,
   )
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)
     const group = groupRef.current
     localTimeRef.current += safeDelta
-    behaviorTimerRef.current -= safeDelta
 
     if (group) {
       useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
     }
 
-    if (isDialogueActive && group) {
-      isWalkingRef.current = false
-      const player = useTopStore.getState()
-      const faceY = Math.atan2(player.x - group.position.x, player.z - group.position.z)
+    const player = useTopStore.getState()
+    const dx = group ? player.x - group.position.x : 0
+    const dz = group ? player.z - group.position.z : 0
+    const distance = Math.hypot(dx, dz)
+    const isStoppedForPlayer = getParkNpcStoppedForPlayer({
+      distance,
+      elapsedTime: state.clock.elapsedTime,
+      isDialogueActive,
+      pauseSeed: CREATOR_MEEBIT_ID,
+      playerPauseUntilRef,
+    })
+
+    // 会話中・近接時は立ち止まってプレイヤーを向く
+    if (isStoppedForPlayer && group) {
+      const faceY = Math.atan2(dx, dz)
       rotationYRef.current = faceY
       targetRotationYRef.current = faceY
       group.rotation.y = faceY
@@ -1172,6 +1234,8 @@ function ParkCreatorNpc() {
       update(safeDelta)
       return
     }
+
+    behaviorTimerRef.current -= safeDelta
 
     if (behaviorTimerRef.current <= 0) {
       isWalkingRef.current = !isWalkingRef.current
@@ -1247,6 +1311,7 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       ? walkPattern.walkSeconds[0] + ((index * 0.37) % 1) * (walkPattern.walkSeconds[1] - walkPattern.walkSeconds[0])
       : walkPattern.idleSeconds[0] + ((index * 0.53) % 1) * (walkPattern.idleSeconds[1] - walkPattern.idleSeconds[0]),
   )
+  const playerPauseUntilRef = useRef(0)
   const rotationYRef = useRef(spawn.rotationY)
   const targetRotationYRef = useRef(spawn.rotationY)
   const localTimeRef = useRef(index * 0.37)
@@ -1261,21 +1326,30 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
     true,
   )
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)
     const group = groupRef.current
     localTimeRef.current += safeDelta
-    behaviorTimerRef.current -= safeDelta
 
     if (group) {
       useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
     }
 
-    // 会話中は止まってプレイヤーを向く
-    if (isDialogueActive && group) {
-      isWalkingRef.current = false
-      const player = useTopStore.getState()
-      const faceY = Math.atan2(player.x - group.position.x, player.z - group.position.z)
+    const player = useTopStore.getState()
+    const dx = group ? player.x - group.position.x : 0
+    const dz = group ? player.z - group.position.z : 0
+    const distance = Math.hypot(dx, dz)
+    const isStoppedForPlayer = getParkNpcStoppedForPlayer({
+      distance,
+      elapsedTime: state.clock.elapsedTime,
+      isDialogueActive,
+      pauseSeed: spawn.meebitNumber,
+      playerPauseUntilRef,
+    })
+
+    // 会話中・近接時は立ち止まってプレイヤーを向く
+    if (isStoppedForPlayer && group) {
+      const faceY = Math.atan2(dx, dz)
       rotationYRef.current = faceY
       targetRotationYRef.current = faceY
       group.rotation.y = faceY
@@ -1290,6 +1364,8 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       update(safeDelta)
       return
     }
+
+    behaviorTimerRef.current -= safeDelta
 
     if (behaviorTimerRef.current <= 0) {
       isWalkingRef.current = !isWalkingRef.current
