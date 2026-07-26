@@ -9,6 +9,7 @@ import {
   MOUNTAIN_STAGE_COUNT,
 } from './stages'
 import { getClimbThemeId } from './climbTheme'
+import { mixDailyStageSeed } from './dailyClimb'
 
 export { MOUNTAIN_STAGE_COUNT, getStageDef, MOUNTAIN_STAGES, clampStageId } from './stages'
 export type { MountainStageDef } from './stages'
@@ -625,14 +626,16 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 }
 
 /**
- * Jerry Mountain は Mt. Meeb と同じ難易度パラメータでも、seed だけ別系統にして別コースにする。
+ * Jerry Mountain は seed 系統を分け、さらに日替わりソルトで毎日別コースにする。
  */
 function stageDefForTheme(stageId: number): MountainStageDef {
   const base = getStageDef(stageId)
-  if (getClimbThemeId() !== 'neon') return base
+  const themeId = getClimbThemeId()
+  const themedSeed =
+    themeId === 'neon' ? base.seed * 17 + 9041 + base.id * 433 : base.seed
   return {
     ...base,
-    seed: base.seed * 17 + 9041 + base.id * 433,
+    seed: mixDailyStageSeed(themedSeed, base.id, themeId),
   }
 }
 

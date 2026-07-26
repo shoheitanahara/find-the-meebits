@@ -47,12 +47,12 @@ export function getClimbThemeId(
 
 const MEEB_THEME: ClimbTheme = {
   id: 'meeb',
-  progressKey: 'meebits-mountain-progress-v2',
+  progressKey: 'meebits-mountain-progress-v3',
   brand: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
-  eyebrow: { en: '20 Stages · 1000m', ja: '全20ステージ · 1000m' },
+  eyebrow: { en: '20 Stages · Daily Route', ja: '全20ステージ · 日替わりルート' },
   blurb: {
-    en: 'Winding ledges and gappy cliffs. Clear a stage to unlock the next — 50m each, up to 1000m.',
-    ja: '曲がりくねった棚と隙間だらけの崖。1ステージ50m、クリアで次が解放され約1000mまで登れる。',
+    en: 'Winding ledges and gappy cliffs. The route and unlocks reset every day (JST) — climb from Stage 1.',
+    ja: '曲がりくねった棚と隙間だらけの崖。ルートと進捗は毎日（JST）リセット。毎日 Stage 1 から挑戦。',
   },
   shellBg: 'bg-[#87b8d8]',
   titleGradient: 'bg-gradient-to-b from-[#6a9fc0] via-[#87b8d8] to-[#3d6b3a]',
@@ -81,12 +81,12 @@ const MEEB_THEME: ClimbTheme = {
 
 const NEON_THEME: ClimbTheme = {
   id: 'neon',
-  progressKey: 'meebits-neon-stack-progress-v1',
+  progressKey: 'meebits-jerry-mountain-progress-v1',
   brand: { en: 'Jerry Mountain', ja: 'ジェリーマウンテン' },
-  eyebrow: { en: '20 Stages · Neon Abyss', ja: '全20ステージ · ネオン奈落' },
+  eyebrow: { en: '20 Stages · Daily Route', ja: '全20ステージ · 日替わりルート' },
   blurb: {
-    en: 'Same climb, different world — tetromino cliffs over a black void. Clear stages to push higher.',
-    ja: 'ゲーム性は同じ。テトリス風ブロックの崖を、暗黒の奈落の上で登る。クリアで次ステージが解放。',
+    en: 'Same climb, different world — tetromino cliffs over a black void. The route resets every day (JST).',
+    ja: 'ゲーム性は同じ。テトリス風ブロックの崖を、暗黒の奈落の上で登る。ルートと進捗は毎日（JST）リセット。',
   },
   shellBg: 'bg-[#242060]',
   titleGradient: 'bg-gradient-to-b from-[#2e2870] via-[#3a3090] to-[#4a38a8]',

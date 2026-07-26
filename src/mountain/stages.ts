@@ -1,6 +1,7 @@
 /**
  * Mountain Climb — ステージ1〜20の難易度パラメータ。
  * 標高表示は labelBaseM + ステージ内進捗で 50m 刻み・約1000mまで繋がる。
+ * 地形シードは実行時に日替わりソルトが混ざる（`mixDailyStageSeed`）。
  */
 
 export const MOUNTAIN_STAGE_COUNT = 20

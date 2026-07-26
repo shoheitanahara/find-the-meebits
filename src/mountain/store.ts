@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { getClimbTheme } from './climbTheme'
+import { getClimbDayKey } from './dailyClimb'
 import {
   clampStageId,
   getMountainRuntime,
@@ -13,12 +14,14 @@ export type MountainPhase = 'title' | 'playing' | 'stageCleared' | 'allCleared'
 const PROGRESS_KEY = getClimbTheme().progressKey
 
 type ProgressPayload = {
+  /** JST 日付。違う日なら進捗をリセット */
+  dateKey?: string
   unlockedStage?: number
-  /** 全ステージ共通の最高到達高度（表示m） */
+  /** 当日の最高到達高度（表示m）。日替わりで消える */
   heightBestM?: number
 }
 
-function readProgress(): ProgressPayload {
+function readStoredProgress(): ProgressPayload {
   if (typeof window === 'undefined') return {}
   try {
     const raw = localStorage.getItem(PROGRESS_KEY)
@@ -29,13 +32,38 @@ function readProgress(): ProgressPayload {
   }
 }
 
+/** 当日分の進捗。日付が変わっていれば Stage1・BEST0 に戻す */
+function readProgress(): ProgressPayload {
+  const today = getClimbDayKey()
+  const stored = readStoredProgress()
+  if (stored.dateKey === today) {
+    return {
+      dateKey: today,
+      unlockedStage: clampStageId(stored.unlockedStage ?? 1),
+      heightBestM: typeof stored.heightBestM === 'number' ? Math.max(0, stored.heightBestM) : 0,
+    }
+  }
+  const fresh: ProgressPayload = { dateKey: today, unlockedStage: 1, heightBestM: 0 }
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(fresh))
+    } catch {
+      // ignore
+    }
+  }
+  return fresh
+}
+
 function writeProgress(patch: ProgressPayload) {
   if (typeof window === 'undefined') return
   try {
-    const next = { ...readProgress(), ...patch }
+    const today = getClimbDayKey()
+    const current = readProgress()
+    const next = { ...current, ...patch, dateKey: today }
     localStorage.setItem(
       PROGRESS_KEY,
       JSON.stringify({
+        dateKey: today,
         unlockedStage: clampStageId(next.unlockedStage ?? 1),
         heightBestM: Math.max(0, next.heightBestM ?? 0),
       }),
@@ -74,7 +102,7 @@ type MountainState = {
   unlockedStage: number
   terrainVersion: number
   elapsedSec: number
-  /** 全ステージ共通 BEST（localStorage 永続） */
+  /** 当日の全ステージ共通 BEST（日替わりでリセット） */
   heightBest: number
   playerY: number
   displayHeightM: number
