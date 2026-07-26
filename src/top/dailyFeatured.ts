@@ -35,10 +35,10 @@ const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])
 const CULTURE_SUIT_SHIRTS = new Set(['Suit', 'Suit Jacket'])
 
 /** 噴水の右前・正面向きの主役説明看板（見た目・当たり判定で共有）。 */
-export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 13.15]
+export const FEATURED_BOARD_POSITION: [number, number, number] = [2.85, 0, 6.15]
 
 /** 噴水・銅像の中心 Z（看板・衝突と共有）。 */
-export const FOUNTAIN_CENTER_Z = 11.4
+export const FOUNTAIN_CENTER_Z = 4.4
 
 export type DailyThemeTrait = {
   traitType: string

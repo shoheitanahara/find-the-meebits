@@ -3,6 +3,12 @@ import type { ParkGateDef, ParkZoneLayout } from './parkZones'
 /** カージナル方位 */
 export type CardinalSide = 'n' | 's' | 'e' | 'w'
 
+/**
+ * 奥側（コード南=-Z／画面奥。ユーザー呼称の北側）の門の X。
+ * 左棟（約 -16〜-12）と中央棟（0）の間に置き、建物被りを避ける。
+ */
+export const PARK_FAR_SIDE_GATE_X = -8
+
 export type PerimeterOpening =
   | { side: CardinalSide; kind: 'bridge-gate'; gateId: string }
   | { side: CardinalSide; kind: 'sealed' }
@@ -160,13 +166,19 @@ function bridgeWallGap(spec: PerimeterSpec, side: CardinalSide) {
   return spec.wallOpeningHalf
 }
 
-function openCenterOnSide(spec: PerimeterSpec, side: CardinalSide) {
+function defaultAlongOnSide(spec: PerimeterSpec, side: CardinalSide) {
+  // 東西辺は中央 Z。南北辺は左棟〜中央棟の間（建物被り回避）
+  if (side === 'e' || side === 'w') return spec.cz
+  return PARK_FAR_SIDE_GATE_X
+}
+
+export function openCenterOnSide(spec: PerimeterSpec, side: CardinalSide) {
   const opening = getOpening(spec, side)
   if (!opening || opening.kind !== 'bridge-gate') {
-    return side === 'e' || side === 'w' ? spec.cz : spec.cx
+    return defaultAlongOnSide(spec, side)
   }
   const gate = spec.gates.find((g) => g.id === opening.gateId)
-  if (!gate) return side === 'e' || side === 'w' ? spec.cz : spec.cx
+  if (!gate) return defaultAlongOnSide(spec, side)
   return side === 'e' || side === 'w' ? gate.z : gate.x
 }
 
@@ -183,11 +195,12 @@ export function getCardinalGatePlacement(
   const radialX = riverInnerX + riverWidth + wallThickness * 0.55
   const radialZN = riverInnerZN + riverWidth + wallThickness * 0.55
   const radialZS = riverInnerZS + riverWidth + wallThickness * 0.55
+  const along = openCenterOnSide(spec, side)
 
-  if (side === 'e') return { x: cx + radialX, z: cz, rotationY: Math.PI }
-  if (side === 'w') return { x: cx - radialX, z: cz, rotationY: 0 }
-  if (side === 'n') return { x: cx, z: cz + radialZN, rotationY: -Math.PI / 2 }
-  return { x: cx, z: cz - radialZS, rotationY: Math.PI / 2 }
+  if (side === 'e') return { x: cx + radialX, z: along, rotationY: Math.PI }
+  if (side === 'w') return { x: cx - radialX, z: along, rotationY: 0 }
+  if (side === 'n') return { x: along, z: cz + radialZN, rotationY: -Math.PI / 2 }
+  return { x: along, z: cz - radialZS, rotationY: Math.PI / 2 }
 }
 
 /** 封印門の遮断ボックス（開口を歩いて抜けられないようにする） */
@@ -345,7 +358,10 @@ export function getBridgePlacement(
     opening.kind === 'bridge-gate' ? spec.gates.find((g) => g.id === opening.gateId) : undefined
   const { riverInnerX, riverInnerZN, riverInnerZS, riverWidth, cz, cx } = spec
   const length = riverWidth + 1.1
-  const along = side === 'e' || side === 'w' ? (gate?.z ?? cz) : (gate?.x ?? cx)
+  const along =
+    side === 'e' || side === 'w'
+      ? (gate?.z ?? defaultAlongOnSide(spec, side))
+      : (gate?.x ?? defaultAlongOnSide(spec, side))
 
   if (side === 'e') {
     return { x: cx + riverInnerX + riverWidth * 0.5, z: along, rotationY: 0, length }

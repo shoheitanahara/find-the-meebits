@@ -9,6 +9,7 @@ import {
   getOpening,
   isFrontClearSide,
   isPerimeterGateOpening,
+  openCenterOnSide,
   riverInnerOnNS,
   shouldBuildPerimeterSide,
   splitAxisSegments,
@@ -160,14 +161,8 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
         const isGateOpening = isPerimeterGateOpening(opening)
         const riverGap = isGateOpening ? spec.openingHalf : 0
         const wallGap = isGateOpening ? spec.wallOpeningHalf : 0
-        const openCenter =
-          opening?.kind === 'bridge-gate'
-            ? (spec.gates.find((g) => g.id === opening.gateId)?.[
-                sideDef.axis === 'z' ? 'z' : 'x'
-              ] ?? (sideDef.axis === 'z' ? cz : cx))
-            : sideDef.axis === 'z'
-              ? cz
-              : cx
+        // 本ゲート／封印門とも同じ along（南北は PARK_FAR_SIDE_GATE_X）
+        const openCenter = openCenterOnSide(spec, sideDef.side)
 
         const span = sideDef.axis === 'z' ? halfSpanZ : halfSpanX
         const riverSegments = splitAxisSegments(

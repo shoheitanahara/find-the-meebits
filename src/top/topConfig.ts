@@ -54,8 +54,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     color: '#d4cdc2',
     roofColor: '#3a3530',
     x: 0,
-    z: -0.4,
-    entranceZ: 3.2,
+    z: -7.4,
+    entranceZ: -3.8,
     footprint: {
       halfWidth: 5.2,
       halfDepth: 3.4,
