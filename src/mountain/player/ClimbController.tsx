@@ -7,6 +7,7 @@ import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { usePlayerStore } from '../../stores/playerStore'
+import { playSfx } from '../../ui/sfx'
 import { MOUNTAIN, getMountainRuntime } from '../config'
 import { isAtGoal, resolveHorizontal, resolveVertical, resetBodyToStageStart, type PlayerBody } from '../collisions'
 import { useMountainControlsStore } from '../controlsStore'
@@ -14,6 +15,9 @@ import { useMountainStore } from '../store'
 
 const cameraPos = new Vector3()
 const cameraTarget = new Vector3()
+/** 8th Street / パークと同系統の足踏み間隔 */
+const WALK_STEP_INTERVAL_SEC = 0.34
+const DASH_STEP_INTERVAL_SEC = 0.25
 
 export function ClimbController({ enabled }: { enabled: boolean }) {
   const groupRef = useRef<Group>(null)
@@ -33,6 +37,7 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
   const keys = useKeyboardControls()
   const jumpLatchRef = useRef(false)
   const localTimeRef = useRef(0)
+  const footstepTimerRef = useRef(0)
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
 
   useEffect(() => {
@@ -40,6 +45,7 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     const body = bodyRef.current
     resetBodyToStageStart(body)
     facingYRef.current = Math.PI
+    footstepTimerRef.current = 0
     if (groupRef.current) {
       groupRef.current.position.set(body.x, body.y, body.z)
       groupRef.current.rotation.y = facingYRef.current
@@ -56,6 +62,7 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
     const body = bodyRef.current
     const controls = useMountainControlsStore.getState()
     const keyboard = keys.current
+    const phase = useMountainStore.getState().phase
 
     let inputX = 0
     let inputZ = 0
@@ -94,6 +101,9 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
       body.onGround = false
       jumpLatchRef.current = true
       useMountainControlsStore.getState().setJumpPressed(false)
+      if (phase === 'playing') {
+        playSfx('climbJump')
+      }
     }
     if (!controls.jumpPressed) {
       jumpLatchRef.current = false
@@ -108,6 +118,18 @@ export function ClimbController({ enabled }: { enabled: boolean }) {
 
     if (isAtGoal(body) && useMountainStore.getState().phase === 'playing') {
       useMountainStore.getState().clearStage()
+    }
+
+    // 地上を歩いているときだけ歩行／ダッシュ音
+    if (phase === 'playing' && moving && body.onGround) {
+      const interval = dashing ? DASH_STEP_INTERVAL_SEC : WALK_STEP_INTERVAL_SEC
+      footstepTimerRef.current += dt
+      if (footstepTimerRef.current >= interval) {
+        footstepTimerRef.current -= interval
+        playSfx('footstep')
+      }
+    } else {
+      footstepTimerRef.current = 0
     }
 
     const group = groupRef.current

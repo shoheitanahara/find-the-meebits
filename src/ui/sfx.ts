@@ -4,6 +4,7 @@ type SfxKind =
   | 'talk'
   | 'clear'
   | 'footstep'
+  | 'climbJump'
   | 'timeUp'
   | 'targetFound'
   | 'unlock'
@@ -161,10 +162,10 @@ function playTalkMurmur(ctx: AudioContext) {
   }
 }
 
-function playFootstepTap(ctx: AudioContext) {
+function playFootstepTap(ctx: AudioContext, pitchScale = 1) {
   const now = ctx.currentTime
   const duration = 0.055
-  const pitch = 0.88 + Math.random() * 0.22
+  const pitch = (0.88 + Math.random() * 0.22) * pitchScale
   const volume = 3
 
   const buffer = getFootstepNoiseBuffer(ctx)
@@ -202,6 +203,11 @@ function playFootstepTap(ctx: AudioContext) {
   thump.start(now)
   noise.stop(now + duration + 0.01)
   thump.stop(now + duration + 0.01)
+}
+
+/** 登山ジャンプ。歩行 footstep を少し高くした「タッ」 */
+function playClimbJump(ctx: AudioContext) {
+  playFootstepTap(ctx, 1.35)
 }
 
 let footstepNoiseBuffer: AudioBuffer | null = null
@@ -357,6 +363,11 @@ export function playSfx(kind: SfxKind) {
 
   if (kind === 'footstep') {
     playFootstepTap(ctx)
+    return
+  }
+
+  if (kind === 'climbJump') {
+    playClimbJump(ctx)
     return
   }
 
