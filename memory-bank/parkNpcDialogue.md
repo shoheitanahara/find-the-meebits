@@ -4,7 +4,7 @@
 > **実装**: `src/top/parkDialogueExpand.ts`（head × tail の積でプール生成）→ `parkDialogue.ts`  
 > **原則**: NPC は **パークを楽しむ来場者**。制作者・仕様説明口調にしない。
 
-最終更新: 2026-07-26
+最終更新: 2026-07-26（`parkDialogueExpand.ts` を本ノート方針で全面刷新）
 
 ---
 
