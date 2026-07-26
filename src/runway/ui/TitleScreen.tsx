@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { formatTraitDisplayName } from '../../game/traitHunt'
 import { getLocale } from '../../i18n/locale'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
-import { getDailyRunwayShow } from '../dailyRunway'
+import { formatRunwayThemeLabel, getDailyRunwayShow } from '../dailyRunway'
 import { useRunwayStore } from '../store'
 
 const copy = {
@@ -39,12 +38,7 @@ export function RunwayTitleScreen() {
     void getDailyRunwayShow()
       .then((show) => {
         if (cancelled) return
-        setThemeLabel(
-          `${show.themeTrait.traitType} · ${formatTraitDisplayName(
-            show.themeTrait.traitType,
-            show.themeTrait.traitValue,
-          )}`,
-        )
+        setThemeLabel(formatRunwayThemeLabel(show.themeTrait, locale))
         setReady(true)
       })
       .catch((err) => {
@@ -54,7 +48,7 @@ export function RunwayTitleScreen() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [locale])
 
   if (phase !== 'title') return null
 

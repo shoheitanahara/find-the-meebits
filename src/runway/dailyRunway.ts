@@ -1,6 +1,7 @@
 /**
- * ランウェイ専用の「本日のトレイト」。
- * パークの themeTrait とは別シードで決定する。
+ * ランウェイ専用の「本日のルック」。
+ * 衣装カラー（Shirt/Pants/Shoes 等）を横断して同じ色ならマッチ。
+ * パークの themeTrait とは別シード。
  */
 
 import {
@@ -22,22 +23,20 @@ const MIN_MATCHING = 24
 const AUDIENCE_COUNT = 32
 const ROAMER_COUNT = 0
 
-/** ファッション寄りのトレイト種別を優先 */
-const FASHION_TRAIT_TYPES = [
-  'Shirt',
-  'Pants',
-  'Overshirt',
-  'Hat',
-  'Shoes',
-  'Glasses',
-  'Earrings',
-  'Necklace',
-  'Bracelet',
-  'Hair Color',
-  'Outfit Type',
+/** ファッションカラーとして横断マッチするトレイト種別 */
+export const RUNWAY_COLOR_TRAIT_TYPES = [
+  'Shirt Color',
+  'Pants Color',
+  'Shoes Color',
+  'Hat Color',
+  'Overshirt Color',
+  'Glasses Color',
 ] as const
 
 const EXCLUDED_VALUES = new Set(['Leopard Print'])
+
+/** UI 用の仮想トレイト種別（実際の Meebit 属性名ではない） */
+export const RUNWAY_COLOR_THEME_TYPE = 'Color'
 
 export type DailyRunwayShow = {
   dateKey: string
@@ -71,9 +70,9 @@ export async function getDailyRunwayShow(): Promise<DailyRunwayShow> {
 }
 
 function buildRunwayShow(dataset: MeebitTraitsDataset, dateKey: string): DailyRunwayShow {
-  const rng = createSeededRng(hashStringToSeed(`meebits-runway:${dateKey}`))
-  const themeTrait = pickRunwayThemeTrait(dataset, rng)
-  const matchingIds = collectMatchingIds(dataset, themeTrait)
+  const rng = createSeededRng(hashStringToSeed(`meebits-runway-color:${dateKey}`))
+  const themeTrait = pickRunwayColorTheme(dataset, rng)
+  const matchingIds = collectMatchingIds(dataset, themeTrait.traitValue)
   const audienceIds = pickGuestIds(dataset, matchingIds, rng, AUDIENCE_COUNT)
   const used = new Set([...matchingIds, ...audienceIds])
   const roamerIds = pickGuestIds(dataset, [...used], rng, ROAMER_COUNT)
@@ -81,62 +80,60 @@ function buildRunwayShow(dataset: MeebitTraitsDataset, dateKey: string): DailyRu
   return { dateKey, themeTrait, matchingIds, audienceIds, roamerIds }
 }
 
-function pickRunwayThemeTrait(
+/** いずれかの衣装カラーが themeColor と一致するか */
+export function meebitHasRunwayColor(traits: MeebitTraitMap, themeColor: string): boolean {
+  return RUNWAY_COLOR_TRAIT_TYPES.some((type) => traits[type] === themeColor)
+}
+
+function pickRunwayColorTheme(
   dataset: MeebitTraitsDataset,
   rng: () => number,
 ): DailyThemeTrait {
-  type Candidate = DailyThemeTrait & { count: number; fashionBoost: number }
   const counts = new Map<string, number>()
 
   for (const traits of Object.values(dataset.byId)) {
-    for (const [traitType, traitValue] of Object.entries(traits)) {
-      if (EXCLUDED_VALUES.has(traitValue)) continue
-      const key = `${traitType}::${traitValue}`
-      counts.set(key, (counts.get(key) ?? 0) + 1)
+    const colorsOnMeebit = new Set<string>()
+    for (const type of RUNWAY_COLOR_TRAIT_TYPES) {
+      const value = traits[type]
+      if (!value || EXCLUDED_VALUES.has(value)) continue
+      colorsOnMeebit.add(value)
+    }
+    for (const color of colorsOnMeebit) {
+      counts.set(color, (counts.get(color) ?? 0) + 1)
     }
   }
 
-  const candidates: Candidate[] = []
-  for (const [key, count] of counts) {
-    if (count < MIN_MATCHING) continue
-    const [traitType, traitValue] = key.split('::')
-    if (!traitType || !traitValue) continue
-    const fashionIndex = (FASHION_TRAIT_TYPES as readonly string[]).indexOf(traitType)
-    candidates.push({
-      traitType,
-      traitValue,
-      count,
-      fashionBoost: fashionIndex >= 0 ? 1.4 - fashionIndex * 0.04 : 0.35,
-    })
-  }
+  const candidates = [...counts.entries()]
+    .filter(([, count]) => count >= MIN_MATCHING)
+    .map(([traitValue, count]) => ({ traitValue, count }))
 
   if (candidates.length === 0) {
-    return { traitType: 'Shirt', traitValue: 'Suit' }
+    return { traitType: RUNWAY_COLOR_THEME_TYPE, traitValue: 'Red' }
   }
 
-  const weights = candidates.map((c) => (1 / Math.sqrt(c.count)) * c.fashionBoost)
+  // 希少寄りに少し寄せつつ、毎日バラけるよう重み付け
+  const weights = candidates.map((c) => 1 / Math.sqrt(c.count))
   const total = weights.reduce((sum, w) => sum + w, 0)
   let roll = rng() * total
   for (let i = 0; i < candidates.length; i += 1) {
     roll -= weights[i]
     if (roll <= 0) {
-      const picked = candidates[i]
-      return { traitType: picked.traitType, traitValue: picked.traitValue }
+      return { traitType: RUNWAY_COLOR_THEME_TYPE, traitValue: candidates[i].traitValue }
     }
   }
 
   const fallback = candidates[candidates.length - 1]
-  return { traitType: fallback.traitType, traitValue: fallback.traitValue }
+  return { traitType: RUNWAY_COLOR_THEME_TYPE, traitValue: fallback.traitValue }
 }
 
-function collectMatchingIds(dataset: MeebitTraitsDataset, theme: DailyThemeTrait): number[] {
+function collectMatchingIds(dataset: MeebitTraitsDataset, themeColor: string): number[] {
   const ids: number[] = []
   for (const [idText, traits] of Object.entries(dataset.byId)) {
     const id = Number(idText)
     if (!Number.isFinite(id) || id < 1 || id > MEEBIT_ID_MAX || id === CREATOR_MEEBIT_ID) {
       continue
     }
-    if (traits[theme.traitType] === theme.traitValue) {
+    if (meebitHasRunwayColor(traits, themeColor)) {
       ids.push(id)
     }
   }
@@ -169,4 +166,18 @@ function pickGuestIds(
 
 export function getRunwayModelTraits(meebitNumber: number): MeebitTraitMap | null {
   return getCachedMeebitTraits(meebitNumber)
+}
+
+/** 画面表示用（例: Color · Red / カラー · Red） */
+export function formatRunwayThemeLabel(
+  themeTrait: DailyThemeTrait,
+  locale: 'en' | 'ja',
+): string {
+  const typeLabel =
+    themeTrait.traitType === RUNWAY_COLOR_THEME_TYPE
+      ? locale === 'ja'
+        ? 'カラー'
+        : 'Color'
+      : themeTrait.traitType
+  return `${typeLabel} · ${themeTrait.traitValue}`
 }

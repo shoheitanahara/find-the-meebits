@@ -1,5 +1,5 @@
-import { formatTraitDisplayName } from '../../game/traitHunt'
 import { getLocale } from '../../i18n/locale'
+import { formatRunwayThemeLabel } from '../dailyRunway'
 import { useRunwayStore } from '../store'
 
 export function RunwayHud() {
@@ -10,10 +10,7 @@ export function RunwayHud() {
 
   if (phase !== 'playing' || !themeTrait) return null
 
-  const themeLine = `${themeTrait.traitType} · ${formatTraitDisplayName(
-    themeTrait.traitType,
-    themeTrait.traitValue,
-  )}`
+  const themeLine = formatRunwayThemeLabel(themeTrait, locale)
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-12 z-20 flex justify-center px-3 pt-[max(0.5rem,env(safe-area-inset-top))]">

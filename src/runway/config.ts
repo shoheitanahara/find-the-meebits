@@ -40,10 +40,10 @@ export const RUNWAY = {
   /** 背面スクリーン */
   screen: {
     x: 0,
-    y: 3.1,
+    y: 3.15,
     z: -12.85,
-    width: 7.2,
-    height: 3.6,
+    width: 8.0,
+    height: 4.2,
   },
 
   /** 客席ベンチ（左右×2列。1列目の |x|=5.6 を基準に壁側へ ROW_GAP） */
