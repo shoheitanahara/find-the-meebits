@@ -133,6 +133,12 @@ export function RunwayRoom() {
 function RunwayBench({ x, z, rotationY }: { x: number; z: number; rotationY: number }) {
   const seat = RUNWAY.colors.seat
   const accent = RUNWAY.colors.seatAccent
+  const legs: Array<[number, number]> = [
+    [-1.0, 0.2],
+    [1.0, 0.2],
+    [-1.0, -0.25],
+    [1.0, -0.25],
+  ]
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
       <mesh position={[0, 0.42, 0]} castShadow receiveShadow>
@@ -143,14 +149,12 @@ function RunwayBench({ x, z, rotationY }: { x: number; z: number; rotationY: num
         <boxGeometry args={[2.4, 0.55, 0.12]} />
         <meshStandardMaterial color={accent} roughness={0.75} metalness={0.05} />
       </mesh>
-      <mesh position={[-1.0, 0.2, 0.2]}>
-        <boxGeometry args={[0.12, 0.4, 0.12]} />
-        <meshStandardMaterial color={seat} roughness={0.8} />
-      </mesh>
-      <mesh position={[1.0, 0.2, 0.2]}>
-        <boxGeometry args={[0.12, 0.4, 0.12]} />
-        <meshStandardMaterial color={seat} roughness={0.8} />
-      </mesh>
+      {legs.map(([lx, lz]) => (
+        <mesh key={`${lx}-${lz}`} position={[lx, 0.2, lz]} castShadow>
+          <boxGeometry args={[0.12, 0.4, 0.12]} />
+          <meshStandardMaterial color={seat} roughness={0.8} />
+        </mesh>
+      ))}
     </group>
   )
 }

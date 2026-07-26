@@ -71,6 +71,7 @@ export function AttractionBuilding({
       <TitleBanner
         attraction={attraction}
         accent={accent}
+        locale={locale}
         y={3.95}
         z={frontZ + 0.28}
       />
@@ -622,14 +623,23 @@ function EntrancePortal({
 function TitleBanner({
   attraction,
   accent,
+  locale,
   y,
   z,
 }: {
   attraction: Attraction
   accent: string
+  locale: 'en' | 'ja'
   y: number
   z: number
 }) {
+  const subtitle =
+    attraction.subtitle === 'UNDER CONSTRUCTION'
+      ? locale === 'ja'
+        ? '工事中'
+        : 'UNDER CONSTRUCTION'
+      : attraction.subtitle
+
   return (
     <group position={[0, y, z]}>
       <mesh castShadow>
@@ -659,7 +669,7 @@ function TitleBanner({
         anchorX="center"
         anchorY="middle"
       >
-        {attraction.subtitle}
+        {subtitle}
       </Text>
     </group>
   )
@@ -699,8 +709,8 @@ function AttractionInfoBoard({
         />
       </mesh>
       <Text
-        position={[0, 1.98, 0.15]}
-        fontSize={0.18}
+        position={[0, description ? 1.98 : 1.55, 0.15]}
+        fontSize={description ? 0.18 : 0.28}
         color={accentColor}
         anchorX="center"
         anchorY="middle"
@@ -708,18 +718,20 @@ function AttractionInfoBoard({
       >
         {heading}
       </Text>
-      <Text
-        position={[0, 1.46, 0.15]}
-        fontSize={0.2}
-        lineHeight={1.45}
-        color="#f1eadc"
-        anchorX="center"
-        anchorY="middle"
-        textAlign="center"
-        maxWidth={2.65}
-      >
-        {description}
-      </Text>
+      {description ? (
+        <Text
+          position={[0, 1.46, 0.15]}
+          fontSize={0.2}
+          lineHeight={1.45}
+          color="#f1eadc"
+          anchorX="center"
+          anchorY="middle"
+          textAlign="center"
+          maxWidth={2.65}
+        >
+          {description}
+        </Text>
+      ) : null}
     </group>
   )
 }

@@ -9,7 +9,6 @@ const copy = {
   en: {
     eyebrow: 'Culture District',
     title: 'Fashion Runway',
-    subtitle: 'A dark room. A glowing catwalk. Today’s look, on repeat.',
     theme: "Tonight's look",
     enter: 'Enter the Show',
     loading: 'Preparing the lineup…',
@@ -19,7 +18,6 @@ const copy = {
   ja: {
     eyebrow: 'カルチャー地区',
     title: 'ファッションランウェイ',
-    subtitle: '暗い会場に輝くランウェイ。本日のトレイトに合うMeebitが歩く。',
     theme: '本日のルック',
     enter: '会場に入る',
     loading: 'ラインナップを準備中…',
@@ -79,7 +77,6 @@ export function RunwayTitleScreen() {
         <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-[0.04em] text-white sm:text-4xl">
           {t.title}
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-white/65">{t.subtitle}</p>
 
         <div className="mt-6 border border-white/10 bg-white/5 px-4 py-3">
           <p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-white/40">{t.theme}</p>

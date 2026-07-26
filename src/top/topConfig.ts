@@ -186,14 +186,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'runway',
     zoneId: 'culture',
     title: 'FASHION RUNWAY',
-    subtitle: 'Now Open',
+    /** 建物看板は工事中表記のまま（入場は可能） */
+    subtitle: 'UNDER CONSTRUCTION',
     description: {
-      en: 'A dark room. A glowing catwalk.\nToday’s look takes the stage\nin black and white.',
-      ja: '暗い会場に輝くランウェイ。\n本日のトレイトに合うMeebitが\n次々と歩くファッションショー。',
+      en: '',
+      ja: '',
     },
     storyTitle: {
-      en: 'TONIGHT’S LOOK',
-      ja: '今夜のルック',
+      en: 'UNDER CONSTRUCTION',
+      ja: '工事中',
     },
     color: '#1a1a1a',
     roofColor: '#f5f5f5',
