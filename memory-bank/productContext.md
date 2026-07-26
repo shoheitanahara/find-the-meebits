@@ -27,6 +27,19 @@
 - **ワクワク / ストーリーテリング調**（無機質な機能説明にしない）
 - TRAIT HUNT は「同じ特徴を持つ Meebit を探そう！」のポップな導入
 
+### ワールドの日替わり・ランダム（重要）
+
+このパークの核: **毎回・毎日、景色や顔ぶれが新鮮**。
+
+| 体験 | 内容 |
+|------|------|
+| Mt. Meeb / Jerry Mountain | コースが日替わり。進捗も毎日 Stage 1 から |
+| 8th Street | 歩行者・異変の感じがランごとに違う |
+| Find the Meebit | 群衆が常にランダムで新鮮 |
+| Plaza | 噴水 Featured・テーマトレイトが日付で変わる |
+
+NPC はこの魅力を **来場者同士の噂** として伝える（仕様説明にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)。
+
 ### Park レイアウトを触るとき
 
 - 必ず **[parkDesigner.md](./parkDesigner.md)** に従う

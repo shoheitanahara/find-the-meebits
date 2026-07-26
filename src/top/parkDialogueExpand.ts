@@ -145,6 +145,10 @@ const EN_FIND_H = [
   'Wrong Meebit?',
   'Museum crowds look similar…',
   'If you beat the Museum,',
+  'Every Museum visit feels brand new —',
+  'I never see the same faces twice in there.',
+  'The crowd reshuffles every run.',
+  'Hunting one Meebit in a fresh sea of faces —',
 ]
 
 const EN_FIND_T = [
@@ -162,6 +166,10 @@ const EN_FIND_T = [
   'the Club night awaits.',
   'Stage clears feel amazing.',
   'Trust your eyes, not the panic.',
+  'that’s why I keep going back.',
+  'the Park’s best hide-and-seek rush.',
+  'never gets stale.',
+  'pure Park magic.',
 ]
 
 const EN_TRAITS_H = [
@@ -209,6 +217,10 @@ const EN_STREET_H = [
   'Turn the corner.',
   'The white fade means',
   '8th Street rewards patience',
+  'Same street, different walkers tonight —',
+  'I love how the anomalies shift.',
+  'Every loop, someone’s standing wrong.',
+  'The crowd on 8th Street never copies yesterday.',
 ]
 
 const EN_STREET_T = [
@@ -226,6 +238,10 @@ const EN_STREET_T = [
   'more than sprinting.',
   'Don’t sprint past the clues.',
   'Slow eyes win there.',
+  'keeps the night feeling alive.',
+  'that’s the thrill for me.',
+  'come feel the unease yourself.',
+  'I’m hooked on those tiny wrongnesses.',
 ]
 
 const EN_MT_GAME_H = [
@@ -241,6 +257,10 @@ const EN_MT_GAME_H = [
   'Wrong jump?',
   'Three lanes up the trail…',
   'If you reach the summit pad,',
+  'Today’s trail already feels new —',
+  'Yesterday’s ledges are gone.',
+  'I love starting from Stage 1 each morning.',
+  'The mountain remakes itself overnight —',
 ]
 
 const EN_MT_GAME_T = [
@@ -258,6 +278,10 @@ const EN_MT_GAME_T = [
   'take a victory breath.',
   'BEST height is something to chase.',
   'Torchlight helps, guts help more.',
+  'my favorite reason to come back.',
+  'fresh cliffs, fresh butterflies.',
+  'it’s exciting, not a chore.',
+  'come chase today’s route with me.',
 ]
 
 const EN_NEON_GAME_H = [
@@ -273,6 +297,10 @@ const EN_NEON_GAME_H = [
   'Wrong jump on Jerry Mountain?',
   'Same jumps, different vibe…',
   'If you reach the Jerry summit,',
+  'Tonight’s jelly path feels brand new —',
+  'I woke up ready for Stage 1 again.',
+  'Jerry remakes the glow route daily —',
+  'Yesterday’s neon ledges? Already gone.',
 ]
 
 const EN_NEON_GAME_T = [
@@ -290,6 +318,10 @@ const EN_NEON_GAME_T = [
   'take a neon victory breath.',
   'chase that BEST height in style.',
   'Sparkles help, guts help more.',
+  'that’s why the tower stays exciting.',
+  'fresh glow, fresh nerves.',
+  'come taste today’s route.',
+  'I’m hooked on the daily remix.',
 ]
 
 const EN_FEAT_H = [
@@ -503,6 +535,10 @@ const EN_PLAZA_FLAVOR_H = [
   'North gate opens to Culture —',
   'West gate opens to the Sea District —',
   'The Park has four districts now —',
+  'This Park never copies yesterday —',
+  'Fresh crowds, fresh trails, fresh rumors —',
+  'I come back because nothing stays still here.',
+  'Every visit feels like a new postcard —',
 ]
 
 const EN_PLAZA_FLAVOR_T = [
@@ -526,6 +562,10 @@ const EN_PLAZA_FLAVOR_T = [
   'pick a mood and wander.',
   'Tonight’s mood is soft gold.',
   'Take a slow lap first.',
+  'that’s the magic for me.',
+  'wander and you’ll feel it.',
+  'come taste tonight’s version of the Park.',
+  'I’m never bored between the gates.',
 ]
 
 const EN_MT_FLAVOR_H = [
@@ -546,28 +586,34 @@ const EN_MT_FLAVOR_H = [
   'Jerry Mountain glows beside the trail.',
   'West of the plaza is the night beach —',
   'North of the plaza is Culture —',
+  'Today’s cliffs already surprised me —',
+  'Morning climb, brand-new route —',
+  'I love how the mountain remixes itself.',
 ]
 
 const EN_MT_FLAVOR_T = [
-  'Warm up, then go for a clear!',
+  'Warm up, then chase a clear!',
   'pine air and Meebits everywhere.',
   'follow the path back to the bridge gate.',
-  'hits different than plaza lamps.',
-  'but the view pays rent.',
-  'Habit of a climber, maybe.',
+  'hits different from plaza lamps.',
+  'but the view pays the rent.',
+  'Climber habit, maybe.',
   'read the blocks before big jumps.',
-  'others just vibe on the ridge.',
-  'Fountain chatter will still be there.',
+  'others just vibing on the ridge.',
+  'Fountain gossip never dies.',
   'Kinda epic.',
-  'Parkour vibes, mountain postcard.',
-  'savor the district too.',
-  'They tell you where the cold comes from.',
+  'Parkour postcard with altitude.',
+  'savor the district air too.',
+  'They teach you where the cold comes from.',
   'Better than any feed.',
-  'try the jelly tower next.',
-  'salt air and palm silhouettes that way.',
+  'try the jelly tower next door.',
+  'tide and palm silhouettes that way.',
   'runway lights and cool blue halls.',
   'Tonight’s mood is amber stone.',
   'Take a slow ridge lap first.',
+  'come feel today’s trail yourself.',
+  'my legs are already curious.',
+  'that’s highland joy for me.',
 ]
 
 const EN_CU_GREET_H = [
@@ -801,6 +847,10 @@ const JA_FIND_H = [
   '違うMeebitだった？',
   'ミュージアムの人混み、',
   'ミュージアムを制覇したら、',
+  'ミュージアム、入るたびに顔ぶれが新しい。',
+  '同じ顔には二度と会えない気がする。',
+  '群衆が毎回シャッフルされるの、',
+  '新しい顔の海から一人を探すの、',
 ]
 
 const JA_FIND_T = [
@@ -818,6 +868,10 @@ const JA_FIND_T = [
   'クラブの夜が待ってるよ。',
   'ステージクリアの快感、やばいよ。',
   '焦らず目を信じるんだ。',
+  'だから何度も入りたくなる。',
+  'パーク一のかくれんぼ興奮だよ。',
+  '飽きないんだよね。',
+  'まさにパークの魔法。',
 ]
 
 const JA_TRAITS_H = [
@@ -865,6 +919,10 @@ const JA_STREET_H = [
   '角を曲がったら二度見。',
   '白いフェードはストリートのリセット。',
   '8番ストリートは',
+  '同じ路地なのに、今夜の歩行者が違う。',
+  '異変の出方が毎回ちがうの、好き。',
+  'ループするたび、誰か一人おかしい。',
+  '昨日の路地の人、今日はもういない感じ。',
 ]
 
 const JA_STREET_T = [
@@ -877,11 +935,15 @@ const JA_STREET_T = [
   '夜だと印象が違うよね。',
   '誰か一人、おかしいはず。',
   '見逃し続けなければね。',
-  '直感を信じて。',
-  '気を引き締めて。',
-  'ダッシュより粘り勝ち。',
+  '二度見て、直感を信じて。',
+  '油断しないで。',
+  '速さより観察が勝つよ。',
   '手がかりを走り抜けないで。',
-  '遅い目が勝つ場所だよ。',
+  'ゆっくり見る目が勝つ。',
+  '夜が生きてる感じがする。',
+  'それが醍醐味だよ。',
+  '一度、あの違和感を味わってみて。',
+  '小さな「おかしさ」にハマってる。',
 ]
 
 const JA_MT_GAME_H = [
@@ -897,6 +959,10 @@ const JA_MT_GAME_H = [
   'ジャンプミス？',
   'トレイルは3レーン…',
   '頂上の平台まで着いたら、',
+  '今日のトレイル、もう別物だよ —',
+  '昨日の棚道、もうないみたい。',
+  '毎朝 Stage 1 から始めるの、ワクワクする。',
+  '山が夜のうちに作り直される感じ —',
 ]
 
 const JA_MT_GAME_T = [
@@ -914,6 +980,10 @@ const JA_MT_GAME_T = [
   '勝利の一息を。',
   'BEST標高、追いかけがいがあるよ。',
   'トーチも大事、胆力もっと大事。',
+  'だからまた来たくなる。',
+  '新しい崖、新しいドキドキ。',
+  '罰じゃなくて、朝のごほうびだよ。',
+  '今日のルート、一緒に追ってみて。',
 ]
 
 const JA_NEON_GAME_H = [
@@ -929,6 +999,10 @@ const JA_NEON_GAME_H = [
   'ジェリーマウンテンでジャンプミス？',
   '同じジャンプ、違う空気…',
   'ジェリーの頂上まで着いたら、',
+  '今夜のゼリー道、また新しい —',
+  '朝から Stage 1、気合い入る。',
+  'ジェリー塔の光ルート、毎日ちがう —',
+  '昨日のネオン棚、もう消えてる。',
 ]
 
 const JA_NEON_GAME_T = [
@@ -946,6 +1020,10 @@ const JA_NEON_GAME_T = [
   'ネオンの勝利の一息を。',
   'BEST標高、かっこよく追いかけよう。',
   'スパークルも大事、胆力もっと大事。',
+  'だから塔が飽きないんだ。',
+  '新しい光、新しい緊張。',
+  '今日のルート、味わってみて。',
+  '日替わりリミックスにハマってる。',
 ]
 
 const JA_FEAT_H = [
@@ -1159,6 +1237,10 @@ const JA_PLAZA_FLAVOR_H = [
   '北の門の先がカルチャー —',
   '西の門の先がシーエリア —',
   'パークにはいま地区が4つある —',
+  'このパーク、昨日のコピーにはならない —',
+  '新しい顔、新しい道、新しい噂 —',
+  '何もじっとしてないから、また来ちゃう。',
+  '来るたびに別の絵葉書みたい —',
 ]
 
 const JA_PLAZA_FLAVOR_T = [
@@ -1182,6 +1264,10 @@ const JA_PLAZA_FLAVOR_T = [
   '気分で地区を選んで歩いてみて。',
   '今夜のムードは柔らかい金。',
   'まずゆっくり一周してみて。',
+  'それがぼくにとっての魔法だよ。',
+  '歩いてると伝わってくるよ。',
+  '今夜バージョンのパーク、味わってみて。',
+  '門と門のあいだ、退屈しない。',
 ]
 
 const JA_MT_FLAVOR_H = [
@@ -1202,6 +1288,9 @@ const JA_MT_FLAVOR_H = [
   'ジェリーマウンテンがトレイルの脇で光ってる。',
   '広場の西は夜のビーチ —',
   '広場の北はカルチャー —',
+  '今日の崖、もうびっくりさせられた —',
+  '朝イチの登攀、ルートが新しい —',
+  '山のリミックス、好きすぎる。',
 ]
 
 const JA_MT_FLAVOR_T = [
@@ -1224,6 +1313,9 @@ const JA_MT_FLAVOR_T = [
   'ランウェイの光とクールな青の廊下。',
   '今夜のムードは琥珀色の石。',
   'まずゆっくり尾根を一周してみて。',
+  '今日のトレイル、自分で感じてみて。',
+  '足がもう好奇してる。',
+  'それがハイランドのよろこびだよ。',
 ]
 
 const JA_CU_GREET_H = [
