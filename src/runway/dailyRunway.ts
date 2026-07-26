@@ -23,14 +23,12 @@ const MIN_MATCHING = 24
 const AUDIENCE_COUNT = 32
 const ROAMER_COUNT = 0
 
-/** ファッションカラーとして横断マッチするトレイト種別 */
+/** ファッションカラーとして横断マッチするトレイト種別（靴・メガネは対象外） */
 export const RUNWAY_COLOR_TRAIT_TYPES = [
   'Shirt Color',
   'Pants Color',
-  'Shoes Color',
-  'Hat Color',
   'Overshirt Color',
-  'Glasses Color',
+  'Hat Color',
 ] as const
 
 const EXCLUDED_VALUES = new Set(['Leopard Print'])
