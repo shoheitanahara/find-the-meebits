@@ -31,24 +31,31 @@ const TRAIT_ORDER = [
   'Necklace',
   'Earring',
   'Tattoo',
+  'Tattoo Motif',
+  'Jersey Number',
 ] as const
 
-const MAX_TRAIT_LINES = 10
+type TraitLine = {
+  key: string
+  line: string
+  highlight: boolean
+}
 
-/** 背面スクリーン：番号・トレイト・本日テーマ */
+/** 背面スクリーン：番号・トレイト・本日テーマ（トレイトは2カラム全表示） */
 export function RunwayScreen() {
   const onScreen = useRunwayStore((state) => state.onScreen)
   const themeTrait = useRunwayStore((state) => state.themeTrait)
   const locale = getLocale()
   const { screen, colors } = RUNWAY
-  const padX = 0.85
+  const padX = 0.55
   const contentWidth = screen.width - padX * 2
-  const topY = screen.height / 2 - 0.45
-  const bottomY = -screen.height / 2 + 0.4
+  const colWidth = contentWidth / 2 - 0.12
+  const topY = screen.height / 2 - 0.38
+  const bottomY = -screen.height / 2 + 0.32
 
   const themeLine = themeTrait ? formatRunwayThemeLabel(themeTrait, locale) : '—'
 
-  const traitLines = useMemo(() => {
+  const traitLines = useMemo((): TraitLine[] => {
     if (!onScreen) return []
 
     const entries = Object.entries(onScreen.traits)
@@ -58,7 +65,6 @@ export function RunwayScreen() {
       (RUNWAY_COLOR_TRAIT_TYPES as readonly string[]).includes(type) &&
       value === themeTrait.traitValue
 
-    // マッチしたカラーは必ず先頭付近に出す
     const matchingColors = entries.filter(([type, value]) => isHighlight(type, value))
     const others = entries
       .filter(([type, value]) => !isHighlight(type, value))
@@ -69,24 +75,26 @@ export function RunwayScreen() {
         return a[0].localeCompare(b[0])
       })
 
-    const ordered = [...matchingColors, ...others].slice(0, MAX_TRAIT_LINES)
-
-    return ordered.map(([type, value]) => ({
+    // マッチカラーを先頭にしつつ、所持トレイトはすべて表示
+    return [...matchingColors, ...others].map(([type, value]) => ({
       key: `${type}::${value}`,
       line: `${type} · ${formatTraitDisplayName(type, value)}`,
       highlight: isHighlight(type, value),
     }))
   }, [onScreen, themeTrait])
 
-  const idY = topY - 1.05
-  const listStartY = idY - 0.55
-  const lineGap = 0.28
+  const idY = topY - 0.95
+  const listStartY = idY - 0.42
+  const availableH = listStartY - bottomY
+  const rowCount = Math.max(1, Math.ceil(traitLines.length / 2))
+  const lineGap = Math.min(0.26, availableH / Math.max(rowCount, 1))
+  const fontSize = Math.min(0.185, lineGap * 0.72)
 
   return (
     <group position={[screen.x, screen.y, screen.z + 0.05]}>
       <Text
         position={[0, topY, 0]}
-        fontSize={0.22}
+        fontSize={0.2}
         color="#a8a8a8"
         anchorX="center"
         anchorY="middle"
@@ -95,8 +103,8 @@ export function RunwayScreen() {
         {locale === 'ja' ? '本日のルック' : "TONIGHT'S LOOK"}
       </Text>
       <Text
-        position={[0, topY - 0.38, 0]}
-        fontSize={0.3}
+        position={[0, topY - 0.34, 0]}
+        fontSize={0.28}
         color={colors.accent}
         anchorX="center"
         anchorY="middle"
@@ -109,7 +117,7 @@ export function RunwayScreen() {
         <>
           <Text
             position={[0, idY, 0]}
-            fontSize={0.52}
+            fontSize={0.46}
             color={colors.screenText}
             anchorX="center"
             anchorY="middle"
@@ -118,17 +126,20 @@ export function RunwayScreen() {
             {`#${onScreen.meebitNumber}`}
           </Text>
           {traitLines.map((entry, index) => {
-            const y = listStartY - index * lineGap
-            if (y < bottomY) return null
+            const col = index % 2
+            const row = Math.floor(index / 2)
+            const x = col === 0 ? -contentWidth / 4 : contentWidth / 4
+            const y = listStartY - row * lineGap
             return (
               <Text
                 key={entry.key}
-                position={[0, y, 0]}
-                fontSize={0.2}
+                position={[x, y, 0]}
+                fontSize={fontSize}
                 color={entry.highlight ? colors.accent : '#cfcfcf'}
                 anchorX="center"
                 anchorY="middle"
-                maxWidth={contentWidth}
+                maxWidth={colWidth}
+                textAlign="center"
               >
                 {entry.line}
               </Text>
@@ -138,7 +149,7 @@ export function RunwayScreen() {
       ) : (
         <Text
           position={[0, 0, 0]}
-          fontSize={0.3}
+          fontSize={0.28}
           color="#777"
           anchorX="center"
           anchorY="middle"
