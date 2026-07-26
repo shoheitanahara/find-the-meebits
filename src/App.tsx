@@ -7,6 +7,7 @@ import { getLocale } from './i18n/locale'
 import { loadMeebitTraitsDataset } from './data/meebitTraits'
 import { EightStreetApp } from './eightStreet/EightStreetApp'
 import { MountainApp } from './mountain/MountainApp'
+import { RunwayApp } from './runway/RunwayApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
@@ -120,6 +121,15 @@ export default function App() {
     return (
       <>
         <MountainApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'runway') {
+    return (
+      <>
+        <RunwayApp />
         <Analytics />
       </>
     )

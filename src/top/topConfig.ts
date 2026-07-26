@@ -182,6 +182,36 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: [-5.2, 4.0],
   },
+  {
+    id: 'runway',
+    zoneId: 'culture',
+    title: 'FASHION RUNWAY',
+    subtitle: 'Now Open',
+    description: {
+      en: 'A dark room. A glowing catwalk.\nToday’s look takes the stage\nin black and white.',
+      ja: '暗い会場に輝くランウェイ。\n本日のトレイトに合うMeebitが\n次々と歩くファッションショー。',
+    },
+    storyTitle: {
+      en: 'TONIGHT’S LOOK',
+      ja: '今夜のルック',
+    },
+    color: '#1a1a1a',
+    roofColor: '#f5f5f5',
+    x: 0,
+    z: -7.0,
+    entranceZ: -3.2,
+    footprint: {
+      halfWidth: 3.4,
+      halfDepth: 3.6,
+      doorHalfWidth: 1.25,
+      alcoveDepth: 2.3,
+      extraBoxes: [
+        { x: -2.8, z: -1.0, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.8, z: -1.0, halfX: 1.0, halfZ: 1.4 },
+      ],
+    },
+    infoBoardLocal: [5.4, 4.0],
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

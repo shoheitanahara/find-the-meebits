@@ -7,7 +7,7 @@ import {
   type ParkZoneId,
 } from './parkZones'
 
-export type AttractionId = 'find' | 'traits' | 'street' | 'mountain' | 'neon'
+export type AttractionId = 'find' | 'traits' | 'street' | 'mountain' | 'neon' | 'runway'
 
 type TopState = {
   started: boolean

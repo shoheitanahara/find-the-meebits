@@ -12,6 +12,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - street: L字レンガ町屋＋アーチ
  * - mountain: ボクセル山エントランス（Mt. Meeb）
  * - neon: テトリス風積みブロック塔（Jerry Mountain）
+ * - runway: 暗いパビリオン＋発光ランウェイ
  */
 export function AttractionBuilding({
   attraction,
@@ -31,7 +32,9 @@ export function AttractionBuilding({
           ? '#e8a0ff'
           : attraction.id === 'neon'
             ? '#ff2bd6'
-            : '#c4a060'
+            : attraction.id === 'runway'
+              ? '#f0f0f0'
+              : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -54,6 +57,8 @@ export function AttractionBuilding({
         <AlleyLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'neon' ? (
         <JerryMountainLandmark accent={accent} />
+      ) : attraction.id === 'runway' ? (
+        <RunwayLandmark color={attraction.color} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -300,6 +305,60 @@ function MuseumLandmark({
       <mesh position={[0, 5.55, 3.35]}>
         <boxGeometry args={[5.2, 0.08, 0.06]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.4} />
+      </mesh>
+    </group>
+  )
+}
+
+/** Fashion Runway: 暗いパビリオン＋発光の白ランウェイ */
+function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
+  return (
+    <group>
+      <mesh position={[0, 0.12, 0]} receiveShadow>
+        <boxGeometry args={[7.2, 0.24, 7.4]} />
+        <meshStandardMaterial color="#0a0a0a" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 0.18, 0.4]} receiveShadow>
+        <boxGeometry args={[1.35, 0.08, 5.8]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.85}
+          roughness={0.35}
+        />
+      </mesh>
+      <mesh position={[-0.72, 0.2, 0.4]}>
+        <boxGeometry args={[0.06, 0.04, 5.8]} />
+        <meshStandardMaterial color="#111" emissive="#ffffff" emissiveIntensity={0.35} />
+      </mesh>
+      <mesh position={[0.72, 0.2, 0.4]}>
+        <boxGeometry args={[0.06, 0.04, 5.8]} />
+        <meshStandardMaterial color="#111" emissive="#ffffff" emissiveIntensity={0.35} />
+      </mesh>
+
+      <mesh position={[-3.1, 1.7, -0.4]} castShadow>
+        <boxGeometry args={[0.55, 3.4, 6.2]} />
+        <meshStandardMaterial color={color} roughness={0.88} />
+      </mesh>
+      <mesh position={[3.1, 1.7, -0.4]} castShadow>
+        <boxGeometry args={[0.55, 3.4, 6.2]} />
+        <meshStandardMaterial color={color} roughness={0.88} />
+      </mesh>
+      <mesh position={[0, 3.55, -0.6]} castShadow>
+        <boxGeometry args={[6.8, 0.35, 6.6]} />
+        <meshStandardMaterial color="#111" metalness={0.2} roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 2.4, -3.35]} castShadow>
+        <boxGeometry args={[6.2, 4.6, 0.4]} />
+        <meshStandardMaterial color="#050505" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 2.55, -3.12]}>
+        <boxGeometry args={[4.2, 2.4, 0.08]} />
+        <meshStandardMaterial color="#f8f8f8" emissive="#ffffff" emissiveIntensity={0.55} />
+      </mesh>
+      <mesh position={[0, 0.95, 3.35]} castShadow>
+        <boxGeometry args={[2.8, 1.9, 0.28]} />
+        <meshStandardMaterial color="#101010" roughness={0.9} />
       </mesh>
     </group>
   )

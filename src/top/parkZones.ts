@@ -312,7 +312,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   culture: {
     id: 'culture',
     title: { en: 'Culture District', ja: 'カルチャー地区' },
-    attractionIds: [],
+    attractionIds: ['runway'],
     layout: CULTURE_LAYOUT,
     perimeter: {
       theme: 'culture',
@@ -357,13 +357,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         title: { en: 'TRAIT MUSEUM', ja: 'トレイト博物館' },
         subtitle: { en: 'Find favorites by traits', ja: 'トレイトでお気に入り探し' },
-      },
-      {
-        x: 0,
-        z: -7.0,
-        theme: 'culture',
-        title: { en: 'FASHION RUNWAY', ja: 'ファッションランウェイ' },
-        subtitle: { en: 'Meebits on the catwalk', ja: 'Meebits のファッションショー' },
       },
       {
         x: 12.5,

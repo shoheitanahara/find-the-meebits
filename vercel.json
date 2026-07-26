@@ -10,6 +10,8 @@
     { "source": "/mountain/(.*)", "destination": "/index.html" },
     { "source": "/neon-stack", "destination": "/index.html" },
     { "source": "/neon-stack/(.*)", "destination": "/index.html" },
+    { "source": "/runway", "destination": "/index.html" },
+    { "source": "/runway/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },
     { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]

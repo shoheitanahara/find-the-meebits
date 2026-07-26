@@ -47,6 +47,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/neon-stack' : '/neon-stack'
   }
 
+  if (segments.includes('runway')) {
+    return locale === 'ja' ? '/jp/runway' : '/runway'
+  }
+
   if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }

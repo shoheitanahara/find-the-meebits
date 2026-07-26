@@ -68,6 +68,40 @@ export function applyVRMAttentionPose(vrm: VRM | null) {
   setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
 }
 
+/** ベンチ着席用の簡易シットポーズ */
+export function applyVRMSitPose(vrm: VRM | null) {
+  if (!vrm) {
+    return
+  }
+
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  // 脚は歩行軸と前後が逆。腕は歩行と同じ符号で膝上に置く
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Hips), { x: 0.12, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Spine), { x: -0.08, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Chest), { x: -0.04, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Head), { x: 0.04, y: 0, z: 0 })
+  setRotationImmediate(leftUpperArm, { x: 0.35, y: 0, z: attentionArmZ.left * 0.92 })
+  setRotationImmediate(rightUpperArm, { x: 0.35, y: 0, z: attentionArmZ.right * 0.92 })
+  setRotationImmediate(leftLowerArm, { x: 0.55, y: 0, z: 0 })
+  setRotationImmediate(rightLowerArm, { x: 0.55, y: 0, z: 0 })
+  setRotationImmediate(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
+  setRotationImmediate(rightUpperLeg, { x: 1.15, y: -0.04, z: 0 })
+  setRotationImmediate(leftLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setRotationImmediate(rightLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setRotationImmediate(leftFoot, { x: -0.12, y: 0, z: 0 })
+  setRotationImmediate(rightFoot, { x: -0.12, y: 0, z: 0 })
+}
+
 export function applyVRMDjPose(
   vrm: VRM | null,
   options: {
