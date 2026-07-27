@@ -5,6 +5,7 @@ import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { TopMobileControls } from '../top/TopControls'
 import { RunwayPlayer } from './player/RunwayPlayer'
+import { RunwayTouchLookPad } from './player/RunwayTouchLookPad'
 import { RunwayCatwalkShow } from './show/RunwayCatwalkShow'
 import { RunwayAudience } from './show/RunwayAudience'
 import { RunwayScreen } from './show/RunwayScreen'
@@ -13,6 +14,7 @@ import { RunwayHud } from './ui/Hud'
 import { RunwayTitleScreen } from './ui/TitleScreen'
 import { RunwayRoom } from './world/RunwayRoom'
 import { RunwayExitPad } from './world/RunwayExitPad'
+import { RunwayBgmSystem } from './RunwayBgmSystem'
 import { RUNWAY } from './config'
 
 function useTabFrameloop() {
@@ -68,6 +70,7 @@ export function RunwayApp() {
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#050505] text-slate-100">
+      <RunwayBgmSystem />
       {showWorld ? (
         <Canvas
           frameloop={frameloop}
@@ -83,7 +86,12 @@ export function RunwayApp() {
       <RunwayTitleScreen />
       <RunwayHud />
       <ParkReturnButton />
-      {phase === 'playing' ? <TopMobileControls /> : null}
+      {phase === 'playing' ? (
+        <>
+          <RunwayTouchLookPad />
+          <TopMobileControls />
+        </>
+      ) : null}
     </main>
   )
 }

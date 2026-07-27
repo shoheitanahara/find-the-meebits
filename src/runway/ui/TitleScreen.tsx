@@ -12,7 +12,7 @@ const copy = {
     enter: 'Enter the Show',
     loading: 'Preparing the lineup…',
     error: 'Could not load today’s runway. Try again.',
-    hint: 'WASD / Arrows to walk · Watch the show',
+    hint: 'WASD to walk · Click to look around · Esc to release',
   },
   ja: {
     eyebrow: 'カルチャー地区',
@@ -21,7 +21,7 @@ const copy = {
     enter: '会場に入る',
     loading: 'ラインナップを準備中…',
     error: '本日のランウェイを読み込めませんでした。',
-    hint: 'WASD / 矢印で歩行 · ショーを眺める',
+    hint: 'WASDで歩行 · クリックで視点変更 · Escで解除',
   },
 } as const
 

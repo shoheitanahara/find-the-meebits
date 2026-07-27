@@ -1,5 +1,5 @@
-import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
 import { applyVRMLocomotion } from '../../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../../avatar/useKeyboardControls'
@@ -11,6 +11,7 @@ import { useTouchControlsStore } from '../../stores/touchControlsStore'
 import { playSfx } from '../../ui/sfx'
 import { resolveRunwayMovement } from '../collisions'
 import { RUNWAY } from '../config'
+import { useRunwayControlsStore } from '../controlsStore'
 import { setRunwayPlayerWorld } from '../playerWorld'
 
 const movement = new Vector2()
@@ -18,23 +19,79 @@ const cameraPosition = new Vector3()
 const cameraTarget = new Vector3()
 const WALK_STEP_INTERVAL_SEC = 0.34
 
-/** パークと同系統の 3rd person 歩行（カメラは室内にクランプ） */
+/**
+ * パークと同系統の 3rd person 歩行。
+ * カメラ距離・高さは従来どおり、マウス／タッチで左右・後ろを見回せる。
+ */
 export function RunwayPlayer({ enabled }: { enabled: boolean }) {
+  const { gl } = useThree()
   const groupRef = useRef<Group>(null)
   const xRef = useRef<number>(RUNWAY.playerStart.x)
   const zRef = useRef<number>(RUNWAY.playerStart.z)
   const rotationYRef = useRef<number>(RUNWAY.playerStart.rotationY)
+  const lookYawRef = useRef(0)
+  const lookPitchRef = useRef(0)
+  const lockedRef = useRef(false)
   const localTimeRef = useRef(0)
   const footstepTimerRef = useRef(0)
   const keys = useKeyboardControls()
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
 
+  useEffect(() => {
+    if (!enabled) {
+      lookYawRef.current = 0
+      lookPitchRef.current = 0
+      return
+    }
+
+    const onMouseMove = (event: MouseEvent) => {
+      if (!lockedRef.current) return
+      lookYawRef.current -= event.movementX * RUNWAY.mouseLookSensitivity
+      lookPitchRef.current = MathUtils.clamp(
+        lookPitchRef.current + event.movementY * RUNWAY.mouseLookSensitivity,
+        -RUNWAY.orbitPitchMaxDown,
+        RUNWAY.orbitPitchMaxUp,
+      )
+    }
+    const onClick = () => {
+      if (document.pointerLockElement !== gl.domElement) {
+        void gl.domElement.requestPointerLock()
+      }
+    }
+    const onPointerLockChange = () => {
+      lockedRef.current = document.pointerLockElement === gl.domElement
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+    gl.domElement.addEventListener('click', onClick)
+    document.addEventListener('pointerlockchange', onPointerLockChange)
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      gl.domElement.removeEventListener('click', onClick)
+      document.removeEventListener('pointerlockchange', onPointerLockChange)
+      if (document.pointerLockElement === gl.domElement) document.exitPointerLock()
+      lockedRef.current = false
+    }
+  }, [enabled, gl])
+
   useFrame((state, delta) => {
     if (!enabled) return
 
     const dt = Math.min(delta, 0.05)
     localTimeRef.current += dt
+
+    const look = useRunwayControlsStore.getState().consumeLookDelta()
+    if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
+      const sens = RUNWAY.touchLookSensitivity
+      lookYawRef.current -= look.lookDeltaX * sens
+      lookPitchRef.current = MathUtils.clamp(
+        lookPitchRef.current - look.lookDeltaY * sens,
+        -RUNWAY.orbitPitchMaxDown,
+        RUNWAY.orbitPitchMaxUp,
+      )
+    }
 
     const keyboard = keys.current
     const touch = useTouchControlsStore.getState()
@@ -53,14 +110,22 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     if (movement.lengthSq() > 1) movement.normalize()
 
     const moving = movement.lengthSq() > 0.01
+    const lookYaw = lookYawRef.current
+    // カメラが向いている水平方向に合わせて移動（W = 画面奥）
+    const forwardX = -Math.sin(lookYaw)
+    const forwardZ = -Math.cos(lookYaw)
+    const rightX = Math.cos(lookYaw)
+    const rightZ = -Math.sin(lookYaw)
 
     if (moving) {
-      const nextX = xRef.current + movement.x * RUNWAY.moveSpeed * dt
-      const nextZ = zRef.current + movement.y * RUNWAY.moveSpeed * dt
+      const worldX = rightX * movement.x + forwardX * -movement.y
+      const worldZ = rightZ * movement.x + forwardZ * -movement.y
+      const nextX = xRef.current + worldX * RUNWAY.moveSpeed * dt
+      const nextZ = zRef.current + worldZ * RUNWAY.moveSpeed * dt
       const resolved = resolveRunwayMovement(xRef.current, zRef.current, nextX, nextZ)
       xRef.current = resolved.x
       zRef.current = resolved.z
-      rotationYRef.current = Math.atan2(movement.x, movement.y)
+      rotationYRef.current = Math.atan2(worldX, worldZ)
 
       footstepTimerRef.current += dt
       if (footstepTimerRef.current >= WALK_STEP_INTERVAL_SEC) {
@@ -88,21 +153,26 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     })
     update(dt)
 
-    // 室内に収まるよう追従（南壁の外に出ると真っ暗になる）
+    const pitch = lookPitchRef.current
+    const flatDist = Math.hypot(RUNWAY.cameraFollow.x, RUNWAY.cameraFollow.z)
+    const orbitDist = flatDist * Math.cos(pitch)
+    const offsetX = Math.sin(lookYaw) * orbitDist
+    const offsetZ = Math.cos(lookYaw) * orbitDist
+    const offsetY = RUNWAY.cameraFollow.y + Math.sin(pitch) * flatDist
+
     const camX = MathUtils.clamp(
-      xRef.current + RUNWAY.cameraFollow.x,
+      xRef.current + offsetX,
       -RUNWAY.roomHalfX + 1.2,
       RUNWAY.roomHalfX - 1.2,
     )
     const camZ = MathUtils.clamp(
-      zRef.current + RUNWAY.cameraFollow.z,
+      zRef.current + offsetZ,
       RUNWAY.roomMinZ + 2.5,
       RUNWAY.roomMaxZ - 0.8,
     )
-    cameraPosition.set(camX, RUNWAY.cameraFollow.y, camZ)
-    // 少し前方（ランウェイ側）を見て、俯瞰感を抑える
-    cameraTarget.set(xRef.current, RUNWAY.cameraLookY, zRef.current - 2.4)
-    state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 6))
+    cameraPosition.set(camX, offsetY, camZ)
+    cameraTarget.set(xRef.current, RUNWAY.cameraLookY, zRef.current)
+    state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))
     state.camera.lookAt(cameraTarget)
   })
 

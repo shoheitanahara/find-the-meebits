@@ -11,8 +11,8 @@ export const RUNWAY = {
   /** 手前壁の入口半幅 */
   entranceHalf: 4.2,
 
-  /** ランウェイ手前の観客スペースにスポーン（衝突と被らない） */
-  playerStart: { x: 0, z: 9.2, rotationY: Math.PI },
+  /** 入口付近にスポーン（ランウェイ方向を向く） */
+  playerStart: { x: 0, z: 12.8, rotationY: Math.PI },
   moveSpeed: 7,
   playerRadius: 0.42,
 
@@ -25,17 +25,22 @@ export const RUNWAY = {
   modelWalkSpeed: 1.55,
   pauseSeconds: 2.8,
 
-  /** プレイヤーがパークへ戻る出口（手前壁寄り） */
+  /** プレイヤーがパークへ戻る出口（入口すぐ手前） */
   playerExit: {
     x: 0,
-    z: 10.6,
-    halfX: 1.6,
-    halfZ: 1.0,
+    z: 14.6,
+    halfX: 1.8,
+    halfZ: 1.1,
   },
 
-  /** より水平寄りの三人称視点 */
+  /** より水平寄りの三人称視点（デフォルトはプレイヤー後方 +Z） */
   cameraFollow: { x: 0, y: 2.85, z: 5.6 },
   cameraLookY: 1.45,
+  /** 三人称のまま視点を回す（マウス / タッチ） */
+  orbitPitchMaxUp: (28 * Math.PI) / 180,
+  orbitPitchMaxDown: (18 * Math.PI) / 180,
+  mouseLookSensitivity: 0.0024,
+  touchLookSensitivity: 0.0065,
 
   /** 背面スクリーン */
   screen: {

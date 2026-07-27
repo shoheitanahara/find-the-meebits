@@ -26,30 +26,45 @@ export function RunwayRoom() {
   return (
     <group>
       <color attach="background" args={['#080808']} />
-      {/* 暗室だが真っ黒に沈まないよう近距離は薄く */}
-      <fog attach="fog" args={['#080808', 22, 48]} />
+      {/* 暗室だが奥側も顔が読めるよう、ランウェイ全体を均一に照らす */}
+      <fog attach="fog" args={['#080808', 28, 55]} />
 
-      <ambientLight intensity={0.55} color="#d8d8d8" />
-      <hemisphereLight args={['#ffffff', '#202020', 0.45]} />
-      <directionalLight position={[4, 9, 6]} intensity={0.55} color="#ffffff" />
+      <ambientLight intensity={0.62} color="#e0e0e0" />
+      <hemisphereLight args={['#ffffff', '#282828', 0.5]} />
+      <directionalLight position={[2, 10, -4]} intensity={0.42} color="#ffffff" />
+      <directionalLight position={[-2, 9, 8]} intensity={0.35} color="#f5f5f5" />
+
+      {/* ランウェイ上のシーリングライト（手前〜奥を均等） */}
+      {[-9.5, -7, -4.5, -2, 0.5, 2.2].map((z) => (
+        <spotLight
+          key={`runway-ceiling-${z}`}
+          position={[0, 6.8, z]}
+          angle={0.72}
+          penumbra={0.55}
+          intensity={48}
+          distance={24}
+          decay={1.4}
+          color="#ffffff"
+        >
+          <object3D attach="target" position={[0, 0.9, z]} />
+        </spotLight>
+      ))}
+
+      {/* 背面スクリーン周辺の補助光 */}
       <spotLight
-        position={[0, 7.2, runwayCenterZ]}
-        angle={0.65}
+        position={[0, 5.8, screen.z + 2]}
+        angle={0.85}
         penumbra={0.5}
-        intensity={70}
-        distance={32}
-        color="#ffffff"
-      />
-      <spotLight
-        position={[0, 5.2, screen.z + 3]}
-        angle={0.75}
-        penumbra={0.45}
-        intensity={40}
-        distance={20}
-        color="#f5f5f5"
-      />
-      <pointLight position={[0, 2.4, runwayEndZ]} intensity={14} distance={12} color="#ffffff" />
-      <pointLight position={[0, 2.8, 6]} intensity={10} distance={14} color="#ffffff" />
+        intensity={55}
+        distance={28}
+        color="#f8f8f8"
+      >
+        <object3D attach="target" position={[0, 2.2, screen.z + 1]} />
+      </spotLight>
+
+      {/* 観客席エリアの床面補助（弱め） */}
+      <pointLight position={[0, 3.2, 8]} intensity={6} distance={16} decay={2} color="#ffffff" />
+      <pointLight position={[0, 3.2, -8]} intensity={6} distance={16} decay={2} color="#ffffff" />
 
       {/* 床 */}
       <mesh position={[0, 0, roomCenterZ]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>

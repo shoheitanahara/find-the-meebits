@@ -16,6 +16,7 @@ import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { ParkTipsOverlay } from './ParkTipsOverlay'
+import { ParkBgmSystem } from './ParkBgmSystem'
 import { useTopStore, type AttractionId } from './topStore'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
@@ -196,6 +197,7 @@ export function TopApp() {
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#070914] text-[#f4ead2]">
+      <ParkBgmSystem />
       {parkReady ? (
         <Canvas
           dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}
