@@ -3,7 +3,6 @@ import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
-import { TopMobileControls } from '../top/TopControls'
 import { RunwayPlayer } from './player/RunwayPlayer'
 import { RunwayTouchLookPad } from './player/RunwayTouchLookPad'
 import { RunwayCatwalkShow } from './show/RunwayCatwalkShow'
@@ -12,6 +11,11 @@ import { RunwayScreen } from './show/RunwayScreen'
 import { useRunwayStore } from './store'
 import { RunwayHud } from './ui/Hud'
 import { RunwayTitleScreen } from './ui/TitleScreen'
+import {
+  RunwayMobileControls,
+  RunwaySitPrompt,
+  useRunwaySitKeyboard,
+} from './ui/RunwaySitControls'
 import { RunwayRoom } from './world/RunwayRoom'
 import { RunwayExitPad } from './world/RunwayExitPad'
 import { RunwayBgmSystem } from './RunwayBgmSystem'
@@ -67,6 +71,7 @@ export function RunwayApp() {
   const phase = useRunwayStore((state) => state.phase)
   const frameloop = useTabFrameloop()
   const showWorld = phase !== 'title'
+  useRunwaySitKeyboard()
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#050505] text-slate-100">
@@ -89,7 +94,8 @@ export function RunwayApp() {
       {phase === 'playing' ? (
         <>
           <RunwayTouchLookPad />
-          <TopMobileControls />
+          <RunwayMobileControls />
+          <RunwaySitPrompt />
         </>
       ) : null}
     </main>

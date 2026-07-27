@@ -68,8 +68,39 @@ export function applyVRMAttentionPose(vrm: VRM | null) {
   setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
 }
 
-/** ベンチ着席用の簡易シットポーズ */
-export function applyVRMSitPose(vrm: VRM | null) {
+type SitPoseBreathingOptions = {
+  elapsedTime: number
+  breathPhaseOffset?: number
+  breathRate?: number
+  breathAmplitude?: number
+  headPhaseOffset?: number
+}
+
+/** 観客ごとに呼吸リズム・位相をずらす（同調を避ける） */
+export function getAudienceBreathParams(meebitNumber: number) {
+  const seed = Math.abs(meebitNumber * 17 + 31)
+  const seed2 = Math.abs(meebitNumber * 23 + 11)
+  return {
+    breathPhaseOffset: ((seed % 360) / 360) * Math.PI * 2,
+    breathRate: 1.22 + (seed % 58) / 100,
+    breathAmplitude: 0.78 + (seed2 % 42) / 100,
+    headPhaseOffset: ((seed2 % 360) / 360) * Math.PI * 2,
+  }
+}
+
+function sampleSitBreath(options: SitPoseBreathingOptions) {
+  const rate = options.breathRate ?? 1.55
+  const phase = options.breathPhaseOffset ?? 0
+  const amp = options.breathAmplitude ?? 1
+  const t = options.elapsedTime * rate + phase
+  // 単純な sin だけだと機械的なので、ゆっくりした二次成分を混ぜる
+  const primary = Math.sin(t)
+  const secondary = Math.sin(t * 0.43 + phase * 1.7) * 0.28
+  return (primary * 0.82 + secondary) * amp * 0.032
+}
+
+/** ベンチ着席用の簡易シットポーズ（任意で肩の呼吸を重ねる） */
+export function applyVRMSitPose(vrm: VRM | null, breathing?: SitPoseBreathingOptions) {
   if (!vrm) {
     return
   }
@@ -84,22 +115,47 @@ export function applyVRMSitPose(vrm: VRM | null) {
   const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
   const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
   const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+  const hips = getBone(vrm, VRMHumanBoneName.Hips)
+  const spine = getBone(vrm, VRMHumanBoneName.Spine)
+  const chest = getBone(vrm, VRMHumanBoneName.Chest)
+  const head = getBone(vrm, VRMHumanBoneName.Head)
+
+  const breath = breathing ? sampleSitBreath(breathing) : 0
+  const headIdle = breathing
+    ? Math.sin(breathing.elapsedTime * 0.62 + (breathing.headPhaseOffset ?? 0)) *
+      (breathing.breathAmplitude ?? 1) *
+      0.012
+    : 0
+  const headTurn = breathing
+    ? Math.sin(breathing.elapsedTime * 0.35 + (breathing.headPhaseOffset ?? 0) * 1.4) *
+      (breathing.breathAmplitude ?? 1) *
+      0.018
+    : 0
+  const setPose = breathing ? setRotation : setRotationImmediate
 
   // 脚は歩行軸と前後が逆。腕は歩行と同じ符号で膝上に置く
-  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Hips), { x: 0.12, y: 0, z: 0 })
-  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Spine), { x: -0.08, y: 0, z: 0 })
-  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Chest), { x: -0.04, y: 0, z: 0 })
-  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Head), { x: 0.04, y: 0, z: 0 })
-  setRotationImmediate(leftUpperArm, { x: 0.35, y: 0, z: attentionArmZ.left * 0.92 })
-  setRotationImmediate(rightUpperArm, { x: 0.35, y: 0, z: attentionArmZ.right * 0.92 })
-  setRotationImmediate(leftLowerArm, { x: 0.55, y: 0, z: 0 })
-  setRotationImmediate(rightLowerArm, { x: 0.55, y: 0, z: 0 })
-  setRotationImmediate(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
-  setRotationImmediate(rightUpperLeg, { x: 1.15, y: -0.04, z: 0 })
-  setRotationImmediate(leftLowerLeg, { x: -1.35, y: 0, z: 0 })
-  setRotationImmediate(rightLowerLeg, { x: -1.35, y: 0, z: 0 })
-  setRotationImmediate(leftFoot, { x: -0.12, y: 0, z: 0 })
-  setRotationImmediate(rightFoot, { x: -0.12, y: 0, z: 0 })
+  setPose(hips, { x: 0.12 + breath * 0.35, y: 0, z: 0 })
+  setPose(spine, { x: -0.08 + breath * 0.75, y: 0, z: 0 })
+  setPose(chest, { x: -0.04 + breath * 1.15, y: 0, z: breath * 0.08 })
+  setPose(head, { x: 0.04 + breath * 0.35 + headIdle, y: headTurn, z: 0 })
+  setPose(leftUpperArm, {
+    x: 0.35 - breath * 0.55,
+    y: 0,
+    z: attentionArmZ.left * 0.92 + breath * 0.06,
+  })
+  setPose(rightUpperArm, {
+    x: 0.35 - breath * 0.55,
+    y: 0,
+    z: attentionArmZ.right * 0.92 - breath * 0.06,
+  })
+  setPose(leftLowerArm, { x: 0.55 + breath * 0.08, y: 0, z: 0 })
+  setPose(rightLowerArm, { x: 0.55 + breath * 0.08, y: 0, z: 0 })
+  setPose(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
+  setPose(rightUpperLeg, { x: 1.15, y: -0.04, z: 0 })
+  setPose(leftLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setPose(rightLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setPose(leftFoot, { x: -0.12, y: 0, z: 0 })
+  setPose(rightFoot, { x: -0.12, y: 0, z: 0 })
 }
 
 export function applyVRMDjPose(

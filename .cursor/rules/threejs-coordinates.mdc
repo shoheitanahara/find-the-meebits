@@ -1,0 +1,57 @@
+---
+description: Three.js / R3F 座標系と前後・上下オフセットの取り違え防止（memory-bank）
+alwaysApply: true
+---
+
+# Three.js 座標系（find-the-meebits）
+
+調整前に必ずこの表と「よくある逆」を確認する。特に **Z 前後** と **Y オフセット符号** でミスが多い。
+
+## 基本軸（Three.js 標準）
+
+| 軸 | 正の方向 | 備考 |
+|----|----------|------|
+| **+X** | 右 | |
+| **+Y** | **上** | group.position.y を**増やすと浮く**。**減らすと沈む** |
+| **+Z** | 手前（カメラ/default 視点で奥行きの手前側） | **前後逆ミス最多** |
+
+## 本プロジェクトの Z（前後）— Runway 例
+
+- **手前・入口**: `roomMaxZ`（+16.5 付近）、`playerStart.z = 12.8`
+- **奥・スクリーン**: `roomMinZ`（-13.5 付近）
+- **ランウェイ歩行**: `runwayStartZ`（奥）→ `pauseZ`（手前）= **Z が増える方向**にモデルが進む
+- **カメラ**: 初期はプレイヤー **+Z 側**（`cameraFollow.z > 0`）= 入口側から見る
+- **移動入力**: `forward` は `movement.y -= 1`。ワールド forward は `(-sin(lookYaw), -cos(lookYaw))`
+- **ベンチ local**: 背もたれ **-Z**、座席は `SEAT_DEPTH` で **rotation に応じた forward 側**
+
+### 前後チェック
+
+- 「奥へ」= **Z を減らす**（Runway）
+- 「手前へ」= **Z を増やす**
+- `atan2(-worldX, pauseZ - worldZ)` でランウェイ方向を向く — 式の **減算順**に注意
+
+## Y オフセット（VRM・接地）
+
+`VRMLoader.alignVrmFeetToGround` が **子 scene 内**に `VRM_FEET_Y_OFFSET`(0.06) を足している。
+
+- **親 group.y = 0** → 足元ワールド **約 +0.06**
+- **Runway プレイヤー**は `playerGroundY: 0.05` 前後で見た目調整（-0.06 は床に沈みすぎる）
+- **親 group.y を増やす = 上に浮く** / **減らす = 下がる**
+
+### 符号ミスパターン
+
+1. **`benchGroundSink` + コードで `-`** → **`benchGroundY: -0.11` をそのまま `position.y` に**
+2. VRM 親 Y を **正** にして「沈める」つもりになる（逆）
+3. ベンチ Y を変えたら **`audienceSeatY` も同量だけ連動**
+4. ベンチ当たり判定: mesh は **local X=2.4 長辺 / local Z=0.7 奥行**（90° 取り違え注意）
+
+## カメラ・入力
+
+- **マウス/タッチ pitch**: `lookPitch += movementY * sens`（**+movementY = 下を見る**方向に統一済み）
+- **orbit**: `lookYaw` 回りで `cameraFollow` オフセットを水平回転
+
+## 触る前の確認
+
+1. 変更するのは **親 group.y** か **子 mesh ローカル y** か
+2. Z は **増加 = 手前（Runway）** か、別シーン（Park 等）と同じか
+3. 既存の `config.ts` 定数を増やすだけ — マジックナンバーを JSX に直書きしない

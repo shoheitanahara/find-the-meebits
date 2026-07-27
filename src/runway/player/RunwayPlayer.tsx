@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
-import { applyVRMLocomotion } from '../../avatar/VRMLocomotion'
+import { applyVRMLocomotion, applyVRMSitPose, getAudienceBreathParams } from '../../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../../avatar/useKeyboardControls'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
@@ -13,11 +13,20 @@ import { resolveRunwayMovement } from '../collisions'
 import { RUNWAY } from '../config'
 import { useRunwayControlsStore } from '../controlsStore'
 import { setRunwayPlayerWorld } from '../playerWorld'
+import {
+  findNearestEmptySeat,
+  getRunwaySeatSlot,
+  resolveRunwayStandUpPosition,
+  RUNWAY_SEAT_Y,
+} from '../runwaySeats'
+import { useRunwayStore } from '../store'
 
 const movement = new Vector2()
 const cameraPosition = new Vector3()
 const cameraTarget = new Vector3()
-const WALK_STEP_INTERVAL_SEC = 0.34
+const WALK_STEP_INTERVAL_SEC = 0.25
+/** 歩行サイクル（applyVRMLocomotion の isRunning 時 speed=12）と揃える */
+const WALK_BOB_FREQUENCY = 10.5
 
 /**
  * パークと同系統の 3rd person 歩行。
@@ -36,7 +45,30 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
   const footstepTimerRef = useRef(0)
   const keys = useKeyboardControls()
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
+  const playerSeatIndex = useRunwayStore((state) => state.playerSeatIndex)
+  const emptySeatIndices = useRunwayStore((state) => state.emptySeatIndices)
+  const setNearestEmptySeatIndex = useRunwayStore((state) => state.setNearestEmptySeatIndex)
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  const prevSeatRef = useRef<number | null>(null)
+  const breathParams = useMemo(() => getAudienceBreathParams(meebitNumber), [meebitNumber])
+
+  useEffect(() => {
+    if (prevSeatRef.current !== null && playerSeatIndex === null) {
+      const stand = resolveRunwayStandUpPosition(prevSeatRef.current)
+      if (stand) {
+        xRef.current = stand.x
+        zRef.current = stand.z
+        rotationYRef.current = stand.rotationY
+      }
+    }
+    prevSeatRef.current = playerSeatIndex
+  }, [playerSeatIndex])
+
+  useEffect(() => {
+    if (!enabled && playerSeatIndex !== null) {
+      useRunwayStore.getState().standUp()
+    }
+  }, [enabled, playerSeatIndex])
 
   useEffect(() => {
     if (!enabled) {
@@ -82,12 +114,14 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const dt = Math.min(delta, 0.05)
     localTimeRef.current += dt
 
+    const isSitting = playerSeatIndex !== null
+
     const look = useRunwayControlsStore.getState().consumeLookDelta()
     if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
       const sens = RUNWAY.touchLookSensitivity
       lookYawRef.current -= look.lookDeltaX * sens
       lookPitchRef.current = MathUtils.clamp(
-        lookPitchRef.current - look.lookDeltaY * sens,
+        lookPitchRef.current + look.lookDeltaY * sens,
         -RUNWAY.orbitPitchMaxDown,
         RUNWAY.orbitPitchMaxUp,
       )
@@ -96,20 +130,25 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const keyboard = keys.current
     const touch = useTouchControlsStore.getState()
 
-    movement.set(0, 0)
-    if (keyboard.left) movement.x -= 1
-    if (keyboard.right) movement.x += 1
-    if (keyboard.forward) movement.y -= 1
-    if (keyboard.backward) movement.y += 1
+    if (!isSitting) {
+      movement.set(0, 0)
+      if (keyboard.forward) movement.y -= 1
+      if (keyboard.backward) movement.y += 1
+      if (keyboard.left) movement.x -= 1
+      if (keyboard.right) movement.x += 1
 
-    if (touch.joystickActive) {
-      movement.x = touch.joystickX
-      movement.y = touch.joystickY
+      if (touch.joystickActive) {
+        movement.x = touch.joystickX
+        movement.y = touch.joystickY
+      }
+
+      if (movement.lengthSq() > 1) movement.normalize()
+    } else {
+      movement.set(0, 0)
+      useTouchControlsStore.getState().resetJoystick()
     }
 
-    if (movement.lengthSq() > 1) movement.normalize()
-
-    const moving = movement.lengthSq() > 0.01
+    const moving = !isSitting && movement.lengthSq() > 0.01
     const lookYaw = lookYawRef.current
     // カメラが向いている水平方向に合わせて移動（W = 画面奥）
     const forwardX = -Math.sin(lookYaw)
@@ -117,7 +156,15 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const rightX = Math.cos(lookYaw)
     const rightZ = -Math.sin(lookYaw)
 
-    if (moving) {
+    if (isSitting) {
+      const seat = getRunwaySeatSlot(playerSeatIndex)
+      if (seat) {
+        xRef.current = seat.x
+        zRef.current = seat.z
+        rotationYRef.current = seat.rotationY
+      }
+      setNearestEmptySeatIndex(null)
+    } else if (moving) {
       const worldX = rightX * movement.x + forwardX * -movement.y
       const worldZ = rightZ * movement.x + forwardZ * -movement.y
       const nextX = xRef.current + worldX * RUNWAY.moveSpeed * dt
@@ -132,25 +179,43 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
         footstepTimerRef.current -= WALK_STEP_INTERVAL_SEC
         playSfx('footstep')
       }
+
+      const nearest = findNearestEmptySeat(xRef.current, zRef.current, emptySeatIndices)
+      setNearestEmptySeatIndex(nearest)
     } else {
       footstepTimerRef.current = 0
+      const nearest = findNearestEmptySeat(xRef.current, zRef.current, emptySeatIndices)
+      setNearestEmptySeatIndex(nearest)
     }
 
     setRunwayPlayerWorld(xRef.current, zRef.current)
 
     const group = groupRef.current
     if (group) {
-      group.position.set(xRef.current, 0.06, zRef.current)
+      const groundY = RUNWAY.playerGroundY
+      group.position.set(xRef.current, isSitting ? RUNWAY_SEAT_Y : groundY, zRef.current)
       group.rotation.y = rotationYRef.current
-      group.position.y = 0.06 + Math.sin(localTimeRef.current * 1.6) * (moving ? 0.03 : 0.01)
+      if (!isSitting) {
+        group.position.y =
+          groundY +
+          (moving ? Math.abs(Math.sin(localTimeRef.current * WALK_BOB_FREQUENCY)) * 0.022 : 0)
+      }
     }
 
-    applyVRMLocomotion(vrmRef.current, {
-      elapsedTime: localTimeRef.current,
-      isMoving: moving,
-      idleOffset: 0.2,
-      walkPhaseOffset: 0.15,
-    })
+    if (isSitting) {
+      applyVRMSitPose(vrmRef.current, {
+        elapsedTime: localTimeRef.current,
+        ...breathParams,
+      })
+    } else {
+      applyVRMLocomotion(vrmRef.current, {
+        elapsedTime: localTimeRef.current,
+        isMoving: moving,
+        isRunning: moving,
+        idleOffset: 0.2,
+        walkPhaseOffset: 0.15,
+      })
+    }
     update(dt)
 
     const pitch = lookPitchRef.current
@@ -179,7 +244,7 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
   return (
     <group
       ref={groupRef}
-      position={[RUNWAY.playerStart.x, 0.06, RUNWAY.playerStart.z]}
+      position={[RUNWAY.playerStart.x, RUNWAY.playerGroundY, RUNWAY.playerStart.z]}
       rotation={[0, RUNWAY.playerStart.rotationY, 0]}
     >
       {vrmScene ? (

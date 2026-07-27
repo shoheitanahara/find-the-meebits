@@ -15,6 +15,32 @@ export const RUNWAY = {
   playerStart: { x: 0, z: 12.8, rotationY: Math.PI },
   moveSpeed: 7,
   playerRadius: 0.42,
+  /**
+   * プレイヤー group Y（+Y = 上）。
+   * VRMLoader 内蔵 +0.06 との合成で見た目調整。Runway では +0.05 前後。
+   */
+  playerGroundY: -0.05,
+  /** ベンチ group Y（負 = 下） */
+  benchGroundY: 0.04,
+  /** 脚を床方向へ延長（正 = 下へ埋める） */
+  benchLegEmbed: 0.09,
+  /** 着席 VRM group Y（benchGroundY に合わせて調整） */
+  audienceSeatY: -0.06,
+  /** ベンチ当たり判定（RunwayRoom の box 2.4×0.7、local X=長辺 / local Z=奥行） */
+  benchCollision: {
+    /** 列の端（前後に隣ベンチがない側） */
+    halfLengthOuter: 1.15,
+    /** 前後の隣ベンチとの間（local X の列間側） */
+    halfLengthGap: 0.72,
+    /** 座席側の半奥行（local +Z＝ランウェイ列 / 壁列では local -Z） */
+    halfDepthSeat: 0.3,
+    /** 2列間の通路側（local -Z＝ランウェイ列 / 壁列では local +Z） */
+    halfDepthAisle: 0.18,
+    /** 背もたれ側（local -Z）へ中心をずらす量 */
+    backShift: 0.28,
+    /** 同列ベンチの z 間隔（config.benches の並び） */
+    rowSpacing: 4.0,
+  },
 
   /** ランウェイ（中央・奥→手前）。先端は観客エリアの手前で止める */
   runwayHalfWidth: 1.15,

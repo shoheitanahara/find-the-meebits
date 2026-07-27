@@ -17,16 +17,25 @@ type RunwayState = {
   matchingIds: number[]
   recentIds: number[]
   audienceIds: number[]
+  emptySeatIndices: number[]
   roamerIds: number[]
+  /** 着席中の座席 index。null なら立位 */
+  playerSeatIndex: number | null
+  /** 近くの空席（Sit 表示用） */
+  nearestEmptySeatIndex: number | null
   start: (payload: {
     themeTrait: DailyThemeTrait
     matchingIds: number[]
     audienceIds: number[]
+    emptySeatIndices: number[]
     roamerIds: number[]
   }) => void
   setOnScreen: (model: RunwayShowModel | null) => void
   pushRecentId: (meebitNumber: number) => void
   pickNextModelId: () => number | null
+  setNearestEmptySeatIndex: (seatIndex: number | null) => void
+  sitAtSeat: (seatIndex: number) => void
+  standUp: () => void
 }
 
 export const useRunwayStore = create<RunwayState>((set, get) => ({
@@ -36,16 +45,22 @@ export const useRunwayStore = create<RunwayState>((set, get) => ({
   matchingIds: [],
   recentIds: [],
   audienceIds: [],
+  emptySeatIndices: [],
   roamerIds: [],
-  start: ({ themeTrait, matchingIds, audienceIds, roamerIds }) =>
+  playerSeatIndex: null,
+  nearestEmptySeatIndex: null,
+  start: ({ themeTrait, matchingIds, audienceIds, emptySeatIndices, roamerIds }) =>
     set({
       phase: 'playing',
       themeTrait,
       matchingIds,
       audienceIds,
+      emptySeatIndices,
       roamerIds,
       recentIds: [],
       onScreen: null,
+      playerSeatIndex: null,
+      nearestEmptySeatIndex: null,
     }),
   setOnScreen: (onScreen) => set({ onScreen }),
   pushRecentId: (meebitNumber) =>
@@ -60,4 +75,17 @@ export const useRunwayStore = create<RunwayState>((set, get) => ({
     const pool = fresh.length > 0 ? fresh : matchingIds
     return pool[Math.floor(Math.random() * pool.length)] ?? null
   },
+  setNearestEmptySeatIndex: (nearestEmptySeatIndex) =>
+    set((state) =>
+      state.nearestEmptySeatIndex === nearestEmptySeatIndex
+        ? state
+        : { nearestEmptySeatIndex },
+    ),
+  sitAtSeat: (seatIndex) => {
+    const { emptySeatIndices, playerSeatIndex } = get()
+    if (playerSeatIndex !== null) return
+    if (!emptySeatIndices.includes(seatIndex)) return
+    set({ playerSeatIndex: seatIndex, nearestEmptySeatIndex: null })
+  },
+  standUp: () => set({ playerSeatIndex: null }),
 }))

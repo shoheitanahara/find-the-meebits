@@ -19,8 +19,13 @@ import {
   type DailyThemeTrait,
 } from '../top/dailyFeatured'
 
+import {
+  getOccupiedSeatIndices,
+  pickDailyEmptySeatIndices,
+} from './runwaySeats'
+
 const MIN_MATCHING = 24
-const AUDIENCE_COUNT = 32
+/** 全席数に合わせ、空席分だけ観客を減らす */
 const ROAMER_COUNT = 0
 
 /** ファッションカラーとして横断マッチするトレイト種別（靴・メガネは対象外） */
@@ -41,6 +46,8 @@ export type DailyRunwayShow = {
   themeTrait: DailyThemeTrait
   matchingIds: number[]
   audienceIds: number[]
+  /** プレイヤーが座れる日替わり空席（座席 index） */
+  emptySeatIndices: number[]
   roamerIds: number[]
 }
 
@@ -69,13 +76,16 @@ export async function getDailyRunwayShow(): Promise<DailyRunwayShow> {
 
 function buildRunwayShow(dataset: MeebitTraitsDataset, dateKey: string): DailyRunwayShow {
   const rng = createSeededRng(hashStringToSeed(`meebits-runway-color:${dateKey}`))
+  const seatRng = createSeededRng(hashStringToSeed(`meebits-runway-seats:${dateKey}`))
   const themeTrait = pickRunwayColorTheme(dataset, rng)
   const matchingIds = collectMatchingIds(dataset, themeTrait.traitValue)
-  const audienceIds = pickGuestIds(dataset, matchingIds, rng, AUDIENCE_COUNT)
+  const emptySeatIndices = pickDailyEmptySeatIndices(seatRng)
+  const occupiedCount = getOccupiedSeatIndices(emptySeatIndices).length
+  const audienceIds = pickGuestIds(dataset, matchingIds, rng, occupiedCount)
   const used = new Set([...matchingIds, ...audienceIds])
   const roamerIds = pickGuestIds(dataset, [...used], rng, ROAMER_COUNT)
 
-  return { dateKey, themeTrait, matchingIds, audienceIds, roamerIds }
+  return { dateKey, themeTrait, matchingIds, audienceIds, emptySeatIndices, roamerIds }
 }
 
 /** いずれかの衣装カラーが themeColor と一致するか */

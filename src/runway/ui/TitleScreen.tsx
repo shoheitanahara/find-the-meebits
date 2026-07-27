@@ -58,6 +58,7 @@ export function RunwayTitleScreen() {
         themeTrait: show.themeTrait,
         matchingIds: show.matchingIds,
         audienceIds: show.audienceIds,
+        emptySeatIndices: show.emptySeatIndices,
         roamerIds: show.roamerIds,
       })
       void unlockAudioIfNeeded().then(() => playSfx('timerStart'))

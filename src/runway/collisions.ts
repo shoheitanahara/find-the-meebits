@@ -7,6 +7,8 @@ type ObstacleBox = {
   maxZ: number
 }
 
+type BenchDef = (typeof RUNWAY.benches)[number]
+
 function boxFromCenter(x: number, z: number, halfX: number, halfZ: number): ObstacleBox {
   return {
     minX: x - halfX,
@@ -14,6 +16,74 @@ function boxFromCenter(x: number, z: number, halfX: number, halfZ: number): Obst
     minZ: z - halfZ,
     maxZ: z + halfZ,
   }
+}
+
+function hasBenchNeighbor(bench: BenchDef, deltaZ: number): boolean {
+  return RUNWAY.benches.some(
+    (other) => other.x === bench.x && Math.abs(other.z - bench.z - deltaZ) < 0.01,
+  )
+}
+
+/** 壁側列（|x|=7.8）かランウェイ側列（|x|=5.6）か */
+function isWallColumnBench(bench: BenchDef): boolean {
+  return Math.abs(bench.x) > 6.5
+}
+
+/** ベンチの当たり判定。座席側は mesh 幅、列間通路側は短く、前後の隣ベンチ間も詰める */
+function buildRotatedBenchObstacle(bench: BenchDef): ObstacleBox {
+  const {
+    halfLengthOuter,
+    halfLengthGap,
+    halfDepthSeat,
+    halfDepthAisle,
+    backShift,
+    rowSpacing,
+  } = RUNWAY.benchCollision
+
+  const isLeftBench = bench.rotationY > 0
+  let halfLengthMinusX = halfLengthOuter
+  let halfLengthPlusX = halfLengthOuter
+
+  // local X 長辺が world Z 方向。回転に応じて「手前/奥の隣ベンチ」側だけ gap 幅に縮める
+  if (isLeftBench) {
+    if (hasBenchNeighbor(bench, rowSpacing)) halfLengthMinusX = halfLengthGap
+    if (hasBenchNeighbor(bench, -rowSpacing)) halfLengthPlusX = halfLengthGap
+  } else {
+    if (hasBenchNeighbor(bench, rowSpacing)) halfLengthPlusX = halfLengthGap
+    if (hasBenchNeighbor(bench, -rowSpacing)) halfLengthMinusX = halfLengthGap
+  }
+
+  const isWallColumn = isWallColumnBench(bench)
+  const halfDepthPlusZ = isWallColumn ? halfDepthAisle : halfDepthSeat
+  const halfDepthMinusZ = isWallColumn ? halfDepthSeat : halfDepthAisle
+
+  const sin = Math.sin(bench.rotationY)
+  const cos = Math.cos(bench.rotationY)
+  const centerX = bench.x - sin * backShift
+  const centerZ = bench.z - cos * backShift
+
+  const cornerOffsets: Array<[number, number]> = [
+    [-halfLengthMinusX, -halfDepthMinusZ],
+    [-halfLengthMinusX, halfDepthPlusZ],
+    [halfLengthPlusX, halfDepthPlusZ],
+    [halfLengthPlusX, -halfDepthMinusZ],
+  ]
+
+  let minX = Infinity
+  let maxX = -Infinity
+  let minZ = Infinity
+  let maxZ = -Infinity
+
+  for (const [localX, localZ] of cornerOffsets) {
+    const worldX = centerX + localX * cos + localZ * sin
+    const worldZ = centerZ - localX * sin + localZ * cos
+    minX = Math.min(minX, worldX)
+    maxX = Math.max(maxX, worldX)
+    minZ = Math.min(minZ, worldZ)
+    maxZ = Math.max(maxZ, worldZ)
+  }
+
+  return { minX, maxX, minZ, maxZ }
 }
 
 /** 壁・ベンチ・スクリーン台・ランウェイの簡易衝突 */
@@ -38,7 +108,7 @@ function buildObstacles(): ObstacleBox[] {
   ]
 
   for (const bench of benches) {
-    boxes.push(boxFromCenter(bench.x, bench.z, 0.45, 1.25))
+    boxes.push(buildRotatedBenchObstacle(bench))
   }
 
   return boxes
