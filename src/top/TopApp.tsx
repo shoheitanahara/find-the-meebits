@@ -10,16 +10,16 @@ import { TargetPreview } from '../ui/TargetPreview'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { getDailyParkLineup, type DailyParkLineup } from './dailyFeatured'
 import { TopMobileControls } from './TopControls'
-import { TOP_ATTRACTIONS, getAttractionById } from './topConfig'
+import { getAttractionById } from './topConfig'
 import { TopScene } from './TopScene'
 import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
+import { ParkTipsOverlay } from './ParkTipsOverlay'
 import { useTopStore, type AttractionId } from './topStore'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
-import { dialogueChromeDimClass } from '../ui/dialogueChrome'
 
 const copy = {
   en: {
@@ -29,9 +29,6 @@ const copy = {
     avatar: 'Your Meebit',
     random: 'Random',
     enterPark: 'Enter the Park',
-    controls: 'WASD / Arrow keys — Move · E — Talk',
-    mobileControls: 'Joystick to move · Talk when nearby',
-    approach: 'Walk up to Meebits (red marker) or attraction entrances.',
     enter: 'Enter',
     preparing: 'Preparing today’s guests…',
     attractions: {
@@ -50,9 +47,6 @@ const copy = {
     avatar: 'あなたのMeebit',
     random: 'ランダム',
     enterPark: 'パークに入る',
-    controls: 'WASD / 矢印キー — 移動 · E — 話す',
-    mobileControls: 'スティックで移動 · 近くで Talk',
-    approach: '赤いマーカーのMeebitか、アトラクション入口へ。',
     enter: '入る',
     preparing: '本日の来場者を準備中…',
     attractions: {
@@ -106,6 +100,7 @@ export function TopApp() {
   const previewMeebitNumber = normalizePlayerMeebitNumber(meebitInput)
   const [lineup, setLineup] = useState<DailyParkLineup | null>(null)
   const [lineupError, setLineupError] = useState(false)
+  const [showParkTips, setShowParkTips] = useState(false)
 
   // 日付シードのラインナップを先読み（ゲーム往復でも sessionStorage で即復帰）
   useEffect(() => {
@@ -154,11 +149,19 @@ export function TopApp() {
     })
   }, [])
 
-  const startPark = () => {
+  const requestEnterPark = () => {
     if (!lineup) return
     const meebitNumber = normalizePlayerMeebitNumber(meebitInput)
     setMeebitInput(String(meebitNumber))
     usePlayerStore.getState().setMeebitNumber(meebitNumber)
+    setShowParkTips(true)
+    void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
+  }
+
+  const confirmEnterPark = () => {
+    if (!lineup) return
+    setShowParkTips(false)
+    const meebitNumber = normalizePlayerMeebitNumber(meebitInput)
     setParkCollisionZone('plaza')
     useTopStore.getState().start(meebitNumber, { zoneId: 'plaza' })
     void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
@@ -188,7 +191,7 @@ export function TopApp() {
     }, 280)
   }
 
-  const showSelectionCard = !started && !isReturningFromGame
+  const showSelectionCard = !started && !isReturningFromGame && !showParkTips
   const parkReady = lineup !== null
 
   return (
@@ -275,7 +278,7 @@ export function TopApp() {
                 <button
                   type="button"
                   className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25),inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:brightness-110 active:scale-[0.99]"
-                  onClick={startPark}
+                  onClick={requestEnterPark}
                 >
                   {t.enterPark}
                 </button>
@@ -285,24 +288,13 @@ export function TopApp() {
         </div>
       ) : null}
 
+      {showParkTips && parkReady ? <ParkTipsOverlay onConfirm={confirmEnterPark} /> : null}
+
       {started && parkReady ? (
         <>
           <ParkDialogueSystem />
           <ParkDialogueBox />
           <ParkInteractionPrompt />
-          <div
-            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen)}`}
-          >
-            <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
-              Meebits Park
-            </p>
-            <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
-              {getParkZone(activeZoneId).title[locale]}
-            </p>
-            <p className="mt-1.5 hidden text-[0.68rem] text-[#d2c9b7] lg:block">{t.controls}</p>
-            <p className="mt-1.5 text-[0.68rem] text-[#d2c9b7] lg:hidden">{t.mobileControls}</p>
-            <p className="mt-0.5 text-[0.64rem] text-[#8f897e]">{t.approach}</p>
-          </div>
 
           {nearest && nearestAttraction && !isDialogueOpen && !nearestGate ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
