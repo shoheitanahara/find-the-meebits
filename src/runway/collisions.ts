@@ -41,8 +41,8 @@ function buildRotatedBenchObstacle(bench: BenchDef): ObstacleBox {
   } = RUNWAY.benchCollision
 
   const isLeftBench = bench.rotationY > 0
-  let halfLengthMinusX = halfLengthOuter
-  let halfLengthPlusX = halfLengthOuter
+  let halfLengthMinusX: number = halfLengthOuter
+  let halfLengthPlusX: number = halfLengthOuter
 
   // local X 長辺が world Z 方向。回転に応じて「手前/奥の隣ベンチ」側だけ gap 幅に縮める
   if (isLeftBench) {
