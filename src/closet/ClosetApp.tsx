@@ -11,6 +11,7 @@ import { TraitQuestVisual } from '../ui/TraitQuestVisual'
 import { formatTraitDisplayName } from '../game/traitHunt'
 import { getMatchPreviewIds, applyTraitSelection, filterCompatibleTraitOptions } from './matchMeebits'
 import {
+  CLOSET_MATCH_PREVIEW_LIMIT,
   getClosetTraitTypes,
   getClosetTraitsByType,
   type ClosetTraitOption,
@@ -31,6 +32,7 @@ const copy = {
     none: 'No Meebits match. Try fewer looks.',
     noCompatible: 'Nothing here works with your current picks.',
     more: (n: number) => `+${n} more`,
+    loadMore: 'Show more',
     wear: 'Wear this look',
     wearing: 'Already wearing',
     clear: 'Clear',
@@ -52,6 +54,7 @@ const copy = {
     none: '一致するMeebitがいないよ。条件を減らしてみて。',
     noCompatible: '今の選択と両立するものがありません。',
     more: (n: number) => `ほか ${n} 体`,
+    loadMore: 'もっと見る',
     wear: 'この姿にきせかえ',
     wearing: 'いまこの姿',
     clear: 'クリア',
@@ -136,6 +139,7 @@ export function ClosetApp() {
   const [selections, setSelections] = useState<ClosetTraitSelection[]>([])
   const [previewId, setPreviewId] = useState(savedMeebit)
   const [typePickerOpen, setTypePickerOpen] = useState(true)
+  const [matchLimit, setMatchLimit] = useState(CLOSET_MATCH_PREVIEW_LIMIT)
 
   useEffect(() => {
     void ensureClosetTypePools()
@@ -175,9 +179,13 @@ export function ClosetApp() {
     [compatibleCountByType, lookTraitTypes],
   )
 
+  useEffect(() => {
+    setMatchLimit(CLOSET_MATCH_PREVIEW_LIMIT)
+  }, [selections])
+
   const match = useMemo(
-    () => getMatchPreviewIds(selections, undefined, savedMeebit),
-    [savedMeebit, selections],
+    () => getMatchPreviewIds(selections, matchLimit, savedMeebit),
+    [matchLimit, savedMeebit, selections],
   )
 
   useEffect(() => {
@@ -216,6 +224,11 @@ export function ClosetApp() {
   const selectMatch = (meebitNumber: number) => {
     void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
     setPreviewId(meebitNumber)
+  }
+
+  const loadMoreMatches = () => {
+    void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
+    setMatchLimit((prev) => prev + CLOSET_MATCH_PREVIEW_LIMIT)
   }
 
   const wearPreview = () => {
@@ -506,9 +519,19 @@ export function ClosetApp() {
                       )
                     })}
                     {match.total > match.ids.length ? (
-                      <div className="flex h-[4.75rem] w-14 shrink-0 items-center justify-center rounded-2xl border border-dashed border-white/20 text-[0.62rem] text-[#8a96aa] sm:h-[5.5rem] sm:w-16">
-                        {t.more(match.total - match.ids.length)}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={loadMoreMatches}
+                        className="flex h-[4.75rem] w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border border-dashed border-[#8eb4e8]/45 bg-[#8eb4e8]/10 px-1 text-[#c8d4e8] transition hover:border-[#f1d48c]/55 hover:bg-[#f1d48c]/10 hover:text-[#f4ead2] sm:h-[5.5rem] sm:w-[4.5rem]"
+                        aria-label={t.loadMore}
+                      >
+                        <span className="text-[0.62rem] font-bold leading-tight">
+                          {t.more(match.total - match.ids.length)}
+                        </span>
+                        <span className="text-[0.5rem] font-semibold uppercase tracking-[0.08em] text-[#8eb4e8]">
+                          {t.loadMore}
+                        </span>
+                      </button>
                     ) : null}
                   </div>
                 )}
