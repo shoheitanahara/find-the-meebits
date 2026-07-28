@@ -1,15 +1,78 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
+import { ui } from '../../i18n/ui'
+import { unlockAudioIfNeeded } from '../../ui/sfx'
+import { dialogueChromeDimClass } from '../../ui/dialogueChrome'
+import { DoneIcon, InspectIcon, NextIcon } from '../../ui/mobile/MobileActionIcons'
 import { useTouchControlsStore } from '../../stores/touchControlsStore'
+import { SERGITO_NPC_ID } from '../config'
+import { useMeetSergitoStore } from '../store'
+import { advanceSergitoDialogue, tryInteractWithSergito } from '../dialogue/interactWithSergito'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
 const KNOB_SIZE = 44
 
 export function MeetSergitoMobileControls() {
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
-      <VirtualJoystick />
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className="flex items-end justify-between gap-3">
+        <div className={dialogueChromeDimClass(isDialogueOpen)}>
+          <VirtualJoystick />
+        </div>
+        <SergitoTalkButton />
+      </div>
     </div>
+  )
+}
+
+function SergitoTalkButton() {
+  const canTalk = useMeetSergitoStore((state) => state.canTalkToSergito)
+  const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+  const activeNpcId = useDialogueStore((state) => state.activeNpcId)
+  const lines = useDialogueStore((state) => state.lines)
+  const currentIndex = useDialogueStore((state) => state.currentIndex)
+  const t = ui()
+  const isSergitoDialogue = isDialogueOpen && activeNpcId === SERGITO_NPC_ID
+  const isLastLine = currentIndex >= lines.length - 1
+
+  if (isSergitoDialogue) {
+    return (
+      <button
+        type="button"
+        className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
+        onPointerDown={(event) => {
+          event.preventDefault()
+          void unlockAudioIfNeeded()
+          advanceSergitoDialogue()
+        }}
+      >
+        {isLastLine ? <DoneIcon /> : <NextIcon />}
+        <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+          {isLastLine ? t.done : t.nextLine}
+        </span>
+      </button>
+    )
+  }
+
+  if (!canTalk) return <div className="h-20 w-20 shrink-0" />
+
+  return (
+    <button
+      type="button"
+      className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
+      onPointerDown={(event) => {
+        event.preventDefault()
+        void unlockAudioIfNeeded().then(() => {
+          tryInteractWithSergito()
+        })
+      }}
+    >
+      <InspectIcon />
+      <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{t.inspectAction}</span>
+    </button>
   )
 }
 

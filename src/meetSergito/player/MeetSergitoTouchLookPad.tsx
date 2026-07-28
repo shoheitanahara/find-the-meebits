@@ -28,7 +28,7 @@ export function MeetSergitoTouchLookPad() {
 
   return (
     <div
-      className="absolute inset-0 z-30 touch-none lg:hidden"
+      className="absolute inset-0 z-20 touch-none lg:hidden"
       style={{ pointerEvents: 'auto' }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
