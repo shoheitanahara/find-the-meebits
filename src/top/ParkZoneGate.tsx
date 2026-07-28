@@ -38,23 +38,14 @@ type VoxelCell = {
 export function ParkZoneGate({
   gate,
   locale,
-  onEnter,
 }: {
   gate: ParkGateDef
   locale: 'en' | 'ja'
-  onEnter: () => void
 }) {
   const yaw = gate.yaw ?? 0
 
   return (
-    <group
-      position={[gate.x, 0, gate.z]}
-      rotation={[0, yaw, 0]}
-      onClick={(event) => {
-        event.stopPropagation()
-        onEnter()
-      }}
-    >
+    <group position={[gate.x, 0, gate.z]} rotation={[0, yaw, 0]}>
       {gate.theme === 'mountain' ? (
         <MountainPortalGate gate={gate} locale={locale} />
       ) : gate.theme === 'culture' ? (

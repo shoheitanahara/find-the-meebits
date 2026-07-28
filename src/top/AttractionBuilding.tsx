@@ -1,6 +1,5 @@
 import { Text } from '@react-three/drei'
 import type { Attraction } from './topConfig'
-import type { AttractionId } from './topStore'
 import { VoxelBlockMat } from './VoxelBlockMat'
 import type { BlockKind } from '../mountain/config'
 import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
@@ -19,11 +18,9 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
 export function AttractionBuilding({
   attraction,
   locale,
-  onEnter,
 }: {
   attraction: Attraction
   locale: 'en' | 'ja'
-  onEnter: (id: AttractionId) => void
 }) {
   const accent =
     attraction.id === 'find'
@@ -44,13 +41,7 @@ export function AttractionBuilding({
   const frontZ = attraction.footprint.halfDepth
 
   return (
-    <group
-      position={[attraction.x, 0, attraction.z]}
-      onClick={(event) => {
-        event.stopPropagation()
-        onEnter(attraction.id)
-      }}
-    >
+    <group position={[attraction.x, 0, attraction.z]}>
       {attraction.id === 'find' ? (
         <MuseumLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'traits' ? (

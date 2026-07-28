@@ -186,16 +186,10 @@ export function TopScene({
           key={attraction.id}
           attraction={attraction}
           locale={locale}
-          onEnter={onEnter}
         />
       ))}
       {zone.gates.map((gate) => (
-        <ParkZoneGate
-          key={gate.id}
-          gate={gate}
-          locale={locale}
-          onEnter={() => transitionToZone(gate.targetZone, gate.targetSpawn)}
-        />
+        <ParkZoneGate key={gate.id} gate={gate} locale={locale} />
       ))}
       {(zone.comingSoonSlots ?? []).map((slot) => (
         <ComingSoonPad
