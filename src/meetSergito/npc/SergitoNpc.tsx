@@ -15,6 +15,7 @@ export function SergitoNpc() {
   const rotationRef = useRef<number>(MEET_SERGITO.sergito.rotationY)
   const localTimeRef = useRef(0)
   const { vrmRef, vrmScene, update } = useVRMModel(SERGITO_MEEBIT_ID, true, 0, true, true)
+  const canTalkToSergito = useMeetSergitoStore((state) => state.canTalkToSergito)
   const setCanTalkToSergito = useMeetSergitoStore((state) => state.setCanTalkToSergito)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
 
@@ -64,6 +65,32 @@ export function SergitoNpc() {
           <MeebitSilhouette />
         </group>
       )}
+      {canTalkToSergito && !isDialogueOpen ? <SergitoInteractionPin /> : null}
+    </group>
+  )
+}
+
+/** パーク NPC と同じ赤い近接マーカー */
+function SergitoInteractionPin() {
+  const pinRef = useRef<Group>(null)
+
+  useFrame((state) => {
+    if (!pinRef.current) return
+    pinRef.current.position.y = 2.35 + Math.sin(state.clock.elapsedTime * 4) * 0.025
+  })
+
+  return (
+    <group ref={pinRef} position={[0, 2.35, 0]}>
+      <mesh>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshStandardMaterial
+          color="#b91c1c"
+          roughness={0.92}
+          metalness={0}
+          transparent
+          opacity={0.82}
+        />
+      </mesh>
     </group>
   )
 }

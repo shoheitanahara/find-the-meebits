@@ -4,6 +4,7 @@ import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { loadMeebitTraitsDataset } from '../data/meebitTraits'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
+import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { MeetSergitoPlayer } from './player/MeetSergitoPlayer'
 import { MeetSergitoTouchLookPad } from './player/MeetSergitoTouchLookPad'
 import { MeetSergitoMobileControls } from './player/MeetSergitoMobileControls'
@@ -75,6 +76,7 @@ export function MeetSergitoApp() {
       </Canvas>
 
       <ParkReturnButton />
+      <TargetPreviewCapture />
       <SergitoDialogueSystem />
       <SergitoDialogueBox />
       <SergitoInteractionPrompt />

@@ -10,19 +10,6 @@ export function SergitoDialogueSystem() {
     return () => window.removeEventListener('keydown', handleSergitoDialogueKeyDown)
   }, [])
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== 'KeyE') return
-      if (useDialogueStore.getState().isOpen) return
-      if (!useMeetSergitoStore.getState().canTalkToSergito) return
-      event.preventDefault()
-      tryInteractWithSergito()
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
-
   return null
 }
 

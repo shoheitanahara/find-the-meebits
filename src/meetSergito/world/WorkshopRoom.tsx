@@ -4,6 +4,7 @@ import { WORKSHOP_SHELF } from './workshopFigureLayout'
 import { WorkshopDesk } from './WorkshopProps'
 import { WorkshopFigures } from './WorkshopFigures'
 import { WorkshopShelves, WorkshopWoodShell } from './WorkshopWoodShell'
+import { WorkshopWalkers } from './WorkshopWalkers'
 
 /** 木造の制作工房 */
 export function WorkshopRoom() {
@@ -74,6 +75,7 @@ export function WorkshopRoom() {
       <WorkshopDesk />
       <WorkshopShelves />
       <WorkshopFigures />
+      <WorkshopWalkers />
     </group>
   )
 }

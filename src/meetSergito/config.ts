@@ -65,11 +65,9 @@ export type WorkshopObstacle = {
   halfZ: number
 }
 
-/** 歩行不可の家具・台座（通路は中央を空ける） */
+/** 歩行不可の家具・台座（棚は collisions 側で見た目長さに合わせて追加） */
 export const WORKSHOP_OBSTACLES: WorkshopObstacle[] = [
   { x: -1.2, z: -8.2, halfX: 1.55, halfZ: 0.65 },
-  { x: -10.35, z: 0, halfX: 0.55, halfZ: 3.6 },
-  { x: 10.35, z: 0, halfX: 0.55, halfZ: 3.6 },
   { x: -6.8, z: 4.5, halfX: 0.65, halfZ: 0.55 },
   { x: 7.8, z: 5.2, halfX: 0.6, halfZ: 0.55 },
 ]

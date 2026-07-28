@@ -17,6 +17,8 @@ export const WORKSHOP_FIGURE_SCALE = 0.285
 
 /** 棚 96 + 机 3 */
 export const WORKSHOP_FIGURE_COUNT = 99
+/** 棚フィギュアのうち、同じ ID で部屋を歩く人数 */
+export const WORKSHOP_WALKER_COUNT = 4
 
 function buildZSlots(count: number, halfSpan: number): readonly number[] {
   if (count <= 1) {
@@ -72,6 +74,32 @@ function buildDailyWorkshopMeebitIds(dateKey: string, count: number): readonly n
   return ids
 }
 
+function getShelfMeebitIds(dateKey: string): readonly number[] {
+  return buildDailyWorkshopMeebitIds(dateKey, WORKSHOP_FIGURE_COUNT)
+}
+
+/**
+ * 棚に並んでいるフィギュアから 4 体（同じ ID）。
+ * 棚にも残し、フルサイズで部屋を歩かせる。
+ */
+export function getWorkshopWalkerMeebitIds(now = new Date()): readonly number[] {
+  const dateKey = getWorkshopFigureDateKey(now)
+  const shelfIds = getShelfMeebitIds(dateKey)
+  const seed = hashStringToSeed(`workshop-walkers-v1-${dateKey}`)
+  const walkers: number[] = []
+  const usedIndex = new Set<number>()
+
+  for (let i = 0; walkers.length < WORKSHOP_WALKER_COUNT && i < shelfIds.length * 2; i += 1) {
+    const index = (Math.imul(i + 1, 1664525) + seed) >>> 0
+    const slot = index % shelfIds.length
+    if (usedIndex.has(slot)) continue
+    usedIndex.add(slot)
+    walkers.push(shelfIds[slot]!)
+  }
+
+  return walkers
+}
+
 function shelfFig(
   meebitId: number,
   side: 'left' | 'right',
@@ -110,12 +138,12 @@ function shelfLevel(
   side: 'left' | 'right',
   level: number,
 ) {
-  return WORKSHOP_SHELF.zSlots.map((z, col) => shelfFig(ids[idOffset + col], side, level, z))
+  return WORKSHOP_SHELF.zSlots.map((z, col) => shelfFig(ids[idOffset + col]!, side, level, z))
 }
 
-/** 棚 3 段 × 16 列 × 2 面 = 96 体 + 机 3 体（JST 0:00 で入れ替え） */
+/** 棚 3 段 × 16 列 × 2 面 = 96 体 + 机 3 体（歩行者と同じ ID も棚に残す） */
 export function buildWorkshopFigurePlacements(dateKey: string): WorkshopFigurePlacement[] {
-  const ids = buildDailyWorkshopMeebitIds(dateKey, WORKSHOP_FIGURE_COUNT)
+  const ids = getShelfMeebitIds(dateKey)
   const deskOffset = SHELF_COLUMNS * 6
 
   return [
@@ -125,9 +153,9 @@ export function buildWorkshopFigurePlacements(dateKey: string): WorkshopFigurePl
     ...shelfLevel(ids, SHELF_COLUMNS * 3, 'right', 0),
     ...shelfLevel(ids, SHELF_COLUMNS * 4, 'right', 1),
     ...shelfLevel(ids, SHELF_COLUMNS * 5, 'right', 2),
-    deskFig(ids[deskOffset], -0.85, 0.05),
-    deskFig(ids[deskOffset + 1], 0, 0.12),
-    deskFig(ids[deskOffset + 2], 0.85, 0.05),
+    deskFig(ids[deskOffset]!, -0.85, 0.05),
+    deskFig(ids[deskOffset + 1]!, 0, 0.12),
+    deskFig(ids[deskOffset + 2]!, 0.85, 0.05),
   ]
 }
 

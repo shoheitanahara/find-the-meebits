@@ -38,19 +38,33 @@ export function advanceSergitoDialogue() {
   closeSergitoDialogue()
 }
 
+/**
+ * パーク同様、会話開始と進行を同一ハンドラで処理する。
+ * 最終行で閉じた直後の同じ keydown / キーリピートで再オープンしない。
+ */
 export function handleSergitoDialogueKeyDown(event: KeyboardEvent) {
   const dialogueState = useDialogueStore.getState()
-  if (!dialogueState.isOpen || dialogueState.activeNpcId !== SERGITO_NPC_ID) return
 
-  if (event.code === 'Escape') {
+  if (event.code === 'Escape' && dialogueState.isOpen && dialogueState.activeNpcId === SERGITO_NPC_ID) {
     event.preventDefault()
     closeSergitoDialogue()
     return
   }
 
-  if (event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyE') {
+  if (dialogueState.isOpen && dialogueState.activeNpcId === SERGITO_NPC_ID) {
+    if (event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyE') {
+      event.preventDefault()
+      if (event.repeat) return
+      advanceSergitoDialogue()
+    }
+    return
+  }
+
+  if (event.code === 'KeyE') {
+    if (event.repeat) return
+    if (!useMeetSergitoStore.getState().canTalkToSergito) return
     event.preventDefault()
-    advanceSergitoDialogue()
+    tryInteractWithSergito()
   }
 }
 
