@@ -1,5 +1,5 @@
 import { getLocale } from '../../i18n/locale'
-import { useMeetSergitoStore } from '../store'
+import { getMeetSergitoBootProgress, useMeetSergitoStore } from '../store'
 
 const copy = {
   en: {
@@ -14,11 +14,13 @@ const copy = {
   },
 } as const
 
-/** 入室直後 — プレイヤー / Sergito / 歩行者 VRM が揃うまで表示 */
+/** 入室直後 — プレイヤー / Sergito / 歩行者 / フィギュア VRM が揃うまで表示 */
 export function MeetSergitoLoadingOverlay() {
   const bootPhase = useMeetSergitoStore((state) => state.bootPhase)
+  const progress = useMeetSergitoStore((state) => getMeetSergitoBootProgress(state))
   const locale = getLocale()
   const t = copy[locale]
+  const ratio = Math.min(1, progress.ready / progress.expected)
 
   if (bootPhase === 'ready') return null
 
@@ -30,8 +32,14 @@ export function MeetSergitoLoadingOverlay() {
         </p>
         <h2 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl">{t.title}</h2>
         <p className="mt-4 text-sm text-[#c8b898]">{t.loading}</p>
-        <div className="mx-auto mt-6 h-1.5 w-40 overflow-hidden rounded-full bg-[#3a3028]">
-          <div className="h-full w-1/2 animate-pulse rounded-full bg-[#d4a060]" />
+        <p className="mt-2 text-[0.7rem] tabular-nums text-[#a89070]">
+          {progress.ready} / {progress.expected}
+        </p>
+        <div className="mx-auto mt-5 h-1.5 w-44 overflow-hidden rounded-full bg-[#3a3028]">
+          <div
+            className="h-full rounded-full bg-[#d4a060] transition-[width] duration-300 ease-out"
+            style={{ width: `${Math.max(8, ratio * 100)}%` }}
+          />
         </div>
       </section>
     </div>

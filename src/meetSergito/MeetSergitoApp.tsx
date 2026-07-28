@@ -16,7 +16,7 @@ import { SergitoDialogueSystem, SergitoInteractionPrompt } from './dialogue/Serg
 import { MEET_SERGITO } from './config'
 import { useMeetSergitoStore } from './store'
 import { MeetSergitoLoadingOverlay } from './ui/MeetSergitoLoadingOverlay'
-import { WORKSHOP_WALKER_COUNT } from './world/workshopFigureLayout'
+import { getWorkshopFigurePlacements, WORKSHOP_WALKER_COUNT } from './world/workshopFigureLayout'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -65,7 +65,8 @@ export function MeetSergitoApp() {
 
   // 子コンポーネントの ready 報告より先にリセットする（useEffect だと競合で固まる）
   useState(() => {
-    useMeetSergitoStore.getState().resetBoot(WORKSHOP_WALKER_COUNT)
+    const figuresExpected = getWorkshopFigurePlacements().length
+    useMeetSergitoStore.getState().resetBoot(WORKSHOP_WALKER_COUNT, figuresExpected)
   })
 
   useEffect(() => {

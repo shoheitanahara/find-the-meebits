@@ -1,8 +1,9 @@
-import { useLayoutEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
 import { applyVRMFigurePose } from '../../avatar/VRMLocomotion'
 import { alignVrmFigureFeet } from '../../avatar/VRMLoader'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
+import { useMeetSergitoStore } from '../store'
 import {
   getWorkshopFigureDateKey,
   getWorkshopFigurePlacements,
@@ -28,9 +29,22 @@ function BlackSquarePedestal() {
   )
 }
 
-function WorkshopFigure({ placement }: { placement: WorkshopFigurePlacement }) {
-  const { vrmRef, vrmScene } = useVRMModel(placement.meebitId, true, 4500, false, true)
+function WorkshopFigure({
+  placement,
+  index,
+}: {
+  placement: WorkshopFigurePlacement
+  index: number
+}) {
+  const { vrmRef, vrmScene, status } = useVRMModel(placement.meebitId, true, 4500, false, true)
+  const setFigureVrmReady = useMeetSergitoStore((state) => state.setFigureVrmReady)
   const figureScale = VRM_WORLD_SCALE * placement.scale
+
+  useEffect(() => {
+    if (status === 'ready' || status === 'error') {
+      setFigureVrmReady(index)
+    }
+  }, [index, setFigureVrmReady, status])
 
   useLayoutEffect(() => {
     const vrm = vrmRef.current
@@ -60,7 +74,11 @@ export function WorkshopFigures() {
   return (
     <group key={dateKey}>
       {placements.map((placement, index) => (
-        <WorkshopFigure key={`fig-${dateKey}-${index}-${placement.meebitId}`} placement={placement} />
+        <WorkshopFigure
+          key={`fig-${dateKey}-${index}-${placement.meebitId}`}
+          placement={placement}
+          index={index}
+        />
       ))}
     </group>
   )

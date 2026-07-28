@@ -49,14 +49,58 @@ function parseArgs(argv) {
   return { from, to, outDir, vrmOrigin, concurrency }
 }
 
-function startStaticServer() {
+async function probeVrmOrigin(origin) {
+  try {
+    const response = await fetch(`${origin.replace(/\/$/, '')}/vrm/1.vrm`, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(8_000),
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Playwright 用ローカルサーバ。
+ * `/vrm/*` は VRM origin へプロキシする（ランダムポート→Worker の CORS 拒否を避ける）。
+ */
+function startStaticServer(vrmOrigin) {
   const html = readFileSync(PREVIEW_HTML)
-  return createServer((req, res) => {
-    if (req.url?.startsWith('/preview-gen.html')) {
+  const upstream = vrmOrigin.replace(/\/$/, '')
+
+  return createServer(async (req, res) => {
+    const url = req.url ?? '/'
+
+    if (url.startsWith('/preview-gen.html')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)
       return
     }
+
+    const vrmMatch = url.match(/^\/vrm\/(\d+)\.vrm(?:\?.*)?$/)
+    if (vrmMatch) {
+      try {
+        const upstreamRes = await fetch(`${upstream}/vrm/${vrmMatch[1]}.vrm`)
+        if (!upstreamRes.ok) {
+          res.writeHead(upstreamRes.status, { 'Content-Type': 'text/plain' })
+          res.end(`Upstream VRM ${upstreamRes.status}`)
+          return
+        }
+        const buffer = Buffer.from(await upstreamRes.arrayBuffer())
+        res.writeHead(200, {
+          'Content-Type': upstreamRes.headers.get('content-type') ?? 'model/vrm',
+          'Content-Length': buffer.length,
+          'Cache-Control': 'no-store',
+        })
+        res.end(buffer)
+      } catch (error) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' })
+        res.end(`VRM proxy failed: ${error instanceof Error ? error.message : error}`)
+      }
+      return
+    }
+
     res.writeHead(404)
     res.end('Not found')
   }).listen(0, '127.0.0.1')
@@ -103,18 +147,42 @@ async function captureOne(page, baseUrl, id, outDir, vrmOrigin) {
 }
 
 async function main() {
-  const { from, to, outDir, vrmOrigin, concurrency } = parseArgs(process.argv.slice(2))
+  const args = parseArgs(process.argv.slice(2))
+  let { from, to, outDir, vrmOrigin, concurrency } = args
   mkdirSync(outDir, { recursive: true })
 
+  if (!(await probeVrmOrigin(vrmOrigin))) {
+    const fallbacks = ['http://127.0.0.1:8787', 'http://127.0.0.1:8788', 'https://files.meebits.app']
+      .filter((origin) => origin !== vrmOrigin)
+    let found = null
+    for (const candidate of fallbacks) {
+      if (await probeVrmOrigin(candidate)) {
+        found = candidate
+        break
+      }
+    }
+    if (!found) {
+      console.error(
+        `VRM origin unreachable: ${vrmOrigin}\n` +
+          'Start the local worker (`npm run vrm-worker:dev` / `npm run dev`) or pass --vrm-origin.',
+      )
+      process.exit(1)
+    }
+    console.warn(`VRM origin ${vrmOrigin} unreachable — using ${found}`)
+    vrmOrigin = found
+  }
+
   const { chromium } = await loadPlaywright()
-  const server = startStaticServer()
+  const server = startStaticServer(vrmOrigin)
   await new Promise((resolve) => server.once('listening', resolve))
   const address = server.address()
   const port = typeof address === 'object' && address ? address.port : 0
   const baseUrl = `http://127.0.0.1:${port}`
+  // ページからは同一オリジンのプロキシ経由で VRM を取る（CORS 回避）
+  const pageVrmOrigin = baseUrl
 
   console.log(`Generating previews v${PREVIEW_VERSION}: #${from}..#${to}`)
-  console.log(`VRM origin: ${vrmOrigin}`)
+  console.log(`VRM upstream: ${vrmOrigin} (proxied via ${baseUrl})`)
   console.log(`Output: ${outDir}`)
 
   const browser = await chromium.launch({ headless: true })
@@ -136,7 +204,7 @@ async function main() {
       const id = ids[cursor]
       cursor += 1
       try {
-        const result = await captureOne(page, baseUrl, id, outDir, vrmOrigin)
+        const result = await captureOne(page, baseUrl, id, outDir, pageVrmOrigin)
         if (result === 'skip') {
           skipped += 1
         } else {
