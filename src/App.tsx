@@ -8,6 +8,7 @@ import { loadMeebitTraitsDataset } from './data/meebitTraits'
 import { EightStreetApp } from './eightStreet/EightStreetApp'
 import { MountainApp } from './mountain/MountainApp'
 import { RunwayApp } from './runway/RunwayApp'
+import { ClosetApp } from './closet/ClosetApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
@@ -130,6 +131,15 @@ export default function App() {
     return (
       <>
         <RunwayApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'closet') {
+    return (
+      <>
+        <ClosetApp />
         <Analytics />
       </>
     )

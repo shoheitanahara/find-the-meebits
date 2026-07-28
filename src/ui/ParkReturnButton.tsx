@@ -43,7 +43,9 @@ export function ParkReturnButton() {
     playSfx('uiConfirm')
     const parkPath = locale === 'ja' ? '/jp' : '/'
     const pathSegments = window.location.pathname.split('/').filter(Boolean)
-    const attractionId = pathSegments.includes('runway')
+    const attractionId = pathSegments.includes('closet') || pathSegments.includes('trait-museum')
+      ? 'closet'
+      : pathSegments.includes('runway')
       ? 'runway'
       : pathSegments.includes('8th-street')
       ? 'street'

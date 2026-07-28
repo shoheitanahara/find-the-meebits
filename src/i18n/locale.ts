@@ -51,6 +51,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/runway' : '/runway'
   }
 
+  if (segments.includes('closet') || segments.includes('trait-museum')) {
+    return locale === 'ja' ? '/jp/closet' : '/closet'
+  }
+
   if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }

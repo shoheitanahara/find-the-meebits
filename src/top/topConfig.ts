@@ -212,6 +212,37 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: [5.4, 4.0],
   },
+  {
+    id: 'closet',
+    zoneId: 'culture',
+    title: 'TRAIT MUSEUM',
+    subtitle: 'Try On Looks',
+    description: {
+      en: 'Pick hats, hair, shirts…\nSee who matches —\ntry them on as your avatar.',
+      ja: '帽子、髪型、シャツ…\n合うMeebitを見つけて、\nきせかえてみよう。',
+    },
+    storyTitle: {
+      en: 'DRESS UP',
+      ja: 'きせかえしよう',
+    },
+    color: '#1a2a48',
+    roofColor: '#6a9ee8',
+    // 半個分左寄せ（旧 -12.5 → footprint halfWidth 約 3.2）
+    x: -15.7,
+    z: -11.5,
+    entranceZ: -8.0,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [-5.2, 4.0],
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

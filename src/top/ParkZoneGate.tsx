@@ -582,10 +582,10 @@ function CulturePortalGate({
 
       {/* 看板（広場から読めるよう −X 向き） */}
       <group position={[faceSign * 0.45, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-        <Text position={[0, 4.35, 0]} fontSize={0.24} color="#e8f0ff" anchorX="center" anchorY="middle">
+        <Text position={[0, 4.85, 0]} fontSize={0.24} color="#e8f0ff" anchorX="center" anchorY="middle">
           {gate.label[locale]}
         </Text>
-        <Text position={[0, 4.0, 0]} fontSize={0.15} color={highlight} anchorX="center" anchorY="middle">
+        <Text position={[0, 4.45, 0]} fontSize={0.15} color={highlight} anchorX="center" anchorY="middle">
           {gate.subtitle[locale]}
         </Text>
       </group>

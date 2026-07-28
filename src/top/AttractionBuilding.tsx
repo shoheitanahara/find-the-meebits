@@ -13,6 +13,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - mountain: ボクセル山エントランス（Mt. Meeb）
  * - neon: テトリス風積みブロック塔（Jerry Mountain）
  * - runway: 暗いパビリオン＋発光ランウェイ
+ * - closet: カルチャー調のトレイト博物館（きせかえ）
  */
 export function AttractionBuilding({
   attraction,
@@ -34,7 +35,9 @@ export function AttractionBuilding({
             ? '#ff2bd6'
             : attraction.id === 'runway'
               ? '#f0f0f0'
-              : '#c4a060'
+              : attraction.id === 'closet'
+                ? '#8eb4e8'
+                : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -59,6 +62,8 @@ export function AttractionBuilding({
         <JerryMountainLandmark accent={accent} />
       ) : attraction.id === 'runway' ? (
         <RunwayLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'closet' ? (
+        <TraitMuseumLandmark color={attraction.color} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -361,6 +366,65 @@ function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
         <boxGeometry args={[2.8, 1.9, 0.28]} />
         <meshStandardMaterial color="#101010" roughness={0.9} />
       </mesh>
+    </group>
+  )
+}
+
+/** Culture 左棟: トレイト博物館（額縁ウォール＋青いスクリーン） */
+function TraitMuseumLandmark({ color, accent }: { color: string; accent: string }) {
+  const frames: Array<[number, number]> = [
+    [-1.7, 2.35],
+    [0, 2.35],
+    [1.7, 2.35],
+    [-1.7, 1.15],
+    [0, 1.15],
+    [1.7, 1.15],
+  ]
+
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.28, 7.2]} />
+        <meshStandardMaterial color="#121c30" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[6.2, 3.5, 5.8]} />
+        <meshStandardMaterial color={color} roughness={0.86} metalness={0.12} />
+      </mesh>
+      <mesh position={[0, 3.75, -0.35]} castShadow>
+        <boxGeometry args={[6.6, 0.32, 6.2]} />
+        <meshStandardMaterial color="#0a1424" metalness={0.25} roughness={0.55} />
+      </mesh>
+      <mesh position={[0, 2.2, -3.15]} castShadow>
+        <boxGeometry args={[5.6, 3.0, 0.35]} />
+        <meshStandardMaterial color="#0c1528" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 2.25, -2.95]}>
+        <boxGeometry args={[4.4, 2.2, 0.08]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.45} />
+      </mesh>
+      {frames.map(([x, y], index) => (
+        <group key={index} position={[x, y, 2.95]}>
+          <mesh>
+            <boxGeometry args={[1.15, 0.95, 0.1]} />
+            <meshStandardMaterial color="#0a1424" roughness={0.8} />
+          </mesh>
+          <mesh position={[0, 0, 0.06]}>
+            <boxGeometry args={[0.88, 0.7, 0.04]} />
+            <meshStandardMaterial
+              color="#f4f6fa"
+              emissive={accent}
+              emissiveIntensity={0.18}
+              roughness={0.55}
+            />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 0.9, 3.4]} castShadow>
+        <boxGeometry args={[2.6, 1.8, 0.28]} />
+        <meshStandardMaterial color="#152038" roughness={0.88} />
+      </mesh>
+      <pointLight position={[0, 2.6, 1.2]} intensity={10} distance={10} color={accent} />
     </group>
   )
 }

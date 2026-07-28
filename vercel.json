@@ -12,6 +12,10 @@
     { "source": "/neon-stack/(.*)", "destination": "/index.html" },
     { "source": "/runway", "destination": "/index.html" },
     { "source": "/runway/(.*)", "destination": "/index.html" },
+    { "source": "/closet", "destination": "/index.html" },
+    { "source": "/closet/(.*)", "destination": "/index.html" },
+    { "source": "/trait-museum", "destination": "/index.html" },
+    { "source": "/trait-museum/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },
     { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]

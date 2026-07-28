@@ -226,7 +226,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // 北門は左寄り → 着地は Culture 入口センター・手前すぐ内側
         targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
-        subtitle: { en: 'Runway · Museum · PFP', ja: 'ランウェイ・博物館・PFP' },
+        subtitle: { en: 'Runway · Traits · PFP', ja: 'ランウェイ・きせかえ・PFP' },
       },
       {
         id: 'plaza-to-sea',
@@ -312,7 +312,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   culture: {
     id: 'culture',
     title: { en: 'Culture District', ja: 'カルチャー地区' },
-    attractionIds: ['runway'],
+    attractionIds: ['runway', 'closet'],
     layout: CULTURE_LAYOUT,
     perimeter: {
       theme: 'culture',
@@ -351,13 +351,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [12.5, -1.5],
     ],
     comingSoonSlots: [
-      {
-        x: -12.5,
-        z: -11.5,
-        theme: 'culture',
-        title: { en: 'TRAIT MUSEUM', ja: 'トレイト博物館' },
-        subtitle: { en: 'Find favorites by traits', ja: 'トレイトでお気に入り探し' },
-      },
       {
         x: 12.5,
         z: -11.0,

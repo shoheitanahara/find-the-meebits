@@ -1,6 +1,14 @@
 /** App edition from URL path. */
 
-export type AppEdition = 'v1' | 'v2' | '8th-street' | 'mountain' | 'neon' | 'runway' | 'top'
+export type AppEdition =
+  | 'v1'
+  | 'v2'
+  | '8th-street'
+  | 'mountain'
+  | 'neon'
+  | 'runway'
+  | 'closet'
+  | 'top'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
   return pathname.split('/').filter(Boolean)
@@ -8,6 +16,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
+  if (segments.includes('closet') || segments.includes('trait-museum')) {
+    return 'closet'
+  }
   if (segments.includes('runway')) {
     return 'runway'
   }

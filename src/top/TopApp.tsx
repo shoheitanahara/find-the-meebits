@@ -41,6 +41,7 @@ const copy = {
       mountain: 'Mt. Meeb',
       neon: 'Jerry Mountain',
       runway: 'Meebits Runway',
+      closet: 'Trait Museum',
     },
   },
   ja: {
@@ -59,6 +60,7 @@ const copy = {
       mountain: 'Mt. Meeb',
       neon: 'ジェリーマウンテン',
       runway: 'Meebits Runway',
+      closet: 'トレイト博物館',
     },
   },
 } as const
@@ -70,6 +72,7 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'street') return `${localePrefix}/8th-street`
   if (id === 'neon') return `${localePrefix}/neon-stack`
   if (id === 'runway') return `${localePrefix}/runway`
+  if (id === 'closet') return `${localePrefix}/closet`
   return `${localePrefix}/mountain`
 }
 
@@ -82,7 +85,8 @@ function getReturningAttractionId(): AttractionId | null {
     from === 'street' ||
     from === 'mountain' ||
     from === 'neon' ||
-    from === 'runway'
+    from === 'runway' ||
+    from === 'closet'
     ? from
     : null
 }
