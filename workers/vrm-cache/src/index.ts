@@ -1,5 +1,6 @@
 const DEFAULT_UPSTREAM = 'https://files.meebits.app'
 const VRM_CONTENT_TYPE = 'model/vrm'
+const PREVIEW_CONTENT_TYPE = 'image/webp'
 
 export interface Env {
   VRM_BUCKET: R2Bucket
@@ -40,6 +41,11 @@ function parseMeebitId(pathname: string): string | null {
   return match?.[1] ?? null
 }
 
+function parsePreviewId(pathname: string): string | null {
+  const match = pathname.match(/^\/previews\/v\d+\/(\d+)\.webp$/)
+  return match?.[1] ?? null
+}
+
 async function fetchAndStoreVrm(
   env: Env,
   id: string,
@@ -69,9 +75,10 @@ function buildObjectResponse(
   request: Request,
   object: R2ObjectBody,
   corsHeaders: Headers,
+  fallbackContentType: string,
 ): Response {
   const headers = new Headers(corsHeaders)
-  headers.set('Content-Type', object.httpMetadata?.contentType ?? VRM_CONTENT_TYPE)
+  headers.set('Content-Type', object.httpMetadata?.contentType ?? fallbackContentType)
   headers.set('Cache-Control', object.httpMetadata?.cacheControl ?? 'public, max-age=31536000, immutable')
   headers.set('ETag', object.httpEtag)
 
@@ -95,7 +102,21 @@ export default {
       return new Response('Method not allowed', { status: 405, headers: corsHeaders })
     }
 
-    const id = parseMeebitId(new URL(request.url).pathname)
+    const pathname = new URL(request.url).pathname
+    const previewId = parsePreviewId(pathname)
+
+    if (previewId) {
+      const key = pathname.slice(1)
+      const object = await env.VRM_BUCKET.get(key)
+
+      if (!object) {
+        return new Response('Preview not found', { status: 404, headers: corsHeaders })
+      }
+
+      return buildObjectResponse(request, object, corsHeaders, PREVIEW_CONTENT_TYPE)
+    }
+
+    const id = parseMeebitId(pathname)
     if (!id) {
       return new Response('Not found', { status: 404, headers: corsHeaders })
     }
@@ -110,6 +131,6 @@ export default {
       }
     }
 
-    return buildObjectResponse(request, object, corsHeaders)
+    return buildObjectResponse(request, object, corsHeaders, VRM_CONTENT_TYPE)
   },
 }

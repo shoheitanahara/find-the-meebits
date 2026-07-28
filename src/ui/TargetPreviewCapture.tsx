@@ -10,14 +10,21 @@ import {
   failTargetPreviewCapture,
   registerTargetPreviewCaptureProcessor,
 } from './targetPreviewCache'
+import { TARGET_PREVIEW_CAPTURE } from './targetPreviewCaptureConfig'
 
-const CAPTURE_SIZE = 320
-const MODEL_SCALE = 1.15
-const MODEL_Y_OFFSET = -0.92
-/** キャラの左斜前（-X, +Z）から見下ろす */
-const CAMERA_POSITION = new Vector3(-1.45, 1.28, 4.25)
-const CAMERA_LOOK_AT = new Vector3(0, 0.28, 0)
-const KEY_LIGHT_POSITION: [number, number, number] = [-2.5, 4.5, 2.8]
+const {
+  size: CAPTURE_SIZE,
+  modelScale: MODEL_SCALE,
+  modelYOffset: MODEL_Y_OFFSET,
+  cameraPosition: CAMERA_POSITION,
+  cameraLookAt: CAMERA_LOOK_AT,
+  keyLightPosition: KEY_LIGHT_POSITION,
+  background: CAPTURE_BACKGROUND,
+  fov: CAPTURE_FOV,
+} = TARGET_PREVIEW_CAPTURE
+
+const cameraPosition = new Vector3(...CAMERA_POSITION)
+const cameraLookAt = new Vector3(...CAMERA_LOOK_AT)
 
 export function TargetPreviewCapture() {
   const [activeMeebit, setActiveMeebit] = useState<number | null>(null)
@@ -46,19 +53,19 @@ export function TargetPreviewCapture() {
         key={activeMeebit}
         frameloop="demand"
         dpr={1}
-        camera={{ fov: 31, near: 0.1, far: 20 }}
+        camera={{ fov: CAPTURE_FOV, near: 0.1, far: 20 }}
         gl={{ antialias: true, preserveDrawingBuffer: true }}
         style={{ width: CAPTURE_SIZE, height: CAPTURE_SIZE }}
         onCreated={({ gl, camera }) => {
           gl.setSize(CAPTURE_SIZE, CAPTURE_SIZE, false)
-          camera.position.copy(CAMERA_POSITION)
-          camera.lookAt(CAMERA_LOOK_AT)
+          camera.position.copy(cameraPosition)
+          camera.lookAt(cameraLookAt)
           camera.updateProjectionMatrix()
         }}
       >
-        <color attach="background" args={['#f5f5f5']} />
+        <color attach="background" args={[CAPTURE_BACKGROUND]} />
         <ambientLight intensity={1.4} />
-        <directionalLight position={KEY_LIGHT_POSITION} intensity={1.8} />
+        <directionalLight position={[...KEY_LIGHT_POSITION]} intensity={1.8} />
         <CaptureCamera />
         <CaptureScene
           meebitNumber={activeMeebit}
@@ -78,8 +85,8 @@ function CaptureCamera() {
   const camera = useThree((state) => state.camera)
 
   useLayoutEffect(() => {
-    camera.position.copy(CAMERA_POSITION)
-    camera.lookAt(CAMERA_LOOK_AT)
+    camera.position.copy(cameraPosition)
+    camera.lookAt(cameraLookAt)
     camera.updateProjectionMatrix()
   }, [camera])
 

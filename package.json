@@ -12,7 +12,9 @@
     "vrm-worker:deploy": "wrangler deploy --config workers/vrm-cache/wrangler.toml",
     "vrm:seed": "node scripts/seed-vrm-sculptures.mjs",
     "traits:fetch": "node scripts/fetch-meebit-traits.mjs",
-    "traits:images": "node scripts/fetch-meebit-trait-images.mjs"
+    "traits:images": "node scripts/fetch-meebit-trait-images.mjs",
+    "previews:generate": "node scripts/generate-meebit-previews.mjs",
+    "previews:upload": "node scripts/upload-meebit-previews.mjs"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.5.4",

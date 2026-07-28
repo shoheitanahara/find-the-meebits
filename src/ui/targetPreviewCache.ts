@@ -1,4 +1,7 @@
-const PREVIEW_RENDER_VERSION = 5
+import { getMeebitPreviewImageUrl } from './meebitPreviewUrl'
+import { MEEBIT_PREVIEW_IMAGE_VERSION } from './targetPreviewCaptureConfig'
+
+const PREVIEW_RENDER_VERSION = 6
 
 /** 右上ターゲット HUD — キャプチャキュー最優先 */
 export const TARGET_HUD_PREVIEW_PRIORITY = 0
@@ -19,13 +22,14 @@ const cache = new Map<string, PreviewCacheEntry>()
 const listeners = new Map<string, Set<() => void>>()
 const queue: PreviewQueueEntry[] = []
 const queued = new Set<string>()
+const staticLoadStarted = new Set<string>()
 
 let activeMeebit: number | null = null
 let processCapture: ((meebitNumber: number | null) => void) | null = null
 let enqueueSeq = 0
 
 function cacheKey(meebitNumber: number) {
-  return `${PREVIEW_RENDER_VERSION}:${meebitNumber}`
+  return `${PREVIEW_RENDER_VERSION}:${MEEBIT_PREVIEW_IMAGE_VERSION}:${meebitNumber}`
 }
 
 function notify(meebitNumber: number) {
@@ -70,7 +74,6 @@ function drainQueue() {
   processCapture(next.meebitNumber)
 }
 
-/** 進行中キャプチャを中断し、同じ Meebit を再度キューに載せられるようにする */
 function abortActiveTargetPreviewCapture() {
   if (activeMeebit === null) {
     return
@@ -79,6 +82,39 @@ function abortActiveTargetPreviewCapture() {
   queued.delete(cacheKey(activeMeebit))
   activeMeebit = null
   processCapture?.(null)
+}
+
+function enqueueRuntimeCapture(meebitNumber: number, priority: number) {
+  if (activeMeebit === meebitNumber) {
+    return
+  }
+
+  enqueuePreview(meebitNumber, priority)
+  drainQueue()
+}
+
+function tryLoadStaticPreview(meebitNumber: number, priority: number) {
+  const key = cacheKey(meebitNumber)
+  if (staticLoadStarted.has(key)) {
+    return
+  }
+
+  staticLoadStarted.add(key)
+  const url = getMeebitPreviewImageUrl(meebitNumber)
+  const img = new Image()
+
+  img.onload = () => {
+    cache.set(key, url)
+    staticLoadStarted.delete(key)
+    notify(meebitNumber)
+  }
+
+  img.onerror = () => {
+    staticLoadStarted.delete(key)
+    enqueueRuntimeCapture(meebitNumber, priority)
+  }
+
+  img.src = url
 }
 
 export function getTargetPreviewImage(meebitNumber: number) {
@@ -95,7 +131,8 @@ export function isTargetPreviewError(meebitNumber: number) {
 }
 
 export function isTargetPreviewPending(meebitNumber: number) {
-  return !cache.has(cacheKey(meebitNumber))
+  const key = cacheKey(meebitNumber)
+  return !cache.has(key) || staticLoadStarted.has(key)
 }
 
 export function requestTargetPreview(
@@ -105,18 +142,18 @@ export function requestTargetPreview(
   const key = cacheKey(meebitNumber)
   if (cache.get(key) === 'error') {
     cache.delete(key)
+    staticLoadStarted.delete(key)
   }
 
   if (cache.has(key)) {
     return
   }
 
-  if (activeMeebit === meebitNumber) {
+  if (activeMeebit === meebitNumber || staticLoadStarted.has(key)) {
     return
   }
 
-  enqueuePreview(meebitNumber, priority)
-  drainQueue()
+  tryLoadStaticPreview(meebitNumber, priority)
 }
 
 export function requestTargetPreviews(
@@ -153,6 +190,7 @@ export function completeTargetPreviewCapture(meebitNumber: number, dataUrl: stri
   const key = cacheKey(meebitNumber)
   cache.set(key, dataUrl)
   queued.delete(key)
+  staticLoadStarted.delete(key)
   activeMeebit = null
   notify(meebitNumber)
   drainQueue()
@@ -162,6 +200,7 @@ export function failTargetPreviewCapture(meebitNumber: number) {
   const key = cacheKey(meebitNumber)
   cache.set(key, 'error')
   queued.delete(key)
+  staticLoadStarted.delete(key)
   activeMeebit = null
   notify(meebitNumber)
   drainQueue()
@@ -175,6 +214,7 @@ export function clearTargetPreviewCacheExcept(keepMeebitIds: number[] = []) {
     if (!keepKeys.has(key)) {
       cache.delete(key)
       listeners.delete(key)
+      staticLoadStarted.delete(key)
     }
   }
 

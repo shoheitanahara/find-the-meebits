@@ -19,3 +19,6 @@ dist/
 
 # Vite
 *.local
+
+# Generated Meebit preview batch output
+previews-out/

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meebit Preview Generator</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #111;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://esm.sh/three@0.184.0",
+          "three/addons/": "https://esm.sh/three@0.184.0/examples/jsm/",
+          "@pixiv/three-vrm": "https://esm.sh/@pixiv/three-vrm@3.5.4?deps=three@0.184.0"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from 'three'
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+      import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm'
+
+      const params = new URLSearchParams(window.location.search)
+      const meebitId = Number(params.get('id') ?? '1')
+      const vrmOrigin = (params.get('vrmOrigin') ?? 'https://files.meebits.app').replace(/\/$/, '')
+      const size = 320
+      const modelScale = 1.15
+      const modelYOffset = -0.92
+      const cameraPosition = new THREE.Vector3(-1.45, 1.28, 4.25)
+      const cameraLookAt = new THREE.Vector3(0, 0.28, 0)
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
+      renderer.setSize(size, size, false)
+      renderer.setClearColor(0xf5f5f5, 1)
+      document.body.appendChild(renderer.domElement)
+
+      const scene = new THREE.Scene()
+      scene.background = new THREE.Color(0xf5f5f5)
+      scene.add(new THREE.AmbientLight(0xffffff, 1.4))
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.8)
+      keyLight.position.set(-2.5, 4.5, 2.8)
+      scene.add(keyLight)
+
+      const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 20)
+      camera.position.copy(cameraPosition)
+      camera.lookAt(cameraLookAt)
+
+      const modelRoot = new THREE.Group()
+      modelRoot.position.y = modelYOffset
+      scene.add(modelRoot)
+
+      function setAttentionPose(vrm) {
+        const humanoid = vrm.humanoid
+        const set = (name, rot) => {
+          const node = humanoid.getNormalizedBoneNode(name)
+          if (node) node.rotation.set(rot.x, rot.y, rot.z)
+        }
+        set('hips', { x: 0, y: 0, z: 0 })
+        set('spine', { x: 0, y: 0, z: 0 })
+        set('chest', { x: 0, y: 0, z: 0 })
+        set('head', { x: 0, y: 0, z: 0 })
+        set('leftUpperArm', { x: 0, y: 0, z: 1.56 })
+        set('rightUpperArm', { x: 0, y: 0, z: -1.56 })
+        set('leftLowerArm', { x: 0.03, y: 0, z: 0 })
+        set('rightLowerArm', { x: 0.03, y: 0, z: 0 })
+        set('leftUpperLeg', { x: 0, y: 0, z: 0 })
+        set('rightUpperLeg', { x: 0, y: 0, z: 0 })
+        set('leftLowerLeg', { x: -0.16, y: 0, z: 0 })
+        set('rightLowerLeg', { x: -0.16, y: 0, z: 0 })
+        set('leftFoot', { x: 0.04, y: 0, z: 0 })
+        set('rightFoot', { x: 0.04, y: 0, z: 0 })
+      }
+
+      function alignFeet(sceneObject) {
+        const box = new THREE.Box3().setFromObject(sceneObject)
+        sceneObject.position.y = -box.min.y + 0.06 / 1.05
+      }
+
+      async function loadVrm() {
+        const loader = new GLTFLoader()
+        loader.register((parser) => new VRMLoaderPlugin(parser))
+        const gltf = await loader.loadAsync(`${vrmOrigin}/vrm/${meebitId}.vrm`)
+        const vrm = gltf.userData.vrm
+        if (!vrm) throw new Error('VRM missing')
+
+        VRMUtils.removeUnnecessaryVertices(vrm.scene)
+        VRMUtils.rotateVRM0(vrm)
+        alignFeet(vrm.scene)
+        setAttentionPose(vrm)
+        vrm.update(0)
+        modelRoot.add(vrm.scene)
+        modelRoot.scale.setScalar(modelScale)
+      }
+
+      window.__PREVIEW_READY__ = false
+      window.__PREVIEW_ERROR__ = null
+
+      loadVrm()
+        .then(() => {
+          renderer.render(scene, camera)
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              renderer.render(scene, camera)
+              window.__PREVIEW_READY__ = true
+            })
+          })
+        })
+        .catch((error) => {
+          window.__PREVIEW_ERROR__ = error instanceof Error ? error.message : String(error)
+        })
+    </script>
+  </body>
+</html>

@@ -77,11 +77,19 @@ export default defineConfig({
         target: vrmWorkerDevUrl,
         changeOrigin: true,
       },
+      '/previews': {
+        target: vrmWorkerDevUrl,
+        changeOrigin: true,
+      },
     },
   },
   preview: {
     proxy: {
       '/vrm': {
+        target: vrmWorkerDevUrl,
+        changeOrigin: true,
+      },
+      '/previews': {
         target: vrmWorkerDevUrl,
         changeOrigin: true,
       },
