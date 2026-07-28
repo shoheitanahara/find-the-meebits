@@ -12,7 +12,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/find-the-meebit` `/jp/find-the-meebit` | `v1` | Find the Meebit（Museum / After Hours） |
 | `/v2` `/jp/v2` | `v2` | Trait Hunt（特徴一致ハント試作） |
 | `/8th-street` `/jp/8th-street` | `8th-street` | 8th Street（一人称・間違い探し系ループ） |
-| `/runway` `/jp/runway` | `runway` | Fashion Runway（日替わりカラー・観賞＋着席） |
+| `/runway` `/jp/runway` | `runway` | Meebits Runway（日替わりカラー・観賞＋着席） |
 | `/mountain` `/jp/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
 

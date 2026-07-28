@@ -1,4 +1,4 @@
-/** Fashion Runway 会場の寸法・演出タイミング。白黒基調の暗室。 */
+/** Meebits Runway 会場の寸法・演出タイミング。白黒基調の暗室。 */
 
 export const RUNWAY = {
   /** 室内の歩行可能半サイズ */

@@ -13,6 +13,7 @@ export type ParkDialoguePools = {
   gameStreet: string[]
   gameMountain: string[]
   gameNeon: string[]
+  gameRunway: string[]
   featuredAny: string[]
   featuredMatched: string[]
   themeAny: string[]
@@ -67,13 +68,13 @@ const JA_CU_GREET = [
   '看板、読んでた。',
   'スーツの人、多い。',
   '床、ちょっと冷たい。',
-  'ランウェイ、まだ工事中だよね。',
-  'ほこりに足跡がついてる。',
-  '照明だけ、もうできてる。',
+  'ランウェイ、今日の色なに？',
+  '白い線、光ってる。',
+  '中、暗いのに明るい。',
   '同じところ、ぐるぐるしてる。',
-  '工事の札、しっかりしてる。',
+  'ショー、もう始まった？',
   '道、ちょっと迷ってる。',
-  '足場、増えてない？',
+  'モデル、歩き方うまい。',
   'こんばんは。',
   '静かだね。',
   'あ、今気づいた。',
@@ -193,6 +194,25 @@ const JA_NEON = [
   'ジャンプの途中で喜ばないほうがいい。',
   'ジェリー、やさしそうに見えたのに。',
   '奈落、近い。',
+]
+
+const JA_RUNWAY = [
+  '今日の色、似てる子多い。',
+  'モデル、歩き方うまい。',
+  '空席、見つけた。',
+  'ショー、もう始まってる？',
+  '白い線、光ってる。',
+  '座って見た。足、伸ばした。',
+  '次の子、誰だろ。',
+  '今日のルック、覚えて帰る。',
+  '背中ばっかり見てた。',
+  '拍手、一人分。',
+  '色、今日は青？',
+  '通路、狭い。',
+  'スクリーン、大きい。',
+  '暗いのに、目が覚める。',
+  '服より歩き方、見てる。',
+  '立ち上がったら前の席に当たった。',
 ]
 
 const JA_FEAT = [
@@ -343,27 +363,27 @@ const JA_MT_FLAVOR = [
   '座ってる。足がもう帰りたがってる。',
   '松の匂い、服についた。',
   '広場の西は海。塩、想像できる。',
-  'カルチャー、まだ足場らしい。',
+  'カルチャー、中が光ってる。',
   '渓谷、もう一回見て帰る。',
 ]
 
 const JA_CU_FLAVOR = [
-  '屋根、一枚増えてる。',
-  '昨日は壁なかったよね。',
-  '中で音した。工事だと思う。',
-  '完成したら最初に来る。覚えてたら。',
-  'あのクレーン、ずっと同じところ。',
-  '看板だけ先に立派。',
-  '何ができるか聞いた。教えてくれなかった。',
-  '工事を見に来るの、ちょっと好き。',
-  'ランウェイの線だけ、先にある。',
+  '外は静か。中は歩いてる。',
+  '今日の色、似てる子多い。',
+  '中で足音した。ショーだ。',
+  '空席見つけたら座る。',
+  'スクリーン、大きい。',
+  '看板より中が派手。',
+  '今日の色、聞いた。覚えてない。',
+  'ショー見に来るの、好き。',
+  '白い線、歩いてる。',
   '床に足跡が増えてる。',
   '青が強いときは、南の門から戻る。',
   'スーツの人と、青い光。',
-  '足場の影、長い。',
-  '看板はファッション。現場はほこり。',
-  '壁が部屋になるの、待ち。',
-  'まだ中に入れない。それでも来た。',
+  '通路、ちょっと狭い。',
+  '次の子、誰だろ。',
+  '座って見た。足、伸ばした。',
+  '拍手、一人分。',
 ]
 
 const JA_SEA_FLAVOR = [
@@ -430,13 +450,13 @@ const EN_CU_GREET = [
   'Was reading the board.',
   'Lots of suits tonight.',
   'Floor’s a bit cold.',
-  'Runway’s still under construction, right?',
-  'Footprints in the dust.',
-  'Lights are up. Show isn’t.',
+  'Wonder what today’s color is.',
+  'The white line’s glowing.',
+  'Dark inside. Bright anyway.',
   'I keep looping the same spot.',
-  'Construction sign looks serious.',
+  'Show already started?',
   'I’m a little lost.',
-  'More scaffolding than yesterday?',
+  'That walk was clean.',
   'Evening.',
   'Quiet here.',
   'Oh — just noticed you.',
@@ -556,6 +576,25 @@ const EN_NEON = [
   'Don’t celebrate mid-jump.',
   'Jelly looked friendly. Wasn’t.',
   'Void feels close.',
+]
+
+const EN_RUNWAY = [
+  'Lots of the same color tonight.',
+  'That walk was clean.',
+  'Found an empty seat.',
+  'Show already on?',
+  'The white line’s glowing.',
+  'Sat down. Stretched my legs.',
+  'Who’s next?',
+  'Trying to remember today’s look.',
+  'Mostly watched their backs.',
+  'One-person applause.',
+  'Blue today, maybe?',
+  'Aisle’s tight.',
+  'Screen’s huge.',
+  'Dark room. Wide awake.',
+  'Watching the walk more than the clothes.',
+  'Stood up and bumped the row in front.',
 ]
 
 const EN_FEAT = [
@@ -706,27 +745,27 @@ const EN_MT_FLAVOR = [
   'Sitting. Legs want to go home.',
   'Pine smell stuck to my jacket.',
   'West of the plaza is sea. I can almost taste salt.',
-  'Culture’s still scaffolding, I hear.',
+  'Culture’s lit up inside, I hear.',
   'One more look at the ravine, then down.',
 ]
 
 const EN_CU_FLAVOR = [
-  'One more piece of roof than yesterday.',
-  'Don’t remember that wall.',
-  'Heard a noise inside. Construction, I think.',
-  'I’ll come on opening day. If I remember.',
-  'That crane hasn’t moved.',
-  'Sign looks more finished than the building.',
-  'Asked what they’re building. No answer.',
-  'I kind of like visiting the construction.',
-  'Runway stripe is here. Runway isn’t.',
+  'Quiet outside. Walking inside.',
+  'Same color everywhere tonight.',
+  'Heard footsteps inside. That’s the show.',
+  'If I find a seat, I’m sitting.',
+  'Screen’s huge.',
+  'Inside’s louder than the sign.',
+  'Asked today’s color. Forgot the answer.',
+  'I like coming for the show.',
+  'The white line’s moving.',
   'More footprints on the floor.',
   'When the blue feels heavy, I take the south gate.',
   'Suits and cool light.',
-  'Scaffolding shadows are long.',
-  'Board says fashion. Site says dust.',
-  'Waiting for walls to become rooms.',
-  'Can’t go inside yet. Came anyway.',
+  'Aisle’s a little tight.',
+  'Who’s next?',
+  'Sat down. Stretched my legs.',
+  'One-person applause.',
 ]
 
 const EN_SEA_FLAVOR = [
@@ -795,6 +834,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     gameStreet: isJa ? JA_STREET : EN_STREET,
     gameMountain: isJa ? JA_MT_GAME : EN_MT_GAME,
     gameNeon: isJa ? JA_NEON : EN_NEON,
+    gameRunway: isJa ? JA_RUNWAY : EN_RUNWAY,
     featuredAny: isMt ? (isJa ? JA_FEAT_MT : EN_FEAT_MT) : isJa ? JA_FEAT : EN_FEAT,
     featuredMatched: isJa ? JA_FEAT_MATCH : EN_FEAT_MATCH,
     themeAny: isMt ? (isJa ? JA_THEME_MT : EN_THEME_MT) : isJa ? JA_THEME : EN_THEME,
@@ -822,6 +862,7 @@ export function countParkDialogueLines(pools: ParkDialoguePools) {
     pools.gameStreet.length +
     pools.gameMountain.length +
     pools.gameNeon.length +
+    pools.gameRunway.length +
     pools.featuredAny.length +
     pools.featuredMatched.length +
     pools.themeAny.length +

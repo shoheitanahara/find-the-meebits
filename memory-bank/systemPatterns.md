@@ -31,7 +31,7 @@ src/
 │   ├── topConfig.ts        # TOP_ATTRACTIONS（find/traits/street/mountain/neon/runway）
 │   ├── parkZones.ts        # plaza / mountain / culture / sea
 │   └── topStore.ts         # start(spawn?), プレイヤー位置, AttractionId
-├── runway/                 # Fashion Runway（/runway）
+├── runway/                 # Meebits Runway（/runway）
 │   ├── RunwayApp.tsx
 │   ├── config.ts           # RUNWAY（部屋・ベンチ・接地・当たり・カメラ）
 │   ├── collisions.ts       # 壁・ベンチ非対称AABB・ランウェイ侵入禁止
@@ -109,7 +109,7 @@ public/audio/               # museum-bgm.mp3, club-bgm.mp3, runway/, park/
 - **NPC**: 30 体ランダム徘徊（`TopNpcCrowd` / 3 種歩行パターン / 会話・衝突なし）。`useVRMModel(exclusive: true)` で T ポーズ回避
 - **銅像**: 噴水中央に Meebit #11143 を `VrmSculpture`（`hidePedestal`）で設置
 
-## Fashion Runway（`runway`）パターン
+## Meebits Runway（`runway`）パターン
 
 - **体験**: 観賞型。日替わりカラー（Shirt/Pants/Overshirt/Hat Color 横断）に合うモデルがランウェイ歩行 → 手前でポーズ → 奥へ戻る
 - **定数の正本**: `src/runway/config.ts`（`RUNWAY`）。マジックナンバーを JSX に直書きしない

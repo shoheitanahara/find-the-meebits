@@ -98,15 +98,19 @@ export function selectParkDialogueLines(
   } else if (branch === 3) {
     second = isMountain
       ? pickLine(pools.gameMountain, seed, talkCount, 31)
-      : isCulture || isSea
-        ? pickLine(pools.flavor, seed, talkCount, 31)
-        : pickLine(pools.gameFind, seed, talkCount, 31)
+      : isCulture
+        ? pickLine(pools.gameRunway, seed, talkCount, 31)
+        : isSea
+          ? pickLine(pools.flavor, seed, talkCount, 31)
+          : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
     second = isMountain
       ? pickLine(pools.gameNeon, seed, talkCount, 37)
-      : isCulture || isSea
-        ? pickLine(pools.flavor, seed, talkCount, 37)
-        : pickLine(pools.gameTraits, seed, talkCount, 37)
+      : isCulture
+        ? pickLine(pools.gameRunway, seed, talkCount, 37)
+        : isSea
+          ? pickLine(pools.flavor, seed, talkCount, 37)
+          : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
     second = isMountain || isCulture || isSea
       ? pickLine(pools.flavor, seed, talkCount, 41)

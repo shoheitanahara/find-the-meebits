@@ -479,7 +479,7 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 
 | ID | 表示名 | (x, z) | entranceZ | 状態 |
 |----|--------|--------|-----------|------|
-| runway | FASHION RUNWAY | (0, -7.0) | -3.2 | **入場可**（`/runway`）。建物看板 subtitle は UNDER CONSTRUCTION のまま |
+| runway | MEEBITS RUNWAY | (0, -7.0) | -3.2 | **Open**（`/runway`）。subtitle `The Catwalk` |
 
 ゲーム本体: `src/runway/`。日替わりカラーショー・客席着席・専用 BGM。座標ルールは `.cursor/rules/threejs-coordinates.mdc`。
 

@@ -8,7 +8,7 @@
 | `/find-the-meebit` | `v1` | Find the Meebit（Museum / After Hours） |
 | `/v2` | `v2` | Trait Hunt |
 | `/8th-street` | `8th-street` | 8th Street |
-| `/runway` | `runway` | Fashion Runway |
+| `/runway` | `runway` | Meebits Runway |
 | `/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
 
@@ -23,7 +23,7 @@
 - 各入口にストーリーテリング調の説明看板（`description` / `storyTitle`、EN/JA）
 - 入口を通過すると自動でゲームへ遷移（アバター ID 引継ぎ）
 - Plaza では NPC 群衆が徘徊。Mountain は山岳テーマ（Coming Soon 可）
-- Culture の Fashion Runway は**入場可**（建物看板は工事中表記のまま）
+- Culture の Meebits Runway は**入場可**（Open）
 - 噴水中央に Meebit #11143 の銅像（Plaza）
 
 ### アトラクション説明トーン
@@ -41,7 +41,7 @@
 | 8th Street | 歩行者・異変の感じがランごとに違う |
 | Find the Meebit | 群衆が常にランダムで新鮮 |
 | Plaza | 噴水 Featured・テーマトレイトが日付で変わる |
-| Fashion Runway | 日替わり衣装カラーテーマ・観客顔ぶれ・空席位置 |
+| Meebits Runway | 日替わり衣装カラーテーマ・観客顔ぶれ・空席位置 |
 
 NPC はこの魅力を **来場者の生活・失敗・寄り道** としてにじませる（仕様説明・広告口調にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)（Dialogue Bible）。
 
@@ -51,7 +51,7 @@ NPC はこの魅力を **来場者の生活・失敗・寄り道** としてに�
 - カージナル導線を塞がない。エリア追加はテーマ差し替えが主
 - 海・砂浜を外周に戻さない。見た目と `topCollisions` をセットで更新する
 
-## Fashion Runway（`runway`）
+## Meebits Runway（`runway`）
 
 - Culture District のファッションショー会場。白黒基調の暗室＋発光ランウェイ
 - **観賞＋着席**: 日替わりカラーに合うモデルが歩くのを見る。空席があれば座れる（タイムアタックやターゲット探しではない）

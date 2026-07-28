@@ -7,7 +7,7 @@ import { useRunwayStore } from '../store'
 const copy = {
   en: {
     eyebrow: 'Culture District',
-    title: 'Fashion Runway',
+    title: 'Meebits Runway',
     theme: "Tonight's look",
     enter: 'Enter the Show',
     loading: 'Preparing the lineup…',
@@ -16,7 +16,7 @@ const copy = {
   },
   ja: {
     eyebrow: 'カルチャー地区',
-    title: 'ファッションランウェイ',
+    title: 'Meebits Runway',
     theme: '本日のルック',
     enter: '会場に入る',
     loading: 'ラインナップを準備中…',

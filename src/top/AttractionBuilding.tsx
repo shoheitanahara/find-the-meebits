@@ -311,7 +311,7 @@ function MuseumLandmark({
   )
 }
 
-/** Fashion Runway: 暗いパビリオン＋発光の白ランウェイ */
+/** Meebits Runway: 暗いパビリオン＋発光の白ランウェイ */
 function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
   return (
     <group>
@@ -633,12 +633,7 @@ function TitleBanner({
   y: number
   z: number
 }) {
-  const subtitle =
-    attraction.subtitle === 'UNDER CONSTRUCTION'
-      ? locale === 'ja'
-        ? '工事中'
-        : 'UNDER CONSTRUCTION'
-      : attraction.subtitle
+  const subtitle = attraction.subtitle
 
   return (
     <group position={[0, y, z]}>

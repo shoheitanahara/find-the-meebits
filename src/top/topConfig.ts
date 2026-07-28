@@ -125,7 +125,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'mountain',
     zoneId: 'mountain',
     title: 'MT. MEEB',
-    subtitle: 'Now Open',
+    subtitle: 'The Summit',
     description: {
       en: 'Scale the voxel mountain\nwith jumps and dashes.\n20 stages up to 1000m.',
       ja: 'ジャンプとダッシュで\nボクセルの山を登ろう。\n全20ステージ・約1000m。',
@@ -155,7 +155,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'neon',
     zoneId: 'mountain',
     title: 'JERRY MOUNTAIN',
-    subtitle: 'Now Open',
+    subtitle: 'Neon Cliffs',
     description: {
       en: 'Jelly cliffs. Black void.\nClimb — or drop.',
       ja: 'ゼリーの崖。奈落の空。\n登れ。落ちるな。',
@@ -185,16 +185,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'runway',
     zoneId: 'culture',
-    title: 'FASHION RUNWAY',
-    /** 建物看板は工事中表記のまま（入場は可能） */
-    subtitle: 'UNDER CONSTRUCTION',
+    title: 'MEEBITS RUNWAY',
+    subtitle: 'The Catwalk',
     description: {
-      en: '',
-      ja: '',
+      en: 'One color. Many Meebits.\nWatch the show — grab a seat if you can.',
+      ja: 'ひとつの色。たくさんのMeebit。\nショーを見る。空席なら座る。',
     },
     storyTitle: {
-      en: 'UNDER CONSTRUCTION',
-      ja: '工事中',
+      en: "TODAY'S COLOR WALKS",
+      ja: '本日の色が歩く',
     },
     color: '#1a1a1a',
     roofColor: '#f5f5f5',

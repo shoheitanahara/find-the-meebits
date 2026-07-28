@@ -38,7 +38,7 @@ const copy = {
       street: '8th Street',
       mountain: 'Mt. Meeb',
       neon: 'Jerry Mountain',
-      runway: 'Fashion Runway',
+      runway: 'Meebits Runway',
     },
   },
   ja: {
@@ -56,7 +56,7 @@ const copy = {
       street: '8番ストリート',
       mountain: 'Mt. Meeb',
       neon: 'ジェリーマウンテン',
-      runway: 'ファッションランウェイ',
+      runway: 'Meebits Runway',
     },
   },
 } as const

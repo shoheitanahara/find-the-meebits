@@ -10,7 +10,7 @@
 | `/find-the-meebit` | `v1` | Find the Meebit |
 | `/v2` | `v2` | Trait Hunt |
 | `/8th-street` | `8th-street` | 8th Street |
-| `/runway` | `runway` | Fashion Runway |
+| `/runway` | `runway` | Meebits Runway |
 | `/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換） |
 
@@ -42,7 +42,7 @@
 - 一人称。クランク型の夜の路地を歩き、変化を見破って進むループ
 - 10 体の歩行者、8 回進むとクリア（`EIGHT_STREET.targetProgress`）
 
-### Fashion Runway（`runway`）
+### Meebits Runway（`runway`）
 
 - Culture District のファッションショー。日替わりカラーテーマのモデルがランウェイを歩く
 - 観賞型＋空席への着席。三人称オービット視点

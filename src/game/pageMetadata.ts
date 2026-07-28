@@ -28,8 +28,8 @@ const metadata = {
       description: 'Climb tetromino neon cliffs over a black abyss. Same climb, darker world — 20 stages.',
     },
     runway: {
-      title: 'Fashion Runway | Meebits Park',
-      description: 'A dark room and a glowing catwalk. Watch Meebits matching today’s look walk the runway.',
+      title: 'Meebits Runway | Meebits Park',
+      description: 'A dark room and a glowing catwalk. Watch Meebits matching today’s color walk the runway.',
     },
   },
   ja: {
@@ -58,8 +58,8 @@ const metadata = {
       description: 'テトリス風ネオンの崖を、暗黒の奈落の上で登ろう。ゲーム性はMt. Meebと同じ。',
     },
     runway: {
-      title: 'ファッションランウェイ | Meebits Park',
-      description: '暗い会場に輝くランウェイ。本日のトレイトに合うMeebitが次々と歩くファッションショー。',
+      title: 'Meebits Runway | Meebits Park',
+      description: '暗い会場に輝くランウェイ。本日の色に合うMeebitが次々と歩くショー。',
     },
   },
 } as const

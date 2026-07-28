@@ -4,10 +4,11 @@
 
 ## 直近の作業サマリー
 
-### Fashion Runway（`/runway`）— 実装・調整中（最新）
+### Meebits Runway（`/runway`）— Open（最新）
 
+- **名称**: Meebits Runway（旧 Fashion Runway）
 - **ルート**: `/runway` `/jp/runway` → edition `runway` → `RunwayApp`（`src/runway/`）
-- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`（`zoneId: 'culture'`）。建物看板は工事中表記のまま入場可
+- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`。看板 subtitle `The Catwalk`、storyTitle `TODAY'S COLOR WALKS`
 - **体験**: 白黒暗室＋中央ランウェイ。日替わりカラーテーマに合う Meebit がキャットウォーク。観客はベンチ着席＋呼吸ポーズ
 - **空席・着席**: 日替わり 4〜8 空席。接近で Sit（E / モバイルボタン）。立ち上がりは通路側へ逃がす（`resolveRunwayStandUpPosition`）
 - **ベンチ当たり**: mesh 軸は local X=長辺 / local Z=奥行。前後隣ベンチ間・列間通路側を非対称に短縮（`benchCollision` + `collisions.ts`）
@@ -33,7 +34,7 @@
 
 - **Canonical Default Layout** を `memory-bank/parkDesigner.md` §14 に記録（2026-07-24）
 - 正本コード: `src/top/parkZones.ts`（家具・ゲート・Coming Soon）+ `src/top/topConfig.ts`（建物）
-- Culture の Fashion Runway は **入場可能なアトラクション**（§14.4 を 2026-07-28 更新）。看板は工事中表記のまま
+- Culture の Meebits Runway は **Open**（§14.4 更新済み）
 - 封印門は本ゲートと同品質（開口・橋・門・通過不可衝突）
 - Coming Soon は南西／南東の建設中ランドマーク棟
 - 以降の Park レイアウト変更は §14 とコードをセットで更新すること
