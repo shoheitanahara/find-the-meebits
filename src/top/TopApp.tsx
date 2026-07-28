@@ -22,6 +22,7 @@ import { useTopStore, type AttractionId } from './topStore'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
+import { dialogueChromeDimClass } from '../ui/dialogueChrome'
 
 const copy = {
   en: {
@@ -321,6 +322,16 @@ export function TopApp() {
           <ParkDialogueSystem />
           <ParkDialogueBox />
           <ParkInteractionPrompt />
+          <div
+            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen)}`}
+          >
+            <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
+              Meebits Park
+            </p>
+            <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
+              {getParkZone(activeZoneId).title[locale]}
+            </p>
+          </div>
 
           {nearest && nearestAttraction && !isDialogueOpen && !nearestGate ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
