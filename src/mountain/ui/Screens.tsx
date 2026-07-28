@@ -37,9 +37,10 @@ export function TitleScreen() {
         <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${eyebrowColor}`}>
           {theme.eyebrow[locale]}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">{brand}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-white/80">{theme.blurb[locale]}</p>
-        <p className="mt-2 text-xs text-white/55">
+        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{brand}</h1>
+        <p className="mt-4 text-base font-bold leading-snug text-white sm:text-lg">{theme.tagline[locale]}</p>
+        <p className="mt-3 text-xs leading-relaxed text-white/55">{theme.dailyNote[locale]}</p>
+        <p className="mt-3 text-[0.7rem] text-white/45">
           {locale === 'ja'
             ? 'WASD — 移動（カメラ追従）· Space — ジャンプ · Shift — ダッシュ'
             : 'WASD — Move (camera follows) · Space — Jump · Shift — Dash'}
@@ -115,7 +116,13 @@ export function TitleScreen() {
           className={`mt-6 w-full rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.16em] transition active:scale-[0.99] ${accentBtn}`}
           onClick={() => start(playStage)}
         >
-          {locale === 'ja' ? `ステージ ${playStage} を開始` : `Start Stage ${playStage}`}
+          {playStage === 1
+            ? locale === 'ja'
+              ? 'さあ、登ろう！'
+              : 'Start Climbing!'
+            : locale === 'ja'
+              ? `ステージ ${playStage} へ！`
+              : `Stage ${playStage} — Go!`}
         </button>
       </section>
     </div>

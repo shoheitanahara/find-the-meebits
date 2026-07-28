@@ -45,6 +45,7 @@ import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp } from './ParkBenchProp'
+import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
@@ -257,11 +258,10 @@ function transitionToZone(
 /** Hunt 本編と同じ固定オフセット追従。会話中は NPC との中間へ寄る。 */
 function TopFollowCamera() {
   useFrame(({ camera }, delta) => {
-    const player = useTopStore.getState()
     const dialogue = useDialogueStore.getState()
     const isMobile = isTouchUiMode()
 
-    playerPosition.set(player.x, 0, player.z)
+    playerPosition.set(parkPlayerWorld.x, 0, parkPlayerWorld.z)
 
     if (dialogue.isOpen && dialogue.activeNpcId) {
       const liveNpcPosition = useNpcStore.getState().npcPositions[dialogue.activeNpcId]
@@ -1105,8 +1105,7 @@ function TopNpcCrowd({
 /** プレイヤーに近い来場者を nearest としてマーク（赤いピン用）。 */
 function ParkNpcProximitySystem() {
   useFrame(() => {
-    const top = useTopStore.getState()
-    if (!top.started) return
+    if (!useTopStore.getState().started) return
     if (useDialogueStore.getState().isOpen) return
 
     const positions = useNpcStore.getState().npcPositions
@@ -1116,7 +1115,7 @@ function ParkNpcProximitySystem() {
     for (const [npcId, position] of Object.entries(positions)) {
       // レジストリ外（前ゾーン・ミュージアムの幽霊）は無視
       if (!getParkNpcById(npcId)) continue
-      const distance = Math.hypot(position[0] - top.x, position[2] - top.z)
+      const distance = Math.hypot(position[0] - parkPlayerWorld.x, position[2] - parkPlayerWorld.z)
       if (distance <= nearestDistance) {
         nearestDistance = distance
         nearestId = npcId
@@ -1205,9 +1204,8 @@ function ParkCreatorNpc() {
       useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
     }
 
-    const player = useTopStore.getState()
-    const dx = group ? player.x - group.position.x : 0
-    const dz = group ? player.z - group.position.z : 0
+    const dx = group ? parkPlayerWorld.x - group.position.x : 0
+    const dz = group ? parkPlayerWorld.z - group.position.z : 0
     const distance = Math.hypot(dx, dz)
     const isStoppedForPlayer = getParkNpcStoppedForPlayer({
       distance,
@@ -1335,9 +1333,8 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
     }
 
-    const player = useTopStore.getState()
-    const dx = group ? player.x - group.position.x : 0
-    const dz = group ? player.z - group.position.z : 0
+    const dx = group ? parkPlayerWorld.x - group.position.x : 0
+    const dz = group ? parkPlayerWorld.z - group.position.z : 0
     const distance = Math.hypot(dx, dz)
     const isStoppedForPlayer = getParkNpcStoppedForPlayer({
       distance,
@@ -1458,19 +1455,18 @@ function TopPlayer() {
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
 
   useFrame((state, delta) => {
-    const player = useTopStore.getState()
     const root = rootRef.current
     if (root) {
-      root.position.set(player.x, 0.06, player.z)
-      root.rotation.y = player.rotationY
-      if (player.isMoving) {
+      root.position.set(parkPlayerWorld.x, 0.06, parkPlayerWorld.z)
+      root.rotation.y = parkPlayerWorld.rotationY
+      if (parkPlayerWorld.isMoving) {
         root.position.y += Math.abs(Math.sin(state.clock.elapsedTime * 10.5)) * 0.025
       }
     }
     applyVRMLocomotion(vrmRef.current, {
       elapsedTime: state.clock.elapsedTime,
-      isMoving: player.isMoving,
-      isRunning: player.isMoving,
+      isMoving: parkPlayerWorld.isMoving,
+      isRunning: parkPlayerWorld.isMoving,
     })
     update(delta)
   })
@@ -1532,9 +1528,9 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     }
 
     const moving = movement.lengthSq() > 0.001
-    let x = state.x
-    let z = state.z
-    let rotationY = state.rotationY
+    let x = parkPlayerWorld.x
+    let z = parkPlayerWorld.z
+    let rotationY = parkPlayerWorld.rotationY
 
     if (moving) {
       movement.normalize()
@@ -1562,7 +1558,7 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
       footstepTimer.current = 0
     }
 
-    useTopStore.getState().setMovement(x, z, rotationY, moving)
+    setParkPlayerWorld(x, z, rotationY, moving)
 
     if (useDialogueStore.getState().isOpen) return
 

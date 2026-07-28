@@ -1,12 +1,16 @@
 import { getLocale, getLocaleHomePath, type Locale } from '../i18n/locale'
 import { ui } from '../i18n/ui'
+import { saveParkLocaleResume } from '../top/parkSession'
 
 export function LanguageSwitcher({
   className = '',
   tone = 'light',
+  persistParkSessionOnSwitch = false,
 }: {
   className?: string
   tone?: 'light' | 'dark'
+  /** パーク内で言語切替したとき、位置を保持して同じ場所から再開 */
+  persistParkSessionOnSwitch?: boolean
 }) {
   const current = getLocale()
   const t = ui()
@@ -37,6 +41,10 @@ export function LanguageSwitcher({
             href={href}
             className={`${linkClass} ${isActive ? activeClass : idleClass}`}
             aria-current={isActive ? 'page' : undefined}
+            onClick={() => {
+              if (isActive || !persistParkSessionOnSwitch) return
+              saveParkLocaleResume()
+            }}
           >
             {locale === 'ja' ? t.langJa : t.langEn}
           </a>

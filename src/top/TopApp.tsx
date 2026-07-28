@@ -11,6 +11,7 @@ import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { getDailyParkLineup, type DailyParkLineup } from './dailyFeatured'
 import { TopMobileControls } from './TopControls'
 import { getAttractionById } from './topConfig'
+import { takeParkLocaleResume } from './parkSession'
 import { TopScene } from './TopScene'
 import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
@@ -120,25 +121,41 @@ export function TopApp() {
   }, [])
 
   useLayoutEffect(() => {
-    if (!returningAttractionId || !lineup) return
+    if (!lineup) return
 
-    const attraction = getAttractionById(returningAttractionId)
-    if (!attraction) return
+    if (returningAttractionId) {
+      const attraction = getAttractionById(returningAttractionId)
+      if (!attraction) return
 
-    const zoneId = getZoneForAttraction(returningAttractionId)
-    setParkCollisionZone(zoneId)
-    useTopStore.getState().start(usePlayerStore.getState().meebitNumber, {
-      x: attraction.x,
-      // 入口のすぐ北（手前側）。建物は南向き入口なので、外へ向く = +Z = 0
-      z: attraction.entranceZ + 2.2,
-      rotationY: 0,
-      zoneId,
+      const zoneId = getZoneForAttraction(returningAttractionId)
+      setParkCollisionZone(zoneId)
+      useTopStore.getState().start(usePlayerStore.getState().meebitNumber, {
+        x: attraction.x,
+        // 入口のすぐ北（手前側）。建物は南向き入口なので、外へ向く = +Z = 0
+        z: attraction.entranceZ + 2.2,
+        rotationY: 0,
+        zoneId,
+      })
+
+      // 帰還判定だけをURLから消し、更新後は通常のパークURLとして扱う。
+      const url = new URL(window.location.href)
+      url.searchParams.delete('from')
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+      return
+    }
+
+    // 言語切替直後のみ保存データあり → 復帰して削除。通常リロードは選択カードへ
+    const resume = takeParkLocaleResume()
+    if (!resume) return
+
+    setParkCollisionZone(resume.zoneId)
+    useTopStore.getState().start(resume.meebitNumber, {
+      x: resume.x,
+      z: resume.z,
+      rotationY: resume.rotationY,
+      zoneId: resume.zoneId,
     })
-
-    // 帰還判定だけをURLから消し、更新後は通常のパークURLとして扱う。
-    const url = new URL(window.location.href)
-    url.searchParams.delete('from')
-    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+    usePlayerStore.getState().setMeebitNumber(resume.meebitNumber)
   }, [returningAttractionId, lineup])
 
   const enterAttraction = useCallback((id: AttractionId) => {
@@ -210,6 +227,14 @@ export function TopApp() {
       ) : null}
       <TargetPreviewCapture />
 
+      {parkReady ? (
+        <LanguageSwitcher
+          className="pointer-events-auto absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-[60]"
+          tone="dark"
+          persistParkSessionOnSwitch
+        />
+      ) : null}
+
       {!parkReady ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#070914]/92 px-4">
           <p className="text-sm tracking-[0.18em] text-[#d8c9aa]">
@@ -220,7 +245,6 @@ export function TopApp() {
 
       {showSelectionCard && parkReady ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_50%_16%,rgba(88,64,122,0.32),transparent_42%),linear-gradient(180deg,rgba(3,5,16,0.42),rgba(3,5,16,0.84))] px-4 py-6 backdrop-blur-[4px]">
-          <LanguageSwitcher className="absolute right-4 top-4 z-10" tone="dark" />
           <section className="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/92 shadow-[0_28px_90px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]">
             <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#f1d48c] to-transparent" />
             <div className="grid md:grid-cols-[0.9fr_1.1fr]">

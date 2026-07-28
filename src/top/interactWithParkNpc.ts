@@ -6,6 +6,7 @@ import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import type { DailyThemeTrait } from './dailyFeatured'
 import { selectParkDialogueLines } from './parkDialogue'
 import { getParkNpcById } from './parkNpcRegistry'
+import { parkPlayerWorld } from './parkPlayerWorld'
 import { useTopStore } from './topStore'
 
 let parkDialogueContext: { featuredId: number; themeTrait: DailyThemeTrait } | null = null
@@ -39,7 +40,7 @@ export function interactWithNearestParkNpc(): boolean {
     top.activeZoneId,
   )
 
-  recordMeebitTalk(npc.meebitNumber, [top.x, 0, top.z])
+  recordMeebitTalk(npc.meebitNumber, [parkPlayerWorld.x, 0, parkPlayerWorld.z])
   usePlayerStore.getState().setMovementLocked(true)
   dialogue.openDialogue(nearestId, lines)
   return true

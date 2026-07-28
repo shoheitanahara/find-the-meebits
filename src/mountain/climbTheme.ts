@@ -9,7 +9,10 @@ export type ClimbTheme = {
   progressKey: string
   /** UI・メタ用 */
   brand: { en: string; ja: string }
-  blurb: { en: string; ja: string }
+  /** タイトル画面のキャッチ（大きく表示） */
+  tagline: { en: string; ja: string }
+  /** 日替わりリセット等の補足（小さく表示） */
+  dailyNote: { en: string; ja: string }
   eyebrow: { en: string; ja: string }
   /** Canvas 背後の DOM 背景 */
   shellBg: string
@@ -49,10 +52,14 @@ const MEEB_THEME: ClimbTheme = {
   id: 'meeb',
   progressKey: 'meebits-mountain-progress-v3',
   brand: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
-  eyebrow: { en: '20 Stages · Daily Route', ja: '全20ステージ · 日替わりルート' },
-  blurb: {
-    en: 'Winding ledges and gappy cliffs. The route and unlocks reset every day (JST) — climb from Stage 1.',
-    ja: '曲がりくねった棚と隙間だらけの崖。ルートと進捗は毎日（JST）リセット。毎日 Stage 1 から挑戦。',
+  eyebrow: { en: 'Voxel Summit Run', ja: 'ボクセル頂上ラン' },
+  tagline: {
+    en: 'Jump the gaps. Dash the ledges. Grab the flag at the top!',
+    ja: '隙間を跳び、棚を駆け、頂の旗を掴め！',
+  },
+  dailyNote: {
+    en: '20 stages to 1000m. The mountain reshapes every day — route and progress reset at midnight JST.',
+    ja: '全20ステージ、標高1000m。山は毎日形を変える — ルートと進捗は毎日深夜（JST）にリセット。',
   },
   shellBg: 'bg-[#87b8d8]',
   titleGradient: 'bg-gradient-to-b from-[#6a9fc0] via-[#87b8d8] to-[#3d6b3a]',
@@ -83,10 +90,14 @@ const NEON_THEME: ClimbTheme = {
   id: 'neon',
   progressKey: 'meebits-jerry-mountain-progress-v1',
   brand: { en: 'Jerry Mountain', ja: 'ジェリーマウンテン' },
-  eyebrow: { en: '20 Stages · Daily Route', ja: '全20ステージ · 日替わりルート' },
-  blurb: {
-    en: 'Same climb, different world — tetromino cliffs over a black void. The route resets every day (JST).',
-    ja: 'ゲーム性は同じ。テトリス風ブロックの崖を、暗黒の奈落の上で登る。ルートと進捗は毎日（JST）リセット。',
+  eyebrow: { en: 'Neon Stack Run', ja: 'ネオン積み木ラン' },
+  tagline: {
+    en: 'Neon blocks over the void. One wrong step — and down you go.',
+    ja: 'ネオンのブロック、底なしの闇。一歩ミスれば、落下。',
+  },
+  dailyNote: {
+    en: 'Same climb as Mt. Meeb — new neon maze every day. Progress resets at midnight JST.',
+    ja: 'Mt. Meeb と同じ登り。ネオンの迷路は毎日変わる。進捗は毎日深夜（JST）にリセット。',
   },
   shellBg: 'bg-[#242060]',
   titleGradient: 'bg-gradient-to-b from-[#2e2870] via-[#3a3090] to-[#4a38a8]',
