@@ -35,6 +35,8 @@ export type Attraction = {
   footprint: AttractionFootprint
   /** 説明看板のローカル xz */
   infoBoardLocal: [number, number]
+  /** 入口看板を工事中表示（施設自体は enter 可） */
+  underConstruction?: boolean
 }
 
 export const TOP_ATTRACTIONS: Attraction[] = [
@@ -242,6 +244,37 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       ],
     },
     infoBoardLocal: [-5.2, 4.0],
+  },
+  {
+    id: 'sergito',
+    zoneId: 'sea',
+    title: 'MEET SERGITO',
+    subtitle: 'The Workshop',
+    description: {
+      en: 'Step into Sergito’s workshop.\nHe’ll take a look at your Meebit\nand share a few honest words.',
+      ja: 'Sergitoの工房へ。\nあなたのMeebitを見て、\n短いコメントをくれるよ。',
+    },
+    storyTitle: {
+      en: 'YOUR MEEBIT, UP CLOSE',
+      ja: 'あなたのMeebitを見てもらう',
+    },
+    color: '#c8b898',
+    roofColor: '#6a8098',
+    x: 12.5,
+    z: -11.0,
+    entranceZ: -8.0,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [5.2, 4.0],
+    underConstruction: true,
   },
 ]
 

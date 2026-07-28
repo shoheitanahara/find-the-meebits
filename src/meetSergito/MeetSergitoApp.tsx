@@ -1,0 +1,85 @@
+import { useEffect, useState } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { PerspectiveCamera } from '@react-three/drei'
+import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
+import { loadMeebitTraitsDataset } from '../data/meebitTraits'
+import { ParkReturnButton } from '../ui/ParkReturnButton'
+import { MeetSergitoPlayer } from './player/MeetSergitoPlayer'
+import { MeetSergitoTouchLookPad } from './player/MeetSergitoTouchLookPad'
+import { MeetSergitoMobileControls } from './player/MeetSergitoMobileControls'
+import { WorkshopRoom } from './world/WorkshopRoom'
+import { MeetSergitoExitPad } from './world/MeetSergitoExitPad'
+import { SergitoNpc } from './npc/SergitoNpc'
+import { SergitoDialogueBox } from './dialogue/SergitoDialogueBox'
+import { SergitoDialogueSystem, SergitoInteractionPrompt } from './dialogue/SergitoDialogueSystem'
+import { MEET_SERGITO } from './config'
+
+function useTabFrameloop() {
+  const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
+    typeof document !== 'undefined' && document.visibilityState === 'hidden' ? 'never' : 'always',
+  )
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      setFrameloop(document.visibilityState === 'hidden' ? 'never' : 'always')
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [])
+
+  return frameloop
+}
+
+function MeetSergitoScene() {
+  return (
+    <>
+      <PerspectiveCamera
+        makeDefault
+        fov={50}
+        near={0.1}
+        far={80}
+        position={[
+          MEET_SERGITO.playerStart.x + MEET_SERGITO.cameraFollow.x,
+          MEET_SERGITO.cameraFollow.y,
+          Math.min(
+            MEET_SERGITO.playerStart.z + MEET_SERGITO.cameraFollow.z,
+            MEET_SERGITO.roomMaxZ - 1.0,
+          ),
+        ]}
+      />
+      <WorkshopRoom />
+      <MeetSergitoExitPad />
+      <SergitoNpc />
+      <MeetSergitoPlayer />
+    </>
+  )
+}
+
+export function MeetSergitoApp() {
+  const frameloop = useTabFrameloop()
+
+  useEffect(() => {
+    void loadMeebitTraitsDataset()
+  }, [])
+
+  return (
+    <main className="relative h-dvh w-dvw overflow-hidden bg-[#1a140c] text-[#f4ead2]">
+      <Canvas
+        frameloop={frameloop}
+        dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}
+        shadows
+        gl={{ antialias: getEnableAntialias(), powerPreference: 'high-performance' }}
+        className="absolute inset-0"
+      >
+        <MeetSergitoScene />
+      </Canvas>
+
+      <ParkReturnButton />
+      <SergitoDialogueSystem />
+      <SergitoDialogueBox />
+      <SergitoInteractionPrompt />
+      <MeetSergitoTouchLookPad />
+      <MeetSergitoMobileControls />
+    </main>
+  )
+}

@@ -68,6 +68,45 @@ export function applyVRMAttentionPose(vrm: VRM | null) {
   setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
 }
 
+/** フィギュア用 — 上腕を体側へ（脇の空きを減らす） */
+const figureArmZ = {
+  left: 1.58,
+  right: -1.58,
+}
+
+/** フィギュア展示用 — 両腕を体の横に自然下垂（T ポーズ解消） */
+export function applyVRMFigurePose(vrm: VRM | null) {
+  if (!vrm) {
+    return
+  }
+
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.Head), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(leftUpperArm, { x: 0.1, y: 0, z: figureArmZ.left })
+  setRotationImmediate(rightUpperArm, { x: 0.1, y: 0, z: figureArmZ.right })
+  setRotationImmediate(leftLowerArm, { x: elbowBaseBend + 0.06, y: 0, z: 0 })
+  setRotationImmediate(rightLowerArm, { x: elbowBaseBend + 0.06, y: 0, z: 0 })
+  setRotationImmediate(leftUpperLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(rightUpperLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(leftLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
+  setRotationImmediate(rightLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
+  setRotationImmediate(leftFoot, { x: 0.04, y: 0, z: 0 })
+  setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
+}
+
 type SitPoseBreathingOptions = {
   elapsedTime: number
   breathPhaseOffset?: number

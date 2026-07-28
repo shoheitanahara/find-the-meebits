@@ -35,6 +35,10 @@ const metadata = {
       title: 'Look Locker | Meebits Park',
       description: 'Pick looks, find matching Meebits, and try them on as your avatar.',
     },
+    sergito: {
+      title: 'Meet Sergito | Meebits Park',
+      description: 'Visit Sergito’s workshop. He’ll look at your Meebit and share a short, personal comment.',
+    },
   },
   ja: {
     top: {
@@ -68,6 +72,10 @@ const metadata = {
     closet: {
       title: 'ルックロッカー | Meebits Park',
       description: '見た目を選んで合うMeebitを見つけ、アバターにきせかえよう。',
+    },
+    sergito: {
+      title: 'Meet Sergito | Meebits Park',
+      description: 'Sergitoの工房を訪れ、あなたのMeebitを見てもらおう。traitに合わせた短いコメントが返ってくる。',
     },
   },
 } as const

@@ -14,6 +14,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - neon: テトリス風積みブロック塔（Jerry Mountain）
  * - runway: 暗いパビリオン＋発光ランウェイ
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
+ * - sergito: シーエリアの工房（Meet Sergito）
  */
 export function AttractionBuilding({
   attraction,
@@ -37,7 +38,9 @@ export function AttractionBuilding({
               ? '#f0f0f0'
               : attraction.id === 'closet'
                 ? '#8eb4e8'
-                : '#c4a060'
+                : attraction.id === 'sergito'
+                  ? '#d4a060'
+                  : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -64,6 +67,8 @@ export function AttractionBuilding({
         <RunwayLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'closet' ? (
         <TraitMuseumLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'sergito' ? (
+        <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -86,6 +91,8 @@ export function AttractionBuilding({
         accentColor={accent}
         description={attraction.description[locale]}
         heading={attraction.storyTitle[locale]}
+        locale={locale}
+        underConstruction={attraction.underConstruction}
       />
     </group>
   )
@@ -366,6 +373,58 @@ function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
         <boxGeometry args={[2.8, 1.9, 0.28]} />
         <meshStandardMaterial color="#101010" roughness={0.9} />
       </mesh>
+    </group>
+  )
+}
+
+/** Sea 右上: Meet Sergito 工房（小さなコテージ＋作業窓） */
+function MeetSergitoLandmark({
+  color,
+  roofColor,
+  accent,
+}: {
+  color: string
+  roofColor: string
+  accent: string
+}) {
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.28, 7.2]} />
+        <meshStandardMaterial color="#8a7060" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[6.0, 3.5, 5.8]} />
+        <meshStandardMaterial color={color} roughness={0.88} />
+      </mesh>
+      <mesh position={[0, 3.75, -0.35]} castShadow>
+        <boxGeometry args={[6.4, 0.35, 6.2]} />
+        <meshStandardMaterial color={roofColor} roughness={0.55} metalness={0.15} />
+      </mesh>
+      <mesh position={[0, 2.2, -3.05]} castShadow>
+        <boxGeometry args={[5.2, 3.0, 0.35]} />
+        <meshStandardMaterial color="#a89078" roughness={0.92} />
+      </mesh>
+      {[-1.4, 1.4].map((x) => (
+        <mesh key={x} position={[x, 2.35, -2.88]}>
+          <boxGeometry args={[1.0, 1.2, 0.08]} />
+          <meshStandardMaterial
+            color="#fff4d8"
+            emissive={accent}
+            emissiveIntensity={0.35}
+            roughness={0.45}
+          />
+        </mesh>
+      ))}
+      <mesh position={[2.4, 1.6, 2.6]} castShadow>
+        <boxGeometry args={[1.4, 0.9, 1.0]} />
+        <meshStandardMaterial color="#9a8068" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 0.9, 3.35]} castShadow>
+        <boxGeometry args={[2.6, 1.8, 0.28]} />
+        <meshStandardMaterial color="#806850" roughness={0.88} />
+      </mesh>
+      <pointLight position={[0, 2.6, 1.2]} intensity={9} distance={10} color={accent} />
     </group>
   )
 }
@@ -739,12 +798,23 @@ function AttractionInfoBoard({
   accentColor,
   description,
   heading,
+  locale,
+  underConstruction = false,
 }: {
   position: [number, number, number]
   accentColor: string
   description: string
   heading: string
+  locale: 'en' | 'ja'
+  underConstruction?: boolean
 }) {
+  const displayHeading = underConstruction
+    ? locale === 'ja'
+      ? '工事中'
+      : 'UNDER CONSTRUCTION'
+    : heading
+  const displayDescription = underConstruction ? '' : description
+
   return (
     <group position={position}>
       <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
@@ -768,16 +838,17 @@ function AttractionInfoBoard({
         />
       </mesh>
       <Text
-        position={[0, description ? 1.98 : 1.55, 0.15]}
-        fontSize={description ? 0.18 : 0.28}
+        position={[0, displayDescription ? 1.98 : 1.55, 0.15]}
+        fontSize={displayDescription ? 0.18 : underConstruction ? 0.24 : 0.28}
         color={accentColor}
         anchorX="center"
         anchorY="middle"
         maxWidth={2.6}
+        textAlign="center"
       >
-        {heading}
+        {displayHeading}
       </Text>
-      {description ? (
+      {displayDescription ? (
         <Text
           position={[0, 1.46, 0.15]}
           fontSize={0.2}
@@ -788,7 +859,7 @@ function AttractionInfoBoard({
           textAlign="center"
           maxWidth={2.65}
         >
-          {description}
+          {displayDescription}
         </Text>
       ) : null}
     </group>

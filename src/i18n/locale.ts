@@ -55,6 +55,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/look-locker' : '/look-locker'
   }
 
+  if (segments.includes('meet-sergito')) {
+    return locale === 'ja' ? '/jp/meet-sergito' : '/meet-sergito'
+  }
+
   if (segments.includes('v2')) {
     return locale === 'ja' ? '/jp/v2' : '/v2'
   }
