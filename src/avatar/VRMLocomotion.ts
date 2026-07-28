@@ -133,23 +133,15 @@ export function applyVRMSitPose(vrm: VRM | null, breathing?: SitPoseBreathingOpt
     : 0
   const setPose = breathing ? setRotation : setRotationImmediate
 
-  // 脚は歩行軸と前後が逆。腕は歩行と同じ符号で膝上に置く
+  // 腕は立位の自然下垂（ねじり・膝上置きなし）。脚だけ着席
   setPose(hips, { x: 0.12 + breath * 0.35, y: 0, z: 0 })
   setPose(spine, { x: -0.08 + breath * 0.75, y: 0, z: 0 })
-  setPose(chest, { x: -0.04 + breath * 1.15, y: 0, z: breath * 0.08 })
+  setPose(chest, { x: -0.04 + breath * 1.15, y: 0, z: 0 })
   setPose(head, { x: 0.04 + breath * 0.35 + headIdle, y: headTurn, z: 0 })
-  setPose(leftUpperArm, {
-    x: 0.35 - breath * 0.55,
-    y: 0,
-    z: attentionArmZ.left * 0.92 + breath * 0.06,
-  })
-  setPose(rightUpperArm, {
-    x: 0.35 - breath * 0.55,
-    y: 0,
-    z: attentionArmZ.right * 0.92 - breath * 0.06,
-  })
-  setPose(leftLowerArm, { x: 0.55 + breath * 0.08, y: 0, z: 0 })
-  setPose(rightLowerArm, { x: 0.55 + breath * 0.08, y: 0, z: 0 })
+  setPose(leftUpperArm, { x: 0, y: 0, z: armRestZ.left })
+  setPose(rightUpperArm, { x: 0, y: 0, z: armRestZ.right })
+  setPose(leftLowerArm, { x: elbowBaseBend, y: 0, z: 0 })
+  setPose(rightLowerArm, { x: elbowBaseBend, y: 0, z: 0 })
   setPose(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
   setPose(rightUpperLeg, { x: 1.15, y: -0.04, z: 0 })
   setPose(leftLowerLeg, { x: -1.35, y: 0, z: 0 })
