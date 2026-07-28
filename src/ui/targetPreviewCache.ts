@@ -1,4 +1,4 @@
-import { getMeebitPreviewImageUrl } from './meebitPreviewUrl'
+import { getMeebitPreviewImageUrl, uploadMeebitPreviewToR2 } from './meebitPreviewUrl'
 import { MEEBIT_PREVIEW_IMAGE_VERSION } from './targetPreviewCaptureConfig'
 
 const PREVIEW_RENDER_VERSION = 6
@@ -194,6 +194,11 @@ export function completeTargetPreviewCapture(meebitNumber: number, dataUrl: stri
   activeMeebit = null
   notify(meebitNumber)
   drainQueue()
+
+  // 他ユーザー向けに R2 へキャッシュ（失敗してもローカル表示は維持）
+  void uploadMeebitPreviewToR2(meebitNumber, dataUrl).catch((error) => {
+    console.warn(`[preview-upload] #${meebitNumber}`, error)
+  })
 }
 
 export function failTargetPreviewCapture(meebitNumber: number) {
