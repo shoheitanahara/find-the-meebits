@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group } from 'three'
 import { applyVRMLocomotion } from '../../avatar/VRMLocomotion'
@@ -14,10 +14,17 @@ export function SergitoNpc() {
   const groupRef = useRef<Group>(null)
   const rotationRef = useRef<number>(MEET_SERGITO.sergito.rotationY)
   const localTimeRef = useRef(0)
-  const { vrmRef, vrmScene, update } = useVRMModel(SERGITO_MEEBIT_ID, true, 0, true, true)
+  const { vrmRef, vrmScene, status, update } = useVRMModel(SERGITO_MEEBIT_ID, true, 0, true, true)
   const canTalkToSergito = useMeetSergitoStore((state) => state.canTalkToSergito)
   const setCanTalkToSergito = useMeetSergitoStore((state) => state.setCanTalkToSergito)
+  const setSergitoVrmReady = useMeetSergitoStore((state) => state.setSergitoVrmReady)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+
+  useEffect(() => {
+    if (status === 'ready' || status === 'error') {
+      setSergitoVrmReady(true)
+    }
+  }, [setSergitoVrmReady, status])
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)

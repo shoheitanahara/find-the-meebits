@@ -15,6 +15,7 @@ import { resolveWorkshopMovement } from '../collisions'
 import { MEET_SERGITO, SERGITO_NPC_ID } from '../config'
 import { useMeetSergitoControlsStore } from '../controlsStore'
 import { setMeetSergitoPlayerWorld } from '../playerWorld'
+import { useMeetSergitoStore } from '../store'
 
 const movement = new Vector2()
 const cameraPosition = new Vector3()
@@ -46,12 +47,22 @@ export function MeetSergitoPlayer() {
   const footstepTimerRef = useRef(0)
   const keys = useKeyboardControls()
   const movementLocked = usePlayerStore((state) => state.movementLocked)
+  const bootPhase = useMeetSergitoStore((state) => state.bootPhase)
+  const setPlayerVrmReady = useMeetSergitoStore((state) => state.setPlayerVrmReady)
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
-  const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  const controlsLocked = movementLocked || bootPhase !== 'ready'
+
+  useEffect(() => {
+    if (status === 'ready' || status === 'error') {
+      setPlayerVrmReady(true)
+    }
+  }, [setPlayerVrmReady, status])
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {
       if (!lockedRef.current) return
+      if (useMeetSergitoStore.getState().bootPhase !== 'ready') return
       lookYawRef.current -= event.movementX * MEET_SERGITO.mouseLookSensitivity
       lookPitchRef.current = MathUtils.clamp(
         lookPitchRef.current + event.movementY * MEET_SERGITO.mouseLookSensitivity,
@@ -60,6 +71,7 @@ export function MeetSergitoPlayer() {
       )
     }
     const onClick = () => {
+      if (useMeetSergitoStore.getState().bootPhase !== 'ready') return
       if (document.pointerLockElement !== gl.domElement) {
         void gl.domElement.requestPointerLock()
       }
@@ -86,7 +98,7 @@ export function MeetSergitoPlayer() {
     localTimeRef.current += dt
 
     const look = useMeetSergitoControlsStore.getState().consumeLookDelta()
-    if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
+    if (!controlsLocked && (look.lookDeltaX !== 0 || look.lookDeltaY !== 0)) {
       const sens = MEET_SERGITO.touchLookSensitivity
       lookYawRef.current -= look.lookDeltaX * sens
       lookPitchRef.current = MathUtils.clamp(
@@ -100,7 +112,7 @@ export function MeetSergitoPlayer() {
     const touch = useTouchControlsStore.getState()
 
     movement.set(0, 0)
-    if (!movementLocked) {
+    if (!controlsLocked) {
       if (keyboard.forward) movement.y -= 1
       if (keyboard.backward) movement.y += 1
       if (keyboard.left) movement.x -= 1
@@ -114,7 +126,7 @@ export function MeetSergitoPlayer() {
       useTouchControlsStore.getState().resetJoystick()
     }
 
-    const moving = !movementLocked && movement.lengthSq() > 0.01
+    const moving = !controlsLocked && movement.lengthSq() > 0.01
     const lookYaw = lookYawRef.current
     const forwardX = -Math.sin(lookYaw)
     const forwardZ = -Math.cos(lookYaw)

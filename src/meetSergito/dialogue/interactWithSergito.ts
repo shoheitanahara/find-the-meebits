@@ -7,10 +7,10 @@ import { useMeetSergitoStore } from '../store'
 import { createSergitoDialogue } from './createSergitoDialogue'
 
 export async function openSergitoDialogue() {
-  const { canTalkToSergito, talkCount, incrementTalkCount } = useMeetSergitoStore.getState()
+  const { bootPhase, canTalkToSergito, talkCount, incrementTalkCount } = useMeetSergitoStore.getState()
   const dialogueState = useDialogueStore.getState()
 
-  if (!canTalkToSergito || dialogueState.isOpen) return
+  if (bootPhase !== 'ready' || !canTalkToSergito || dialogueState.isOpen) return
 
   await loadMeebitTraitsDataset()
   const meebitId = usePlayerStore.getState().meebitNumber

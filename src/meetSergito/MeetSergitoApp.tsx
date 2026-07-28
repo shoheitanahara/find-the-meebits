@@ -14,6 +14,9 @@ import { SergitoNpc } from './npc/SergitoNpc'
 import { SergitoDialogueBox } from './dialogue/SergitoDialogueBox'
 import { SergitoDialogueSystem, SergitoInteractionPrompt } from './dialogue/SergitoDialogueSystem'
 import { MEET_SERGITO } from './config'
+import { useMeetSergitoStore } from './store'
+import { MeetSergitoLoadingOverlay } from './ui/MeetSergitoLoadingOverlay'
+import { WORKSHOP_WALKER_COUNT } from './world/workshopFigureLayout'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -58,6 +61,12 @@ function MeetSergitoScene() {
 
 export function MeetSergitoApp() {
   const frameloop = useTabFrameloop()
+  const bootPhase = useMeetSergitoStore((state) => state.bootPhase)
+
+  // 子コンポーネントの ready 報告より先にリセットする（useEffect だと競合で固まる）
+  useState(() => {
+    useMeetSergitoStore.getState().resetBoot(WORKSHOP_WALKER_COUNT)
+  })
 
   useEffect(() => {
     void loadMeebitTraitsDataset()
@@ -77,11 +86,16 @@ export function MeetSergitoApp() {
 
       <ParkReturnButton />
       <TargetPreviewCapture />
-      <SergitoDialogueSystem />
-      <SergitoDialogueBox />
-      <SergitoInteractionPrompt />
-      <MeetSergitoTouchLookPad />
-      <MeetSergitoMobileControls />
+      <MeetSergitoLoadingOverlay />
+      {bootPhase === 'ready' ? (
+        <>
+          <SergitoDialogueSystem />
+          <SergitoDialogueBox />
+          <SergitoInteractionPrompt />
+          <MeetSergitoTouchLookPad />
+          <MeetSergitoMobileControls />
+        </>
+      ) : null}
     </main>
   )
 }

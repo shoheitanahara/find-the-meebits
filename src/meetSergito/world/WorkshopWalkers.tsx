@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group, MathUtils } from 'three'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../../avatar/VRMLocomotion'
@@ -8,6 +8,7 @@ import { INTERACTION_DISTANCE, VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { isWorkshopPositionWalkable } from '../collisions'
 import { MEET_SERGITO } from '../config'
 import { meetSergitoPlayerWorld } from '../playerWorld'
+import { useMeetSergitoStore } from '../store'
 import { getWorkshopWalkerMeebitIds } from './workshopFigureLayout'
 
 const WALKER_WALK_SPEED = 1.15
@@ -127,7 +128,14 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
   const localTimeRef = useRef(index * 0.37)
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
   const groundY = MEET_SERGITO.playerGroundY
-  const { vrmRef, vrmScene, update } = useVRMModel(spawn.meebitNumber, true, 80 + index, true, true)
+  const { vrmRef, vrmScene, status, update } = useVRMModel(spawn.meebitNumber, true, 80 + index, true, true)
+  const setWalkerVrmReady = useMeetSergitoStore((state) => state.setWalkerVrmReady)
+
+  useEffect(() => {
+    if (status === 'ready' || status === 'error') {
+      setWalkerVrmReady(index)
+    }
+  }, [index, setWalkerVrmReady, status])
 
   useFrame((state, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)
