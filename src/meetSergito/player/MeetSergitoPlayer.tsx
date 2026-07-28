@@ -54,10 +54,10 @@ export function MeetSergitoPlayer() {
   const controlsLocked = movementLocked || bootPhase !== 'ready'
 
   useEffect(() => {
-    if (status === 'ready' || status === 'error') {
+    if (status === 'error' || (status === 'ready' && vrmScene)) {
       setPlayerVrmReady(true)
     }
-  }, [setPlayerVrmReady, status])
+  }, [setPlayerVrmReady, status, vrmScene])
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {

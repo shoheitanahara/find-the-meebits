@@ -21,10 +21,10 @@ export function SergitoNpc() {
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
 
   useEffect(() => {
-    if (status === 'ready' || status === 'error') {
+    if (status === 'error' || (status === 'ready' && vrmScene)) {
       setSergitoVrmReady(true)
     }
-  }, [setSergitoVrmReady, status])
+  }, [setSergitoVrmReady, status, vrmScene])
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)

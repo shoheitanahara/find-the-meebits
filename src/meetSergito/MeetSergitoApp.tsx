@@ -9,6 +9,7 @@ import { MeetSergitoPlayer } from './player/MeetSergitoPlayer'
 import { MeetSergitoTouchLookPad } from './player/MeetSergitoTouchLookPad'
 import { MeetSergitoMobileControls } from './player/MeetSergitoMobileControls'
 import { WorkshopRoom } from './world/WorkshopRoom'
+import { MeetSergitoDisplayWarmup } from './world/MeetSergitoDisplayWarmup'
 import { MeetSergitoExitPad } from './world/MeetSergitoExitPad'
 import { SergitoNpc } from './npc/SergitoNpc'
 import { SergitoDialogueBox } from './dialogue/SergitoDialogueBox'
@@ -55,6 +56,7 @@ function MeetSergitoScene() {
       <MeetSergitoExitPad />
       <SergitoNpc />
       <MeetSergitoPlayer />
+      <MeetSergitoDisplayWarmup />
     </>
   )
 }

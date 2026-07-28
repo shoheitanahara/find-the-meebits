@@ -262,7 +262,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     roofColor: '#6a8098',
     x: 12.5,
     z: -11.0,
-    entranceZ: -8.0,
+    // 正面ドア (z + halfDepth = -7.5) のすぐ手前 — 旧 -8.0 だとアルコーブ奥まで入らないと発火していた
+    entranceZ: -7.35,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.5,

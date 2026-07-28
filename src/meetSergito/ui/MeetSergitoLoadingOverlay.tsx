@@ -1,26 +1,38 @@
 import { getLocale } from '../../i18n/locale'
-import { getMeetSergitoBootProgress, useMeetSergitoStore } from '../store'
+import { useMeetSergitoStore } from '../store'
 
 const copy = {
   en: {
     eyebrow: 'Sea District',
     title: 'Meet Sergito',
     loading: 'Preparing the workshop…',
+    finishing: 'Almost ready…',
   },
   ja: {
     eyebrow: 'シーエリア',
     title: 'Meet Sergito',
     loading: '工房を準備中…',
+    finishing: '表示を仕上げています…',
   },
 } as const
 
-/** 入室直後 — プレイヤー / Sergito / 歩行者 / フィギュア VRM が揃うまで表示 */
+/** 入室直後 — アセット取得＋ GPU 表示準備が終わるまで表示 */
 export function MeetSergitoLoadingOverlay() {
   const bootPhase = useMeetSergitoStore((state) => state.bootPhase)
-  const progress = useMeetSergitoStore((state) => getMeetSergitoBootProgress(state))
+  const assetsReady = useMeetSergitoStore((state) => state.assetsReady)
+  const progressReady = useMeetSergitoStore(
+    (state) =>
+      (state.playerVrmReady ? 1 : 0) +
+      (state.sergitoVrmReady ? 1 : 0) +
+      state.walkersReadyCount +
+      state.figuresReadyCount,
+  )
+  const progressExpected = useMeetSergitoStore((state) =>
+    Math.max(1, 2 + state.walkersExpected + state.figuresExpected),
+  )
   const locale = getLocale()
   const t = copy[locale]
-  const ratio = Math.min(1, progress.ready / progress.expected)
+  const ratio = assetsReady ? 1 : Math.min(0.96, progressReady / progressExpected)
 
   if (bootPhase === 'ready') return null
 
@@ -31,13 +43,17 @@ export function MeetSergitoLoadingOverlay() {
           {t.eyebrow}
         </p>
         <h2 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl">{t.title}</h2>
-        <p className="mt-4 text-sm text-[#c8b898]">{t.loading}</p>
-        <p className="mt-2 text-[0.7rem] tabular-nums text-[#a89070]">
-          {progress.ready} / {progress.expected}
-        </p>
+        <p className="mt-4 text-sm text-[#c8b898]">{assetsReady ? t.finishing : t.loading}</p>
+        {!assetsReady ? (
+          <p className="mt-2 text-[0.7rem] tabular-nums text-[#a89070]">
+            {progressReady} / {progressExpected}
+          </p>
+        ) : null}
         <div className="mx-auto mt-5 h-1.5 w-44 overflow-hidden rounded-full bg-[#3a3028]">
           <div
-            className="h-full rounded-full bg-[#d4a060] transition-[width] duration-300 ease-out"
+            className={`h-full rounded-full bg-[#d4a060] transition-[width] duration-300 ease-out ${
+              assetsReady ? 'animate-pulse' : ''
+            }`}
             style={{ width: `${Math.max(8, ratio * 100)}%` }}
           />
         </div>

@@ -132,10 +132,10 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
   const setWalkerVrmReady = useMeetSergitoStore((state) => state.setWalkerVrmReady)
 
   useEffect(() => {
-    if (status === 'ready' || status === 'error') {
+    if (status === 'error' || (status === 'ready' && vrmScene)) {
       setWalkerVrmReady(index)
     }
-  }, [index, setWalkerVrmReady, status])
+  }, [index, setWalkerVrmReady, status, vrmScene])
 
   useFrame((state, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)

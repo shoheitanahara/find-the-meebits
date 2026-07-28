@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { applyVRMFigurePose } from '../../avatar/VRMLocomotion'
 import { alignVrmFigureFeet } from '../../avatar/VRMLoader'
 import { useVRMModel } from '../../avatar/useVRMModel'
@@ -40,20 +40,21 @@ function WorkshopFigure({
   const setFigureVrmReady = useMeetSergitoStore((state) => state.setFigureVrmReady)
   const figureScale = VRM_WORLD_SCALE * placement.scale
 
-  useEffect(() => {
-    if (status === 'ready' || status === 'error') {
-      setFigureVrmReady(index)
-    }
-  }, [index, setFigureVrmReady, status])
-
+  // ファイル取得だけでなく、ポーズ・解像度加工・足元合わせまで終えてから ready
   useLayoutEffect(() => {
+    if (status === 'error') {
+      setFigureVrmReady(index)
+      return
+    }
     const vrm = vrmRef.current
-    if (!vrm) return
+    if (!vrm || status !== 'ready' || !vrmScene) return
+
     applyVRMFigurePose(vrm)
     applyWorkshopFigureVrmQuality(vrm)
     alignVrmFigureFeet(vrm)
     vrm.update(0)
-  }, [vrmRef, vrmScene])
+    setFigureVrmReady(index)
+  }, [index, setFigureVrmReady, status, vrmRef, vrmScene])
 
   return (
     <group position={[placement.x, placement.y, placement.z]} rotation={[0, placement.rotationY, 0]}>

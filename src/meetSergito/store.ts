@@ -4,6 +4,8 @@ export type MeetSergitoBootPhase = 'loading' | 'ready'
 
 type MeetSergitoState = {
   bootPhase: MeetSergitoBootPhase
+  /** VRM ファイル取得＋フィギュア加工まで完了（まだ GPU 表示待ちの場合あり） */
+  assetsReady: boolean
   playerVrmReady: boolean
   sergitoVrmReady: boolean
   walkersReadyCount: number
@@ -19,20 +21,31 @@ type MeetSergitoState = {
   setSergitoVrmReady: (ready: boolean) => void
   setWalkerVrmReady: (index: number) => void
   setFigureVrmReady: (index: number) => void
+  /** GPU compile / 数フレーム描画後に呼ぶ — オーバーレイ解除 */
+  setDisplayReady: () => void
 }
 
 const readyWalkerIndices = new Set<number>()
 const readyFigureIndices = new Set<number>()
 
-function recomputeBootPhase(state: MeetSergitoState): MeetSergitoBootPhase {
-  if (!state.playerVrmReady || !state.sergitoVrmReady) return 'loading'
-  if (state.walkersReadyCount < state.walkersExpected) return 'loading'
-  if (state.figuresReadyCount < state.figuresExpected) return 'loading'
-  return 'ready'
+function areAssetsReady(state: Pick<
+  MeetSergitoState,
+  | 'playerVrmReady'
+  | 'sergitoVrmReady'
+  | 'walkersReadyCount'
+  | 'walkersExpected'
+  | 'figuresReadyCount'
+  | 'figuresExpected'
+>): boolean {
+  if (!state.playerVrmReady || !state.sergitoVrmReady) return false
+  if (state.walkersReadyCount < state.walkersExpected) return false
+  if (state.figuresReadyCount < state.figuresExpected) return false
+  return true
 }
 
 export const useMeetSergitoStore = create<MeetSergitoState>((set) => ({
   bootPhase: 'loading',
+  assetsReady: false,
   playerVrmReady: false,
   sergitoVrmReady: false,
   walkersReadyCount: 0,
@@ -48,6 +61,7 @@ export const useMeetSergitoStore = create<MeetSergitoState>((set) => ({
     readyFigureIndices.clear()
     set({
       bootPhase: 'loading',
+      assetsReady: false,
       playerVrmReady: false,
       sergitoVrmReady: false,
       walkersReadyCount: 0,
@@ -60,13 +74,13 @@ export const useMeetSergitoStore = create<MeetSergitoState>((set) => ({
   setPlayerVrmReady: (ready) => {
     set((state) => {
       const next = { ...state, playerVrmReady: ready }
-      return { playerVrmReady: ready, bootPhase: recomputeBootPhase(next) }
+      return { playerVrmReady: ready, assetsReady: areAssetsReady(next) }
     })
   },
   setSergitoVrmReady: (ready) => {
     set((state) => {
       const next = { ...state, sergitoVrmReady: ready }
-      return { sergitoVrmReady: ready, bootPhase: recomputeBootPhase(next) }
+      return { sergitoVrmReady: ready, assetsReady: areAssetsReady(next) }
     })
   },
   setWalkerVrmReady: (index) => {
@@ -75,7 +89,7 @@ export const useMeetSergitoStore = create<MeetSergitoState>((set) => ({
     set((state) => {
       const walkersReadyCount = readyWalkerIndices.size
       const next = { ...state, walkersReadyCount }
-      return { walkersReadyCount, bootPhase: recomputeBootPhase(next) }
+      return { walkersReadyCount, assetsReady: areAssetsReady(next) }
     })
   },
   setFigureVrmReady: (index) => {
@@ -84,7 +98,13 @@ export const useMeetSergitoStore = create<MeetSergitoState>((set) => ({
     set((state) => {
       const figuresReadyCount = readyFigureIndices.size
       const next = { ...state, figuresReadyCount }
-      return { figuresReadyCount, bootPhase: recomputeBootPhase(next) }
+      return { figuresReadyCount, assetsReady: areAssetsReady(next) }
+    })
+  },
+  setDisplayReady: () => {
+    set((state) => {
+      if (!state.assetsReady || state.bootPhase === 'ready') return state
+      return { bootPhase: 'ready' }
     })
   },
 }))
