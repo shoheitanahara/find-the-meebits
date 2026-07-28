@@ -1,10 +1,11 @@
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { applyVRMFigurePose } from '../../avatar/VRMLocomotion'
 import { alignVrmFigureFeet } from '../../avatar/VRMLoader'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import {
-  WORKSHOP_FIGURE_PLACEMENTS,
+  getWorkshopFigureDateKey,
+  getWorkshopFigurePlacements,
   type WorkshopFigurePlacement,
 } from './workshopFigureLayout'
 import { applyWorkshopFigureVrmQuality } from './workshopFigureVrmQuality'
@@ -53,10 +54,13 @@ function WorkshopFigure({ placement }: { placement: WorkshopFigurePlacement }) {
 }
 
 export function WorkshopFigures() {
+  const dateKey = useMemo(() => getWorkshopFigureDateKey(), [])
+  const placements = useMemo(() => getWorkshopFigurePlacements(), [])
+
   return (
-    <group>
-      {WORKSHOP_FIGURE_PLACEMENTS.map((placement, index) => (
-        <WorkshopFigure key={`fig-${index}-${placement.meebitId}`} placement={placement} />
+    <group key={dateKey}>
+      {placements.map((placement, index) => (
+        <WorkshopFigure key={`fig-${dateKey}-${index}-${placement.meebitId}`} placement={placement} />
       ))}
     </group>
   )

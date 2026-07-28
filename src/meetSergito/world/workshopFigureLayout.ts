@@ -1,3 +1,4 @@
+import { getJstDateKey, hashStringToSeed } from '../../top/dailyFeatured'
 import { SERGITO_MEEBIT_ID, WORKSHOP_DESK_TOP_Y } from '../config'
 
 export type WorkshopFigureKind = 'shelf' | 'desk'
@@ -13,6 +14,9 @@ export type WorkshopFigurePlacement = {
 }
 
 export const WORKSHOP_FIGURE_SCALE = 0.285
+
+/** 棚 96 + 机 3 */
+export const WORKSHOP_FIGURE_COUNT = 99
 
 function buildZSlots(count: number, halfSpan: number): readonly number[] {
   if (count <= 1) {
@@ -39,19 +43,37 @@ export const WORKSHOP_SHELF = {
   },
 } as const
 
-const WORKSHOP_FIGURE_SEED = 20260728
+const SHELF_COLUMNS = WORKSHOP_SHELF.columnCount
 
-function pickWorkshopMeebitId(index: number): number {
-  let id = (Math.imul(index + 1, 1103515245) + WORKSHOP_FIGURE_SEED) >>> 0
-  id = (id % 20000) + 1
-  if (id === SERGITO_MEEBIT_ID) {
-    id = ((id + 137) % 20000) + 1
+/** JST 日付キー（YYYY-MM-DD） */
+export function getWorkshopFigureDateKey(now = new Date()) {
+  return getJstDateKey(now)
+}
+
+/** 同日・全員同じ並びになる決定的 ID プール */
+function buildDailyWorkshopMeebitIds(dateKey: string, count: number): readonly number[] {
+  const seed = hashStringToSeed(`workshop-figures-v1-${dateKey}`)
+  const used = new Set<number>()
+  const ids: number[] = []
+
+  for (let index = 0; ids.length < count; index += 1) {
+    let id = (Math.imul(index + 1, 1103515245) + seed) >>> 0
+    id = (id % 20000) + 1
+    if (id === SERGITO_MEEBIT_ID) {
+      id = ((id + 137) % 20000) + 1
+    }
+    if (used.has(id)) {
+      continue
+    }
+    used.add(id)
+    ids.push(id)
   }
-  return id
+
+  return ids
 }
 
 function shelfFig(
-  index: number,
+  meebitId: number,
   side: 'left' | 'right',
   level: number,
   zSlot: number,
@@ -59,7 +81,7 @@ function shelfFig(
   const { leftCenterX, rightCenterX, boardTopY, figureInset } = WORKSHOP_SHELF
   const isLeft = side === 'left'
   return {
-    meebitId: pickWorkshopMeebitId(index),
+    meebitId,
     x: isLeft ? leftCenterX + figureInset : rightCenterX - figureInset,
     y: boardTopY[level],
     z: zSlot,
@@ -69,10 +91,10 @@ function shelfFig(
   }
 }
 
-function deskFig(index: number, localX: number, localZ: number): WorkshopFigurePlacement {
+function deskFig(meebitId: number, localX: number, localZ: number): WorkshopFigurePlacement {
   const desk = { x: -1.2, z: -8.2 }
   return {
-    meebitId: pickWorkshopMeebitId(index),
+    meebitId,
     x: desk.x + localX,
     y: WORKSHOP_DESK_TOP_Y,
     z: desk.z + localZ,
@@ -82,25 +104,47 @@ function deskFig(index: number, localX: number, localZ: number): WorkshopFigureP
   }
 }
 
-const SHELF_COLUMNS = WORKSHOP_SHELF.columnCount
-
-function shelfLevel(side: 'left' | 'right', level: number, idOffset: number) {
-  return WORKSHOP_SHELF.zSlots.map((z, col) => shelfFig(idOffset + col, side, level, z))
+function shelfLevel(
+  ids: readonly number[],
+  idOffset: number,
+  side: 'left' | 'right',
+  level: number,
+) {
+  return WORKSHOP_SHELF.zSlots.map((z, col) => shelfFig(ids[idOffset + col], side, level, z))
 }
 
-/** 棚 3 段 × 16 列 × 2 面 = 96 体 + 机 3 体 */
-export const WORKSHOP_FIGURE_PLACEMENTS: WorkshopFigurePlacement[] = [
-  ...shelfLevel('left', 0, 0),
-  ...shelfLevel('left', 1, SHELF_COLUMNS),
-  ...shelfLevel('left', 2, SHELF_COLUMNS * 2),
-  ...shelfLevel('right', 0, SHELF_COLUMNS * 3),
-  ...shelfLevel('right', 1, SHELF_COLUMNS * 4),
-  ...shelfLevel('right', 2, SHELF_COLUMNS * 5),
-  deskFig(SHELF_COLUMNS * 6, -0.85, 0.05),
-  deskFig(SHELF_COLUMNS * 6 + 1, 0, 0.12),
-  deskFig(SHELF_COLUMNS * 6 + 2, 0.85, 0.05),
-]
+/** 棚 3 段 × 16 列 × 2 面 = 96 体 + 机 3 体（JST 0:00 で入れ替え） */
+export function buildWorkshopFigurePlacements(dateKey: string): WorkshopFigurePlacement[] {
+  const ids = buildDailyWorkshopMeebitIds(dateKey, WORKSHOP_FIGURE_COUNT)
+  const deskOffset = SHELF_COLUMNS * 6
 
-export const WORKSHOP_UNIQUE_FIGURE_IDS = [
-  ...new Set(WORKSHOP_FIGURE_PLACEMENTS.map((placement) => placement.meebitId)),
-]
+  return [
+    ...shelfLevel(ids, 0, 'left', 0),
+    ...shelfLevel(ids, SHELF_COLUMNS, 'left', 1),
+    ...shelfLevel(ids, SHELF_COLUMNS * 2, 'left', 2),
+    ...shelfLevel(ids, SHELF_COLUMNS * 3, 'right', 0),
+    ...shelfLevel(ids, SHELF_COLUMNS * 4, 'right', 1),
+    ...shelfLevel(ids, SHELF_COLUMNS * 5, 'right', 2),
+    deskFig(ids[deskOffset], -0.85, 0.05),
+    deskFig(ids[deskOffset + 1], 0, 0.12),
+    deskFig(ids[deskOffset + 2], 0.85, 0.05),
+  ]
+}
+
+const placementCache = new Map<string, WorkshopFigurePlacement[]>()
+
+export function getWorkshopFigurePlacements(now = new Date()): WorkshopFigurePlacement[] {
+  const dateKey = getWorkshopFigureDateKey(now)
+  const cached = placementCache.get(dateKey)
+  if (cached) {
+    return cached
+  }
+
+  const placements = buildWorkshopFigurePlacements(dateKey)
+  placementCache.set(dateKey, placements)
+  return placements
+}
+
+export function getWorkshopUniqueFigureIds(now = new Date()) {
+  return [...new Set(getWorkshopFigurePlacements(now).map((placement) => placement.meebitId))]
+}
