@@ -16,7 +16,7 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
-  if (segments.includes('closet') || segments.includes('trait-museum')) {
+  if (segments.includes('look-locker')) {
     return 'closet'
   }
   if (segments.includes('runway')) {

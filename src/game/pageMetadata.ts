@@ -32,8 +32,8 @@ const metadata = {
       description: 'A dark room and a glowing catwalk. Watch Meebits matching today’s color walk the runway.',
     },
     closet: {
-      title: 'Trait Museum | Meebits Park',
-      description: 'Pick looks by trait, find matching Meebits, and try them on as your avatar.',
+      title: 'Look Locker | Meebits Park',
+      description: 'Pick looks, find matching Meebits, and try them on as your avatar.',
     },
   },
   ja: {
@@ -66,8 +66,8 @@ const metadata = {
       description: '暗い会場に輝くランウェイ。本日の色に合うMeebitが次々と歩くショー。',
     },
     closet: {
-      title: 'トレイト博物館 | Meebits Park',
-      description: '見た目のトレイトを選んで合うMeebitを見つけ、アバターにきせかえよう。',
+      title: 'ルックロッカー | Meebits Park',
+      description: '見た目を選んで合うMeebitを見つけ、アバターにきせかえよう。',
     },
   },
 } as const

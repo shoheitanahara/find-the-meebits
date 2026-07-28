@@ -215,15 +215,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'closet',
     zoneId: 'culture',
-    title: 'TRAIT MUSEUM',
-    subtitle: 'Try On Looks',
+    title: 'LOOK LOCKER',
+    subtitle: 'The Fitting Room',
     description: {
       en: 'Pick hats, hair, shirts…\nSee who matches —\ntry them on as your avatar.',
       ja: '帽子、髪型、シャツ…\n合うMeebitを見つけて、\nきせかえてみよう。',
     },
     storyTitle: {
-      en: 'DRESS UP',
-      ja: 'きせかえしよう',
+      en: 'TRY ON',
+      ja: 'ためしてみよう',
     },
     color: '#1a2a48',
     roofColor: '#6a9ee8',

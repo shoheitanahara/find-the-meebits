@@ -107,7 +107,7 @@ export function selectParkDialogueLines(
     second = isMountain
       ? pickLine(pools.gameNeon, seed, talkCount, 37)
       : isCulture
-        ? pickLine(pools.gameRunway, seed, talkCount, 37)
+        ? pickLine(pools.gameLookLocker, seed, talkCount, 37)
         : isSea
           ? pickLine(pools.flavor, seed, talkCount, 37)
           : pickLine(pools.gameTraits, seed, talkCount, 37)

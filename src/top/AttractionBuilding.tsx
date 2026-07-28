@@ -13,7 +13,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - mountain: ボクセル山エントランス（Mt. Meeb）
  * - neon: テトリス風積みブロック塔（Jerry Mountain）
  * - runway: 暗いパビリオン＋発光ランウェイ
- * - closet: カルチャー調のトレイト博物館（きせかえ）
+ * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  */
 export function AttractionBuilding({
   attraction,
@@ -370,7 +370,7 @@ function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
   )
 }
 
-/** Culture 左棟: トレイト博物館（額縁ウォール＋青いスクリーン） */
+/** Culture 左棟: ルックロッカー（額縁ウォール＋青いスクリーン） */
 function TraitMuseumLandmark({ color, accent }: { color: string; accent: string }) {
   const frames: Array<[number, number]> = [
     [-1.7, 2.35],

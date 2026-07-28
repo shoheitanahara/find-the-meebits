@@ -71,7 +71,7 @@ Meebits Park は **海の島ではなく、テーマランドの連なり**。
 
 Mountain 地区: テーマ `mountain`（苔・土・石・針葉樹・松明・木橋）。西門は崖壁で額縁接続。床色は `parkZoneTheme.ts`。アトラクション: Mt. Meeb＋**Jerry Mountain**（旧 Neon Stack・ゼリー塔）。
 
-Culture 地区: テーマ `culture`（濃紺ギャラリー夜・青アクセント・ランウェイ床）。Plaza **北門**（奥・左寄り）から入場し、**Culture 側入口はセンター**。戻りは手前（南）クリア帯の自立門（センター）。来場者はスーツ（Suit / Suit Jacket）半数。建物は当面 Coming Soon（中央ランウェイ／左博物館／右PFP）。
+Culture 地区: テーマ `culture`（濃紺ギャラリー夜・青アクセント・ランウェイ床）。Plaza **北門**（奥・左寄り）から入場し、**Culture 側入口はセンター**。戻りは手前（南）クリア帯の自立門（センター）。来場者はスーツ（Suit / Suit Jacket）半数。Open: 中央ランウェイ＋左ルックロッカー。右 PFP は Coming Soon。
 
 Sea 地区: テーマ `sea`（夜のビーチ・曲線の波打ち際・遠くまで続く海・ヤシ・木の桟橋）。Plaza 西門から入場。壁なし。来場者は全員上裸／チューブトップ。建物は当面 Coming Soon（ビーチクラブ／タイドプール／桟橋ステージ）。
 
@@ -480,14 +480,14 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 | ID | 表示名 | (x, z) | entranceZ | 状態 |
 |----|--------|--------|-----------|------|
 | runway | MEEBITS RUNWAY | (0, -7.0) | -3.2 | **Open**（`/runway`）。subtitle `The Catwalk` |
+| closet | LOOK LOCKER | (-15.7, -11.5) | -8.0 | **Open**（`/look-locker`）。subtitle `The Fitting Room` |
 
-ゲーム本体: `src/runway/`。日替わりカラーショー・客席着席・専用 BGM。座標ルールは `.cursor/rules/threejs-coordinates.mdc`。
+ゲーム本体: `src/runway/`（ランウェイ）、`src/closet/`（ルックロッカー）。座標ルールは `.cursor/rules/threejs-coordinates.mdc`。
 
 **Coming Soon 棟**（入場不可・看板のみ）
 
 | 名前 | (x, z) |
 |------|--------|
-| TRAIT MUSEUM / トレイト博物館 | (-12.5, -11.5) |
 | PFP STUDIO / PFPクリエイター | (12.5, -11.0) |
 
 **家具**: Plaza と同じグリッド。テーマ差は床色・ライトのみ。

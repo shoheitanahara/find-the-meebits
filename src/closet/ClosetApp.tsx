@@ -20,7 +20,7 @@ import {
 const copy = {
   en: {
     eyebrow: 'Culture District',
-    title: 'Trait Museum',
+    title: 'Look Locker',
     subtitle: 'Pick a type first — then mix looks and try them on.',
     typeStep: 'Step 1 · Type',
     typeHint: 'Who are you dressing up?',
@@ -41,7 +41,7 @@ const copy = {
   },
   ja: {
     eyebrow: 'カルチャー地区',
-    title: 'トレイト博物館',
+    title: 'ルックロッカー',
     subtitle: 'まずタイプ → 見た目を足す → きせかえ！',
     typeStep: 'ステップ1 · タイプ',
     typeHint: 'どんな Meebit をきせかえる？',

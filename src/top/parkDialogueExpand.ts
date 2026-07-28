@@ -14,6 +14,7 @@ export type ParkDialoguePools = {
   gameMountain: string[]
   gameNeon: string[]
   gameRunway: string[]
+  gameLookLocker: string[]
   featuredAny: string[]
   featuredMatched: string[]
   themeAny: string[]
@@ -215,6 +216,25 @@ const JA_RUNWAY = [
   '立ち上がったら前の席に当たった。',
 ]
 
+const JA_LOOK_LOCKER = [
+  'ロッカーで帽子、替えてみた。',
+  'いまとためし着、並べて見た。',
+  'タイプから選ぶの、わかりやすい。',
+  '似てる子いっぱい出てきて迷った。',
+  'きせかえたら、南の門から出た。',
+  '髪型だけ変えてみた。',
+  '左の建物、試着室だって。',
+  '同じ服の子、何体もいた。',
+  'ためし着、気に入った。',
+  'クリアしたら最初から。',
+  'Pigにしたら髪型、ほぼなかった。',
+  'いまの姿と並べて比べてる。',
+  'シャツ変えたら別人みたい。',
+  'ルックロッカー、人が入ってた。',
+  'この姿でランウェイ見に行く。',
+  '帽子、三つ試した。',
+]
+
 const JA_FEAT = [
   '今日の主役、ちょっと眠そう。',
   '像より、見てる人の服が気になる。',
@@ -382,8 +402,8 @@ const JA_CU_FLAVOR = [
   'スーツの人と、青い光。',
   '通路、ちょっと狭い。',
   '次の子、誰だろ。',
-  '座って見た。足、伸ばした。',
-  '拍手、一人分。',
+  '左のロッカー、光ってる。',
+  'きせかえてからショー見た。',
 ]
 
 const JA_SEA_FLAVOR = [
@@ -597,6 +617,25 @@ const EN_RUNWAY = [
   'Stood up and bumped the row in front.',
 ]
 
+const EN_LOOK_LOCKER = [
+  'Tried a new hat in the locker.',
+  'Lined up Now and New. Hard to choose.',
+  'Starting from Type makes sense.',
+  'Too many matches. Got stuck.',
+  'Changed looks, then took the south gate.',
+  'Only switched the hair.',
+  'Left building’s a fitting room, they said.',
+  'Saw a bunch in the same shirt.',
+  'Liked the try-on.',
+  'Cleared it and started over.',
+  'Went Pig. Almost no hair options.',
+  'Comparing side by side with my current look.',
+  'New shirt. Barely recognized myself.',
+  'Look Locker had people going in.',
+  'Wearing this to the runway next.',
+  'Tried three hats.',
+]
+
 const EN_FEAT = [
   'Today’s Star looks a little sleepy.',
   'Watching the crowd more than the statue.',
@@ -764,8 +803,8 @@ const EN_CU_FLAVOR = [
   'Suits and cool light.',
   'Aisle’s a little tight.',
   'Who’s next?',
-  'Sat down. Stretched my legs.',
-  'One-person applause.',
+  'Left locker’s lit up.',
+  'Changed looks, then watched the show.',
 ]
 
 const EN_SEA_FLAVOR = [
@@ -835,6 +874,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     gameMountain: isJa ? JA_MT_GAME : EN_MT_GAME,
     gameNeon: isJa ? JA_NEON : EN_NEON,
     gameRunway: isJa ? JA_RUNWAY : EN_RUNWAY,
+    gameLookLocker: isJa ? JA_LOOK_LOCKER : EN_LOOK_LOCKER,
     featuredAny: isMt ? (isJa ? JA_FEAT_MT : EN_FEAT_MT) : isJa ? JA_FEAT : EN_FEAT,
     featuredMatched: isJa ? JA_FEAT_MATCH : EN_FEAT_MATCH,
     themeAny: isMt ? (isJa ? JA_THEME_MT : EN_THEME_MT) : isJa ? JA_THEME : EN_THEME,
@@ -863,6 +903,7 @@ export function countParkDialogueLines(pools: ParkDialoguePools) {
     pools.gameMountain.length +
     pools.gameNeon.length +
     pools.gameRunway.length +
+    pools.gameLookLocker.length +
     pools.featuredAny.length +
     pools.featuredMatched.length +
     pools.themeAny.length +
