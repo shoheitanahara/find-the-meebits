@@ -21,6 +21,17 @@
 - [x] 歩行者 10 体 / 8 回前進クリア / 白フェードワープ
 - [x] 夜のムード（`NIGHT_MOOD`）+ 路地当たり判定（`clampToAlley`）
 
+### Fashion Runway（`/runway`）
+
+- [x] Culture District から入場（id=`runway`）。ルート `/runway` `/jp/runway`
+- [x] 暗室＋キャットウォークショー（日替わりカラーテーマ `dailyRunway.ts`）
+- [x] 観客ベンチ着席＋呼吸ポーズ（`applyVRMSitPose` / `getAudienceBreathParams`）
+- [x] 日替わり空席 4〜8 + プレイヤー着席（E / Sit ボタン）・立ち上がり位置補正
+- [x] ベンチ当たり非対称化（前後隣・列間通路側を短縮）
+- [x] 三人称オービット視点（マウス / タッチ）。スマホ pitch は上下反転
+- [x] Runway 専用 BGM（`RunwayBgmSystem`）
+- [x] Three.js 座標ルール（`.cursor/rules/threejs-coordinates.mdc`）
+
 ### 共通導線・ルーティング
 
 - [x] 全ゲーム共通ヘッダー（Meebits Park / Back to Top、確認ダイアログ付き）
@@ -62,6 +73,7 @@
 
 - [x] 会場別 BGM（Museum / Club MP3）
 - [x] `VenueBgmSystem` — フェーズ・タブ visibility 連動
+- [x] Runway 専用 BGM（`/audio/runway/Meebits Runway.mp3`）
 - [x] 任意 `VITE_BGM_BASE_URL`
 
 ### タブ・パフォーマンス
@@ -104,6 +116,8 @@
 | BGM ファイル | `public/audio/` に配置。本番 CDN は任意 |
 | SP 5 体 HUD | PC `TargetHUD` とは別レイアウト |
 | Shawn DJ 位置 | 微調整は `CLUB_CREATOR_DJ_POSITION` の z のみ |
+| Runway 接地 Y | `playerGroundY` / `benchGroundY` / `audienceSeatY` は見た目で微調整。符号は座標ルール参照 |
+| Runway 建物看板 | 入場可だが subtitle は UNDER CONSTRUCTION のまま |
 
 ## 未着手・任意改善
 
@@ -112,6 +126,8 @@
 - [ ] README.md
 - [ ] BGM を R2 に置いて `VITE_BGM_BASE_URL` 本番設定
 - [ ] アバター変更時の会話リセット（スタート時 Meebit 変更のみ、等）
+- [ ] Runway 建物看板を正式オープン表記に更新
+- [ ] Runway ベンチ間当たりのプレイ確認（奥席立ち上がり・列間通路）
 
 ## テスト観点（手動）
 
@@ -122,3 +138,5 @@
 5. 会話: 初回/再会セリフ、Meebit 番号で記憶
 6. RETRY 後メモリ・FPS
 7. 本番 VRM Worker 200 + CORS
+8. Runway: 空席 Sit / 立ち上がりでベンチ判定に捕まらない / スマホ視点上下
+9. Culture → Fashion Runway 入場 → Park 復帰（`?from=runway`）

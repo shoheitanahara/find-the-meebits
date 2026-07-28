@@ -6,12 +6,15 @@
 src/App.tsx
   getAppEdition(pathname)  ← src/game/appEdition.ts
     '8th-street' → EightStreetApp   （/8th-street, /jp/8th-street）
+    'mountain'   → MountainApp      （/mountain, /jp/mountain）
+    'neon'       → NeonApp          （/neon-stack 互換）
+    'runway'     → RunwayApp        （/runway, /jp/runway）
     'v2'         → HuntApp(v2)       （/v2, /jp/v2）
     'v1'         → HuntApp(v1)       （/find-the-meebit, /jp/find-the-meebit）
     'top'        → TopApp            （/ , /jp）← デフォルト
 ```
 
-- ルート判定は**パスセグメント**ベース（`segments.includes('...')`）。順序に注意（8th-street → v2 → find-the-meebit → top）
+- ルート判定は**パスセグメント**ベース（`segments.includes('...')`）。順序に注意（8th-street → runway → … → top）
 - `/` `/jp` は Park（`top`）。旧 `/`（本編）は `/find-the-meebit` へ移設。**互換リダイレクトなし**
 - SPA fallback: `vite.config.ts`（`SPA_FALLBACK_PATHS`）+ `vercel.json`（rewrites）に全ルート列挙
 - 全ゲームに `ParkReturnButton`（薄いヘッダー: 左「Meebits Park」/右「Back to Top」）を無条件マウント
@@ -25,16 +28,28 @@ src/
 ├── top/                    # Meebits Park ハブ（/）
 │   ├── TopApp.tsx          # アバター選択 → パーク開始 / from クエリで自動復帰
 │   ├── TopScene.tsx        # 3D シーン: 追従カメラ, 建物, 噴水, NPC30, 銅像
-│   ├── topConfig.ts        # TOP_ATTRACTIONS（3 建物: find/traits/street）
+│   ├── topConfig.ts        # TOP_ATTRACTIONS（find/traits/street/mountain/neon/runway）
+│   ├── parkZones.ts        # plaza / mountain / culture / sea
 │   └── topStore.ts         # start(spawn?), プレイヤー位置, AttractionId
+├── runway/                 # Fashion Runway（/runway）
+│   ├── RunwayApp.tsx
+│   ├── config.ts           # RUNWAY（部屋・ベンチ・接地・当たり・カメラ）
+│   ├── collisions.ts       # 壁・ベンチ非対称AABB・ランウェイ侵入禁止
+│   ├── runwaySeats.ts      # 座席スロット・Sit・立ち上がり位置
+│   ├── dailyRunway.ts      # 日替わりカラーテーマ・空席・観客 ID
+│   ├── player/             # RunwayPlayer, TouchLookPad
+│   ├── show/               # CatwalkShow, Audience, Screen
+│   ├── world/              # RunwayRoom, ExitPad
+│   ├── ui/                 # Title, Hud, SitControls
+│   └── RunwayBgmSystem.tsx
 ├── eightStreet/            # 8th Street（/8th-street）
 │   ├── EightStreetApp.tsx
 │   ├── config.ts           # EIGHT_STREET（クランク路地座標）, NIGHT_MOOD
 │   ├── logic/              # walkerPath, selectSimilarMeebit 等
 │   └── ui/                 # TitleScreen, ProgressHud
 ├── avatar/
-│   ├── VRMLoader.ts        # getMeebitVrmUrl
-│   ├── VRMLocomotion.ts    # applyVRMLocomotion, applyVRMDjPose, applyVRMAttentionPose
+│   ├── VRMLoader.ts        # getMeebitVrmUrl, alignVrmFeetToGround
+│   ├── VRMLocomotion.ts    # applyVRMLocomotion, applyVRMDjPose, applyVRMSitPose
 │   ├── AvatarController.tsx
 │   └── vrmInstancePool.ts
 ├── game/
@@ -68,7 +83,9 @@ src/
 ├── collision/
 │   └── obstacles.ts        # getWorldObstacles(venueId)
 ├── audio/
-│   └── venueAudioConfig.ts
+│   ├── venueAudioConfig.ts
+│   ├── runwayAudioConfig.ts
+│   └── parkAudioConfig.ts
 └── systems/
     ├── tabPause.ts
     ├── TabPauseSystem.tsx
@@ -77,18 +94,31 @@ src/
     └── save/localStorage.ts  # meebits-world-save-v2: talkedCountByMeebit, playerMeebitNumber, lastPlayerPosition
 
 workers/vrm-cache/
-public/audio/               # museum-bgm.mp3, club-bgm.mp3
+public/audio/               # museum-bgm.mp3, club-bgm.mp3, runway/, park/
+.cursor/rules/
+  threejs-coordinates.mdc   # Runway 含む Three.js 軸・接地・ベンチ軸（alwaysApply）
 ```
 
 ## Meebits Park（`top`）パターン
 
 - **アバター選択**: `TopApp` で番号入力 / ランダム。`TargetPreviewCapture` を Park でもマウントし実 VRM プレビュー表示
 - **カメラ**: `TopFollowCamera` — ワールド固定オフセットでプレイヤーを滑らかに追従（本編 FOV/距離感に合わせる）
-- **建物**: `TOP_ATTRACTIONS`（`topConfig.ts`）が唯一の座標・見た目・説明ソース。`find` / `traits` / `street` の 3 棟。各 `entranceZ` を跨ぐと自動遷移
+- **建物**: `TOP_ATTRACTIONS`（`topConfig.ts`）が唯一の座標・見た目・説明ソース。ゾーン別に `find` / `traits` / `street` / `mountain` / `neon` / `runway`。各 `entranceZ` を跨ぐと自動遷移
 - **遷移**: 入口通過で該当ゲームへ（アバター ID をクエリ引継ぎ）
 - **復帰**: `ParkReturnButton` が `?from=<attractionId>` を付けて `/` へ。`TopApp` が `useLayoutEffect` で自動 start(spawn) → 該当建物前にスポーン、選択カードをスキップ
 - **NPC**: 30 体ランダム徘徊（`TopNpcCrowd` / 3 種歩行パターン / 会話・衝突なし）。`useVRMModel(exclusive: true)` で T ポーズ回避
 - **銅像**: 噴水中央に Meebit #11143 を `VrmSculpture`（`hidePedestal`）で設置
+
+## Fashion Runway（`runway`）パターン
+
+- **体験**: 観賞型。日替わりカラー（Shirt/Pants/Overshirt/Hat Color 横断）に合うモデルがランウェイ歩行 → 手前でポーズ → 奥へ戻る
+- **定数の正本**: `src/runway/config.ts`（`RUNWAY`）。マジックナンバーを JSX に直書きしない
+- **座標**: +Z = 手前（入口）、−Z = 奥（スクリーン）。詳細は `.cursor/rules/threejs-coordinates.mdc`
+- **ベンチ**: mesh `2.4 × 0.7`（local X = 長辺 / local Z = 奥行）。当たりは前後隣・列間通路側を非対称短縮（`benchCollision`）
+- **着席**: `runwaySeats.ts` + `store.ts`。空席は日替わり。Sit は通路側アプローチ距離基準
+- **視点**: 三人称オービット。マウス `+movementY` = 下を見る。**タッチは `-lookDeltaY`（上下反転）**
+- **着席ポーズ**: `applyVRMSitPose` + `getAudienceBreathParams`（個体差のある呼吸）
+- **BGM**: `RunwayBgmSystem`（会場 BGM とは別系統）
 
 ## 会場（Venue）パターン
 
@@ -142,9 +172,9 @@ visibility visible:
 
 ## BGM
 
-- `VenueBgmSystem` — `venueId` + `gamePhase` + `document.visibilityState`
-- 再生フェーズ: preparing, playing, timedOut, cleared
-- URL: `resolveVenueBgmUrl()` — ローカル `/audio/` or `VITE_BGM_BASE_URL`
+- `VenueBgmSystem` — `venueId` + `gamePhase` + `document.visibilityState`（Museum / Club）
+- Runway / Park は各専用システム（`RunwayBgmSystem` / `ParkBgmSystem`）
+- URL: `resolveVenueBgmUrl()` / `resolveRunwayBgmUrl()` — ローカル `/audio/` or `VITE_BGM_BASE_URL`
 
 ## ゲームフェーズ（`gameStore`）
 
@@ -161,8 +191,12 @@ intro → preparing → playing → cleared | timedOut | conquered
 |------|---------|
 | Museum | `worldLandmarks.ts` |
 | Club | `clubLandmarks.ts` |
+| Park 建物 | `topConfig.ts` |
+| Park ゾーン | `parkZones.ts` |
+| Runway | `runway/config.ts` |
+| 8th Street | `eightStreet/config.ts` |
 
-描画・collision・ヒントは各 landmarks から参照。
+描画・collision・ヒントは各 landmarks / config から参照。
 
 ## 会話記憶
 

@@ -19,7 +19,7 @@
 ## ルーティング / SPA fallback
 
 - URL パスで edition を判定（`src/game/appEdition.ts`）。`/` `/jp` = Park（`top`）
-- ルート一覧: `/`(`top`), `/find-the-meebit`(`v1`), `/v2`(`v2`), `/8th-street`(`8th-street`)、各 `/jp` 版
+- ルート一覧: `/`(`top`), `/find-the-meebit`(`v1`), `/v2`(`v2`), `/8th-street`, `/runway`, `/mountain`, `/neon-stack`、各 `/jp` 版
 - 新ルート追加時は 2 箇所に登録:
   - `vite.config.ts` の `SPA_FALLBACK_PATHS`（ローカル dev/preview 用）
   - `vercel.json` の `rewrites`（本番用）
@@ -112,6 +112,8 @@ npm run vrm:seed         # 彫刻9体+デフォルトプレイヤーを R2 に�
 
 - `public/favicon.jpg`
 - `public/audio/museum-bgm.mp3`, `public/audio/club-bgm.mp3`
+- `public/audio/runway/Meebits Runway.mp3`
+- `public/audio/park/`（Park BGM）
 
 ## パフォーマンス設計（ブラウザ側がボトルネック）
 

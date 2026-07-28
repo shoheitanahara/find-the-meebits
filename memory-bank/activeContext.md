@@ -1,139 +1,99 @@
 # Active Context
 
-最終更新: 2026-07-24
+最終更新: 2026-07-28
 
 ## 直近の作業サマリー
 
-### Park 配置の凍結（最新）
+### Fashion Runway（`/runway`）— 実装・調整中（最新）
+
+- **ルート**: `/runway` `/jp/runway` → edition `runway` → `RunwayApp`（`src/runway/`）
+- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`（`zoneId: 'culture'`）。建物看板は工事中表記のまま入場可
+- **体験**: 白黒暗室＋中央ランウェイ。日替わりカラーテーマに合う Meebit がキャットウォーク。観客はベンチ着席＋呼吸ポーズ
+- **空席・着席**: 日替わり 4〜8 空席。接近で Sit（E / モバイルボタン）。立ち上がりは通路側へ逃がす（`resolveRunwayStandUpPosition`）
+- **ベンチ当たり**: mesh 軸は local X=長辺 / local Z=奥行。前後隣ベンチ間・列間通路側を非対称に短縮（`benchCollision` + `collisions.ts`）
+- **視点**: 三人称オービット。マウス: `+movementY` = 下を見る。**スマホタッチ: `-lookDeltaY`（上下反転・指上スワイプで上を見る）**
+- **座標・接地**: `.cursor/rules/threejs-coordinates.mdc`（alwaysApply）。Runway は +Z=手前（入口）、−Z=奥（スクリーン）
+- **BGM**: `RunwayBgmSystem` + `src/audio/runwayAudioConfig.ts` → `/audio/runway/Meebits Runway.mp3`
+
+主要ファイル:
+
+| 用途 | パス |
+|------|------|
+| 寸法・接地・当たり | `src/runway/config.ts` |
+| 衝突 | `src/runway/collisions.ts` |
+| 座席・Sit | `src/runway/runwaySeats.ts` |
+| 日替わりショー | `src/runway/dailyRunway.ts` |
+| プレイヤー | `src/runway/player/RunwayPlayer.tsx` |
+| 会場 | `src/runway/world/RunwayRoom.tsx` |
+| 観客 | `src/runway/show/RunwayAudience.tsx` |
+| Sit UI | `src/runway/ui/RunwaySitControls.tsx` |
+| Three.js 座標ルール | `.cursor/rules/threejs-coordinates.mdc` |
+
+### Park 配置の凍結
 
 - **Canonical Default Layout** を `memory-bank/parkDesigner.md` §14 に記録（2026-07-24）
 - 正本コード: `src/top/parkZones.ts`（家具・ゲート・Coming Soon）+ `src/top/topConfig.ts`（建物）
+- Culture の Fashion Runway は **入場可能なアトラクション**（§14.4 を 2026-07-28 更新）。看板は工事中表記のまま
 - 封印門は本ゲートと同品質（開口・橋・門・通過不可衝突）
 - Coming Soon は南西／南東の建設中ランドマーク棟
 - 以降の Park レイアウト変更は §14 とコードをセットで更新すること
 
-### Meebits Park（`/`）ハブ新設 + ルーティング刷新
+### Meebits Park（`/`）ハブ + ルーティング
 
 - **ルート変更**: `/` `/jp` = Meebits Park（`top`）。旧本編は `/find-the-meebit` へ移設。**互換リダイレクトなし**
   - `src/game/appEdition.ts` で判定。SPA fallback は `vite.config.ts` + `vercel.json` 両方に追加
-- **パーク（`src/top/`）**:
-  - `TopApp.tsx` — アバター選択カード（番号/ランダム + 実 VRM プレビュー）→ 入場。`?from=<attractionId>` があれば自動 start(spawn)（選択カードスキップ、該当建物前へ）
-  - `TopScene.tsx` — `TopFollowCamera`（本編相当の追従）、ゾーン切替、噴水、NPC、外周キット
-  - `topConfig.ts` / `parkZones.ts` — アトラクション・家具・ゲート（§14）
-  - `topStore.ts` — `start(spawn?)` でスポーン座標指定可
-- **共通ヘッダー**: `ParkReturnButton` を全ゲームに無条件マウント（左「Meebits Park」/右「Back to Top」）。確認ダイアログ付き。既存 UI（タイマー/HUD/言語切替）はヘッダー分だけ下げた
-- **ページメタ**: `src/game/pageMetadata.ts` の `applyPageMetadata(edition, locale)` を `App.tsx` で edition 変化時に適用
-- **本番ドメイン**: `https://meebits-park.vercel.app`。移行時に Worker `ALLOWED_ORIGINS` 追加漏れで VRM が CORS 全滅 → `wrangler.toml` に追加して再デプロイで解消
+- **パーク（`src/top/`）**: アバター選択 → 入場。`?from=<attractionId>` で自動 start(spawn)
+- **共通ヘッダー**: `ParkReturnButton`（左「Meebits Park」/右「Back to Top」）
+- **本番ドメイン**: `https://meebits-park.vercel.app`。ドメイン変更時は Worker `ALLOWED_ORIGINS` 必須
 
-### 8th Street（`/8th-street`）
+### 8th Street / After Hours / タブ停止 / BGM
 
-- 一人称・クランク型夜路地の間違い探しループ。定数は `src/eightStreet/config.ts`（`EIGHT_STREET` / `NIGHT_MOOD`）
-- 10 体歩行者、`targetProgress`(8) 回前進でクリア。最終左折でワープ（白フェード）
-- 当たり: `clampToAlley()`（回廊 + 最終コーナー L 字ソリッド）
-
-### 日本語化 `/jp`（実装済み・翻訳は調整中）
-
-- **ロケール**: `src/i18n/locale.ts` — `/jp` パスで `ja`、それ以外 `en`
-- **UI辞書**: `src/i18n/ui.ts` — `ui()` で取得
-- **セリフ**: `src/i18n/dialogue/` — Museum/Club 初回・再会・発見・Shawn、ヒント・ランドマーク
-- **切替**: スタート画面右上 `LanguageSwitcher`（フルリロードで `/` ↔ `/jp`）
-- **Vercel**: `vercel.json` で `/jp` → `index.html`
-- **Vite**: `jpSpaFallback` プラグインでローカルでも `/jp` 表示可
-- NPC セリフ・ヒント・Tips・HUD・クリア/タイムアップ等も locale 連動
-
-### After Hours（Club 会場）— 主要実装済み
-
-- **2 会場**: `museum`（Museum） / `club`（After Hours）— `venueId` で分岐
-- **解放**: Museum Grand Final クリア後 → `afterHoursUnlockPending` → Club へ
-- **進行**: Club 独自 5 ステージ（`afterhours` ×4 + `lastcall`）— `gameProgression.ts`
-- **ワールド**: `ClubWorld.tsx`, `ClubProps.tsx`, `clubLandmarks.ts`, `ClubSpotlights.tsx`, `ClubMirrorBall.tsx`
-- **当たり判定**: `obstacles.ts` の `buildClubObstacles()`（DJ ブースは counter + side cabinets のみ）
-
-### Shawn T. Art — Club DJ ブース（完了）
-
-- Museum: 従来位置 `[-10, 0, -14]` で徘徊・会話
-- **Club**: DJ ブース奥に固定 — `CLUB_CREATOR_DJ_POSITION = [0, 0.06, -42.62]`, rotation `0`（ダンスフロア向き）
-- **DJ ブース形状**: 手前カウンター + ターンテーブル + ミキサー + 奥プラットフォーム + サイドキャビネット
-  - **削除済み**: 青いバックパネル、薄ピンクのネオン棒（カウンター上）
-- **モーション**: `applyVRMDjPose()` — 頭の小ギザミうなずき、横ステップ、腕は他 NPC と同様に下ろす
-- **NPC 分岐**: `NPC.tsx` の `isClubDj` — 徘徊なし、タブ復帰時も LOD スキップなし
-- レイアウト定数: `CLUB_DJ_BOOTH_LAYOUT`（`clubLandmarks.ts`）— 描画・collision 共有
-
-### タブ非表示時の完全停止（完了）
-
-- **レンダー**: `GameCanvas` — `frameloop="never"` when hidden
-- **タイマー**: `tabPause.ts` + `TabPauseSystem` — 非表示時間を `getElapsedSeconds` から除外
-- **BGM**: `VenueBgmSystem` — visibility で pause/resume
-- **復帰時**: `TabResumeInvalidator` で `invalidate()`、`clampFrameDeltaAfterTabResume`（80ms 窓）、NPC `pauseUntilRef` リセット
-- **削除**: 常時 `clampFrameDelta`（通常プレイのガタつき原因だった）
-
-### BGM（会場別 MP3）
-
-- `VenueBgmSystem.tsx` + `venueAudioConfig.ts`
-- Museum: `/audio/museum-bgm.mp3` vol 0.7
-- Club: `/audio/club-bgm.mp3` vol 0.11
-- 任意 CDN: `VITE_BGM_BASE_URL`
-- `cleared` フェーズ中も再生継続
-
-### 会話・記憶
-
-- **初回/再会セリフ** — Museum / Club 各プール、温かいトーン
-- **会話回数**: Meebit **番号単位** — `talkedCountByMeebit` in `meebits-world-save-v2`
-- Shawn Museum セリフ 11 件維持、Club 用は `npcClubDialogue.ts` の `CLUB_CREATOR_DIALOGUE_LINES`
-- 会話カメラ: `FollowCamera.tsx` — 左右 2 候補（近い位置 +Z 側優先）
-
-### Club 演出
-
-- **ミラーボール**: `ClubMirrorBall.tsx` — 床ディスコ光（ダンスフロア中心）
-- **スポットライト**: `ClubSpotlights.tsx` — ランドマーク別プール
-
-### パフォーマンス（モバイル）
-
-- Canvas DPR 最大 **1** 固定（`getMaxCanvasDpr()`）
-- 同時 VRM 上限削減（モバイル perf モード）
+- 8th Street: 一人称クランク路地。定数 `src/eightStreet/config.ts`
+- Club: Museum Grand Final 後解放。Shawn は DJ 固定（`CLUB_CREATOR_DJ_POSITION`）
+- タブ非表示: レンダー停止 + タイマー除外 + BGM pause（常時 delta クランプは使わない）
+- Museum/Club BGM: `VenueBgmSystem` + `venueAudioConfig.ts`
 
 ## 現在のブランチ状態
 
-- 上記 Club / タブ停止 / DJ / BGM 等は **作業ツリーに未コミットの可能性あり**
+- Fashion Runway（着席・ベンチ当たり・タッチ視点反転・BGM・接地調整）は **作業ツリーに未コミットの可能性あり**
 - Worker / Vercel VRM 構成は以前どおり（変更なし）
 
 ## 次に触る可能性が高いファイル
 
 | 用途 | パス |
 |------|------|
+| Runway 寸法・接地・当たり | `src/runway/config.ts` |
+| Runway 衝突 | `src/runway/collisions.ts` |
+| Runway 座席 | `src/runway/runwaySeats.ts` |
+| Runway プレイヤー | `src/runway/player/RunwayPlayer.tsx` |
+| Three.js 座標 | `.cursor/rules/threejs-coordinates.mdc` |
 | パーク UI/入場 | `src/top/TopApp.tsx` |
-| パーク 3D/NPC | `src/top/TopScene.tsx` |
 | パーク建物設定 | `src/top/topConfig.ts` |
-| 共通ヘッダー/戻る | `src/ui/ParkReturnButton.tsx` |
+| パーク ゾーン | `src/top/parkZones.ts` |
 | ルート判定 | `src/game/appEdition.ts` |
 | SPA fallback | `vite.config.ts`, `vercel.json` |
-| ページメタ | `src/game/pageMetadata.ts` |
-| 8th Street 座標 | `src/eightStreet/config.ts` |
 | Club 座標・DJ | `src/world/clubLandmarks.ts`, `ClubProps.tsx` |
-| Shawn DJ ポーズ | `src/avatar/VRMLocomotion.ts` (`applyVRMDjPose`) |
-| Shawn 配置 | `src/npc/npcGeneration.ts` (`getCreatorNpcForVenue`) |
-| タブ停止 | `src/systems/tabPause.ts`, `GameCanvas.tsx` |
-| BGM | `src/systems/VenueBgmSystem.tsx`, `src/audio/venueAudioConfig.ts` |
-| 会場進行 | `src/game/gameProgression.ts`, `src/stores/gameStore.ts` |
-| 会話記憶 | `src/systems/save/localStorage.ts` |
-| VRM URL | `src/avatar/VRMLoader.ts` |
+| BGM（会場） | `src/systems/VenueBgmSystem.tsx`, `src/audio/venueAudioConfig.ts` |
+| BGM（Runway） | `src/runway/RunwayBgmSystem.tsx`, `src/audio/runwayAudioConfig.ts` |
 
 ## エージェント向け注意
 
 1. **Next.js ではない** — Vite + React
 2. **`/` は Park**（`top`）。本編は `/find-the-meebit`。新ルートは `vite.config.ts` + `vercel.json` の両方に登録
 3. **本番ドメイン変更時は Worker `ALLOWED_ORIGINS` を更新して再デプロイ**（忘れると VRM が CORS 全滅）
-4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts`
+4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts` / **Runway → `runway/config.ts`**
 5. **パーク NPC は `useVRMModel(exclusive:true)`**（プール共有だと T ポーズになる）
 6. **DJ ブース collision** は `CLUB_DJ_BOOTH_LAYOUT` と `ClubProps` を同期すること
 7. **Shawn Club 回転** は `0`（+Z = ダンスフロア）。`Math.PI` は後ろ向きになる
 8. タブ非表示は **全部止める**方針。常時 delta クランプは使わない
-9. commit はユーザー依頼時のみ
+9. **Runway 座標**: +Z=手前（入口）、−Z=奥。ベンチ mesh は local X=長辺 / local Z=奥行。詳細は `.cursor/rules/threejs-coordinates.mdc`
+10. **Runway タッチ視点**: pitch は `-lookDeltaY`（マウスの `+movementY` とは逆）。変えるときは両方確認
+11. commit はユーザー依頼時のみ
 
 ## デプロイチェックリスト
 
 1. **本番ドメインを変えた場合**: `workers/vrm-cache/wrangler.toml` の `ALLOWED_ORIGINS` に新ドメイン追加
 2. `npm run vrm-worker:deploy`
 3. Vercel `VITE_VRM_BASE_URL` → Redeploy
-4. 新ルートを足したら `vite.config.ts`（`SPA_FALLBACK_PATHS`）と `vercel.json` を確認
+4. 新ルートを足したら `vite.config.ts`（`SPA_FALLBACK_PATHS`）と `vercel.json` を確認（`/runway` 済み）
 5. 任意: `VITE_BGM_BASE_URL`（BGM を R2/CDN に置く場合）

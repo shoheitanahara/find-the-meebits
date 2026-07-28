@@ -475,14 +475,19 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 |----|------|----------------------|
 | `culture-to-plaza` | `(0, 16.0)` halfW 2.55 yaw=`π/2` | `(-8, -14.5)` `rotY=0`（プラザ北門すぐ内側） |
 
-**アトラクション**: なし（すべて工事中）
+**アトラクション**（`topConfig.ts` / `attractionIds: ['runway']`）
 
-**Coming Soon 棟**
+| ID | 表示名 | (x, z) | entranceZ | 状態 |
+|----|--------|--------|-----------|------|
+| runway | FASHION RUNWAY | (0, -7.0) | -3.2 | **入場可**（`/runway`）。建物看板 subtitle は UNDER CONSTRUCTION のまま |
+
+ゲーム本体: `src/runway/`。日替わりカラーショー・客席着席・専用 BGM。座標ルールは `.cursor/rules/threejs-coordinates.mdc`。
+
+**Coming Soon 棟**（入場不可・看板のみ）
 
 | 名前 | (x, z) |
 |------|--------|
 | TRAIT MUSEUM / トレイト博物館 | (-12.5, -11.5) |
-| FASHION RUNWAY / ファッションランウェイ | (0, -7.0) |
 | PFP STUDIO / PFPクリエイター | (12.5, -11.0) |
 
 **家具**: Plaza と同じグリッド。テーマ差は床色・ライトのみ。

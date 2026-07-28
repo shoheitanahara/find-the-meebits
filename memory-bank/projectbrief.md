@@ -2,7 +2,7 @@
 
 ## 概要
 
-**Meebits Park** は、遊園地ハブ（`/`）から 3 つの Meebits ゲームへ入場できるコレクション。プレイヤーは自分の Meebit（VRM アバター）を選び、パーク内を歩いてアトラクションへ入る。
+**Meebits Park** は、遊園地ハブ（`/`）から複数の Meebits ゲームへ入場できるコレクション。プレイヤーは自分の Meebit（VRM アバター）を選び、パーク内を歩いてアトラクションへ入る。
 
 | ルート | エディション | 内容 |
 |--------|-------------|------|
@@ -10,6 +10,9 @@
 | `/find-the-meebit` | `v1` | Find the Meebit |
 | `/v2` | `v2` | Trait Hunt |
 | `/8th-street` | `8th-street` | 8th Street |
+| `/runway` | `runway` | Fashion Runway |
+| `/mountain` | `mountain` | Mt. Meeb |
+| `/neon-stack` | `neon` | Jerry Mountain（互換） |
 
 ルート判定は `src/game/appEdition.ts`。`/` `/jp` は Park。
 
@@ -21,7 +24,7 @@
 - 三人称・視点固定追従カメラ（本編 `FollowCamera` 相当のワールド固定オフセット）
 - WASD / ジョイスティックで移動（速度 7、本編と同一）
 - 建物の入口を通過すると自動でそのゲームへ遷移（アバター ID を引き継ぎ）
-- 夜のクラシック遊園地。外周は海。噴水中央に Meebit #11143 の銅像
+- マルチゾーン（Plaza / Mountain / Culture / Sea）。噴水中央に Meebit #11143 の銅像
 - NPC 30 体がランダム徘徊（3 種の歩行パターン、会話なし）
 
 ### Find the Meebit（`v1`）
@@ -38,6 +41,11 @@
 
 - 一人称。クランク型の夜の路地を歩き、変化を見破って進むループ
 - 10 体の歩行者、8 回進むとクリア（`EIGHT_STREET.targetProgress`）
+
+### Fashion Runway（`runway`）
+
+- Culture District のファッションショー。日替わりカラーテーマのモデルがランウェイを歩く
+- 観賞型＋空席への着席。三人称オービット視点
 
 ## 共通導線
 

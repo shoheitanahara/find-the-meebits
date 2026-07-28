@@ -12,11 +12,14 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/find-the-meebit` `/jp/find-the-meebit` | `v1` | Find the Meebit（Museum / After Hours） |
 | `/v2` `/jp/v2` | `v2` | Trait Hunt（特徴一致ハント試作） |
 | `/8th-street` `/jp/8th-street` | `8th-street` | 8th Street（一人称・間違い探し系ループ） |
+| `/runway` `/jp/runway` | `runway` | Fashion Runway（日替わりカラー・観賞＋着席） |
 | `/mountain` `/jp/mountain` | `mountain` | Mt. Meeb |
+| `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
 
 - ルート判定: `src/game/appEdition.ts`（`getAppEdition`）
 - Park 設計: **[parkDesigner.md](./parkDesigner.md)**（共通骨格・橋ゲート・カージナル導線）
-- **配置の正**: `parkDesigner.md` **§14 Canonical Default Layout**（2026-07-24 凍結）+ `src/top/parkZones.ts` / `topConfig.ts`
+- **配置の正**: `parkDesigner.md` **§14 Canonical Default Layout**（2026-07-24 凍結、Culture Runway は 2026-07-28 更新）+ `src/top/parkZones.ts` / `topConfig.ts`
+- Runway 座標・接地: `.cursor/rules/threejs-coordinates.mdc`
 - `/` `/jp` は Park（`top`）。`find-the-meebit` セグメントで v1。
 
 ## 読む順序（推奨）
