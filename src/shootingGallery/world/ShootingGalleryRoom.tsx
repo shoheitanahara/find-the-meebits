@@ -4,7 +4,6 @@ import { SHOOTING_GALLERY } from '../config'
 const FLOOR_PLANK_Z = [-7.8, -6.2, -4.6, -3, -1.4, 0.2, 1.8, 3.4, 5] as const
 const BACK_WALL_PLANK_Y = [0.45, 1.15, 1.85, 2.55, 3.25, 3.95, 4.65] as const
 const PRACTICAL_LIGHT_X = [-3.4, 0, 3.4] as const
-const COVER_X = [-0.15, 1.25, 2.65] as const
 
 /** 木造遊園地風の射的場。西部劇風だがリアル戦闘施設にはしない。 */
 export function ShootingGalleryRoom() {
@@ -87,38 +86,33 @@ export function ShootingGalleryRoom() {
         </mesh>
       ))}
 
-      {/* 的を引き立てる中央舞台。奥壁と的のコントラストを分離する。 */}
-      <group position={[1.25, 0, roomMinZ + 0.14]}>
-        <mesh position={[0, 2.05, 0]} receiveShadow>
-          <boxGeometry args={[5.7, 3.65, 0.16]} />
-          <meshStandardMaterial color="#172128" roughness={0.66} metalness={0.08} />
+      {/* 山小屋の窓を思わせる、明快なターゲット舞台。 */}
+      <group position={[1, 0, roomMinZ + 0.14]}>
+        <mesh position={[0, 2.15, 0]} receiveShadow>
+          <boxGeometry args={[7.35, 4.15, 0.16]} />
+          <meshStandardMaterial color="#18252a" roughness={0.72} />
         </mesh>
-        {([-2.95, 2.95] as const).map((x) => (
-          <group key={`stage-column-${x}`} position={[x, 2.05, 0.18]}>
+        <MountainBackdrop />
+        {([-3.78, 3.78] as const).map((x) => (
+          <group key={`stage-column-${x}`} position={[x, 2.15, 0.2]}>
             <mesh castShadow>
-              <boxGeometry args={[0.24, 4.05, 0.24]} />
-              <meshStandardMaterial color="#8a5b32" roughness={0.58} />
+              <boxGeometry args={[0.3, 4.5, 0.3]} />
+              <meshStandardMaterial color="#765033" roughness={0.68} />
             </mesh>
-            <mesh position={[0, 0, 0.14]}>
-              <boxGeometry args={[0.07, 3.75, 0.04]} />
-              <meshStandardMaterial color="#d2a55a" metalness={0.48} roughness={0.3} />
+            <mesh position={[0, 0, 0.17]}>
+              <boxGeometry args={[0.07, 4.18, 0.04]} />
+              <meshStandardMaterial color="#bd8a50" roughness={0.48} />
             </mesh>
           </group>
         ))}
-        <mesh position={[0, 4.02, 0.18]} castShadow>
-          <boxGeometry args={[6.15, 0.34, 0.28]} />
-          <meshStandardMaterial color="#8a5b32" roughness={0.58} />
+        <mesh position={[0, 4.3, 0.2]} castShadow>
+          <boxGeometry args={[7.85, 0.38, 0.34]} />
+          <meshStandardMaterial color="#765033" roughness={0.68} />
         </mesh>
-        <mesh position={[0, 3.97, 0.35]}>
-          <boxGeometry args={[5.75, 0.055, 0.04]} />
-          <meshStandardMaterial color="#e1b45f" emissive="#8a4e16" emissiveIntensity={0.3} metalness={0.55} />
+        <mesh position={[0, 4.2, 0.39]}>
+          <boxGeometry args={[7.42, 0.055, 0.04]} />
+          <meshStandardMaterial color="#e0b36a" emissive="#80501e" emissiveIntensity={0.22} />
         </mesh>
-        {[-1.75, 0, 1.75].map((x) => (
-          <mesh key={`back-panel-${x}`} position={[x, 2.05, 0.1]}>
-            <boxGeometry args={[0.025, 3.35, 0.03]} />
-            <meshStandardMaterial color="#4d6267" emissive="#1b343b" emissiveIntensity={0.16} />
-          </mesh>
-        ))}
       </group>
 
       {/* 屋根梁 */}
@@ -184,24 +178,31 @@ export function ShootingGalleryRoom() {
         <boxGeometry args={[8.15, 0.035, 0.72]} />
         <meshStandardMaterial color="#e0b068" metalness={0.45} roughness={0.3} />
       </mesh>
+      {/* ロッジバーらしい真鍮のフットレールと客席。 */}
+      <mesh position={[0, 0.38, counterZ + 0.66]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.035, 0.035, 7.5, 14]} />
+        <meshStandardMaterial color="#c99a50" metalness={0.76} roughness={0.25} />
+      </mesh>
+      {[-3.45, 3.45].map((x) => (
+        <mesh key={`foot-rail-bracket-${x}`} position={[x, 0.38, counterZ + 0.48]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.025, 0.025, 0.38, 12]} />
+          <meshStandardMaterial color="#b48243" metalness={0.7} roughness={0.28} />
+        </mesh>
+      ))}
+      <BarStool position={[-2.55, 0, counterZ + 1.15]} rotationY={0.12} />
+      <BarStool position={[2.45, 0, counterZ + 1.2]} rotationY={-0.16} />
 
-      {/* レーン仕切り */}
+      {/* 三段の木製ターゲット棚。機械設備に見える装飾は置かない。 */}
       {SHOOTING_GALLERY.laneZ.map((z, index) => (
         <group key={z}>
-          <mesh position={[1.25, 0.12 + index * 0.025, z]} receiveShadow castShadow>
-            <boxGeometry args={[5.85, 0.16, 0.5]} />
-            <meshStandardMaterial color={index % 2 === 0 ? '#563720' : '#432b1e'} roughness={0.72} />
+          <mesh position={[1, 0.14 + index * 0.035, z]} receiveShadow castShadow>
+            <boxGeometry args={[7.25, 0.2, 0.48]} />
+            <meshStandardMaterial color={index % 2 === 0 ? '#70492d' : '#5d3d29'} roughness={0.7} />
           </mesh>
-          <mesh position={[1.25, 0.23 + index * 0.025, z + 0.24]}>
-            <boxGeometry args={[5.65, 0.055, 0.04]} />
-            <meshStandardMaterial color="#c6924d" metalness={0.38} roughness={0.36} />
+          <mesh position={[1, 0.27 + index * 0.035, z + 0.22]}>
+            <boxGeometry args={[7.05, 0.055, 0.045]} />
+            <meshStandardMaterial color="#d1a165" roughness={0.44} />
           </mesh>
-          {([-1.8, 4.3] as const).map((x) => (
-            <mesh key={x} position={[x, 1.05, z]} castShadow>
-              <boxGeometry args={[0.16, 1.9, 0.16]} />
-              <meshStandardMaterial color="#6e4527" roughness={0.68} />
-            </mesh>
-          ))}
         </group>
       ))}
 
@@ -215,46 +216,8 @@ export function ShootingGalleryRoom() {
       <Rock position={[-3.8, 0.3, -6.8]} />
       <BottleShelf position={[-4.75, 2.05, -1.7]} />
       <BottleShelf position={[5.15, 2.2, -2.8]} />
-
-      {/* トロッコレール（奥レーン） */}
-      <mesh position={[1.25, 0.14, SHOOTING_GALLERY.laneZ[0]]} receiveShadow>
-        <boxGeometry args={[5.7, 0.07, 0.62]} />
-        <meshStandardMaterial color="#282522" roughness={0.78} metalness={0.22} />
-      </mesh>
-      {[-0.2, 0.2].map((zOffset) => (
-        <mesh key={zOffset} position={[1.25, 0.2, SHOOTING_GALLERY.laneZ[0] + zOffset]}>
-          <boxGeometry args={[5.55, 0.055, 0.07]} />
-          <meshStandardMaterial color="#a9a29a" metalness={0.72} roughness={0.28} />
-        </mesh>
-      ))}
-      {[-1.2, -0.2, 0.8, 1.8, 2.8, 3.8].map((x) => (
-        <mesh key={`rail-tie-${x}`} position={[x, 0.16, SHOOTING_GALLERY.laneZ[0]]}>
-          <boxGeometry args={[0.12, 0.04, 0.56]} />
-          <meshStandardMaterial color="#553720" roughness={0.76} />
-        </mesh>
-      ))}
-
-      {/* ロープ・歯車デコ */}
-      {([-3.8, 3.8] as const).map((x) => (
-        <group key={`gear-${x}`} position={[x, 2.8, roomMinZ + 0.4]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.55, 0.55, 0.18, 16]} />
-            <meshStandardMaterial color="#75613c" metalness={0.58} roughness={0.36} />
-          </mesh>
-          <mesh position={[0, 0, 0.12]}>
-            <torusGeometry args={[0.39, 0.07, 8, 20]} />
-            <meshStandardMaterial color="#bc9451" metalness={0.62} roughness={0.3} />
-          </mesh>
-          <mesh position={[0, 0, 0.14]} rotation={[0, 0, Math.PI / 4]}>
-            <boxGeometry args={[0.78, 0.11, 0.06]} />
-            <meshStandardMaterial color="#d0a35a" metalness={0.55} roughness={0.32} />
-          </mesh>
-        </group>
-      ))}
-      <mesh position={[0, 3.6, roomMinZ + 0.35]}>
-        <torusGeometry args={[1.8, 0.04, 8, 32]} />
-        <meshStandardMaterial color="#6a5038" roughness={0.8} />
-      </mesh>
+      <LogStack position={[-5.2, 0.38, -4.9]} />
+      <LogStack position={[5.35, 0.38, -5.4]} />
 
       {/* 看板 */}
       <group position={[0, 3.9, counterZ + 0.2]}>
@@ -284,16 +247,102 @@ export function ShootingGalleryRoom() {
         ))}
       </group>
 
-      {/* 遮蔽用木箱（出現演出用） */}
-      {COVER_X.map((x, index) => (
-        <group key={`cover-${x}`} position={[x, 0.62, -3.5]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.95, 1.12 + index * 0.08, 0.62]} />
-            <meshStandardMaterial color={index % 2 === 0 ? '#5b3922' : '#704627'} roughness={0.76} />
+    </group>
+  )
+}
+
+function MountainBackdrop() {
+  return (
+    <group position={[0, 0, 0.11]}>
+      {/* 塗装された遠景と手前の山並み。射的レーンの背景として静的に見せる。 */}
+      <mesh position={[-1.9, 1.65, 0]} scale={[2.5, 1.75, 1]}>
+        <circleGeometry args={[1, 3, Math.PI / 2]} />
+        <meshStandardMaterial color="#354d50" roughness={0.92} />
+      </mesh>
+      <mesh position={[1.55, 1.55, 0.01]} scale={[2.9, 1.95, 1]}>
+        <circleGeometry args={[1, 3, Math.PI / 2]} />
+        <meshStandardMaterial color="#2b4142" roughness={0.94} />
+      </mesh>
+      <mesh position={[-1.9, 2.88, 0.025]} scale={[0.72, 0.48, 1]}>
+        <circleGeometry args={[1, 3, Math.PI / 2]} />
+        <meshStandardMaterial color="#d8d4c5" roughness={0.84} />
+      </mesh>
+      <mesh position={[1.55, 2.94, 0.03]} scale={[0.82, 0.52, 1]}>
+        <circleGeometry args={[1, 3, Math.PI / 2]} />
+        <meshStandardMaterial color="#e5dfcf" roughness={0.82} />
+      </mesh>
+      <mesh position={[0, 0.68, 0.04]} scale={[4.3, 1.08, 1]}>
+        <circleGeometry args={[1, 3, Math.PI / 2]} />
+        <meshStandardMaterial color="#203536" roughness={0.96} />
+      </mesh>
+
+      {([-3.25, -2.78, 2.85, 3.3] as const).map((x, index) => (
+        <PineSilhouette
+          key={x}
+          position={[x, 0.92 + (index % 2) * 0.16, 0.08]}
+          scale={index % 2 === 0 ? 0.9 : 0.72}
+        />
+      ))}
+
+      <Text
+        position={[0, 3.7, 0.08]}
+        fontSize={0.19}
+        color="#e4c88c"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.16}
+      >
+        HIGH PEAK LODGE
+      </Text>
+    </group>
+  )
+}
+
+function PineSilhouette({
+  position,
+  scale,
+}: {
+  position: [number, number, number]
+  scale: number
+}) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, -0.48, 0]}>
+        <boxGeometry args={[0.12, 0.7, 0.06]} />
+        <meshStandardMaterial color="#172724" roughness={0.95} />
+      </mesh>
+      {[0.38, 0, -0.38].map((y, index) => (
+        <mesh key={y} position={[0, y, 0]} scale={[1 - index * 0.16, 1, 1]}>
+          <circleGeometry args={[0.64, 3, Math.PI / 2]} />
+          <meshStandardMaterial color={index % 2 === 0 ? '#244139' : '#1d352f'} roughness={0.96} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function LogStack({ position }: { position: [number, number, number] }) {
+  const logs = [
+    [-0.34, 0, 0],
+    [0.34, 0, 0],
+    [0, 0.42, 0],
+  ] as const
+
+  return (
+    <group position={position}>
+      {logs.map(([x, y, z]) => (
+        <group key={`${x}-${y}`} position={[x, y, z]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.28, 0.3, 0.72, 14]} />
+            <meshStandardMaterial color="#654127" roughness={0.82} />
           </mesh>
-          <mesh position={[0, 0.1, 0.33]}>
-            <boxGeometry args={[0.7, 0.055, 0.025]} />
-            <meshStandardMaterial color="#b17a43" roughness={0.58} />
+          <mesh position={[0, 0, 0.37]}>
+            <circleGeometry args={[0.255, 14]} />
+            <meshStandardMaterial color="#b47b49" roughness={0.76} />
+          </mesh>
+          <mesh position={[0, 0, 0.375]}>
+            <ringGeometry args={[0.11, 0.135, 14]} />
+            <meshStandardMaterial color="#7c4d2b" roughness={0.8} />
           </mesh>
         </group>
       ))}
@@ -365,38 +414,119 @@ function Rock({ position }: { position: [number, number, number] }) {
 }
 
 function BottleShelf({ position }: { position: [number, number, number] }) {
-  const bottles = [
-    { x: -0.32, color: '#567f6b', scale: 0.9 },
-    { x: 0, color: '#7e6848', scale: 1.08 },
-    { x: 0.32, color: '#4e7180', scale: 0.82 },
+  const shelfLevels = [-0.78, 0, 0.78] as const
+  const bottleColors = [
+    ['#567f6b', '#8b633d', '#4e7180'],
+    ['#764b42', '#50745e', '#977443'],
+    ['#496b73', '#6c8053', '#805044'],
   ] as const
 
   return (
     <group position={position}>
-      <mesh position={[0, -0.42, 0]} castShadow>
-        <boxGeometry args={[1.12, 0.1, 0.38]} />
-        <meshStandardMaterial color="#80502d" roughness={0.66} />
+      <mesh position={[0, 0.1, -0.16]} castShadow receiveShadow>
+        <boxGeometry args={[1.75, 2.75, 0.16]} />
+        <meshStandardMaterial color="#2b211c" roughness={0.82} />
       </mesh>
-      <mesh position={[0, -0.48, -0.13]} castShadow>
-        <boxGeometry args={[1.2, 0.12, 0.1]} />
-        <meshStandardMaterial color="#c18a4f" roughness={0.55} />
-      </mesh>
-      {bottles.map(({ x, color, scale }) => (
-        <group key={x} position={[x, -0.1, 0]} scale={scale}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.12, 0.15, 0.5, 14]} />
-            <meshStandardMaterial color={color} roughness={0.26} metalness={0.06} />
+      {([-0.83, 0.83] as const).map((x) => (
+        <mesh key={`shelf-side-${x}`} position={[x, 0.1, 0]} castShadow>
+          <boxGeometry args={[0.12, 2.9, 0.42]} />
+          <meshStandardMaterial color="#80502d" roughness={0.66} />
+        </mesh>
+      ))}
+      {shelfLevels.map((shelfY, row) => (
+        <group key={shelfY}>
+          <mesh position={[0, shelfY, 0]} castShadow>
+            <boxGeometry args={[1.68, 0.11, 0.46]} />
+            <meshStandardMaterial color="#9b6638" roughness={0.62} />
           </mesh>
-          <mesh position={[0, 0.33, 0]} castShadow>
-            <cylinderGeometry args={[0.06, 0.09, 0.2, 14]} />
-            <meshStandardMaterial color={color} roughness={0.24} />
+          <mesh position={[0, shelfY + 0.02, 0.24]}>
+            <boxGeometry args={[1.55, 0.035, 0.035]} />
+            <meshStandardMaterial color="#d0a060" metalness={0.45} roughness={0.36} />
           </mesh>
-          <mesh position={[0, -0.04, 0.125]}>
-            <planeGeometry args={[0.14, 0.18]} />
-            <meshStandardMaterial color="#d8c69a" roughness={0.7} />
-          </mesh>
+          {([-0.52, 0, 0.52] as const).map((x, column) => (
+            <DecorativeBottle
+              key={`${shelfY}-${x}`}
+              position={[x, shelfY + 0.34, 0.08]}
+              color={bottleColors[row]![column]!}
+              scale={0.82 + ((row + column) % 3) * 0.1}
+            />
+          ))}
         </group>
       ))}
+      <mesh position={[0, 1.5, 0]} castShadow>
+        <boxGeometry args={[1.82, 0.16, 0.46]} />
+        <meshStandardMaterial color="#9b6638" roughness={0.62} />
+      </mesh>
+    </group>
+  )
+}
+
+function DecorativeBottle({
+  position,
+  color,
+  scale,
+}: {
+  position: [number, number, number]
+  color: string
+  scale: number
+}) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.11, 0.14, 0.46, 14]} />
+        <meshStandardMaterial color={color} roughness={0.24} metalness={0.05} />
+      </mesh>
+      <mesh position={[0, 0.3, 0]} castShadow>
+        <cylinderGeometry args={[0.055, 0.08, 0.18, 14]} />
+        <meshStandardMaterial color={color} roughness={0.22} />
+      </mesh>
+      <mesh position={[0, -0.03, 0.115]}>
+        <planeGeometry args={[0.13, 0.16]} />
+        <meshStandardMaterial color="#dfcfa8" roughness={0.7} />
+      </mesh>
+    </group>
+  )
+}
+
+function BarStool({
+  position,
+  rotationY,
+}: {
+  position: [number, number, number]
+  rotationY: number
+}) {
+  return (
+    <group position={position} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 1.02, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.42, 0.44, 0.16, 20]} />
+        <meshStandardMaterial color="#513225" roughness={0.58} />
+      </mesh>
+      <mesh position={[0, 1.12, 0]}>
+        <cylinderGeometry args={[0.36, 0.38, 0.08, 20]} />
+        <meshStandardMaterial color="#9a513d" roughness={0.46} />
+      </mesh>
+      {([-0.25, 0.25] as const).flatMap((x) =>
+        ([-0.2, 0.2] as const).map((z) => (
+          <mesh key={`${x}-${z}`} position={[x, 0.5, z]} castShadow>
+            <cylinderGeometry args={[0.035, 0.045, 0.95, 10]} />
+            <meshStandardMaterial color="#493326" roughness={0.7} />
+          </mesh>
+        )),
+      )}
+      <mesh position={[0, 0.48, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.27, 0.025, 8, 20]} />
+        <meshStandardMaterial color="#b88749" metalness={0.52} roughness={0.35} />
+      </mesh>
+      {([-0.25, 0.25] as const).map((x) => (
+        <mesh key={`back-post-${x}`} position={[x, 1.48, -0.22]} castShadow>
+          <cylinderGeometry args={[0.035, 0.04, 0.78, 10]} />
+          <meshStandardMaterial color="#493326" roughness={0.7} />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.82, -0.22]} castShadow>
+        <boxGeometry args={[0.68, 0.38, 0.14]} />
+        <meshStandardMaterial color="#8e4938" roughness={0.54} />
+      </mesh>
     </group>
   )
 }
