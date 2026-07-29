@@ -45,7 +45,7 @@ export const SHOOTING_GALLERY = {
   },
   targetYRange: { min: 0.45, max: 2.85 },
   targetMotionAmplitude: { normal: 1.7, small: 1.3, vertical: 0.9 },
-  maxActiveTargets: 8,
+  maxActiveTargets: 10,
 
   score: {
     normal: 100,
@@ -59,10 +59,10 @@ export const SHOOTING_GALLERY = {
 
   /** 評価閾値 */
   rating: [
-    { min: 10000, id: 'legend' as const },
-    { min: 7500, id: 'deadeye' as const },
-    { min: 5000, id: 'sharpshooter' as const },
-    { min: 2000, id: 'goodShot' as const },
+    { min: 15000, id: 'legend' as const },
+    { min: 12000, id: 'deadeye' as const },
+    { min: 7500, id: 'sharpshooter' as const },
+    { min: 3000, id: 'goodShot' as const },
     { min: 0, id: 'rookie' as const },
   ],
 } as const

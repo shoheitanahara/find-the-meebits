@@ -64,7 +64,7 @@ function pickSpawnPlan(phase: 0 | 1 | 2, allowRed: boolean): SpawnPlan {
   }
   if (phase === 1) {
     const roll = Math.random()
-    if (allowRed && roll < 0.12) {
+    if (allowRed && roll < 0.15) {
       return { kind: 'red', motion: 'horizontal', lane, small: false }
     }
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
@@ -77,7 +77,7 @@ function pickSpawnPlan(phase: 0 | 1 | 2, allowRed: boolean): SpawnPlan {
   }
   const roll = Math.random()
   if (roll < 0.14) return { kind: 'gold', motion: 'brief', lane, small: true }
-  if (allowRed && roll < 0.24) {
+  if (allowRed && roll < 0.27) {
     return { kind: 'red', motion: 'horizontal', lane, small: false }
   }
   const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
@@ -196,9 +196,9 @@ function createTarget(
 }
 
 function desiredActiveCount(phase: 0 | 1 | 2) {
-  if (phase === 0) return 3
-  if (phase === 1) return 5
-  return 7
+  if (phase === 0) return 4
+  if (phase === 1) return 7
+  return 9
 }
 
 /** 的プール。物理なしの座標更新 + 倒れる演出。 */
@@ -254,7 +254,8 @@ export function ShootingGalleryTargets() {
         } else if (targets.length < POOL_SIZE) {
           targets.push(next)
         }
-        spawnCooldownRef.current = difficulty === 0 ? 1.1 : difficulty === 1 ? 0.75 : 0.45
+        spawnCooldownRef.current =
+          difficulty === 0 ? 0.75 : difficulty === 1 ? 0.45 : 0.28
       }
     }
 
