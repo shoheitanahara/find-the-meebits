@@ -3,14 +3,8 @@ import { getLocale } from '../../i18n/locale'
 import type { DialogueLine } from '../../npc/npcTypes'
 import { SERGITO_MEEBIT_ID } from '../config'
 import {
-  SERGITO_CATEGORY_COMMENTS,
   SERGITO_FALLBACK_DIALOGUES,
-  SERGITO_GREETINGS,
   SERGITO_SPECIAL_DIALOGUES,
-  SERGITO_TRAIT_SPECIFIC,
-  TRAIT_CATEGORY_PRIORITY,
-  TRAIT_KEY_PRIORITY,
-  TRAIT_KEY_TO_CATEGORY,
   type LocalizedText,
   type SergitoDialogueCategory,
 } from './sergitoDialogueData'
@@ -21,8 +15,45 @@ export type SergitoDialogueContext = {
   talkCount: number
 }
 
-/** パーク NPC と同様、1 回の会話は 2 行 */
+/** 1回を短く保ちつつ、2行の中で複数traitを拾う */
 const SERGITO_LINES_PER_TALK = 2
+
+type TraitFeature = {
+  id: string
+  category: SergitoDialogueCategory
+  ja: string
+  en: string
+  impact: number
+}
+
+const COLOR_JA: Record<string, string> = {
+  Black: '黒',
+  Blue: '青',
+  Brown: 'ブラウン',
+  Camo: 'カモ',
+  Cyan: 'シアン',
+  Gold: 'ゴールド',
+  Gray: 'グレー',
+  Green: 'グリーン',
+  'Light Blue': 'ライトブルー',
+  Orange: 'オレンジ',
+  Pink: 'ピンク',
+  Purple: 'パープル',
+  Red: '赤',
+  Silver: 'シルバー',
+  Tan: 'タン',
+  Teal: 'ティール',
+  White: '白',
+  Yellow: 'イエロー',
+}
+
+const TYPE_JA: Record<string, string> = {
+  Human: 'ヒューマン',
+  Robot: 'ロボット',
+  Elephant: 'エレファント',
+  Pig: 'ピッグ',
+  Skeleton: 'スケルトン',
+}
 
 function pickLocalized(text: LocalizedText) {
   return getLocale() === 'ja' ? text.ja : text.en
@@ -37,54 +68,131 @@ function toLine(id: string, text: string, category: SergitoDialogueCategory): Di
   return { id, text, category: category === 'special' || category === 'fallback' ? 'greeting' : category === 'closing' ? 'greeting' : category === 'body' ? 'meebits' : 'daily' }
 }
 
-function pickFromPool(pool: LocalizedText[], seed: number, talkCount: number, usedTexts: Set<string>) {
-  if (pool.length === 0) return null
-  for (let attempt = 0; attempt < pool.length; attempt += 1) {
-    const index = (seededIndex(seed, talkCount + attempt, pool.length) + attempt) % pool.length
-    const text = pickLocalized(pool[index])
-    if (!usedTexts.has(text)) {
-      usedTexts.add(text)
-      return text
-    }
-  }
-  const fallback = pickLocalized(pool[seededIndex(seed, talkCount, pool.length)])
-  usedTexts.add(fallback)
-  return fallback
+function getTrait(traits: MeebitTraitMap, key: string) {
+  const value = traits[key]
+  return value && value !== 'No' ? value : null
 }
 
-function getTraitSpecificComment(traitKey: string, traitValue: string, seed: number, talkCount: number, usedTexts: Set<string>) {
-  const pool = SERGITO_TRAIT_SPECIFIC[traitKey]?.[traitValue]
-  if (!pool?.length) return null
-  return pickFromPool(pool, seed + traitKey.length, talkCount, usedTexts)
+function colorJa(value: string) {
+  return COLOR_JA[value] ?? value
 }
 
-function getCategoryComment(category: SergitoDialogueCategory, seed: number, talkCount: number, usedTexts: Set<string>) {
-  if (category === 'greeting' || category === 'closing' || category === 'special' || category === 'fallback') {
-    return null
+function makeStyledFeature({
+  id,
+  value,
+  color,
+  category,
+  impact,
+}: {
+  id: string
+  value: string | null
+  color?: string | null
+  category: SergitoDialogueCategory
+  impact: number
+}): TraitFeature | null {
+  if (!value) return null
+  return {
+    id,
+    category,
+    ja: color ? `${colorJa(color)}の「${value}」` : `「${value}」`,
+    en: color ? `${color} ${value}` : value,
+    impact,
   }
-  const pool = SERGITO_CATEGORY_COMMENTS[category]
-  return pickFromPool(pool, seed + category.length, talkCount, usedTexts)
 }
 
-function selectCommentableTrait(traits: MeebitTraitMap | null) {
-  if (!traits) return null
+/**
+ * 色を単独traitとして扱わず、対応する服や髪へ結合する。
+ * これにより「赤がいい」ではなく「赤のジャケットが主役」と具体的に褒められる。
+ */
+function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
+  const features: Array<TraitFeature | null> = []
+  const type = getTrait(traits, 'Type')
 
-  const candidates: Array<{ traitKey: string; traitValue: string; category: SergitoDialogueCategory }> = []
-
-  for (const traitKey of TRAIT_KEY_PRIORITY) {
-    const traitValue = traits[traitKey]
-    if (!traitValue || traitValue === 'No') continue
-    const category = TRAIT_KEY_TO_CATEGORY[traitKey]
-    if (!category) continue
-    candidates.push({ traitKey, traitValue, category })
+  if (type && type !== 'Human') {
+    features.push({
+      id: 'type',
+      category: 'body',
+      ja: `${TYPE_JA[type] ?? type}ボディ`,
+      en: `${type} body`,
+      impact: 100,
+    })
   }
 
-  for (const category of TRAIT_CATEGORY_PRIORITY) {
-    const match = candidates.find((c) => c.category === category)
-    if (match) return match
+  features.push(
+    makeStyledFeature({
+      id: 'overshirt',
+      value: getTrait(traits, 'Overshirt'),
+      color: getTrait(traits, 'Overshirt Color'),
+      category: 'clothing',
+      impact: 92,
+    }),
+    makeStyledFeature({
+      id: 'hat',
+      value: getTrait(traits, 'Hat'),
+      color: getTrait(traits, 'Hat Color'),
+      category: 'head',
+      impact: 90,
+    }),
+    makeStyledFeature({
+      id: 'glasses',
+      value: getTrait(traits, 'Glasses'),
+      category: 'face',
+      impact: 88,
+    }),
+    makeStyledFeature({
+      id: 'shirt',
+      value: getTrait(traits, 'Shirt'),
+      color: getTrait(traits, 'Shirt Color'),
+      category: 'clothing',
+      impact: 84,
+    }),
+    makeStyledFeature({
+      id: 'hair',
+      value: getTrait(traits, 'Hair Style'),
+      color: getTrait(traits, 'Hair Color'),
+      category: 'head',
+      impact: 82,
+    }),
+    makeStyledFeature({
+      id: 'pants',
+      value: getTrait(traits, 'Pants'),
+      color: getTrait(traits, 'Pants Color'),
+      category: 'clothing',
+      impact: 76,
+    }),
+    makeStyledFeature({
+      id: 'beard',
+      value: getTrait(traits, 'Beard'),
+      color: getTrait(traits, 'Beard Color'),
+      category: 'face',
+      impact: 74,
+    }),
+    makeStyledFeature({
+      id: 'shoes',
+      value: getTrait(traits, 'Shoes'),
+      color: getTrait(traits, 'Shoes Color'),
+      category: 'overall',
+      impact: 68,
+    }),
+    makeStyledFeature({
+      id: 'earring',
+      value: getTrait(traits, 'Earring'),
+      category: 'face',
+      impact: 66,
+    }),
+  )
+
+  if (getTrait(traits, 'Tattoo')) {
+    features.push({
+      id: 'tattoo',
+      category: 'overall',
+      ja: 'タトゥー',
+      en: 'tattoo',
+      impact: 64,
+    })
   }
 
-  return candidates[0] ?? null
+  return features.filter((feature): feature is TraitFeature => feature !== null)
 }
 
 function buildSpecialDialogue(talkCount: number): DialogueLine[] {
@@ -101,37 +209,390 @@ function buildFallbackDialogue(talkCount: number): DialogueLine[] {
     .map((line, index) => toLine(`sergito-fallback-${index}`, pickLocalized(line), 'fallback'))
 }
 
+function rotateFeatures(features: TraitFeature[], seed: number, talkCount: number) {
+  const sorted = [...features].sort((a, b) => b.impact - a.impact)
+  if (sorted.length < 2) return sorted
+
+  // 再訪時は主役traitをずらし、同じMeebitでも別の魅力を話す。
+  const focusWindow = Math.min(sorted.length, 6)
+  const focusIndex = seededIndex(seed, talkCount, focusWindow)
+  const [focus] = sorted.splice(focusIndex, 1)
+  return [focus, ...sorted]
+}
+
+function joinJa(features: TraitFeature[]) {
+  return features.map((feature) => feature.ja).join('、')
+}
+
+function joinEn(features: TraitFeature[]) {
+  const labels = features.map((feature) => feature.en)
+  if (labels.length <= 1) return labels[0] ?? ''
+  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`
+  return `${labels.slice(0, -1).join(', ')}, and ${labels.at(-1)}`
+}
+
+function getCategoryOpenings(feature: TraitFeature): LocalizedText[] {
+  const byCategory: Partial<Record<SergitoDialogueCategory, LocalizedText[]>> = {
+    body: [
+      {
+        ja: `${feature.ja}のシルエット、ものすごくきれいだ。立ってるだけで絵になるね。`,
+        en: `The silhouette of that ${feature.en} is beautiful. You look composed just standing there.`,
+      },
+      {
+        ja: `${feature.ja}って、こんなに表情が出るんだ。近くで見るとますます好きになる。`,
+        en: `I did not know a ${feature.en} could have this much expression. It gets better up close.`,
+      },
+      {
+        ja: `その${feature.ja}、存在感がすごいな。服に着られず、全部自分のものにしてる。`,
+        en: `That ${feature.en} has serious presence. The clothes do not wear you — you own all of it.`,
+      },
+      {
+        ja: `${feature.ja}ならではの輪郭が、今日のスタイルにぴったりはまってる。`,
+        en: `The distinct shape of the ${feature.en} fits today's whole look perfectly.`,
+      },
+      {
+        ja: `まず${feature.ja}に拍手したい。どの角度から見てもキャラクターが立ってるよ。`,
+        en: `First, applause for that ${feature.en}. It has character from every angle.`,
+      },
+    ],
+    clothing: [
+      {
+        ja: `${feature.ja}を選ぶセンス、かなり信頼できる。主張があるのに着こなしは自然だ。`,
+        en: `I trust anyone who chooses ${feature.en}. It makes a statement, but you wear it effortlessly.`,
+      },
+      {
+        ja: `${feature.ja}が今日のルックの芯だね。ここが決まってるから、全体がぶれない。`,
+        en: `The ${feature.en} is the backbone of this look. It keeps everything else perfectly grounded.`,
+      },
+      {
+        ja: `その${feature.ja}、ただ似合うだけじゃない。ちゃんと君の服になってる。`,
+        en: `That ${feature.en} does more than suit you. It already feels completely yours.`,
+      },
+      {
+        ja: `${feature.ja}の見せ方がうまいなあ。目立つのに、全体を食ってない。`,
+        en: `You know exactly how to show off the ${feature.en}. It stands out without swallowing the look.`,
+      },
+      {
+        ja: `お、その${feature.ja}！ それを中心に組み立てたなら、狙いは大成功だよ。`,
+        en: `Oh, that ${feature.en}! If you built the look around it, the plan worked beautifully.`,
+      },
+      {
+        ja: `${feature.ja}、色も形も今の君にしっくりきてる。これは替えたくなくなるね。`,
+        en: `The color and shape of that ${feature.en} feel made for you. Hard to imagine changing it.`,
+      },
+    ],
+    head: [
+      {
+        ja: `${feature.ja}で輪郭が一気に決まってる。遠くからでも君だってわかるよ。`,
+        en: `The ${feature.en} locks in your whole silhouette. I would know it was you from across the room.`,
+      },
+      {
+        ja: `その${feature.ja}、顔まわりの完成度をぐっと上げてる。選び方がうまい。`,
+        en: `That ${feature.en} lifts the whole face area. Excellent choice.`,
+      },
+      {
+        ja: `${feature.ja}がいいアクセントだね。見た瞬間、ちょっと嬉しくなった。`,
+        en: `The ${feature.en} is such a good accent. It made me smile the moment I saw it.`,
+      },
+      {
+        ja: `正直、その${feature.ja}はずるい。ひと目で好きになるシルエットだ。`,
+        en: `Honestly, that ${feature.en} is almost unfair. It is a silhouette you love on sight.`,
+      },
+      {
+        ja: `${feature.ja}に目が行って、それから全身を見たくなる。視線の流れまでできてるよ。`,
+        en: `The ${feature.en} catches your eye, then invites you to take in the whole look. Great visual flow.`,
+      },
+      {
+        ja: `その${feature.ja}、ちゃんと遊び心があるのに子どもっぽくない。絶妙だね。`,
+        en: `That ${feature.en} is playful without feeling childish. Beautifully judged.`,
+      },
+    ],
+    face: [
+      {
+        ja: `${feature.ja}が表情を作ってるね。無言でもキャラクターが伝わってくる。`,
+        en: `The ${feature.en} gives the face a whole expression. Your character comes through without a word.`,
+      },
+      {
+        ja: `その${feature.ja}、顔にリズムが生まれていいな。ずっと見ていられる。`,
+        en: `That ${feature.en} gives the face such a good rhythm. I could keep looking.`,
+      },
+      {
+        ja: `${feature.ja}が効いてる！ 小さなディテールなのに、印象はすごく大きい。`,
+        en: `The ${feature.en} really lands! A small detail with a huge effect.`,
+      },
+      {
+        ja: `その${feature.ja}があるだけで、どんな性格なのか想像したくなるよ。`,
+        en: `That ${feature.en} alone makes me want to imagine your whole personality.`,
+      },
+      {
+        ja: `${feature.ja}を入れたことで、顔が一気に忘れられなくなってる。`,
+        en: `Adding the ${feature.en} makes the face instantly unforgettable.`,
+      },
+      {
+        ja: `近くで見て正解だった。その${feature.ja}、思ってた以上にいい仕事してる。`,
+        en: `I am glad I looked closer. That ${feature.en} is doing even more than I first thought.`,
+      },
+    ],
+    overall: [
+      {
+        ja: `${feature.ja}まで気を抜いてないのがいい。全身でひとつのルックになってる。`,
+        en: `I love that you did not neglect the ${feature.en}. The look works from head to toe.`,
+      },
+      {
+        ja: `最後に${feature.ja}で締めるの、わかってるね。全体がぐっと引き締まった。`,
+        en: `Finishing with the ${feature.en} shows real instinct. It pulls the whole look together.`,
+      },
+      {
+        ja: `${feature.ja}を見て、このMeebitは細部まで強いって確信したよ。`,
+        en: `The ${feature.en} convinced me this Meebit is strong right down to the details.`,
+      },
+      {
+        ja: `その${feature.ja}、脇役に見えて実はかなり大事だ。バランスを作ってる。`,
+        en: `That ${feature.en} may look secondary, but it is doing important work for the balance.`,
+      },
+      {
+        ja: `${feature.ja}まで含めて抜かりなし。どこで切り取っても君らしい。`,
+        en: `Nothing is accidental, right down to the ${feature.en}. Every crop still feels like you.`,
+      },
+    ],
+  }
+  return byCategory[feature.category] ?? []
+}
+
+function buildOpening(feature: TraitFeature, seed: number, talkCount: number): LocalizedText {
+  const genericOpenings: LocalizedText[] = [
+    {
+      ja: `待って、${feature.ja}が最高だ。そこを主役にしたの、大正解。`,
+      en: `Wait — the ${feature.en} is fantastic. Making that the star was exactly right.`,
+    },
+    {
+      ja: `おお、まず${feature.ja}に目を奪われた。これは強い。`,
+      en: `Oh, the ${feature.en} grabbed me immediately. That is a strong choice.`,
+    },
+    {
+      ja: `${feature.ja}、めちゃくちゃ似合ってる。入ってきた瞬間に空気が変わったよ。`,
+      en: `That ${feature.en} looks incredible on you. The room changed when you walked in.`,
+    },
+    {
+      ja: `いいね！ ${feature.ja}だけで、もう物語が始まってる。`,
+      en: `Yes! The ${feature.en} already tells a whole story.`,
+    },
+    {
+      ja: `なるほど、${feature.ja}を持ってきたか。見れば見るほど、この選択が効いてくる。`,
+      en: `I see — you went with ${feature.en}. The longer I look, the smarter that choice feels.`,
+    },
+    {
+      ja: `ちょっと一周見せて。うん、やっぱり${feature.ja}が抜群にいい。`,
+      en: `Give me one full turn. Yes — the ${feature.en} is exceptionally good.`,
+    },
+    {
+      ja: `入ってきた時から気になってたんだ。その${feature.ja}、ものすごく君らしい。`,
+      en: `I noticed it the moment you walked in. That ${feature.en} feels completely you.`,
+    },
+    {
+      ja: `これは好きだな。${feature.ja}に、ちゃんと選んだ理由が見える。`,
+      en: `I love this. The ${feature.en} feels chosen with real intention.`,
+    },
+    {
+      ja: `その${feature.ja}、写真より実物のほうがずっといい。空気まで含めて似合ってる。`,
+      en: `That ${feature.en} is even better in person. It suits your whole presence.`,
+    },
+    {
+      ja: `いいところを突いてくるね。${feature.ja}があるから、ありきたりで終わってない。`,
+      en: `That is exactly the right move. The ${feature.en} keeps the look from ever feeling ordinary.`,
+    },
+    {
+      ja: `うん、${feature.ja}は残したい。これが君のサインみたいになってる。`,
+      en: `Yes, keep the ${feature.en}. It has become something like your signature.`,
+    },
+    {
+      ja: `最初の一秒で${feature.ja}に目が行ったよ。強いけど、ちゃんと品がある。`,
+      en: `My eye went straight to the ${feature.en}. Strong, but still beautifully composed.`,
+    },
+  ]
+  const openings = [...getCategoryOpenings(feature), ...genericOpenings]
+  return openings[seededIndex(seed + feature.id.length, talkCount, openings.length)]
+}
+
+function getSynergyTemplates(
+  focus: TraitFeature,
+  picked: TraitFeature[],
+  jaTraits: string,
+  enTraits: string,
+): LocalizedText[] {
+  const categories = new Set([focus, ...picked].map((feature) => feature.category))
+  const templates: LocalizedText[] = []
+
+  if (categories.has('head') && categories.has('face')) {
+    templates.push(
+      {
+        ja: `${focus.ja}と${jaTraits}で、顔まわりにちゃんと物語がある。表情まで違って見えるよ。`,
+        en: `The ${focus.en} with ${enTraits} tells a story around the face. It changes the whole expression.`,
+      },
+      {
+        ja: `${jaTraits}が${focus.ja}をうまく受け止めてる。上半身だけでも忘れられない組み合わせだ。`,
+        en: `${enTraits} balance the ${focus.en} beautifully. The upper silhouette alone is unforgettable.`,
+      },
+    )
+  }
+
+  if (picked.filter((feature) => feature.category === 'clothing').length >= 2) {
+    templates.push(
+      {
+        ja: `${jaTraits}の重ね方、かなり上手だ。単品で強い服同士なのに、けんかしてない。`,
+        en: `The layering between ${enTraits} is excellent. Strong pieces, yet none of them fight.`,
+      },
+      {
+        ja: `${focus.ja}から${jaTraits}まで、ちゃんとひとつのコーデとして読める。完成度が高いよ。`,
+        en: `From the ${focus.en} through ${enTraits}, it reads as one complete outfit. Beautifully resolved.`,
+      },
+      {
+        ja: `${jaTraits}で色と形のテンポができてる。服を並べただけじゃなく、ちゃんと編集してるね。`,
+        en: `${enTraits} create a real tempo of color and shape. This is styled, not merely assembled.`,
+      },
+    )
+  }
+
+  if (categories.has('body')) {
+    const bodyFeature = [focus, ...picked].find((feature) => feature.category === 'body')
+    templates.push(
+      {
+        ja: `${bodyFeature?.ja ?? 'ボディ'}の個性に${jaTraits}が負けてない。それどころか、輪郭の魅力をもっと引き出してる。`,
+        en: `${enTraits} hold their own against the ${bodyFeature?.en ?? 'body'} — they bring even more out of its silhouette.`,
+      },
+      {
+        ja: `${jaTraits}を合わせたことで、シルエットが上から下まできれいにつながってる。`,
+        en: `Adding ${enTraits} makes the silhouette flow cleanly from top to bottom.`,
+      },
+    )
+  }
+
+  if (categories.has('overall')) {
+    templates.push({
+      ja: `${jaTraits}まで見ると、偶然じゃなくて全部狙ってるのがわかる。細部まで気持ちいいよ。`,
+      en: `Once I notice ${enTraits}, I can tell none of this is accidental. The details are deeply satisfying.`,
+    })
+  }
+
+  return templates
+}
+
+function buildCombination(
+  focus: TraitFeature,
+  supporting: TraitFeature[],
+  seed: number,
+  talkCount: number,
+): LocalizedText {
+  // 2つ拾う回と3つ拾う回を混ぜ、毎回同じ列挙リズムになるのを避ける。
+  const pickedCount = supporting.length >= 3 && (seed + talkCount) % 3 !== 0 ? 3 : 2
+  const picked = supporting.slice(0, pickedCount)
+  const jaTraits = joinJa(picked)
+  const enTraits = joinEn(picked)
+  const generalTemplates: LocalizedText[] = [
+    {
+      ja: `${jaTraits}まで全部つながってる。派手な要素を重ねてるのに、ちゃんと君のスタイルになってる。`,
+      en: `Then ${enTraits} all connect. Lots of bold pieces, but together they become unmistakably yours.`,
+    },
+    {
+      ja: `${focus.ja}に${jaTraits}を合わせる発想、かなり好き。どこを見ても発見がある。`,
+      en: `Pairing the ${focus.en} with ${enTraits} is inspired. There is something to discover everywhere you look.`,
+    },
+    {
+      ja: `${jaTraits}が脇役じゃなく、全部ちゃんと効いてる。20,000体の中でも一発で覚えるよ。`,
+      en: `${enTraits} are not background details — every one lands. I would remember you instantly out of 20,000.`,
+    },
+    {
+      ja: `${jaTraits}のリズムが気持ちいい。作り込んだのに無理して見えない、そのバランスがすごい。`,
+      en: `The rhythm between ${enTraits} is so satisfying. Detailed without looking forced — that balance is rare.`,
+    },
+    {
+      ja: `それに${jaTraits}でしょう？ 見る順番によって印象が変わる。すごく楽しいMeebitだ。`,
+      en: `And then there is ${enTraits}. The impression changes as your eye moves — such a joyful Meebit to look at.`,
+    },
+    {
+      ja: `${focus.ja}だけで終わらず、${jaTraits}でもう一段ひねってる。そこが好きだな。`,
+      en: `You did not stop at the ${focus.en}; ${enTraits} add another turn. That is the part I love.`,
+    },
+    {
+      ja: `${jaTraits}を見つけた瞬間、全体の意味がつながったよ。これは考えられた組み合わせだね。`,
+      en: `The moment I noticed ${enTraits}, the whole look clicked. This combination has real thought behind it.`,
+    },
+    {
+      ja: `近くで見ると${jaTraits}まで効いてくる。第一印象が強くて、二度目にもっと好きになる。`,
+      en: `Up close, ${enTraits} start to land too. Strong first impression, even better on the second look.`,
+    },
+    {
+      ja: `${focus.ja}と${jaTraits}、普通ならまとまりにくいのに完全に成立してる。君が着ると正解になるんだね。`,
+      en: `The ${focus.en} with ${enTraits} should be hard to balance, yet it completely works. You make it feel inevitable.`,
+    },
+    {
+      ja: `${jaTraits}がいい余韻を残してる。前から見ても、振り返っても、ちゃんと面白い。`,
+      en: `${enTraits} leave a great final impression. Interesting from the front and still interesting as you turn away.`,
+    },
+    {
+      ja: `色、形、ディテール。その全部を${jaTraits}がつないでる。かなり完成されたスタイルだよ。`,
+      en: `Color, shape, detail — ${enTraits} tie all three together. This is a remarkably complete style.`,
+    },
+    {
+      ja: `${jaTraits}まで自信を持って見せてるのがいい。似合うかどうかじゃなく、もう君のものだ。`,
+      en: `I love the confidence in ${enTraits}. This is beyond whether they suit you — they belong to you now.`,
+    },
+    {
+      ja: `この組み合わせ、きれいにまとめすぎてないのがいい。${jaTraits}がちゃんと意外性を残してる。`,
+      en: `I love that this is not polished into predictability. ${enTraits} preserve exactly the right surprise.`,
+    },
+    {
+      ja: `${jaTraits}、あとからじわじわ効いてくるね。話してる間にも好きなところが増えてるよ。`,
+      en: `${enTraits} keep growing on me. I am finding more to love even while we talk.`,
+    },
+    {
+      ja: `20,000体の中からでも、${focus.ja}と${jaTraits}を手がかりにすぐ君を見つけられる。`,
+      en: `Even among 20,000, I could find you immediately by the ${focus.en} and ${enTraits}.`,
+    },
+    {
+      ja: `${focus.ja}で惹きつけて、${jaTraits}で記憶に残す。見せ方まで完璧だね。`,
+      en: `The ${focus.en} pulls me in; ${enTraits} make the memory stick. Even the presentation is perfect.`,
+    },
+  ]
+  const templates = [
+    ...getSynergyTemplates(focus, picked, jaTraits, enTraits),
+    ...generalTemplates,
+  ]
+  return templates[seededIndex(seed + picked.length * 13, talkCount, templates.length)]
+}
+
 export function createSergitoDialogue(context: SergitoDialogueContext): DialogueLine[] {
   if (context.meebitId === SERGITO_MEEBIT_ID) {
     return buildSpecialDialogue(context.talkCount)
   }
 
-  const usedTexts = new Set<string>()
-  const seed = context.meebitId
-  const lines: DialogueLine[] = []
-
-  const greeting = pickFromPool(SERGITO_GREETINGS, seed, context.talkCount, usedTexts)
-  if (greeting) {
-    lines.push(toLine('sergito-greeting', greeting, 'greeting'))
-  }
-
-  const trait = selectCommentableTrait(context.traits)
-
-  if (!trait) {
+  if (!context.traits) {
     return buildFallbackDialogue(context.talkCount)
   }
 
-  const comment =
-    getTraitSpecificComment(trait.traitKey, trait.traitValue, seed, context.talkCount, usedTexts) ??
-    getCategoryComment(trait.category, seed + 19, context.talkCount, usedTexts)
-
-  if (comment) {
-    lines.push(toLine('sergito-trait-0', comment, trait.category))
-  }
-
-  if (lines.length < SERGITO_LINES_PER_TALK) {
+  const features = rotateFeatures(buildFeatures(context.traits), context.meebitId, context.talkCount)
+  const focus = features[0]
+  if (!focus) {
     return buildFallbackDialogue(context.talkCount)
   }
 
-  return lines.slice(0, SERGITO_LINES_PER_TALK)
+  const opening = buildOpening(focus, context.meebitId, context.talkCount)
+  const supporting = features.slice(1)
+  if (supporting.length === 0) {
+    return [
+      toLine('sergito-focus', pickLocalized(opening), focus.category),
+      ...buildFallbackDialogue(context.talkCount).slice(1),
+    ]
+  }
+
+  const combination = buildCombination(
+    focus,
+    supporting,
+    context.meebitId,
+    context.talkCount,
+  )
+  return [
+    toLine('sergito-focus', pickLocalized(opening), focus.category),
+    toLine('sergito-combination', pickLocalized(combination), 'overall'),
+  ].slice(0, SERGITO_LINES_PER_TALK)
 }
