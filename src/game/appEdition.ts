@@ -9,6 +9,7 @@ export type AppEdition =
   | 'runway'
   | 'closet'
   | 'sergito'
+  | 'shooting'
   | 'top'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
@@ -17,6 +18,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
+  if (segments.includes('shooting-gallery')) {
+    return 'shooting'
+  }
   if (segments.includes('look-locker')) {
     return 'closet'
   }

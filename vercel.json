@@ -16,6 +16,8 @@
     { "source": "/look-locker/(.*)", "destination": "/index.html" },
     { "source": "/meet-sergito", "destination": "/index.html" },
     { "source": "/meet-sergito/(.*)", "destination": "/index.html" },
+    { "source": "/shooting-gallery", "destination": "/index.html" },
+    { "source": "/shooting-gallery/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },
     { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]

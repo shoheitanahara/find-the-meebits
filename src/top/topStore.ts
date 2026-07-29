@@ -17,6 +17,7 @@ export type AttractionId =
   | 'runway'
   | 'closet'
   | 'sergito'
+  | 'shooting'
 
 type TopState = {
   started: boolean

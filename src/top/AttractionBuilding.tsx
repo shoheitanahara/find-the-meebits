@@ -14,6 +14,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - runway: 暗いパビリオン＋発光ランウェイ
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  * - sergito: シーエリアの工房（Meet Sergito）
+ * - shooting: マウンテン地区の木造射的場
  */
 export function AttractionBuilding({
   attraction,
@@ -37,7 +38,9 @@ export function AttractionBuilding({
                 ? '#8eb4e8'
                 : attraction.id === 'sergito'
                   ? '#d4a060'
-                  : '#c4a060'
+                  : attraction.id === 'shooting'
+                    ? '#e8b060'
+                    : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -60,6 +63,8 @@ export function AttractionBuilding({
         <TraitMuseumLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'sergito' ? (
         <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : attraction.id === 'shooting' ? (
+        <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -416,6 +421,76 @@ function MeetSergitoLandmark({
         <meshStandardMaterial color="#806850" roughness={0.88} />
       </mesh>
       <pointLight position={[0, 2.6, 1.2]} intensity={9} distance={10} color={accent} />
+    </group>
+  )
+}
+
+/** Mountain 東棟: 木造射的場（カウンター・樽・的レーン看板） */
+function ShootingGalleryLandmark({
+  color,
+  roofColor,
+  accent,
+}: {
+  color: string
+  roofColor: string
+  accent: string
+}) {
+  return (
+    <group>
+      <mesh position={[0, 0.12, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.24, 7.2]} />
+        <meshStandardMaterial color="#4a3a28" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 1.7, -0.4]} castShadow receiveShadow>
+        <boxGeometry args={[6.2, 3.2, 5.6]} />
+        <meshStandardMaterial color={color} roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 3.55, -0.45]} castShadow>
+        <boxGeometry args={[6.8, 0.4, 6.2]} />
+        <meshStandardMaterial color={roofColor} roughness={0.7} metalness={0.08} />
+      </mesh>
+      {/* 正面カウンター */}
+      <mesh position={[0, 0.85, 2.85]} castShadow>
+        <boxGeometry args={[4.6, 1.1, 0.55]} />
+        <meshStandardMaterial color="#5a4030" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 1.45, 2.85]} castShadow>
+        <boxGeometry args={[4.8, 0.12, 0.7]} />
+        <meshStandardMaterial color="#7a5840" roughness={0.78} />
+      </mesh>
+      {/* 的レーン看板 */}
+      <mesh position={[0, 2.55, -2.95]} castShadow>
+        <boxGeometry args={[4.2, 1.6, 0.18]} />
+        <meshStandardMaterial color="#2a2018" roughness={0.88} />
+      </mesh>
+      {[-1.2, 0, 1.2].map((x) => (
+        <mesh key={x} position={[x, 2.55, -2.82]}>
+          <circleGeometry args={[0.32, 16]} />
+          <meshStandardMaterial
+            color={x === 0 ? '#e8b060' : '#c45a4a'}
+            emissive={x === 0 ? accent : '#c45a4a'}
+            emissiveIntensity={0.45}
+            roughness={0.5}
+          />
+        </mesh>
+      ))}
+      {/* 樽 */}
+      {[-2.6, 2.6].map((x) => (
+        <mesh key={`barrel-${x}`} position={[x, 0.55, 2.4]} castShadow>
+          <cylinderGeometry args={[0.42, 0.48, 1.0, 12]} />
+          <meshStandardMaterial color="#6a4a30" roughness={0.88} />
+        </mesh>
+      ))}
+      {/* 木箱 */}
+      <mesh position={[-2.5, 0.4, 1.2]} castShadow>
+        <boxGeometry args={[0.9, 0.8, 0.9]} />
+        <meshStandardMaterial color="#7a5a38" roughness={0.9} />
+      </mesh>
+      <mesh position={[2.5, 0.35, 1.0]} castShadow>
+        <boxGeometry args={[0.85, 0.7, 0.85]} />
+        <meshStandardMaterial color="#6a5030" roughness={0.9} />
+      </mesh>
+      <pointLight position={[0, 2.8, 1.5]} intensity={10} distance={11} color={accent} />
     </group>
   )
 }

@@ -247,7 +247,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   mountain: {
     id: 'mountain',
     title: { en: 'Mountain District', ja: 'マウンテン地区' },
-    attractionIds: ['mountain', 'neon'],
+    attractionIds: ['mountain', 'neon', 'shooting'],
     layout: MOUNTAIN_LAYOUT,
     perimeter: {
       theme: 'mountain',
@@ -284,14 +284,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [12.5, 9],
       [-12.5, -1.5],
       [12.5, -1.5],
-    ],
-    comingSoonSlots: [
-      // 南東スロット（将来アトラクション予定・看板は工事中のみ）
-      {
-        x: 12.5,
-        z: -11.0,
-        theme: 'mountain',
-      },
     ],
     gates: [
       {

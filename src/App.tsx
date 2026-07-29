@@ -10,6 +10,7 @@ import { MountainApp } from './mountain/MountainApp'
 import { RunwayApp } from './runway/RunwayApp'
 import { ClosetApp } from './closet/ClosetApp'
 import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
+import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
@@ -150,6 +151,15 @@ export default function App() {
     return (
       <>
         <MeetSergitoApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'shooting') {
+    return (
+      <>
+        <ShootingGalleryApp />
         <Analytics />
       </>
     )

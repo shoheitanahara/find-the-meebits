@@ -2,6 +2,14 @@
 
 ## 完了済み
 
+### Mountain Shooting Gallery（`/shooting-gallery`）
+
+- [x] Mountain 東棟 `(15.7, -11.0)` に Shooting Gallery を配置（id=`shooting`）
+- [x] 45秒三人称射的（固定射撃位置・右肩越しカメラ）
+- [x] PC マウス照準 + クリック／SP aim スティック + Fire
+- [x] 複数種の動く的（Meebit/trait 的なし）・レイキャスト命中
+- [x] スコア／コンボ／赤ペナルティ／金色ボーナス／リザルト評価
+
 ### Meebits Park（ハブ / `top`）
 
 - [x] `/` を Park に、本編を `/find-the-meebit` に移設（互換リダイレクトなし）

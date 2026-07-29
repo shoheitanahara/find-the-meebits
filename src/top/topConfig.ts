@@ -185,6 +185,37 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     infoBoardLocal: [-5.2, 4.0],
   },
   {
+    id: 'shooting',
+    zoneId: 'mountain',
+    title: 'SHOOTING GALLERY',
+    subtitle: 'The Fair Booth',
+    description: {
+      en: 'Moving targets. Forty-five seconds.\nAim from the counter and\nchase a high score.',
+      ja: '動く的。制限時間45秒。\nカウンターから狙って、\n高得点を目指そう。',
+    },
+    storyTitle: {
+      en: 'HIT THE MARK',
+      ja: '的を射抜け',
+    },
+    color: '#6a5038',
+    roofColor: '#c8a060',
+    x: 15.7,
+    z: -11.0,
+    entranceZ: -8.0,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [5.2, 4.0],
+    underConstruction: true,
+  },
+  {
     id: 'runway',
     zoneId: 'culture',
     title: 'MEEBITS RUNWAY',

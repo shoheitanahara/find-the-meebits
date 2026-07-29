@@ -39,6 +39,10 @@ const metadata = {
       title: 'Meet Sergito | Meebits Park',
       description: 'Visit Sergito’s workshop. He’ll look at your Meebit and share a short, personal comment.',
     },
+    shooting: {
+      title: 'Shooting Gallery | Meebits Park',
+      description: 'Aim at moving fairground targets from the mountain booth. Forty-five seconds to chase a high score.',
+    },
   },
   ja: {
     top: {
@@ -76,6 +80,10 @@ const metadata = {
     sergito: {
       title: 'Meet Sergito | Meebits Park',
       description: 'Sergitoの工房を訪れ、あなたのMeebitを見てもらおう。traitに合わせた短いコメントが返ってくる。',
+    },
+    shooting: {
+      title: 'シューティングギャラリー | Meebits Park',
+      description: 'マウンテン地区の射的場で、動く的を狙おう。制限時間45秒のスコアアタック。',
     },
   },
 } as const

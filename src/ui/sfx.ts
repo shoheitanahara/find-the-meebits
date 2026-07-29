@@ -9,6 +9,10 @@ type SfxKind =
   | 'targetFound'
   | 'unlock'
   | 'timerStart'
+  | 'shootGalleryFire'
+  | 'shootGalleryHit'
+  | 'shootGalleryHitGold'
+  | 'shootGalleryHitRed'
 
 let audioContext: AudioContext | null = null
 
@@ -386,12 +390,95 @@ export function playSfx(kind: SfxKind) {
     return
   }
 
+  if (kind === 'shootGalleryFire') {
+    playShootGalleryFire(ctx)
+    return
+  }
+
+  if (kind === 'shootGalleryHit') {
+    playShootGalleryHit(ctx)
+    return
+  }
+
+  if (kind === 'shootGalleryHitGold') {
+    playShootGalleryHitGold(ctx)
+    return
+  }
+
+  if (kind === 'shootGalleryHitRed') {
+    playShootGalleryHitRed(ctx)
+    return
+  }
+
   if (kind === 'unlock') {
     playUnlockFanfare(ctx)
     return
   }
 
   playTalkMurmur(ctx)
+}
+
+/** 遊園地の射的らしい軽い銃声 */
+function playShootGalleryFire(ctx: AudioContext) {
+  const now = ctx.currentTime
+  scheduleBeep(ctx, {
+    frequency: 420,
+    durationMs: 35,
+    type: 'square',
+    gain: 0.04,
+    startTime: now,
+  })
+  scheduleBeep(ctx, {
+    frequency: 180,
+    durationMs: 55,
+    type: 'triangle',
+    gain: 0.05,
+    startTime: now,
+  })
+  const noiseLength = Math.max(1, Math.floor(ctx.sampleRate * 0.04))
+  const buffer = ctx.createBuffer(1, noiseLength, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < noiseLength; i += 1) data[i] = Math.random() * 2 - 1
+  const noise = ctx.createBufferSource()
+  noise.buffer = buffer
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'bandpass'
+  filter.frequency.value = 1800
+  filter.Q.value = 0.8
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.07, now)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05)
+  noise.connect(filter)
+  filter.connect(gain)
+  gain.connect(ctx.destination)
+  noise.start(now)
+  noise.stop(now + 0.06)
+}
+
+function playShootGalleryHit(ctx: AudioContext) {
+  const now = ctx.currentTime
+  scheduleBeep(ctx, { frequency: 660, durationMs: 55, type: 'triangle', gain: 0.06, startTime: now })
+  scheduleBeep(ctx, { frequency: 880, durationMs: 70, type: 'sine', gain: 0.05, startTime: now + 0.04 })
+}
+
+function playShootGalleryHitGold(ctx: AudioContext) {
+  const now = ctx.currentTime
+  const notes = [523.25, 659.25, 783.99, 1046.5]
+  notes.forEach((frequency, index) => {
+    scheduleBeep(ctx, {
+      frequency,
+      durationMs: 90,
+      type: 'triangle',
+      gain: 0.07,
+      startTime: now + index * 0.05,
+    })
+  })
+}
+
+function playShootGalleryHitRed(ctx: AudioContext) {
+  const now = ctx.currentTime
+  scheduleBeep(ctx, { frequency: 220, durationMs: 120, type: 'sawtooth', gain: 0.05, startTime: now })
+  scheduleBeep(ctx, { frequency: 160, durationMs: 180, type: 'triangle', gain: 0.06, startTime: now + 0.08 })
 }
 
 function playUnlockFanfare(ctx: AudioContext) {

@@ -143,7 +143,7 @@ Sea 地区: テーマ `sea`（夜のビーチ・曲線の波打ち際・遠く�
 | A | 南西寄り | Plaza: Trait Hunt `(-16, -10.2)` |
 | B | 南中央寄り（中央道は空けたまま） | Plaza: Find `(0, -0.4)` / Mountain: Climb `(0, -7)` |
 | C | 南東寄り | Plaza: Street `(16, -10.2)` |
-| 予備／左棟 | Jerry Mountain（正式オープン）／Coming Soon | Mountain: Jerry `(-15.7, -11.5)`／東 Coming Soon `(12.5, -11.0)` |
+| 予備／左棟 | Jerry Mountain（正式オープン）／Shooting Gallery | Mountain: Jerry `(-15.7, -11.5)`／東 Shooting `(15.7, -11.0)` |
 
 **満杯なら新エリア＋橋ゲート**。既存エリアを押し広げて 4 棟目をねじ込まない。
 
@@ -443,14 +443,14 @@ Plaza `pathEdgeX=21.5`／Mountain `pathEdgeX=11`。床の横幅は全区共通�
 |----|--------|--------|-----------|
 | mountain | Mt. Meeb | (0, -7) | -3.2 |
 | neon | Jerry Mountain（旧 Neon Stack） | (-15.7, -11.5) | -8.0 |
+| shooting | Shooting Gallery | (15.7, -11.0) | -8.0 |
 
 ※ ルート `/neon-stack`・内部 id `neon` は互換のため維持。表示名のみ Jerry Mountain。
+※ ルート `/shooting-gallery`・内部 id `shooting`。木造射的場・45秒スコアアタック。
 
-**Coming Soon 棟**（将来アトラクション予定・看板は工事中のみ）
+**Coming Soon 棟**
 
-| 名前 | (x, z) |
-|------|--------|
-| （北東寄り） | (12.5, -11.0) |
+なし（東棟は Shooting Gallery として Open）
 
 **家具**: Plaza と同じグリッド（benches / planters / lamps / trees）。テーマ差は見た目（針葉樹・床色）のみ。
 

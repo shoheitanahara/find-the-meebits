@@ -9,6 +9,9 @@ src/App.tsx
     'mountain'   → MountainApp      （/mountain, /jp/mountain）
     'neon'       → NeonApp          （/neon-stack 互換）
     'runway'     → RunwayApp        （/runway, /jp/runway）
+    'closet'     → ClosetApp        （/look-locker）
+    'sergito'    → MeetSergitoApp   （/meet-sergito）
+    'shooting'   → ShootingGalleryApp （/shooting-gallery）
     'v2'         → HuntApp(v2)       （/v2, /jp/v2）
     'v1'         → HuntApp(v1)       （/find-the-meebit, /jp/find-the-meebit）
     'top'        → TopApp            （/ , /jp）← デフォルト

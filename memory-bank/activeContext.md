@@ -1,10 +1,31 @@
 # Active Context
 
-最終更新: 2026-07-28
+最終更新: 2026-07-29
 
 ## 直近の作業サマリー
 
-### Meebits Runway（`/runway`）— Open（最新）
+### Mountain Shooting Gallery（`/shooting-gallery`）— Open（最新）
+
+- **名称**: Shooting Gallery（仮）
+- **ルート**: `/shooting-gallery` `/jp/shooting-gallery` → edition `shooting` → `ShootingGalleryApp`（`src/shootingGallery/`）
+- **パーク導線**: Mountain District 東棟 `TOP_ATTRACTIONS` id=`shooting`（建物位置 `(15.7, -11.0)`）
+- **体験**: 45秒・固定射撃位置・三人称右肩越し。動く的をポインターで撃つスコアアタック
+- **操作**: PC マウス照準 + クリック発砲（Pointer Lock）。SP 左下 aim スティック（離しても戻らない）+ 右下 Fire
+- **的**: プレート／星／缶／ボトル／動物シルエット／トロッコ／金色／赤（Meebit・trait 的なし）
+- **スコア**: 通常100 / 小・速200 / 金500 / 赤-300。コンボ倍率 1 / 1.5 / 2
+
+主要ファイル:
+
+| 用途 | パス |
+|------|------|
+| 定数 | `src/shootingGallery/config.ts` |
+| 状態 | `src/shootingGallery/store.ts` |
+| App | `src/shootingGallery/ShootingGalleryApp.tsx` |
+| プレイヤー / カメラ / 入力 | `src/shootingGallery/player/` |
+| 会場・的 | `src/shootingGallery/world/` |
+| UI | `src/shootingGallery/ui/` |
+
+### Meebits Runway（`/runway`）— Open
 
 - **名称**: Meebits Runway（旧 Fashion Runway）
 - **ルート**: `/runway` `/jp/runway` → edition `runway` → `RunwayApp`（`src/runway/`）

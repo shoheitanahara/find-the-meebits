@@ -15,6 +15,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/runway` `/jp/runway` | `runway` | Meebits Runway（日替わりカラー・観賞＋着席） |
 | `/mountain` `/jp/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
+| `/shooting-gallery` `/jp/shooting-gallery` | `shooting` | Shooting Gallery |
 
 - ルート判定: `src/game/appEdition.ts`（`getAppEdition`）
 - Park 設計: **[parkDesigner.md](./parkDesigner.md)**（共通骨格・橋ゲート・カージナル導線）
