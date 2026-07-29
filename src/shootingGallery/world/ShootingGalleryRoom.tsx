@@ -205,6 +205,9 @@ export function ShootingGalleryRoom() {
           </mesh>
         </group>
       ))}
+      {SHOOTING_GALLERY.barObstacleSegments.map(({ x, z, width }, index) => (
+        <BackBarCounter key={`${x}-${z}`} position={[x, 0, z]} width={width} bottleOffset={index} />
+      ))}
 
       {/* 木箱・樽・岩 */}
       <Crate position={[-4.8, 0.4, 1.6]} />
@@ -410,6 +413,54 @@ function Rock({ position }: { position: [number, number, number] }) {
       <dodecahedronGeometry args={[0.55, 0]} />
       <meshStandardMaterial color="#625d52" roughness={0.9} />
     </mesh>
+  )
+}
+
+/** 的を完全には隠さず、移動中に見え隠れさせるバックバーの什器。 */
+function BackBarCounter({
+  position,
+  width,
+  bottleOffset,
+}: {
+  position: [number, number, number]
+  width: number
+  bottleOffset: number
+}) {
+  const bottleColors = ['#50745e', '#805044', '#496b73'] as const
+
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.43, 0]} castShadow receiveShadow>
+        <boxGeometry args={[width, 0.78, 0.62]} />
+        <meshStandardMaterial color="#4a2d20" roughness={0.76} />
+      </mesh>
+      <mesh position={[0, 0.84, 0.02]} castShadow receiveShadow>
+        <boxGeometry args={[width + 0.16, 0.13, 0.76]} />
+        <meshStandardMaterial color="#9b6638" roughness={0.54} />
+      </mesh>
+      <mesh position={[0, 0.91, 0.03]}>
+        <boxGeometry args={[width + 0.08, 0.025, 0.66]} />
+        <meshStandardMaterial color="#d1a05d" metalness={0.3} roughness={0.38} />
+      </mesh>
+      {([-0.32, 0.32] as const).map((panelX) => (
+        <mesh key={panelX} position={[panelX * width, 0.43, 0.325]}>
+          <boxGeometry args={[width * 0.48, 0.58, 0.035]} />
+          <meshStandardMaterial color="#684027" roughness={0.68} />
+        </mesh>
+      ))}
+      {([-0.31, 0, 0.31] as const).map((ratio, index) => (
+        <DecorativeBottle
+          key={ratio}
+          position={[ratio * width, 1.2, 0.02]}
+          color={bottleColors[(index + bottleOffset) % bottleColors.length]!}
+          scale={0.78 + ((index + bottleOffset) % 2) * 0.14}
+        />
+      ))}
+      <mesh position={[width * 0.37, 1.03, 0.04]} rotation={[0, 0, -0.12]} castShadow>
+        <cylinderGeometry args={[0.12, 0.14, 0.34, 14]} />
+        <meshStandardMaterial color="#a67b4d" roughness={0.5} metalness={0.18} />
+      </mesh>
+    </group>
   )
 }
 

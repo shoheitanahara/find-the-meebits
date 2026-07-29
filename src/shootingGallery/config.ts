@@ -31,6 +31,11 @@ export const SHOOTING_GALLERY = {
 
   /** 的レーン中心 Z（奥ほど小さい） */
   laneZ: [-5.8, -4.2, -2.6] as const,
+  /** 手前レーンの的を部分的に隠す、分割式バックバーカウンター。 */
+  barObstacleSegments: [
+    { x: -1.7, z: -2.15, width: 1.8 },
+    { x: 2.85, z: -2.1, width: 2.05 },
+  ] as const,
   /**
    * 的が移動できる横範囲。
    * 左端はアバターと重ならない「画面中央より少し左」までに制限する。
@@ -46,6 +51,10 @@ export const SHOOTING_GALLERY = {
   targetYRange: { min: 0.45, max: 2.85 },
   targetMotionAmplitude: { normal: 1.7, small: 1.3, vertical: 0.9 },
   maxActiveTargets: 10,
+  /** フェーズ別の赤的上限。終盤のみ2枚まで同時出現させる。 */
+  maxActiveRedTargets: [0, 2, 4] as const,
+  /** フェーズ別の赤的抽選率。 */
+  redTargetSpawnChance: [0, 0.15, 0.45] as const,
 
   score: {
     normal: 100,

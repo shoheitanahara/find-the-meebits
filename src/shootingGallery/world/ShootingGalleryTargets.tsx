@@ -51,7 +51,7 @@ export const shootingTargetsRuntime: {
   groups: new Map(),
 }
 
-function pickSpawnPlan(phase: 0 | 1 | 2, allowRed: boolean): SpawnPlan {
+function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
   const lane = Math.floor(Math.random() * 3) as 0 | 1 | 2
   if (phase === 0) {
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal']
@@ -64,7 +64,7 @@ function pickSpawnPlan(phase: 0 | 1 | 2, allowRed: boolean): SpawnPlan {
   }
   if (phase === 1) {
     const roll = Math.random()
-    if (allowRed && roll < 0.15) {
+    if (canSpawnRed && roll < SHOOTING_GALLERY.redTargetSpawnChance[phase]) {
       return { kind: 'red', motion: 'horizontal', lane, small: false }
     }
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
@@ -75,11 +75,12 @@ function pickSpawnPlan(phase: 0 | 1 | 2, allowRed: boolean): SpawnPlan {
       small: Math.random() < 0.45,
     }
   }
-  const roll = Math.random()
-  if (roll < 0.14) return { kind: 'gold', motion: 'brief', lane, small: true }
-  if (allowRed && roll < 0.27) {
+  const specialTargetRoll = Math.random()
+  if (canSpawnRed && specialTargetRoll < SHOOTING_GALLERY.redTargetSpawnChance[phase]) {
     return { kind: 'red', motion: 'horizontal', lane, small: false }
   }
+  const roll = Math.random()
+  if (roll < 0.14) return { kind: 'gold', motion: 'brief', lane, small: true }
   const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
   return {
     kind: kinds[Math.floor(Math.random() * kinds.length)]!,
@@ -243,9 +244,13 @@ export function ShootingGalleryTargets() {
       const aliveVisible = targets.filter((t) => t.alive && t.visible).length
       if (aliveVisible < desiredActiveCount(difficulty) && spawnCooldownRef.current <= 0) {
         const freeSlot = targets.findIndex((t) => !t.alive)
-        const allowRed = !targets.some((target) => target.alive && target.kind === 'red')
+        const activeRedTargetCount = targets.filter(
+          (target) => target.alive && target.kind === 'red',
+        ).length
+        const canSpawnRed =
+          activeRedTargetCount < SHOOTING_GALLERY.maxActiveRedTargets[difficulty]
         const next = createTarget(
-          pickSpawnPlan(difficulty, allowRed),
+          pickSpawnPlan(difficulty, canSpawnRed),
           elapsed,
           targets,
         )
