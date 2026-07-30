@@ -808,9 +808,19 @@ function FeaturedInfoBoard({
   const linkLabel = locale === 'ja' ? '本日の共通点' : "TODAY'S LINK"
   const themeLine = `${themeTrait.traitType} · ${formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue)}`
   const orderedTraits = orderFeaturedTraits(featuredTraits)
-  const mid = Math.ceil(orderedTraits.length / 2)
-  const leftTraits = orderedTraits.slice(0, mid)
-  const rightTraits = orderedTraits.slice(mid)
+  const displayedTraits = orderedTraits.filter(
+    ([type, value]) => !(type === themeTrait.traitType && value === themeTrait.traitValue),
+  )
+  const mid = Math.ceil(displayedTraits.length / 2)
+  const leftTraits = displayedTraits.slice(0, mid)
+  const rightTraits = displayedTraits.slice(mid)
+  const maxTraitRows = Math.max(leftTraits.length, rightTraits.length)
+  const boardBottomY = 0.42
+  const boardHeight = Math.max(1.85, 1.14 + maxTraitRows * 0.141)
+  const boardTopY = boardBottomY + boardHeight
+  const boardCenterY = boardBottomY + boardHeight * 0.5
+  const postBottomY = 0.08
+  const postHeight = boardTopY - postBottomY
 
   return (
     <group position={FEATURED_BOARD_POSITION} rotation={[0, 0, 0]}>
@@ -819,13 +829,13 @@ function FeaturedInfoBoard({
         <meshStandardMaterial color="#29242c" roughness={0.62} />
       </mesh>
       {[-1.35, 1.35].map((x) => (
-        <mesh key={x} position={[x, 1.05, 0]}>
-          <cylinderGeometry args={[0.05, 0.065, 1.95, 10]} />
+        <mesh key={x} position={[x, postBottomY + postHeight * 0.5, 0]}>
+          <cylinderGeometry args={[0.05, 0.065, postHeight, 10]} />
           <meshStandardMaterial color="#a8864d" metalness={0.66} roughness={0.34} />
         </mesh>
       ))}
-      <mesh position={[0, 1.35, 0.04]}>
-        <boxGeometry args={[3.4, 1.85, 0.14]} />
+      <mesh position={[0, boardCenterY, 0.04]}>
+        <boxGeometry args={[3.4, boardHeight, 0.14]} />
         <meshStandardMaterial
           color="#17151d"
           emissive="#d4b46a"
@@ -835,12 +845,12 @@ function FeaturedInfoBoard({
         />
       </mesh>
 
-      <mesh position={[0, 2.02, 0.05]}>
+      <mesh position={[0, boardTopY - 0.23, 0.05]}>
         <boxGeometry args={[3.25, 0.38, 0.04]} />
         <meshStandardMaterial color="#221c28" roughness={0.55} metalness={0.12} />
       </mesh>
       <Text
-        position={[-0.78, 2.04, 0.14]}
+        position={[-0.78, boardTopY - 0.21, 0.14]}
         fontSize={0.15}
         color="#e2c77f"
         anchorX="center"
@@ -850,7 +860,7 @@ function FeaturedInfoBoard({
         {heading}
       </Text>
       <Text
-        position={[0.88, 2.04, 0.14]}
+        position={[0.88, boardTopY - 0.21, 0.14]}
         fontSize={0.22}
         color="#f4ead2"
         anchorX="center"
@@ -859,14 +869,14 @@ function FeaturedInfoBoard({
         {`#${featuredId}`}
       </Text>
 
-      <mesh position={[0, 1.78, 0.13]}>
+      <mesh position={[0, boardTopY - 0.49, 0.13]}>
         <boxGeometry args={[3.05, 0.012, 0.02]} />
         <meshStandardMaterial color="#d4b46a" emissive="#8b632b" emissiveIntensity={0.35} />
       </mesh>
 
       {/* 本日の共通トレイト（マッチ枠15体の基準） */}
       <Text
-        position={[0, 1.64, 0.15]}
+        position={[0, boardTopY - 0.63, 0.15]}
         fontSize={0.1}
         color="#caa75b"
         anchorX="center"
@@ -875,7 +885,7 @@ function FeaturedInfoBoard({
         {linkLabel}
       </Text>
       <Text
-        position={[0, 1.48, 0.15]}
+        position={[0, boardTopY - 0.79, 0.15]}
         fontSize={0.14}
         color="#ffe7b0"
         anchorX="center"
@@ -887,13 +897,11 @@ function FeaturedInfoBoard({
 
       <FeaturedTraitColumn
         traits={leftTraits}
-        themeTrait={themeTrait}
-        position={[-0.82, 1.05, 0.15]}
+        position={[-0.82, boardTopY - 0.96, 0.15]}
       />
       <FeaturedTraitColumn
         traits={rightTraits}
-        themeTrait={themeTrait}
-        position={[0.82, 1.05, 0.15]}
+        position={[0.82, boardTopY - 0.96, 0.15]}
       />
     </group>
   )
@@ -934,22 +942,16 @@ function orderFeaturedTraits(traits: MeebitTraitMap): Array<[string, string]> {
 
 function FeaturedTraitColumn({
   traits,
-  themeTrait,
   position,
 }: {
   traits: Array<[string, string]>
-  themeTrait: DailyThemeTrait
   position: [number, number, number]
 }) {
   if (traits.length === 0) return null
 
-  // テーマ以外のトレイトを通常色で列表示（テーマは上段で強調済み）
   const lines = traits
-    .filter(([type, value]) => !(type === themeTrait.traitType && value === themeTrait.traitValue))
     .map(([type, value]) => `${type} · ${formatTraitDisplayName(type, value)}`)
     .join('\n')
-
-  if (!lines) return null
 
   return (
     <Text
@@ -958,7 +960,7 @@ function FeaturedTraitColumn({
       lineHeight={1.28}
       color="#d8cfc0"
       anchorX="center"
-      anchorY="middle"
+      anchorY="top"
       textAlign="left"
       maxWidth={1.55}
     >
