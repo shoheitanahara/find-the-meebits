@@ -102,6 +102,9 @@ function tryLoadStaticPreview(meebitNumber: number, priority: number) {
   staticLoadStarted.add(key)
   const url = getMeebitPreviewImageUrl(meebitNumber)
   const img = new Image()
+  // CORS なしで読むと同 URL のキャッシュが非 CORS 応答になり、
+  // Three.js の TextureLoader（crossOrigin 必須）が後から弾かれる。
+  img.crossOrigin = 'anonymous'
 
   img.onload = () => {
     cache.set(key, url)

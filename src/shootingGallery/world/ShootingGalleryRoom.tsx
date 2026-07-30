@@ -426,6 +426,9 @@ function createWeatheredPosterTexture(source: Texture): Texture {
       context.arc(x, y, radius, 0, Math.PI * 2)
       context.fill()
     }
+
+    // 汚染された canvas は WebGL 転送時に失敗するため、加工前の画像へ退避する。
+    context.getImageData(0, 0, 1, 1)
   } catch {
     source.colorSpace = SRGBColorSpace
     return source
