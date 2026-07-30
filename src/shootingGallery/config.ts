@@ -52,8 +52,8 @@ export const SHOOTING_GALLERY = {
   targetYRange: { min: 0.45, max: 2.85 },
   targetMotionAmplitude: { normal: 1.7, small: 1.3, vertical: 0.9 },
   maxActiveTargets: 10,
-  /** フェーズ別の赤的上限。終盤のみ2枚まで同時出現させる。 */
-  maxActiveRedTargets: [0, 2, 4] as const,
+  /** フェーズ別の赤的上限。終盤のみ5枚まで同時出現させる。 */
+  maxActiveRedTargets: [0, 3, 5] as const,
   /** フェーズ別の赤的抽選率。 */
   redTargetSpawnChance: [0, 0.15, 0.45] as const,
   /** 難易度切り替え時に既存の的を残し、段階的に入れ替える時間。 */

@@ -1,9 +1,22 @@
 import { Text } from '@react-three/drei'
+import { Vector2 } from 'three'
 import { SHOOTING_GALLERY } from '../config'
 
 const FLOOR_PLANK_Z = [-7.8, -6.2, -4.6, -3, -1.4, 0.2, 1.8, 3.4, 5] as const
 const BACK_WALL_PLANK_Y = [0.45, 1.15, 1.85, 2.55, 3.25, 3.95, 4.65] as const
 const PRACTICAL_LIGHT_X = [-3.4, 0, 3.4] as const
+const BOTTLE_PROFILE = [
+  new Vector2(0, -0.29),
+  new Vector2(0.12, -0.29),
+  new Vector2(0.145, -0.25),
+  new Vector2(0.15, -0.18),
+  new Vector2(0.15, 0.12),
+  new Vector2(0.14, 0.18),
+  new Vector2(0.095, 0.25),
+  new Vector2(0.06, 0.28),
+  new Vector2(0.055, 0.43),
+  new Vector2(0, 0.43),
+]
 
 /** 木造遊園地風の射的場。西部劇風だがリアル戦闘施設にはしない。 */
 export function ShootingGalleryRoom() {
@@ -86,13 +99,13 @@ export function ShootingGalleryRoom() {
         </mesh>
       ))}
 
-      {/* 山小屋の窓を思わせる、明快なターゲット舞台。 */}
+      {/* 石積みと重い木梁で構成したマウンテンロッジのターゲット舞台。 */}
       <group position={[1, 0, roomMinZ + 0.14]}>
         <mesh position={[0, 2.15, 0]} receiveShadow>
           <boxGeometry args={[7.35, 4.15, 0.16]} />
           <meshStandardMaterial color="#18252a" roughness={0.72} />
         </mesh>
-        <MountainBackdrop />
+        <LodgeBackWall />
         {([-3.78, 3.78] as const).map((x) => (
           <group key={`stage-column-${x}`} position={[x, 2.15, 0.2]}>
             <mesh castShadow>
@@ -189,9 +202,6 @@ export function ShootingGalleryRoom() {
           <meshStandardMaterial color="#b48243" metalness={0.7} roughness={0.28} />
         </mesh>
       ))}
-      <BarStool position={[-2.55, 0, counterZ + 1.15]} rotationY={0.12} />
-      <BarStool position={[2.45, 0, counterZ + 1.2]} rotationY={-0.16} />
-
       {/* 三段の木製ターゲット棚。機械設備に見える装飾は置かない。 */}
       {SHOOTING_GALLERY.laneZ.map((z, index) => (
         <group key={z}>
@@ -254,46 +264,80 @@ export function ShootingGalleryRoom() {
   )
 }
 
-function MountainBackdrop() {
+function LodgeBackWall() {
+  const stoneBlockX = [-3.25, -2.45, -1.65, -0.82, 0, 0.82, 1.65, 2.45, 3.25] as const
+
   return (
     <group position={[0, 0, 0.11]}>
-      {/* 塗装された遠景と手前の山並み。射的レーンの背景として静的に見せる。 */}
-      <mesh position={[-1.9, 1.65, 0]} scale={[2.5, 1.75, 1]}>
-        <circleGeometry args={[1, 3, Math.PI / 2]} />
-        <meshStandardMaterial color="#354d50" roughness={0.92} />
-      </mesh>
-      <mesh position={[1.55, 1.55, 0.01]} scale={[2.9, 1.95, 1]}>
-        <circleGeometry args={[1, 3, Math.PI / 2]} />
-        <meshStandardMaterial color="#2b4142" roughness={0.94} />
-      </mesh>
-      <mesh position={[-1.9, 2.88, 0.025]} scale={[0.72, 0.48, 1]}>
-        <circleGeometry args={[1, 3, Math.PI / 2]} />
-        <meshStandardMaterial color="#d8d4c5" roughness={0.84} />
-      </mesh>
-      <mesh position={[1.55, 2.94, 0.03]} scale={[0.82, 0.52, 1]}>
-        <circleGeometry args={[1, 3, Math.PI / 2]} />
-        <meshStandardMaterial color="#e5dfcf" roughness={0.82} />
-      </mesh>
-      <mesh position={[0, 0.68, 0.04]} scale={[4.3, 1.08, 1]}>
-        <circleGeometry args={[1, 3, Math.PI / 2]} />
-        <meshStandardMaterial color="#203536" roughness={0.96} />
-      </mesh>
-
-      {([-3.25, -2.78, 2.85, 3.3] as const).map((x, index) => (
-        <PineSilhouette
-          key={x}
-          position={[x, 0.92 + (index % 2) * 0.16, 0.08]}
-          scale={index % 2 === 0 ? 0.9 : 0.72}
-        />
+      {/* 深い色の横板。的の輪郭を保ちながらロッジの室内壁に見せる。 */}
+      {[0.48, 1.04, 1.6, 2.16, 2.72, 3.28, 3.84].map((y, index) => (
+        <mesh key={`lodge-plank-${y}`} position={[0, y, 0]}>
+          <boxGeometry args={[7.15, 0.5, 0.08]} />
+          <meshStandardMaterial
+            color={index % 2 === 0 ? '#273029' : '#31382f'}
+            roughness={0.88}
+          />
+        </mesh>
       ))}
 
+      {/* 不揃いな石積みの腰壁。 */}
+      {[0.22, 0.7].map((y, row) =>
+        stoneBlockX.map((x, index) => (
+          <mesh
+            key={`stone-${row}-${x}`}
+            position={[x + (row === 0 ? 0 : 0.22), y, 0.11]}
+            rotation={[0, 0, ((index + row) % 3 - 1) * 0.025]}
+            castShadow
+          >
+            <boxGeometry args={[0.72 + ((index + row) % 2) * 0.08, 0.4, 0.16]} />
+            <meshStandardMaterial
+              color={(index + row) % 2 === 0 ? '#777267' : '#625f58'}
+              roughness={0.96}
+            />
+          </mesh>
+        )),
+      )}
+
+      {/* ロッジ建築らしい柱・梁・方杖。 */}
+      {([-2.78, 2.78] as const).map((x) => (
+        <mesh key={`lodge-post-${x}`} position={[x, 2.32, 0.16]} castShadow>
+          <boxGeometry args={[0.24, 3.05, 0.2]} />
+          <meshStandardMaterial color="#6f472b" roughness={0.72} />
+        </mesh>
+      ))}
+      <mesh position={[0, 3.22, 0.16]} castShadow>
+        <boxGeometry args={[6.05, 0.25, 0.2]} />
+        <meshStandardMaterial color="#70472a" roughness={0.7} />
+      </mesh>
+      <mesh position={[-2.08, 2.68, 0.17]} rotation={[0, 0, -0.58]} castShadow>
+        <boxGeometry args={[1.45, 0.16, 0.18]} />
+        <meshStandardMaterial color="#795033" roughness={0.72} />
+      </mesh>
+      <mesh position={[2.08, 2.68, 0.17]} rotation={[0, 0, 0.58]} castShadow>
+        <boxGeometry args={[1.45, 0.16, 0.18]} />
+        <meshStandardMaterial color="#795033" roughness={0.72} />
+      </mesh>
+
+      <LodgeSkiRack position={[-2.05, 1.82, 0.23]} accentColor="#9a493c" />
+      <LodgeSkiRack position={[2.05, 1.82, 0.23]} accentColor="#4c7180" />
+      <LodgeLantern position={[-3.3, 3.2, 0.28]} />
+      <LodgeLantern position={[3.3, 3.2, 0.28]} />
+
+      <mesh position={[0, 3.7, 0.22]} castShadow>
+        <boxGeometry args={[2.9, 0.62, 0.16]} />
+        <meshStandardMaterial color="#6b4328" roughness={0.68} />
+      </mesh>
+      <mesh position={[0, 3.7, 0.32]}>
+        <boxGeometry args={[2.66, 0.42, 0.035]} />
+        <meshStandardMaterial color="#2b2924" roughness={0.8} />
+      </mesh>
       <Text
-        position={[0, 3.7, 0.08]}
-        fontSize={0.19}
-        color="#e4c88c"
+        position={[0, 3.7, 0.36]}
+        fontSize={0.2}
+        color="#f0d39a"
         anchorX="center"
         anchorY="middle"
-        letterSpacing={0.16}
+        letterSpacing={0.12}
       >
         HIGH PEAK LODGE
       </Text>
@@ -301,23 +345,57 @@ function MountainBackdrop() {
   )
 }
 
-function PineSilhouette({
+function LodgeSkiRack({
   position,
-  scale,
+  accentColor,
 }: {
   position: [number, number, number]
-  scale: number
+  accentColor: string
 }) {
   return (
-    <group position={position} scale={scale}>
-      <mesh position={[0, -0.48, 0]}>
-        <boxGeometry args={[0.12, 0.7, 0.06]} />
-        <meshStandardMaterial color="#172724" roughness={0.95} />
+    <group position={position}>
+      {([-0.18, 0.18] as const).map((rotationZ, index) => (
+        <group key={rotationZ} rotation={[0, 0, rotationZ]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.1, 1.65, 0.08]} />
+            <meshStandardMaterial color={index === 0 ? accentColor : '#d5bd8d'} roughness={0.55} />
+          </mesh>
+          <mesh position={[0, 0.12, 0.06]} castShadow>
+            <boxGeometry args={[0.18, 0.24, 0.1]} />
+            <meshStandardMaterial color="#302923" roughness={0.68} metalness={0.18} />
+          </mesh>
+          {([-0.62, 0.62] as const).map((y) => (
+            <mesh key={y} position={[0, y, 0.05]}>
+              <boxGeometry args={[0.105, 0.1, 0.02]} />
+              <meshStandardMaterial color="#eee0bd" roughness={0.6} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  )
+}
+
+function LodgeLantern({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.1, 0]} castShadow>
+        <boxGeometry args={[0.34, 0.5, 0.12]} />
+        <meshStandardMaterial color="#272524" metalness={0.62} roughness={0.36} />
       </mesh>
-      {[0.38, 0, -0.38].map((y, index) => (
-        <mesh key={y} position={[0, y, 0]} scale={[1 - index * 0.16, 1, 1]}>
-          <circleGeometry args={[0.64, 3, Math.PI / 2]} />
-          <meshStandardMaterial color={index % 2 === 0 ? '#244139' : '#1d352f'} roughness={0.96} />
+      <mesh position={[0, 0.1, 0.075]}>
+        <boxGeometry args={[0.2, 0.34, 0.04]} />
+        <meshStandardMaterial
+          color="#ffe1a0"
+          emissive="#ff9d32"
+          emissiveIntensity={2.1}
+          roughness={0.28}
+        />
+      </mesh>
+      {([-0.13, 0.13] as const).map((x) => (
+        <mesh key={x} position={[x, 0.1, 0.14]}>
+          <boxGeometry args={[0.025, 0.48, 0.025]} />
+          <meshStandardMaterial color="#191817" metalness={0.7} roughness={0.32} />
         </mesh>
       ))}
     </group>
@@ -523,60 +601,38 @@ function DecorativeBottle({
 }) {
   return (
     <group position={position} scale={scale}>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.11, 0.14, 0.46, 14]} />
-        <meshStandardMaterial color={color} roughness={0.24} metalness={0.05} />
+      <mesh castShadow receiveShadow>
+        <latheGeometry args={[BOTTLE_PROFILE, 28]} />
+        <meshPhysicalMaterial
+          color={color}
+          roughness={0.18}
+          metalness={0.02}
+          transmission={0.08}
+          thickness={0.18}
+          transparent
+          opacity={0.92}
+        />
       </mesh>
-      <mesh position={[0, 0.3, 0]} castShadow>
-        <cylinderGeometry args={[0.055, 0.08, 0.18, 14]} />
-        <meshStandardMaterial color={color} roughness={0.22} />
+      {/* 胴を一周する紙ラベル。平面よりボトルの丸みに馴染ませる。 */}
+      <mesh position={[0, -0.04, 0]} castShadow>
+        <cylinderGeometry args={[0.152, 0.152, 0.16, 28]} />
+        <meshStandardMaterial color="#dfcfa8" roughness={0.76} />
       </mesh>
-      <mesh position={[0, -0.03, 0.115]}>
-        <planeGeometry args={[0.13, 0.16]} />
-        <meshStandardMaterial color="#dfcfa8" roughness={0.7} />
+      <mesh position={[0, -0.035, 0.154]}>
+        <planeGeometry args={[0.105, 0.075]} />
+        <meshStandardMaterial color="#68452d" roughness={0.68} />
       </mesh>
-    </group>
-  )
-}
-
-function BarStool({
-  position,
-  rotationY,
-}: {
-  position: [number, number, number]
-  rotationY: number
-}) {
-  return (
-    <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 1.02, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.42, 0.44, 0.16, 20]} />
-        <meshStandardMaterial color="#513225" roughness={0.58} />
+      <mesh position={[0, 0.43, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.056, 0.012, 8, 20]} />
+        <meshStandardMaterial color="#bd9255" metalness={0.42} roughness={0.34} />
       </mesh>
-      <mesh position={[0, 1.12, 0]}>
-        <cylinderGeometry args={[0.36, 0.38, 0.08, 20]} />
-        <meshStandardMaterial color="#9a513d" roughness={0.46} />
+      <mesh position={[0, 0.47, 0]} castShadow>
+        <cylinderGeometry args={[0.048, 0.048, 0.075, 18]} />
+        <meshStandardMaterial color="#8d6845" roughness={0.88} />
       </mesh>
-      {([-0.25, 0.25] as const).flatMap((x) =>
-        ([-0.2, 0.2] as const).map((z) => (
-          <mesh key={`${x}-${z}`} position={[x, 0.5, z]} castShadow>
-            <cylinderGeometry args={[0.035, 0.045, 0.95, 10]} />
-            <meshStandardMaterial color="#493326" roughness={0.7} />
-          </mesh>
-        )),
-      )}
-      <mesh position={[0, 0.48, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.27, 0.025, 8, 20]} />
-        <meshStandardMaterial color="#b88749" metalness={0.52} roughness={0.35} />
-      </mesh>
-      {([-0.25, 0.25] as const).map((x) => (
-        <mesh key={`back-post-${x}`} position={[x, 1.48, -0.22]} castShadow>
-          <cylinderGeometry args={[0.035, 0.04, 0.78, 10]} />
-          <meshStandardMaterial color="#493326" roughness={0.7} />
-        </mesh>
-      ))}
-      <mesh position={[0, 1.82, -0.22]} castShadow>
-        <boxGeometry args={[0.68, 0.38, 0.14]} />
-        <meshStandardMaterial color="#8e4938" roughness={0.54} />
+      <mesh position={[-0.1, 0.08, 0.12]} rotation={[0, 0.25, 0]}>
+        <planeGeometry args={[0.025, 0.24]} />
+        <meshBasicMaterial color="#d9f4de" transparent opacity={0.36} />
       </mesh>
     </group>
   )
