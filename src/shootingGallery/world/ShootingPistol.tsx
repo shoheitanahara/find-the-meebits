@@ -261,23 +261,39 @@ function VintageReceiver() {
           emissiveIntensity={0.1}
         />
       </mesh>
-      {([-0.105, 0.115] as const).map((z) => (
-        <mesh key={`chamber-ring-${z}`} position={[0, 0.08, z]} castShadow>
-          <torusGeometry args={[0.069, 0.009, 10, 24]} />
+      <mesh position={[0, 0.08, 0.115]} castShadow>
+        <torusGeometry args={[0.069, 0.009, 10, 24]} />
+        <meshStandardMaterial
+          color={POLISHED_BRASS}
+          metalness={0.88}
+          roughness={0.22}
+        />
+      </mesh>
+
+      {/* カメラ側の後端は閉じた角型機関部にし、第二の銃口に見せない。 */}
+      <mesh position={[0, 0.075, -0.145]} castShadow receiveShadow>
+        <boxGeometry args={[0.12, 0.13, 0.105]} />
+        <meshStandardMaterial
+          color={DARK_BRASS}
+          metalness={0.78}
+          roughness={0.32}
+        />
+      </mesh>
+      <mesh position={[0, 0.148, -0.143]} castShadow>
+        <boxGeometry args={[0.104, 0.026, 0.112]} />
+        <meshStandardMaterial
+          color={AGED_BRASS}
+          metalness={0.82}
+          roughness={0.28}
+        />
+      </mesh>
+      {([-0.064, 0.064] as const).map((x) => (
+        <mesh key={`breech-side-${x}`} position={[x, 0.075, -0.145]} castShadow>
+          <boxGeometry args={[0.009, 0.1, 0.082]} />
           <meshStandardMaterial
             color={POLISHED_BRASS}
-            metalness={0.88}
-            roughness={0.22}
-          />
-        </mesh>
-      ))}
-      {[-0.145, -0.12, -0.095].map((z, index) => (
-        <mesh key={`rear-coil-${z}`} position={[0, 0.08, z]} castShadow>
-          <torusGeometry args={[0.056 - index * 0.004, 0.011, 10, 22]} />
-          <meshStandardMaterial
-            color={index % 2 === 0 ? DARK_STEEL : POLISHED_BRASS}
-            metalness={0.84}
-            roughness={0.28}
+            metalness={0.86}
+            roughness={0.24}
           />
         </mesh>
       ))}
