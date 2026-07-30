@@ -51,13 +51,29 @@ export const shootingTargetsRuntime: {
   groups: new Map(),
 }
 
+function pickMidGameMotion(roll: number): TargetMotion {
+  if (roll < 0.45) return 'vertical'
+  if (roll < 0.7) return 'horizontal'
+  return 'brief'
+}
+
+function pickLateGameMotion(roll: number): TargetMotion {
+  if (roll < 0.5) return 'horizontal'
+  if (roll < 0.75) return 'vertical'
+  return 'trolley'
+}
+
+function pickMovingMotion(roll: number): TargetMotion {
+  return roll < 0.5 ? 'horizontal' : 'vertical'
+}
+
 function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
   const lane = Math.floor(Math.random() * 3) as 0 | 1 | 2
   if (phase === 0) {
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal']
     return {
       kind: kinds[Math.floor(Math.random() * kinds.length)]!,
-      motion: Math.random() < 0.7 ? 'horizontal' : 'pop',
+      motion: 'static',
       lane,
       small: false,
     }
@@ -68,11 +84,12 @@ function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
       return { kind: 'red', motion: 'horizontal', lane, small: false }
     }
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
+    const small = Math.random() < 0.45
     return {
       kind: kinds[Math.floor(Math.random() * kinds.length)]!,
-      motion: roll < 0.45 ? 'vertical' : roll < 0.7 ? 'horizontal' : 'brief',
+      motion: small ? pickMidGameMotion(roll) : pickMovingMotion(roll),
       lane,
-      small: Math.random() < 0.45,
+      small,
     }
   }
   const specialTargetRoll = Math.random()
@@ -80,13 +97,21 @@ function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
     return { kind: 'red', motion: 'horizontal', lane, small: false }
   }
   const roll = Math.random()
-  if (roll < 0.14) return { kind: 'gold', motion: 'brief', lane, small: true }
+  if (roll < 0.14) {
+    return {
+      kind: 'gold',
+      motion: pickMovingMotion(Math.random()),
+      lane,
+      small: true,
+    }
+  }
   const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
+  const small = Math.random() < 0.55
   return {
     kind: kinds[Math.floor(Math.random() * kinds.length)]!,
-    motion: roll < 0.5 ? 'horizontal' : roll < 0.75 ? 'vertical' : 'trolley',
+    motion: pickLateGameMotion(roll),
     lane,
-    small: Math.random() < 0.55,
+    small,
   }
 }
 
@@ -152,7 +177,7 @@ function createTarget(
   const amp = isSmall
     ? SHOOTING_GALLERY.targetMotionAmplitude.small
     : SHOOTING_GALLERY.targetMotionAmplitude.normal
-  const motion = plan.kind === 'trolley' ? 'trolley' : plan.motion
+  const motion = plan.motion
   const horizontalMargin =
     motion === 'horizontal' || motion === 'trolley'
       ? amp

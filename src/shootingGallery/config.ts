@@ -89,6 +89,7 @@ export type TargetKind =
   | 'red'
 
 export type TargetMotion =
+  | 'static'
   | 'horizontal'
   | 'vertical'
   | 'pop'
