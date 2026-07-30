@@ -49,7 +49,7 @@ const CREATOR_SEED = 11143
 
 /**
  * パーク来場者のセリフを 1〜2 行選ぶ。
- * plaza / mountain / culture / sea で別プール。挨拶 + 本文。
+ * plaza / mountain / culture / sea / astro で別プール。挨拶 + 本文。
  */
 export function selectParkDialogueLines(
   npc: ParkNpcRecord,
@@ -69,6 +69,7 @@ export function selectParkDialogueLines(
   const isMountain = zoneId === 'mountain'
   const isCulture = zoneId === 'culture'
   const isSea = zoneId === 'sea'
+  const isAstro = zoneId === 'astro'
 
   const greeting = pickLine(pools.greetings, seed, talkCount, 11)
   lines.push({
@@ -84,10 +85,10 @@ export function selectParkDialogueLines(
   if (npc.isFeatured) {
     second =
       locale === 'ja'
-        ? isMountain || isCulture || isSea
+        ? isMountain || isCulture || isSea || isAstro
           ? `噴水の銅像、#${featuredId}。ぼく。遠くからだと信じにくいよね。`
           : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
-        : isMountain || isCulture || isSea
+        : isMountain || isCulture || isSea || isAstro
           ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
           : `Fountain statue’s #${featuredId}. That’s me. Looks different from the side.`
   } else if (npc.matched && branch <= 2) {
@@ -100,7 +101,7 @@ export function selectParkDialogueLines(
       ? pickLine(pools.gameMountain, seed, talkCount, 31)
       : isCulture
         ? pickLine(pools.gameRunway, seed, talkCount, 31)
-        : isSea
+        : isSea || isAstro
           ? pickLine(pools.flavor, seed, talkCount, 31)
           : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
@@ -108,11 +109,11 @@ export function selectParkDialogueLines(
       ? pickLine(pools.gameNeon, seed, talkCount, 37)
       : isCulture
         ? pickLine(pools.gameLookLocker, seed, talkCount, 37)
-        : isSea
+        : isSea || isAstro
           ? pickLine(pools.flavor, seed, talkCount, 37)
           : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
-    second = isMountain || isCulture || isSea
+    second = isMountain || isCulture || isSea || isAstro
       ? pickLine(pools.flavor, seed, talkCount, 41)
       : pickLine(pools.gameStreet, seed, talkCount, 41)
   } else {

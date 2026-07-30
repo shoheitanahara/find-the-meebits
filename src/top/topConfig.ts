@@ -1,3 +1,4 @@
+import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
 import type { AttractionId } from './topStore'
 import type { ParkZoneId } from './parkZones'
 
@@ -138,9 +139,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#6a7a58',
     roofColor: '#e8eef4',
-    x: 0,
-    z: -7,
-    entranceZ: -3.2,
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.center.entranceZ,
     footprint: {
       halfWidth: 3.6,
       halfDepth: 3.8,
@@ -169,9 +170,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     color: '#1a0a30',
     roofColor: '#ff2bd6',
     // 半棟分左寄せ（旧 -12.5 → footprint halfWidth 約 3.2）
-    x: -15.7,
-    z: -11.5,
-    entranceZ: -8.0,
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.west.entranceZ,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.5,
@@ -199,9 +200,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#6a5038',
     roofColor: '#c8a060',
-    x: 15.7,
-    z: -11.0,
-    entranceZ: -8.0,
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.east.entranceZ,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.5,
@@ -230,9 +231,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     color: '#1a1a1a',
     roofColor: '#f5f5f5',
-    x: 0,
-    z: -7.0,
-    entranceZ: -3.2,
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.center.entranceZ,
     footprint: {
       halfWidth: 3.4,
       halfDepth: 3.6,
@@ -261,9 +262,9 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     color: '#1a2a48',
     roofColor: '#6a9ee8',
     // 半個分左寄せ（旧 -12.5 → footprint halfWidth 約 3.2）
-    x: -15.7,
-    z: -11.5,
-    entranceZ: -8.0,
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.west.entranceZ,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.5,

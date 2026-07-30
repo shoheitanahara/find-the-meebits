@@ -17,7 +17,13 @@ export type ParkLocaleResume = {
 }
 
 function isParkZoneId(value: unknown): value is ParkZoneId {
-  return value === 'plaza' || value === 'mountain' || value === 'culture' || value === 'sea'
+  return (
+    value === 'plaza' ||
+    value === 'mountain' ||
+    value === 'culture' ||
+    value === 'sea' ||
+    value === 'astro'
+  )
 }
 
 function parseParkLocaleResume(raw: string): ParkLocaleResume | null {

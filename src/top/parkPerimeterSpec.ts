@@ -21,7 +21,7 @@ export type PerimeterOpening =
   | { side: CardinalSide; kind: 'bridge-gate'; gateId: string }
   | { side: CardinalSide; kind: 'sealed' }
 
-export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture' | 'sea'
+export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
 
 export type ParkPerimeterDef = {
   theme: ParkPerimeterTheme
@@ -85,6 +85,7 @@ export function buildPerimeterSpec(
 ): PerimeterSpec {
   const isMountain = perimeter.theme === 'mountain'
   const isSea = perimeter.theme === 'sea'
+  const isAstro = perimeter.theme === 'astro'
   // 床スケルトンは全区共通。川内側も同じ基準で揃える
   const riverInnerX = Math.min(layout.boundsX - 4.8, 22.2)
   const riverInnerZN = Math.min(layout.maxZ - 2.2, 12.5)
@@ -97,14 +98,14 @@ export function buildPerimeterSpec(
     riverInnerZN,
     riverInnerZS,
     // sea: 広い海帯。壁寸法は未使用（描画・衝突ともスキップ）
-    riverWidth: isMountain ? 3.0 : isSea ? 5.6 : 2.5,
-    wallThickness: isMountain ? 1.6 : isSea ? 0.2 : 1.25,
-    wallHeight: isMountain ? 3.6 : isSea ? 0.2 : 2.85,
-    wallOpeningHalf: isMountain ? 5.4 : isSea ? 5.6 : 5.2,
+    riverWidth: isMountain ? 3.0 : isSea ? 5.6 : isAstro ? 2.8 : 2.5,
+    wallThickness: isMountain ? 1.6 : isSea ? 0.2 : isAstro ? 1.35 : 1.25,
+    wallHeight: isMountain ? 3.6 : isSea ? 0.2 : isAstro ? 3.2 : 2.85,
+    wallOpeningHalf: isMountain ? 5.4 : isSea ? 5.6 : isAstro ? 5.3 : 5.2,
     openingHalf: 2.35,
     // 門の通過幅に近いデッキ。川をまたぐ長さは配置側で river に合わせる
     bridgeDeckWidth: 4.0,
-    bridgeLength: isMountain ? 3.6 : isSea ? 3.8 : 3.2,
+    bridgeLength: isMountain ? 3.6 : isSea ? 3.8 : isAstro ? 3.4 : 3.2,
     frontClearSides: perimeter.frontClearSides ?? ['n'],
     theme: perimeter.theme,
     openings: perimeter.openings,

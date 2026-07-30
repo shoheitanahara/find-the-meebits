@@ -826,6 +826,66 @@ const EN_SEA_FLAVOR = [
   'Leaving when the lantern cools. Probably lying.',
 ]
 
+const JA_ASTRO_GREET = [
+  '真空の匂い、する？',
+  'エアロック、通りました？',
+  'ようこそ、アストロへ。',
+  'ロボットとビジターの夜です。',
+  'ハッチの先がここ。',
+  '軌道側の風、感じる？',
+  '工事灯がきれいでしょう。',
+  'ドッキング、完了？',
+]
+
+const JA_ASTRO_FLAVOR = [
+  'スタードーム、まだ骨組みだけ。',
+  'ルナラボから電波が聞こえる。',
+  'オービタルポートのリングが光ってる。',
+  'ロボが資材を運んでた。',
+  'ビジターの靴跡が残ってる。',
+  'シアンの線、踏まないでね。',
+  '工事中の建物、全部入らないで。',
+  '山側の門から来た？',
+  'カルチャーの東から？',
+  'クレーターの影、休憩にいい。',
+  'アンテナが今日もうるさそう。',
+  '紫のビーコンが点滅してる。',
+  '足場の下、金属の音。',
+  '今夜は星が近い。',
+  'ロボットの歩幅、規則正しい。',
+  'ビジターは地図を見てる。',
+]
+
+const EN_ASTRO_GREET = [
+  'Smell that vacuum air?',
+  'Through the airlock yet?',
+  'Welcome to Astro.',
+  'Robots and visitors tonight.',
+  'Past the hatch — you’re here.',
+  'Feel the orbital breeze?',
+  'Nice construction lights, right?',
+  'Docking complete?',
+]
+
+const EN_ASTRO_FLAVOR = [
+  'Star Dome’s still just ribs.',
+  'Lunar Lab’s buzzing with signals.',
+  'Orbital Port ring’s glowing.',
+  'A robot hauled crates past me.',
+  'Visitor footprints on the metal.',
+  'Don’t step on the cyan line.',
+  'All three buildings are closed — under construction.',
+  'Came in from the mountain gate?',
+  'Or from Culture’s east side?',
+  'Crater shadow’s a good rest stop.',
+  'Antenna’s chatty tonight.',
+  'Purple beacon keeps blinking.',
+  'Metal clanks under the scaffold.',
+  'Stars feel close.',
+  'Robots walk like metronomes.',
+  'Visitor’s checking a map.',
+]
+
 // ─── build ───────────────────────────────────────────────────────────
 
 function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
@@ -833,6 +893,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isMt = zone === 'mountain'
   const isCu = zone === 'culture'
   const isSea = zone === 'sea'
+  const isAstro = zone === 'astro'
 
   const greetings = isMt
     ? isJa
@@ -846,9 +907,13 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
         ? isJa
           ? JA_SEA_GREET
           : EN_SEA_GREET
-        : isJa
-          ? JA_PLAZA_GREET
-          : EN_PLAZA_GREET
+        : isAstro
+          ? isJa
+            ? JA_ASTRO_GREET
+            : EN_ASTRO_GREET
+          : isJa
+            ? JA_PLAZA_GREET
+            : EN_PLAZA_GREET
 
   const flavor = isMt
     ? isJa
@@ -862,9 +927,13 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
         ? isJa
           ? JA_SEA_FLAVOR
           : EN_SEA_FLAVOR
-        : isJa
-          ? JA_PLAZA_FLAVOR
-          : EN_PLAZA_FLAVOR
+        : isAstro
+          ? isJa
+            ? JA_ASTRO_FLAVOR
+            : EN_ASTRO_FLAVOR
+          : isJa
+            ? JA_PLAZA_FLAVOR
+            : EN_PLAZA_FLAVOR
 
   return {
     greetings,
@@ -875,9 +944,9 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     gameNeon: isJa ? JA_NEON : EN_NEON,
     gameRunway: isJa ? JA_RUNWAY : EN_RUNWAY,
     gameLookLocker: isJa ? JA_LOOK_LOCKER : EN_LOOK_LOCKER,
-    featuredAny: isMt ? (isJa ? JA_FEAT_MT : EN_FEAT_MT) : isJa ? JA_FEAT : EN_FEAT,
+    featuredAny: isMt || isAstro ? (isJa ? JA_FEAT_MT : EN_FEAT_MT) : isJa ? JA_FEAT : EN_FEAT,
     featuredMatched: isJa ? JA_FEAT_MATCH : EN_FEAT_MATCH,
-    themeAny: isMt ? (isJa ? JA_THEME_MT : EN_THEME_MT) : isJa ? JA_THEME : EN_THEME,
+    themeAny: isMt || isAstro ? (isJa ? JA_THEME_MT : EN_THEME_MT) : isJa ? JA_THEME : EN_THEME,
     themeMatched: isJa ? JA_THEME_MATCH : EN_THEME_MATCH,
     flavor,
   }

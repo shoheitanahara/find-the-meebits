@@ -1,17 +1,28 @@
 # Active Context
 
-最終更新: 2026-07-29
+最終更新: 2026-07-30
 
 ## 直近の作業サマリー
 
-### Mountain Shooting Gallery（`/shooting-gallery`）— Open（最新）
+### Astro District（パーク新ゾーン）— Open（工事中建物のみ）
+
+- **Zone ID**: `astro`（Mountain の北 × Culture の東）
+- **接続**: Mountain 北門 `mountain-to-astro` / Culture 東門 `culture-to-astro`（双方向）
+- **地面**: `AstroDistrictGround`（レゴリス・金属パネル・シアン発光ライン）
+- **建物**: 共通3スロットに工事中のみ（STAR DOME / LUNAR LAB / ORBITAL PORT）。`TOP_ATTRACTIONS` 未登録＝進入不可
+- **NPC**: 日次15体・Robot / Visitor 8体＋他Type 7体（`dailyFeatured` STORAGE_KEY `v11`）
+- **家具**: Astro専用の環状ライト街灯（パーク共通ベンチは全ゾーンから撤去）
+- **軽量化**: Astroの街灯・ビーコン・工事中棟はemissive表現を維持し、個別pointLightを省略
+- **スロット正本**: `src/top/parkAttractionSlots.ts`（Mountain 配置を全区デフォルト化）
+
+### Mountain Shooting Gallery（`/shooting-gallery`）— Open
 
 - **名称**: Shooting Gallery（仮）
 - **ルート**: `/shooting-gallery` `/jp/shooting-gallery` → edition `shooting` → `ShootingGalleryApp`（`src/shootingGallery/`）
 - **パーク導線**: Mountain District 東棟 `TOP_ATTRACTIONS` id=`shooting`（建物位置 `(15.7, -11.0)`）
 - **体験**: 45秒・固定射撃位置・三人称右肩越し。動く的をポインターで撃つスコアアタック
-- **操作**: PC マウス照準 + クリック発砲（Pointer Lock）。SP 左下 aim スティック（離しても戻らない）+ 右下 Fire
-- **的**: プレート／星／缶／ボトル／動物シルエット／トロッコ／金色／赤（Meebit・trait 的なし）
+- **操作**: PC マウス照準 + クリック発砲（Pointer Lock）。SP 画面ドラッグ照準 + 右下 Fire
+- **的**: 高品質な丸的（金／赤／通常／小）。Bullseye ×2
 - **スコア**: 通常100 / 小・速200 / 金500 / 赤-300。コンボ倍率 1 / 1.5 / 2
 
 主要ファイル:

@@ -5,7 +5,11 @@
  */
 
 /** ベンチ横オブジェの差し替えキー（実装は ParkBenchProp.tsx） */
-export type ParkBenchPropKind = 'flowers' | 'beachSet' | 'surfboard' | 'campRock'
+export type ParkBenchPropKind =
+  | 'flowers'
+  | 'beachSet'
+  | 'surfboard'
+  | 'campRock'
 
 /** drei Environment の preset 名 */
 export type ParkEnvironmentPreset =

@@ -109,5 +109,39 @@ export function applyZoneLook(zoneId: ParkZoneId, baseLook: ParkLook): ParkLook 
     }
   }
 
+  if (zoneId === 'astro') {
+    return {
+      ...baseLook,
+      // 宇宙基地：濃紺の真空空とシアン／紫のアクセント
+      backgroundColor: '#050814',
+      fogColor: '#0a1020',
+      fogNear: 28,
+      fogFar: 110,
+      showStars: true,
+      hemisphereSky: '#4a68a8',
+      hemisphereGround: '#121824',
+      ambientColor: '#9ab0d0',
+      ambientIntensity: baseLook.ambientIntensity * 0.88,
+      hemisphereIntensity: baseLook.hemisphereIntensity * 0.95,
+      directionalIntensity: baseLook.directionalIntensity * 0.72,
+      directionalColor: '#d0e0ff',
+      accentPointColor: '#5ce0ff',
+      accentPointIntensity: Math.min(baseLook.accentPointIntensity * 1.1, 32),
+      environmentPreset: 'night',
+      environmentIntensity: Math.min(baseLook.environmentIntensity, 0.5),
+      districtColor: '#141824',
+      plazaColor: '#1a2234',
+      pathColor: '#2a3448',
+      paverColorA: '#2e3a52',
+      paverColorB: '#222c40',
+      pathEdgeColor: '#5ce0ff',
+      fountainRingColor: '#3a4a68',
+      lampLightIntensity: baseLook.lampLightIntensity * 1.2,
+      lampEmissiveIntensity: baseLook.lampEmissiveIntensity * 1.15,
+      // Astroのplantersは空配列。型上の既定値のみ設定する。
+      benchProp: 'flowers',
+    }
+  }
+
   return baseLook
 }

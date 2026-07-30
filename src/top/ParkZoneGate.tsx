@@ -52,6 +52,8 @@ export function ParkZoneGate({
         <CulturePortalGate gate={gate} locale={locale} />
       ) : gate.theme === 'sea' ? (
         <SeaPortalGate gate={gate} locale={locale} />
+      ) : gate.theme === 'astro' ? (
+        <AstroPortalGate gate={gate} locale={locale} />
       ) : (
         <PlazaReturnGate gate={gate} locale={locale} />
       )}
@@ -74,6 +76,9 @@ function MountainPortalGate({
   const faceSign = -1
   const corridorHalf = gate.halfWidth * 0.52
   const rockZ = gate.halfWidth * 0.98
+  const keepsExistingSignDirection = gate.id === 'astro-to-mountain'
+  const signFaceSign = keepsExistingSignDirection ? -faceSign : faceSign
+  const signRotationY = keepsExistingSignDirection ? Math.PI / 2 : -Math.PI / 2
 
   return (
     <group>
@@ -131,8 +136,8 @@ function MountainPortalGate({
         />
       ))}
 
-      {/* 看板（広場から読めるよう −X 向き） */}
-      <group position={[faceSign * 0.55, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+      {/* Astro帰還門は本体だけ反転し、既存看板のワールド向き・位置を維持する。 */}
+      <group position={[signFaceSign * 0.55, 0, 0]} rotation={[0, signRotationY, 0]}>
         <mesh position={[0, 5.15, 0]} castShadow>
           <boxGeometry args={[3.5, 0.95, 0.14]} />
           <meshStandardMaterial color="#1a1510" roughness={0.72} />
@@ -682,6 +687,134 @@ function SeaPortalGate({
   )
 }
 
+/** Astro 地区への入口（エアロック風ポータル） */
+function AstroPortalGate({
+  gate,
+  locale,
+}: {
+  gate: ParkGateDef
+  locale: 'en' | 'ja'
+}) {
+  const faceSign = -1
+  const pillarZ = gate.halfWidth * 0.88
+  const accent = '#5ce0ff'
+  const purple = '#a878ff'
+  const hull = '#1a2234'
+  const hullDark = '#0e1422'
+  const panel = '#2a3448'
+
+  return (
+    <group>
+      <ApproachPath faceSign={faceSign} length={1.05} width={gate.halfWidth * 1.05} />
+
+      {[-pillarZ, pillarZ].map((z) => (
+        <group key={z} position={[0, 0, z]}>
+          <mesh position={[0, 1.9, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.68, 3.8, 0.68]} />
+            <meshStandardMaterial color={hullDark} roughness={0.42} metalness={0.62} />
+          </mesh>
+          <mesh position={[0, 0.14, faceSign * 0.06]} castShadow>
+            <boxGeometry args={[0.9, 0.28, 0.9]} />
+            <meshStandardMaterial color={panel} roughness={0.4} metalness={0.55} />
+          </mesh>
+          <mesh position={[0, 3.95, 0]} castShadow>
+            <boxGeometry args={[0.82, 0.24, 0.82]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={0.4}
+              metalness={0.55}
+              roughness={0.32}
+            />
+          </mesh>
+          <mesh position={[0, 4.35, 0]} castShadow>
+            <sphereGeometry args={[0.16, 12, 12]} />
+            <meshStandardMaterial
+              color={purple}
+              emissive={purple}
+              emissiveIntensity={0.75}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      <mesh position={[0, 3.6, 0]} castShadow>
+        <boxGeometry args={[0.48, 0.34, gate.halfWidth * 2.05]} />
+        <meshStandardMaterial color={hull} roughness={0.45} metalness={0.58} />
+      </mesh>
+      <mesh position={[0, 3.88, 0]} castShadow>
+        <boxGeometry args={[0.32, 0.14, gate.halfWidth * 1.9]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.45}
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
+
+      <mesh position={[0, 1.8, 0]}>
+        <boxGeometry args={[0.12, 3.3, gate.halfWidth * 1.55]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.65}
+          transparent
+          opacity={0.32}
+        />
+      </mesh>
+      <pointLight
+        position={[faceSign * 0.7, 2.2, 0]}
+        color="#7ae8ff"
+        intensity={1.5}
+        distance={9}
+        decay={2}
+      />
+
+      {([-1, 1] as const).map((side) => (
+        <group key={`astro-lantern-${side}`} position={[faceSign * 1.45, 0, side * (gate.halfWidth * 0.55)]}>
+          <mesh position={[0, 1.05, 0]} castShadow>
+            <cylinderGeometry args={[0.07, 0.09, 2.1, 8]} />
+            <meshStandardMaterial color={hull} roughness={0.5} metalness={0.55} />
+          </mesh>
+          <mesh position={[0, 2.25, 0]} castShadow>
+            <boxGeometry args={[0.4, 0.5, 0.4]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={0.7}
+              roughness={0.35}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      <group position={[faceSign * 0.5, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh position={[0, 5.05, 0]} castShadow>
+          <boxGeometry args={[3.5, 0.95, 0.14]} />
+          <meshStandardMaterial color="#0a101c" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 5.05, 0.09]}>
+          <boxGeometry args={[3.25, 0.75, 0.04]} />
+          <meshStandardMaterial
+            color={accent}
+            emissive={accent}
+            emissiveIntensity={0.2}
+            roughness={0.45}
+          />
+        </mesh>
+        <Text position={[0, 5.18, 0.14]} fontSize={0.24} color="#061018" anchorX="center" anchorY="middle">
+          {gate.label[locale]}
+        </Text>
+        <Text position={[0, 4.88, 0.14]} fontSize={0.15} color="#102030" anchorX="center" anchorY="middle">
+          {gate.subtitle[locale]}
+        </Text>
+      </group>
+    </group>
+  )
+}
+
 /** マウンテン側：広場へ戻る門 */
 function PlazaReturnGate({
   gate,
@@ -768,7 +901,7 @@ export function ComingSoonPad({
 }: {
   position: [number, number, number]
   locale: 'en' | 'ja'
-  theme?: 'classic' | 'mountain' | 'culture' | 'sea'
+  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }) {
@@ -776,8 +909,11 @@ export function ComingSoonPad({
   const mountain = theme === 'mountain'
   const culture = theme === 'culture'
   const sea = theme === 'sea'
+  const astro = theme === 'astro'
   const titleText = title?.[locale]
   const subtitleText = subtitle?.[locale]
+  const variant =
+    title?.en === 'LUNAR LAB' ? 'lab' : title?.en === 'ORBITAL PORT' ? 'port' : 'dome'
 
   return (
     <group position={position}>
@@ -787,24 +923,29 @@ export function ComingSoonPad({
         <CultureComingSoonShell />
       ) : sea ? (
         <SeaComingSoonShell />
+      ) : astro ? (
+        <AstroComingSoonShell variant={variant} />
       ) : (
         <ClassicComingSoonShell />
       )}
-      <ComingSoonBarricade mountain={mountain} culture={culture} sea={sea} />
+      <ComingSoonBarricade mountain={mountain} culture={culture} sea={sea} astro={astro} />
       <ComingSoonSignboard
         heading={heading}
         mountain={mountain}
         culture={culture}
         sea={sea}
+        astro={astro}
         title={titleText}
         subtitle={subtitleText}
       />
-      <pointLight
-        position={[0, 3.2, 2.8]}
-        intensity={sea ? 10 : culture ? 11 : mountain ? 8 : 10}
-        distance={11}
-        color={sea ? '#c8e8f8' : culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
-      />
+      {astro ? null : (
+        <pointLight
+          position={[0, 3.2, 2.8]}
+          intensity={sea ? 10 : culture ? 11 : mountain ? 8 : 10}
+          distance={11}
+          color={sea ? '#c8e8f8' : culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
+        />
+      )}
     </group>
   )
 }
@@ -1041,28 +1182,173 @@ function SeaComingSoonShell() {
   )
 }
 
+/** Astro 工事中シェル。中央ドーム / 西ラボ / 東ポートでシルエットを変える。 */
+function AstroComingSoonShell({ variant }: { variant: 'dome' | 'lab' | 'port' }) {
+  const hull = '#1a2234'
+  const hullDark = '#0e1422'
+  const panel = '#2a3448'
+  const accent = '#5ce0ff'
+  const purple = '#a878ff'
+
+  return (
+    <group>
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[6.4, 0.32, 5.8]} />
+        <meshStandardMaterial color={hullDark} roughness={0.55} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.38, 0]} receiveShadow>
+        <boxGeometry args={[5.8, 0.1, 5.2]} />
+        <meshStandardMaterial color={panel} roughness={0.45} metalness={0.55} />
+      </mesh>
+
+      {variant === 'dome' ? (
+        <>
+          <mesh position={[0, 1.6, -0.4]} castShadow receiveShadow>
+            <cylinderGeometry args={[2.2, 2.4, 2.4, 16]} />
+            <meshStandardMaterial color={hull} roughness={0.42} metalness={0.62} />
+          </mesh>
+          <mesh position={[0, 3.15, -0.4]} castShadow>
+            <sphereGeometry args={[1.55, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={0.25}
+              transparent
+              opacity={0.55}
+              roughness={0.25}
+              metalness={0.4}
+            />
+          </mesh>
+          <mesh position={[0, 0.85, 1.5]} castShadow>
+            <boxGeometry args={[2.4, 1.2, 1.4]} />
+            <meshStandardMaterial color={panel} roughness={0.4} metalness={0.58} />
+          </mesh>
+        </>
+      ) : variant === 'lab' ? (
+        <>
+          <mesh position={[-0.8, 1.7, -0.3]} castShadow receiveShadow>
+            <boxGeometry args={[3.2, 2.8, 2.6]} />
+            <meshStandardMaterial color={hull} roughness={0.42} metalness={0.6} />
+          </mesh>
+          <mesh position={[1.5, 1.2, -0.6]} castShadow receiveShadow>
+            <boxGeometry args={[2.0, 1.8, 2.2]} />
+            <meshStandardMaterial color={panel} roughness={0.4} metalness={0.55} />
+          </mesh>
+          <mesh position={[-0.8, 3.4, -0.3]} castShadow>
+            <cylinderGeometry args={[0.15, 0.2, 1.4, 8]} />
+            <meshStandardMaterial color={hullDark} metalness={0.7} roughness={0.35} />
+          </mesh>
+          <mesh position={[-0.8, 4.2, -0.3]}>
+            <sphereGeometry args={[0.28, 12, 10]} />
+            <meshStandardMaterial color={purple} emissive={purple} emissiveIntensity={0.7} />
+          </mesh>
+        </>
+      ) : (
+        <>
+          <mesh position={[0, 1.3, -0.5]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+            <torusGeometry args={[1.9, 0.35, 10, 24]} />
+            <meshStandardMaterial color={hull} roughness={0.4} metalness={0.65} />
+          </mesh>
+          <mesh position={[0, 1.3, -0.5]} castShadow>
+            <cylinderGeometry args={[1.2, 1.4, 1.6, 16]} />
+            <meshStandardMaterial color={panel} roughness={0.42} metalness={0.58} />
+          </mesh>
+          <mesh position={[0, 2.4, -0.5]}>
+            <torusGeometry args={[1.35, 0.08, 8, 24]} />
+            <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} />
+          </mesh>
+          <mesh position={[1.8, 0.9, 0.8]} castShadow>
+            <boxGeometry args={[1.5, 1.2, 1.3]} />
+            <meshStandardMaterial color={hullDark} roughness={0.45} metalness={0.55} />
+          </mesh>
+        </>
+      )}
+
+      {[-2.7, 2.7].map((x) => (
+        <group key={`astro-scaffold-${x}`}>
+          <mesh position={[x, 1.7, 1.5]} castShadow>
+            <boxGeometry args={[0.12, 3.4, 0.12]} />
+            <meshStandardMaterial color={panel} metalness={0.6} roughness={0.4} />
+          </mesh>
+          <mesh position={[x, 1.7, -1.7]} castShadow>
+            <boxGeometry args={[0.12, 3.4, 0.12]} />
+            <meshStandardMaterial color={panel} metalness={0.6} roughness={0.4} />
+          </mesh>
+          <mesh position={[x, 2.6, -0.1]} castShadow>
+            <boxGeometry args={[0.1, 0.1, 3.3]} />
+            <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.25} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 2.65, 1.5]} castShadow>
+        <boxGeometry args={[5.4, 0.1, 0.65]} />
+        <meshStandardMaterial color={hull} metalness={0.55} roughness={0.42} />
+      </mesh>
+      <mesh position={[-2.5, 0.55, 2.1]} castShadow>
+        <boxGeometry args={[1.0, 0.7, 0.85]} />
+        <meshStandardMaterial color={panel} metalness={0.5} roughness={0.45} />
+      </mesh>
+      <mesh position={[2.4, 0.48, 2.0]} castShadow>
+        <cylinderGeometry args={[0.35, 0.35, 0.7, 12]} />
+        <meshStandardMaterial color={hullDark} metalness={0.6} roughness={0.4} />
+      </mesh>
+      <mesh position={[0.8, 0.42, 2.2]} castShadow>
+        <boxGeometry args={[0.9, 0.5, 0.6]} />
+        <meshStandardMaterial color={purple} emissive={purple} emissiveIntensity={0.2} />
+      </mesh>
+    </group>
+  )
+}
+
 function ComingSoonBarricade({
   mountain,
   culture = false,
   sea = false,
+  astro = false,
 }: {
   mountain: boolean
   culture?: boolean
   sea?: boolean
+  astro?: boolean
 }) {
-  const stripe = sea ? '#f0c878' : culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
-  const post = sea ? '#5a4030' : culture ? '#1a2a48' : mountain ? '#5a4030' : '#3a3530'
+  const stripe = astro
+    ? '#5ce0ff'
+    : sea
+      ? '#f0c878'
+      : culture
+        ? '#6a9ee8'
+        : mountain
+          ? '#c4a060'
+          : '#c9a24a'
+  const post = astro
+    ? '#1a2234'
+    : sea
+      ? '#5a4030'
+      : culture
+        ? '#1a2a48'
+        : mountain
+          ? '#5a4030'
+          : '#3a3530'
   return (
     <group position={[0, 0, 2.85]}>
       {[-2.4, -0.8, 0.8, 2.4].map((x) => (
         <mesh key={x} position={[x, 0.55, 0]} castShadow>
           <boxGeometry args={[0.12, 1.1, 0.12]} />
-          <meshStandardMaterial color={post} roughness={0.85} />
+          <meshStandardMaterial
+            color={post}
+            roughness={astro ? 0.45 : 0.85}
+            metalness={astro ? 0.55 : 0}
+          />
         </mesh>
       ))}
       <mesh position={[0, 0.85, 0]} castShadow>
         <boxGeometry args={[5.2, 0.22, 0.1]} />
-        <meshStandardMaterial color={stripe} roughness={0.7} />
+        <meshStandardMaterial
+          color={stripe}
+          emissive={astro ? stripe : '#000000'}
+          emissiveIntensity={astro ? 0.25 : 0}
+          roughness={0.7}
+        />
       </mesh>
       <mesh position={[0, 0.45, 0]} castShadow>
         <boxGeometry args={[5.2, 0.22, 0.1]} />
@@ -1077,6 +1363,7 @@ function ComingSoonSignboard({
   mountain,
   culture = false,
   sea = false,
+  astro = false,
   title,
   subtitle,
 }: {
@@ -1084,16 +1371,29 @@ function ComingSoonSignboard({
   mountain: boolean
   culture?: boolean
   sea?: boolean
+  astro?: boolean
   title?: string
   subtitle?: string
 }) {
-  const accent = sea ? '#f0c878' : culture ? '#6a9ee8' : mountain ? '#c4a060' : '#c9a24a'
+  const accent = astro
+    ? '#5ce0ff'
+    : sea
+      ? '#f0c878'
+      : culture
+        ? '#6a9ee8'
+        : mountain
+          ? '#c4a060'
+          : '#c9a24a'
   const hasDetail = Boolean(title)
   return (
     <group position={[0, 0, 3.35]}>
       <mesh position={[0, 1.15, 0]} castShadow>
         <cylinderGeometry args={[0.07, 0.09, 2.2, 8]} />
-        <meshStandardMaterial color="#8a7050" roughness={0.85} />
+        <meshStandardMaterial
+          color={astro ? '#1a2234' : '#8a7050'}
+          roughness={astro ? 0.45 : 0.85}
+          metalness={astro ? 0.55 : 0}
+        />
       </mesh>
       <mesh position={[0, hasDetail ? 2.65 : 2.45, 0.05]} castShadow>
         <boxGeometry args={[2.9, hasDetail ? 2.15 : 1.55, 0.14]} />

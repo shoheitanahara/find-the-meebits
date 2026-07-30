@@ -40,6 +40,7 @@ import {
   setParkCollisionZone,
 } from './topCollisions'
 import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
+import { AstroDistrictGround } from './AstroDistrictGround'
 import { CultureDistrictGround } from './CultureDistrictGround'
 import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
@@ -149,11 +150,16 @@ export function TopScene({
         layout={layout}
         trees={zone.trees}
         treeStyle={
-          activeZoneId === 'mountain' ? 'pine' : activeZoneId === 'sea' ? 'none' : 'grove'
+          activeZoneId === 'mountain'
+            ? 'pine'
+            : activeZoneId === 'sea' || activeZoneId === 'astro'
+              ? 'none'
+              : 'grove'
         }
         voxelGround={activeZoneId === 'mountain'}
         cultureGround={activeZoneId === 'culture'}
         seaGround={activeZoneId === 'sea'}
+        astroGround={activeZoneId === 'astro'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -172,9 +178,16 @@ export function TopScene({
           locale={locale}
         />
       ) : null}
-      <ParkLamps look={look} lamps={zone.lamps} style={activeZoneId === 'sea' ? 'beach' : 'classic'} />
+      <ParkLamps
+        look={look}
+        lamps={zone.lamps}
+        style={
+          activeZoneId === 'sea' ? 'beach' : activeZoneId === 'astro' ? 'astro' : 'classic'
+        }
+      />
       <ParkDetails
         benchProp={look.benchProp}
+        benchStyle={activeZoneId === 'astro' ? 'astro' : 'classic'}
         benches={zone.benches}
         planters={zone.planters}
         layout={layout}
@@ -204,7 +217,9 @@ export function TopScene({
                 ? 'culture'
                 : zone.id === 'sea'
                   ? 'sea'
-                  : 'classic')
+                  : zone.id === 'astro'
+                    ? 'astro'
+                    : 'classic')
           }
           title={slot.title}
           subtitle={slot.subtitle}
@@ -220,7 +235,9 @@ export function TopScene({
                 ? lineup.seaVisitors
                 : activeZoneId === 'culture'
                   ? lineup.cultureVisitors
-                  : lineup.visitors
+                  : activeZoneId === 'astro'
+                    ? lineup.astroVisitors
+                    : lineup.visitors
           }
           featuredId={lineup.featuredId}
           themeTrait={lineup.themeTrait}
@@ -329,6 +346,7 @@ function HubGround({
   voxelGround = false,
   cultureGround = false,
   seaGround = false,
+  astroGround = false,
   showFountain,
 }: {
   featuredId: number
@@ -339,6 +357,7 @@ function HubGround({
   voxelGround?: boolean
   cultureGround?: boolean
   seaGround?: boolean
+  astroGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -364,6 +383,8 @@ function HubGround({
         <CultureDistrictGround layout={layout} />
       ) : seaGround ? (
         <SeaDistrictGround layout={layout} />
+      ) : astroGround ? (
+        <AstroDistrictGround layout={layout} />
       ) : (
         <>
           {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
@@ -530,17 +551,81 @@ function ParkLamps({
 }: {
   look: ParkLook
   lamps: ReadonlyArray<readonly [number, number]>
-  style?: 'classic' | 'beach'
+  style?: 'classic' | 'beach' | 'astro'
 }) {
   return (
     <group>
       {lamps.map(([x, z]) =>
         style === 'beach' ? (
           <BeachLamp key={`${x}-${z}`} look={look} x={x} z={z} />
+        ) : style === 'astro' ? (
+          <AstroLamp key={`${x}-${z}`} look={look} x={x} z={z} />
         ) : (
           <ClassicLamp key={`${x}-${z}`} look={look} x={x} z={z} />
         ),
       )}
+    </group>
+  )
+}
+
+/** Astro向け：分節ポール＋シアンの環状ライト。 */
+function AstroLamp({
+  look,
+  x,
+  z,
+}: {
+  look: ParkLook
+  x: number
+  z: number
+}) {
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.28, 0.36, 0.24, 10]} />
+        <meshStandardMaterial color="#0e1422" metalness={0.68} roughness={0.38} />
+      </mesh>
+      {[0.68, 1.55, 2.42].map((y, index) => (
+        <group key={y}>
+          <mesh position={[0, y, 0]} castShadow>
+            <cylinderGeometry args={[0.075, 0.1, 0.78, 8]} />
+            <meshStandardMaterial
+              color={index % 2 === 0 ? '#1a2234' : '#2a3448'}
+              metalness={0.7}
+              roughness={0.34}
+            />
+          </mesh>
+          <mesh position={[0, y + 0.39, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.14, 0.025, 8, 18]} />
+            <meshStandardMaterial
+              color="#5ce0ff"
+              emissive="#5ce0ff"
+              emissiveIntensity={0.45}
+              metalness={0.45}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 3.1, 0]} castShadow>
+        <sphereGeometry args={[0.28, 16, 12]} />
+        <meshStandardMaterial
+          color="#dff8ff"
+          emissive="#5ce0ff"
+          emissiveIntensity={look.lampEmissiveIntensity * 1.15}
+          roughness={0.22}
+          metalness={0.12}
+        />
+      </mesh>
+      <mesh position={[0, 3.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.36, 0.055, 8, 24]} />
+        <meshStandardMaterial
+          color="#a878ff"
+          emissive="#a878ff"
+          emissiveIntensity={0.55}
+          metalness={0.5}
+          roughness={0.3}
+        />
+      </mesh>
     </group>
   )
 }
@@ -664,6 +749,7 @@ function BeachLamp({
 
 function ParkDetails({
   benchProp,
+  benchStyle = 'classic',
   benches,
   planters,
   layout,
@@ -671,6 +757,7 @@ function ParkDetails({
   showRailings,
 }: {
   benchProp: ParkBenchPropKind
+  benchStyle?: 'classic' | 'astro'
   benches: ReadonlyArray<readonly [number, number, number]>
   planters: ReadonlyArray<readonly [number, number]>
   layout: ParkZoneLayout
@@ -688,9 +775,13 @@ function ParkDetails({
 
   return (
     <group>
-      {benches.map(([x, z, rotationY], index) => (
-        <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
-      ))}
+      {benches.map(([x, z, rotationY], index) =>
+        benchStyle === 'astro' ? (
+          <AstroBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
+        ) : (
+          <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
+        ),
+      )}
       {planters.map(([x, z], index) => (
         <ParkBenchProp
           key={`bench-prop-${index}`}
@@ -787,6 +878,56 @@ function ClassicBench({
             <meshStandardMaterial color="#353039" metalness={0.68} roughness={0.34} />
           </mesh>
         </group>
+      ))}
+    </group>
+  )
+}
+
+/** Astro地区の気密モジュール風ベンチ。 */
+function AstroBench({
+  position,
+  rotationY,
+}: {
+  position: [number, number, number]
+  rotationY: number
+}) {
+  return (
+    <group position={position} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 0.48, 0.05]} castShadow receiveShadow>
+        <boxGeometry args={[2.3, 0.18, 0.68]} />
+        <meshStandardMaterial color="#253149" metalness={0.58} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 0.78, -0.27]} rotation={[-0.08, 0, 0]} castShadow>
+        <boxGeometry args={[2.3, 0.62, 0.14]} />
+        <meshStandardMaterial color="#1a2234" metalness={0.62} roughness={0.38} />
+      </mesh>
+      <mesh position={[0, 0.79, -0.35]}>
+        <boxGeometry args={[1.9, 0.12, 0.035]} />
+        <meshStandardMaterial
+          color="#5ce0ff"
+          emissive="#5ce0ff"
+          emissiveIntensity={0.45}
+          metalness={0.45}
+          roughness={0.3}
+        />
+      </mesh>
+      {[-0.92, 0.92].map((x) => (
+        <group key={x} position={[x, 0, 0]}>
+          <mesh position={[0, 0.26, 0]} castShadow>
+            <boxGeometry args={[0.16, 0.52, 0.58]} />
+            <meshStandardMaterial color="#0e1422" metalness={0.68} roughness={0.36} />
+          </mesh>
+          <mesh position={[0, 0.57, 0.15]} castShadow>
+            <boxGeometry args={[0.2, 0.08, 0.42]} />
+            <meshStandardMaterial color="#a878ff" emissive="#a878ff" emissiveIntensity={0.28} />
+          </mesh>
+        </group>
+      ))}
+      {[-0.55, 0, 0.55].map((x) => (
+        <mesh key={x} position={[x, 0.58, 0.39]}>
+          <boxGeometry args={[0.035, 0.04, 0.16]} />
+          <meshStandardMaterial color="#5ce0ff" emissive="#5ce0ff" emissiveIntensity={0.35} />
+        </mesh>
       ))}
     </group>
   )

@@ -189,6 +189,14 @@ Park は **ゾーン切替**（フルリロードしない）。描画・衝突�
 |---------|------|------|--------|
 | `plaza` | Meebits Plaza | メインハブ | クラシック園 |
 | `mountain` | Mountain District | 山岳／Mt. Meeb 正式オープン | Mt. Meeb（ボクセル山登り） |
+| `culture` | Culture District | ランウェイ／ロッカー | 濃紺ギャラリー |
+| `sea` | Sea District | ビーチ／Sergito | 夜のビーチ |
+| `astro` | Astro District | 宇宙基地（全棟工事中） | 月面レゴリス＋金属パネル |
+
+**建物スロット正本**: `src/top/parkAttractionSlots.ts`（Mountain 完成配置を全区デフォルトに）
+- 中央 `(0, -7.0)` / 西 `(-15.7, -11.5)` / 東 `(15.7, -11.0)`
+
+**Astro 接続**: Mountain 北門（−Z）＋ Culture 東門（+X）の双方向。NPC は Robot / Visitor 8体＋他Type 7体。建物は STAR DOME / LUNAR LAB / ORBITAL PORT（進入不可の工事中）。街灯はAstro専用意匠。発光はemissive中心にして個別pointLightを抑える。
 
 ### ハードルール
 

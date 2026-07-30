@@ -6,6 +6,7 @@
  * マウンテン地区: ランダム15体（広場と重複しない）
  * シーエリア: 15体（全員が上裸 / チューブトップ）
  * カルチャー地区: 15体（スーツが半数）
+ * アストロエリア: 15体（Robot / Visitor が約半数、残りは他 Type）
  */
 
 import {
@@ -21,13 +22,16 @@ export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
 export const DAILY_SEA_VISITOR_COUNT = 15
 export const DAILY_CULTURE_VISITOR_COUNT = 15
+export const DAILY_ASTRO_VISITOR_COUNT = 15
+/** 15体中8体をRobot / Visitorにする（奇数なので半数切り上げ）。 */
+export const DAILY_ASTRO_TYPE_COUNT = Math.ceil(DAILY_ASTRO_VISITOR_COUNT / 2)
 /** シー来場者は全員ビーチ服 */
 export const SEA_BEACH_SHIRT_MIN_RATIO = 1
 /** カルチャー来場者のうちスーツを最低この割合にする */
 export const CULTURE_SUIT_MIN_RATIO = 0.5
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v9'
+const STORAGE_KEY = 'meebits-park-daily-v11'
 
 /** ビーチらしい上半身（上裸・チューブトップ） */
 const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])
@@ -63,6 +67,8 @@ export type DailyParkLineup = {
   seaVisitors: DailyVisitor[]
   /** カルチャー地区の日替わり来場者（スーツ半数・他地区と非重複）。 */
   cultureVisitors: DailyVisitor[]
+  /** アストロエリアの日替わり来場者（Robot / Visitor 約半数＋他Type）。 */
+  astroVisitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
@@ -73,6 +79,7 @@ type StoredDailyLineup = {
   mountainVisitors: DailyVisitor[]
   seaVisitors: DailyVisitor[]
   cultureVisitors: DailyVisitor[]
+  astroVisitors: DailyVisitor[]
 }
 
 let memoryCache: DailyParkLineup | null = null
@@ -123,6 +130,12 @@ export function isSeaBeachShirt(traits: MeebitTraitMap | null | undefined) {
 export function isCultureSuitShirt(traits: MeebitTraitMap | null | undefined) {
   const shirt = traits?.Shirt
   return typeof shirt === 'string' && CULTURE_SUIT_SHIRTS.has(shirt)
+}
+
+/** Astro 地区で優先する Type。 */
+export function isAstroMeebitType(traits: MeebitTraitMap | null | undefined) {
+  const type = traits?.Type
+  return type === 'Robot' || type === 'Visitor'
 }
 
 /**
@@ -194,6 +207,68 @@ function pickCultureVisitors(
     isCultureSuitShirt,
     CULTURE_SUIT_MIN_RATIO,
   )
+}
+
+/**
+ * Astro: Robot / Visitor を半数（15体中8体）、残りを他 Type から抽選する。
+ * 他地区未使用プールを優先し、足りないカテゴリだけ全域から補完する。
+ */
+function pickAstroVisitors(
+  dataset: MeebitTraitsDataset,
+  preferredIds: number[],
+  allIds: number[],
+  rng: () => number,
+): DailyVisitor[] {
+  const preferredAstro = preferredIds.filter((id) =>
+    isAstroMeebitType(dataset.byId[String(id)]),
+  )
+  const preferredOther = preferredIds.filter(
+    (id) => !isAstroMeebitType(dataset.byId[String(id)]),
+  )
+  shuffleInPlace(preferredAstro, rng)
+  shuffleInPlace(preferredOther, rng)
+
+  const picked: number[] = []
+  const used = new Set<number>()
+
+  for (const id of preferredAstro) {
+    if (picked.length >= DAILY_ASTRO_TYPE_COUNT) break
+    picked.push(id)
+    used.add(id)
+  }
+
+  if (picked.length < DAILY_ASTRO_TYPE_COUNT) {
+    const fallback = allIds.filter(
+      (id) => !used.has(id) && isAstroMeebitType(dataset.byId[String(id)]),
+    )
+    shuffleInPlace(fallback, rng)
+    for (const id of fallback) {
+      if (picked.length >= DAILY_ASTRO_TYPE_COUNT) break
+      picked.push(id)
+      used.add(id)
+    }
+  }
+
+  for (const id of preferredOther) {
+    if (picked.length >= DAILY_ASTRO_VISITOR_COUNT) break
+    picked.push(id)
+    used.add(id)
+  }
+
+  if (picked.length < DAILY_ASTRO_VISITOR_COUNT) {
+    const fallback = allIds.filter(
+      (id) => !used.has(id) && !isAstroMeebitType(dataset.byId[String(id)]),
+    )
+    shuffleInPlace(fallback, rng)
+    for (const id of fallback) {
+      if (picked.length >= DAILY_ASTRO_VISITOR_COUNT) break
+      picked.push(id)
+      used.add(id)
+    }
+  }
+
+  shuffleInPlace(picked, rng)
+  return picked.map((meebitNumber) => ({ meebitNumber, matched: false }))
 }
 
 function shuffleInPlace<T>(items: T[], rng: () => number): T[] {
@@ -375,6 +450,12 @@ function buildLineupFromScratch(
   const cultureVisitors = pickCultureVisitors(dataset, culturePool, cultureRng)
   for (const visitor of cultureVisitors) used.add(visitor.meebitNumber)
 
+  // アストロエリア: Robot / Visitor 約半数＋他 Type
+  const astroRng = createSeededRng(hashStringToSeed(`meebits-park-astro:${dateKey}`))
+  const astroPreferred = allOtherIds.filter((id) => !used.has(id))
+  const astroVisitors = pickAstroVisitors(dataset, astroPreferred, allOtherIds, astroRng)
+  for (const visitor of astroVisitors) used.add(visitor.meebitNumber)
+
   return {
     dateKey,
     featuredId,
@@ -384,6 +465,7 @@ function buildLineupFromScratch(
     mountainVisitors,
     seaVisitors,
     cultureVisitors,
+    astroVisitors,
   }
 }
 
@@ -411,6 +493,8 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
       parsed.seaVisitors.length !== DAILY_SEA_VISITOR_COUNT ||
       !Array.isArray(parsed.cultureVisitors) ||
       parsed.cultureVisitors.length !== DAILY_CULTURE_VISITOR_COUNT ||
+      !Array.isArray(parsed.astroVisitors) ||
+      parsed.astroVisitors.length !== DAILY_ASTRO_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
     ) {
       return null
@@ -432,6 +516,7 @@ function writeStoredLineup(lineup: DailyParkLineup) {
       mountainVisitors: lineup.mountainVisitors,
       seaVisitors: lineup.seaVisitors,
       cultureVisitors: lineup.cultureVisitors,
+      astroVisitors: lineup.astroVisitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
@@ -459,6 +544,7 @@ function hydrateFromStored(
     mountainVisitors: stored.mountainVisitors,
     seaVisitors: stored.seaVisitors,
     cultureVisitors: stored.cultureVisitors,
+    astroVisitors: stored.astroVisitors,
   }
 }
 

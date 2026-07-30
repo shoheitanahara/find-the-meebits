@@ -1,11 +1,12 @@
 import type { AttractionId } from './topStore'
+import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
 import { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
 import { SEA_PALM_TREE_XZ } from './seaPalms'
 
 export { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X }
 
 /** Park のエリア ID。1エリア最大3ゲーム。 */
-export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea'
+export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea' | 'astro'
 
 export type ParkZoneBounds = {
   boundsX: number
@@ -41,8 +42,8 @@ export type ParkGateDef = {
   halfWidth: number
   /** 通過アルコーブ深さ */
   alcoveDepth: number
-  /** mountain / culture / sea = 行き先意匠、plaza = 広場へ戻る門 */
-  theme: 'mountain' | 'plaza' | 'culture' | 'sea'
+  /** mountain / culture / sea / astro = 行き先意匠、plaza = 広場へ戻る門 */
+  theme: 'mountain' | 'plaza' | 'culture' | 'sea' | 'astro'
   /**
    * Yaw（ラジアン）。0 で東西通過。
    * カージナル橋では基本 0（軸平行）。
@@ -60,7 +61,7 @@ export type ComingSoonSlot = {
   x: number
   z: number
   /** 省略時はゾーン外周テーマに追従 */
-  theme?: 'classic' | 'mountain' | 'culture' | 'sea'
+  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }
@@ -149,6 +150,17 @@ const SEA_LAYOUT: ParkZoneLayout = {
   railingHalfLength: 15.5,
   pathEdgeX: 14,
   treeX: 21.5,
+}
+
+/** Astro: 同じ床幅。金属パネルの園路縁 */
+const ASTRO_LAYOUT: ParkZoneLayout = {
+  ...SHARED_PARK_GROUND,
+  railingX: 26,
+  railingHalfThickness: 0.22,
+  railingZ: 1,
+  railingHalfLength: 15.5,
+  pathEdgeX: 13,
+  treeX: 22.5,
 }
 
 export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
@@ -255,7 +267,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       openings: [
         { side: 'w', kind: 'bridge-gate', gateId: 'mountain-to-plaza' },
         { side: 'e', kind: 'sealed' },
-        { side: 's', kind: 'sealed' },
+        // 奥（北 / −Z）→ Astro
+        { side: 's', kind: 'bridge-gate', gateId: 'mountain-to-astro' },
       ],
     },
     // 西門・橋の内側（川 ≈ -22 より東）
@@ -299,6 +312,20 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
       },
+      {
+        id: 'mountain-to-astro',
+        x: PARK_FAR_SIDE_GATE_X,
+        z: -18.4,
+        halfWidth: 2.55,
+        alcoveDepth: 2.6,
+        theme: 'astro',
+        yaw: Math.PI / 2,
+        targetZone: 'astro',
+        // Astro 手前入口センター・奥向き
+        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
+        label: { en: 'ASTRO DISTRICT', ja: 'アストロエリア' },
+        subtitle: { en: 'Robots · Visitors · Orbit', ja: 'ロボ・ビジター・軌道' },
+      },
     ],
   },
   culture: {
@@ -310,8 +337,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       theme: 'culture',
       frontClearSides: ['n'],
       openings: [
-        // 北は手前クリア。戻りゲートは自立門（橋・川なし）
-        { side: 'e', kind: 'sealed' },
+        // 東 → Astro
+        { side: 'e', kind: 'bridge-gate', gateId: 'culture-to-astro' },
         { side: 'w', kind: 'sealed' },
         { side: 's', kind: 'sealed' },
       ],
@@ -344,8 +371,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     ],
     comingSoonSlots: [
       {
-        x: 12.5,
-        z: -11.0,
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
         theme: 'culture',
         title: { en: 'PFP STUDIO', ja: 'PFPクリエイター' },
         subtitle: { en: 'Craft your profile look', ja: 'プロフィール用の姿を作る' },
@@ -367,6 +394,20 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
+      },
+      {
+        id: 'culture-to-astro',
+        x: 26.4,
+        z: 1,
+        halfWidth: 2.55,
+        alcoveDepth: 2.8,
+        theme: 'astro',
+        yaw: 0,
+        targetZone: 'astro',
+        // Astro 西門すぐ内側・東向き
+        targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
+        label: { en: 'ASTRO DISTRICT', ja: 'アストロエリア' },
+        subtitle: { en: 'Robots · Visitors · Orbit', ja: 'ロボ・ビジター・軌道' },
       },
     ],
   },
@@ -406,15 +447,15 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     trees: SEA_PALM_TREE_XZ,
     comingSoonSlots: [
       {
-        x: -12.5,
-        z: -11.5,
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
         theme: 'sea',
         title: { en: 'BEACH CLUB', ja: 'ビーチクラブ' },
         subtitle: { en: 'Sunset hangout', ja: '夕暮れのたまり場' },
       },
       {
-        x: 0,
-        z: -7.0,
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
         theme: 'sea',
         title: { en: 'TIDE POOL', ja: 'タイドプール' },
         subtitle: { en: 'Shoreline stroll', ja: '潮だまりウォーク' },
@@ -433,6 +474,102 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetSpawn: { x: -20.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
+      },
+    ],
+  },
+  /**
+   * Astro: Mountain の北 × Culture の東。
+   * 全棟工事中。NPC は Robot / Visitor 約半数＋他Type（dailyFeatured）。
+   */
+  astro: {
+    id: 'astro',
+    title: { en: 'Astro District', ja: 'アストロエリア' },
+    attractionIds: [],
+    layout: ASTRO_LAYOUT,
+    perimeter: {
+      theme: 'astro',
+      frontClearSides: ['n'],
+      openings: [
+        // 西 → Culture
+        { side: 'w', kind: 'bridge-gate', gateId: 'astro-to-culture' },
+        { side: 'e', kind: 'sealed' },
+        // 奥は封印。Mountain へは手前（南 / +Z）の自立門で戻る
+        { side: 's', kind: 'sealed' },
+      ],
+    },
+    // Mountain 北門からの到着を既定スポーンに
+    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
+    hasFountain: false,
+    hasFeaturedBoard: false,
+    hasNpcCrowd: true,
+    benches: [
+      [-6.5, 5.0, Math.PI / 2],
+      [6.5, 5.0, -Math.PI / 2],
+    ],
+    // Astroではベンチ横オブジェを置かず、通路と視界を軽く保つ。
+    planters: [],
+    lamps: [
+      [-9, 6.5],
+      [9, 6.5],
+      [-9, 0.5],
+      [9, 0.5],
+      [-9, -5.5],
+      [9, -5.5],
+    ],
+    // 樹木なし（宇宙小物は地面コンポーネント側）
+    trees: [],
+    comingSoonSlots: [
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+        theme: 'astro',
+        title: { en: 'STAR DOME', ja: 'スタードーム' },
+        subtitle: { en: 'Orbital amphitheater', ja: '軌道アンフィシアター' },
+      },
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+        theme: 'astro',
+        title: { en: 'LUNAR LAB', ja: 'ルナラボ' },
+        subtitle: { en: 'Robot research bay', ja: 'ロボ研究ベイ' },
+      },
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
+        theme: 'astro',
+        title: { en: 'ORBITAL PORT', ja: 'オービタルポート' },
+        subtitle: { en: 'Visitor docking ring', ja: 'ビジター接岸リング' },
+      },
+    ],
+    gates: [
+      {
+        id: 'astro-to-mountain',
+        x: PARK_NEAR_SIDE_GATE_X,
+        z: 16.0,
+        halfWidth: 2.55,
+        alcoveDepth: 2.4,
+        theme: 'mountain',
+        // Astro 地区内（−Z側）から近づく向きに門正面を合わせる。
+        yaw: -Math.PI / 2,
+        targetZone: 'mountain',
+        // Mountain 北門（左寄り）すぐ内側・地区奥向き
+        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
+        label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテン地区' },
+        subtitle: { en: 'Peaks · Neon · Gallery', ja: '山頂・ネオン・射撃' },
+      },
+      {
+        id: 'astro-to-culture',
+        x: -25.6,
+        z: 1,
+        halfWidth: 2.6,
+        alcoveDepth: 2.0,
+        theme: 'culture',
+        yaw: 0,
+        targetZone: 'culture',
+        // Culture 東門すぐ内側・西向き
+        targetSpawn: { x: 20.5, z: 1, rotationY: -Math.PI / 2 },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
+        subtitle: { en: 'Runway · Locker · PFP', ja: 'ランウェイ・ロッカー・PFP' },
       },
     ],
   },
@@ -457,7 +594,9 @@ export function readStoredParkZone(): ParkZoneId {
   if (typeof window === 'undefined') return DEFAULT_PARK_ZONE
   try {
     const raw = sessionStorage.getItem(ZONE_STORAGE_KEY)
-    if (raw === 'plaza' || raw === 'mountain' || raw === 'culture' || raw === 'sea') return raw
+    if (raw === 'plaza' || raw === 'mountain' || raw === 'culture' || raw === 'sea' || raw === 'astro') {
+      return raw
+    }
   } catch {
     // ignore
   }
