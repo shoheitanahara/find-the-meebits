@@ -227,6 +227,21 @@ function desiredActiveCount(phase: 0 | 1 | 2) {
   return 9
 }
 
+function staggerTargetsAcrossDifficultyTransition(targets: TargetRuntime[]) {
+  let transitionIndex = 0
+  for (const target of targets) {
+    if (!target.alive || !target.visible) continue
+    const minimumRemainingSec =
+      SHOOTING_GALLERY.difficultyTransitionGraceSec +
+      transitionIndex * SHOOTING_GALLERY.difficultyTransitionStaggerSec
+    target.lifeDuration = Math.max(
+      target.lifeDuration,
+      target.lifeT + minimumRemainingSec,
+    )
+    transitionIndex += 1
+  }
+}
+
 /** 的プール。物理なしの座標更新 + 倒れる演出。 */
 export function ShootingGalleryTargets() {
   const poolRef = useRef<Array<Group | null>>(Array.from({ length: POOL_SIZE }, () => null))
@@ -234,12 +249,14 @@ export function ShootingGalleryTargets() {
   const phase = useShootingGalleryStore((state) => state.phase)
   const localTimeRef = useRef(0)
   const spawnCooldownRef = useRef(0)
+  const difficultyRef = useRef<0 | 1 | 2>(0)
 
   useEffect(() => {
     shootingTargetsRuntime.targets = []
     shootingTargetsRuntime.groups.clear()
     localTimeRef.current = 0
     spawnCooldownRef.current = 0
+    difficultyRef.current = 0
     nextTargetId = 1
     for (const group of poolRef.current) {
       if (!group) continue
@@ -265,6 +282,11 @@ export function ShootingGalleryTargets() {
     const targets = shootingTargetsRuntime.targets
 
     if (store.phase === 'playing') {
+      if (difficulty !== difficultyRef.current) {
+        staggerTargetsAcrossDifficultyTransition(targets)
+        difficultyRef.current = difficulty
+        spawnCooldownRef.current = 0
+      }
       spawnCooldownRef.current -= dt
       const aliveVisible = targets.filter((t) => t.alive && t.visible).length
       if (aliveVisible < desiredActiveCount(difficulty) && spawnCooldownRef.current <= 0) {
@@ -347,7 +369,14 @@ export function ShootingGalleryTargets() {
         group.position.set(x, y, z)
         group.rotation.set(0, 0, 0)
         group.visible = target.visible
-        group.scale.setScalar(target.small ? 0.72 : 1)
+        const baseScale = target.small ? 0.72 : 1
+        const remainingLifeSec = target.lifeDuration - target.lifeT
+        const exitScale = MathUtils.clamp(
+          remainingLifeSec / SHOOTING_GALLERY.targetExitScaleDurationSec,
+          0,
+          1,
+        )
+        group.scale.setScalar(baseScale * exitScale)
       } else if (target.hitAt !== null) {
         const fallT = Math.min(1, (now - target.hitAt) / 380)
         group.visible = fallT < 1

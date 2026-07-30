@@ -1,3 +1,4 @@
+import { isTouchUiMode } from '../../game/perfConfig'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { SHOOTING_GALLERY } from '../config'
 import { shootingGalleryUi } from '../i18n'
@@ -9,6 +10,14 @@ const TARGET_SCORE_ROWS = [
   { id: 'gold', color: '#f0c050', score: SHOOTING_GALLERY.score.gold },
   { id: 'red', color: '#c02828', score: SHOOTING_GALLERY.score.red },
 ] as const
+
+function requestAimPointerLock() {
+  if (isTouchUiMode()) return
+  const canvas = document.getElementById(SHOOTING_GALLERY.canvasElementId)
+  if (!(canvas instanceof HTMLCanvasElement)) return
+  if (document.pointerLockElement === canvas) return
+  void canvas.requestPointerLock()
+}
 
 export function ShootingGalleryPlayPrompt() {
   const phase = useShootingGalleryStore((state) => state.phase)
@@ -86,9 +95,10 @@ export function ShootingGalleryPlayPrompt() {
           type="button"
           className="mt-5 w-full rounded-full bg-amber-100 px-6 py-3 text-sm font-black uppercase tracking-[0.18em] text-[#101820] transition hover:bg-white active:scale-[0.99]"
           onClick={() => {
+            requestAimPointerLock()
+            startGame()
             void unlockAudioIfNeeded().then(() => {
               playSfx('timerStart')
-              startGame()
             })
           }}
         >
@@ -126,9 +136,10 @@ export function ShootingGalleryResult() {
             type="button"
             className="rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#101820]"
             onClick={() => {
+              requestAimPointerLock()
+              replay()
               void unlockAudioIfNeeded().then(() => {
                 playSfx('uiConfirm')
-                replay()
               })
             }}
           >

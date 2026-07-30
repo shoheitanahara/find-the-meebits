@@ -22,18 +22,11 @@ export function ShootingGalleryController() {
   const phase = useShootingGalleryStore((state) => state.phase)
 
   useEffect(() => {
-    if (phase !== 'playing' && phase !== 'countdown') {
-      if (document.pointerLockElement === gl.domElement) {
-        document.exitPointerLock()
-      }
-      lockedRef.current = false
-      return
-    }
-
     if (isTouchUiMode()) return
 
     const onMouseMove = (event: MouseEvent) => {
-      if (useShootingGalleryStore.getState().phase !== 'playing') return
+      const currentPhase = useShootingGalleryStore.getState().phase
+      if (currentPhase !== 'playing' && currentPhase !== 'countdown') return
       if (lockedRef.current) {
         useShootingGalleryStore.getState().addAimDelta(
           event.movementX * SHOOTING_GALLERY.mouseAimSensitivity,
@@ -52,10 +45,12 @@ export function ShootingGalleryController() {
 
     const onPointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return
-      if (useShootingGalleryStore.getState().phase !== 'playing') return
+      const currentPhase = useShootingGalleryStore.getState().phase
+      if (currentPhase !== 'playing' && currentPhase !== 'countdown') return
       if (document.pointerLockElement !== gl.domElement) {
         void gl.domElement.requestPointerLock()
       }
+      if (currentPhase !== 'playing') return
       if (mouseDownFiredRef.current) return
       mouseDownFiredRef.current = true
       attemptFire(camera)
@@ -83,7 +78,15 @@ export function ShootingGalleryController() {
       if (document.pointerLockElement === gl.domElement) document.exitPointerLock()
       lockedRef.current = false
     }
-  }, [camera, gl, phase])
+  }, [camera, gl])
+
+  useEffect(() => {
+    if (phase === 'playing' || phase === 'countdown') return
+    if (document.pointerLockElement === gl.domElement) {
+      document.exitPointerLock()
+    }
+    lockedRef.current = false
+  }, [gl, phase])
 
   useFrame(() => {
     const store = useShootingGalleryStore.getState()

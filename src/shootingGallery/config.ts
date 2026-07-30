@@ -1,6 +1,7 @@
 /** Shooting Gallery 定数の正本。マジックナンバーを JSX に直書きしない。 */
 
 export const SHOOTING_GALLERY = {
+  canvasElementId: 'shooting-gallery-canvas',
   gameDurationSec: 45,
   fireCooldownMs: 250,
   countdownSec: 3,
@@ -55,6 +56,11 @@ export const SHOOTING_GALLERY = {
   maxActiveRedTargets: [0, 2, 4] as const,
   /** フェーズ別の赤的抽選率。 */
   redTargetSpawnChance: [0, 0.15, 0.45] as const,
+  /** 難易度切り替え時に既存の的を残し、段階的に入れ替える時間。 */
+  difficultyTransitionGraceSec: 1.4,
+  difficultyTransitionStaggerSec: 0.16,
+  /** 自然に退場させるための縮小時間。 */
+  targetExitScaleDurationSec: 0.28,
 
   score: {
     normal: 100,

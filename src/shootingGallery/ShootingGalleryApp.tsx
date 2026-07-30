@@ -79,6 +79,7 @@ export function ShootingGalleryApp() {
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#1a1510] text-[#f4ead2]">
       <Canvas
+        id={SHOOTING_GALLERY.canvasElementId}
         frameloop={frameloop}
         dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}
         shadows="soft"

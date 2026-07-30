@@ -4,10 +4,10 @@ import { useShootingControlsStore } from '../controlsStore'
 import { shootingGalleryUi } from '../i18n'
 import { useShootingGalleryStore } from '../store'
 
-/** ゲーム中のみ: 画面ドラッグで照準 + 右下発砲ボタン。 */
+/** カウントダウンから照準可能。発砲ボタンはゲーム開始後のみ表示する。 */
 export function ShootingGalleryMobileControls() {
   const phase = useShootingGalleryStore((state) => state.phase)
-  if (phase !== 'playing') return null
+  if (phase !== 'playing' && phase !== 'countdown') return null
 
   return (
     <>
@@ -17,7 +17,7 @@ export function ShootingGalleryMobileControls() {
           <p className="pb-3 pl-2 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/55">
             {shootingGalleryUi().dragToAim}
           </p>
-          <FireButton />
+          {phase === 'playing' ? <FireButton /> : null}
         </div>
       </div>
     </>
