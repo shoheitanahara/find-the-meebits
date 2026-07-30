@@ -33,8 +33,15 @@ function isOriginAllowed(origin: string | null, allowedOrigins: string[]): boole
 function buildCorsHeaders(request: Request, allowedOrigins: string[]): Headers {
   const headers = new Headers()
   const origin = request.headers.get('Origin')
+  const requestedMethod = request.headers.get('Access-Control-Request-Method')?.toUpperCase()
+  const isWriteRequest =
+    request.method === 'PUT' || (request.method === 'OPTIONS' && requestedMethod === 'PUT')
 
-  if (origin && isOriginAllowed(origin, allowedOrigins)) {
+  // VRM・プレビュー画像は公開アセットなので、GET/HEAD は配信元を限定しない。
+  // ブラウザからの PUT のみ、キャッシュ汚染を防ぐため許可リストを適用する。
+  if (!isWriteRequest) {
+    headers.set('Access-Control-Allow-Origin', '*')
+  } else if (origin && isOriginAllowed(origin, allowedOrigins)) {
     headers.set('Access-Control-Allow-Origin', origin)
     headers.set('Vary', 'Origin')
   }
