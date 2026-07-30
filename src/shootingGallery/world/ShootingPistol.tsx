@@ -50,199 +50,318 @@ export const ShootingPistol = forwardRef<ShootingPistolHandle, { visible: boolea
 
     return (
       <group ref={rootRef}>
-        <PistolGrip />
-        <PistolFrame />
-        <PistolSlide />
+        <group scale={[0.8, 0.8, 0.84]}>
+          <VintageGrip />
+          <VintageFrame />
+          <VintageReceiver />
 
-        <group ref={muzzleRef} position={[0, 0.07, 0.285]} />
-        <group ref={flashRef} position={[0, 0.07, 0.315]} visible={false}>
-          <mesh>
-            <sphereGeometry args={[0.045, 10, 8]} />
-            <meshStandardMaterial
-              color="#ffe8a0"
-              emissive="#ffb040"
-              emissiveIntensity={2.2}
-              transparent
-              opacity={0.85}
-            />
-          </mesh>
-          <pointLight intensity={6} distance={2.2} color="#ffc060" />
+          <group ref={muzzleRef} position={[0, 0.075, 0.405]} />
+          <group ref={flashRef} position={[0, 0.075, 0.435]} visible={false}>
+            <mesh>
+              <sphereGeometry args={[0.045, 10, 8]} />
+              <meshStandardMaterial
+                color="#ffe8a0"
+                emissive="#ffb040"
+                emissiveIntensity={2.2}
+                transparent
+                opacity={0.85}
+              />
+            </mesh>
+            <pointLight intensity={6} distance={2.2} color="#ffc060" />
+          </group>
         </group>
       </group>
     )
   },
 )
 
-const GUNMETAL = '#596166'
-const DARK_STEEL = '#272c2f'
-const FRAME_METAL = '#454d51'
-const GRIP_COLOR = '#49372e'
+const AGED_BRASS = '#86653d'
+const POLISHED_BRASS = '#b18a50'
+const DARK_BRASS = '#4e3c29'
+const BLUE_ENAMEL = '#9eb8c0'
+const DARK_STEEL = '#25292a'
 
-function PistolGrip() {
+function VintageGrip() {
   return (
-    <group position={[0, -0.145, -0.055]} rotation={[0.17, 0, 0]}>
+    <group position={[0, -0.155, -0.055]} rotation={[0.2, 0, 0]}>
       <mesh castShadow receiveShadow>
-        <boxGeometry args={[0.1, 0.245, 0.12]} />
+        <boxGeometry args={[0.115, 0.255, 0.135]} />
         <meshStandardMaterial
-          color={GRIP_COLOR}
-          roughness={0.78}
-          metalness={0.05}
-          emissive="#130c09"
-          emissiveIntensity={0.24}
+          color={AGED_BRASS}
+          roughness={0.34}
+          metalness={0.78}
+          emissive="#201406"
+          emissiveIntensity={0.12}
         />
       </mesh>
-      {([-0.053, 0.053] as const).map((x) => (
+      {([-0.061, 0.061] as const).map((x) => (
         <group key={x} position={[x, 0, 0]}>
           <mesh castShadow>
-            <boxGeometry args={[0.008, 0.185, 0.09]} />
-            <meshStandardMaterial color="#342c26" roughness={0.88} />
+            <boxGeometry args={[0.009, 0.19, 0.098]} />
+            <meshStandardMaterial
+              color={BLUE_ENAMEL}
+              roughness={0.42}
+              metalness={0.18}
+              emissive="#17272b"
+              emissiveIntensity={0.16}
+            />
           </mesh>
-          {[-0.065, -0.025, 0.015, 0.055].map((y) => (
-            <mesh key={y} position={[x > 0 ? 0.005 : -0.005, y, 0.002]}>
-              <boxGeometry args={[0.006, 0.012, 0.075]} />
-              <meshStandardMaterial color="#181615" roughness={0.9} />
+          {[-0.065, -0.025, 0.015, 0.055].map((y, index) => (
+            <mesh
+              key={y}
+              position={[x > 0 ? 0.006 : -0.006, y, 0]}
+              rotation={[0.25 + index * 0.12, 0, 0]}
+            >
+              <boxGeometry args={[0.006, 0.012, 0.102]} />
+              <meshStandardMaterial
+                color="#dce8e5"
+                roughness={0.36}
+                metalness={0.08}
+              />
             </mesh>
           ))}
-          <mesh position={[x > 0 ? 0.006 : -0.006, 0.065, 0.035]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.011, 0.011, 0.008, 12]} />
-            <meshStandardMaterial color="#54504a" metalness={0.5} roughness={0.4} />
+          <mesh
+            position={[x > 0 ? 0.007 : -0.007, 0.075, 0.04]}
+            rotation={[0, 0, Math.PI / 2]}
+          >
+            <cylinderGeometry args={[0.012, 0.012, 0.009, 12]} />
+            <meshStandardMaterial
+              color={POLISHED_BRASS}
+              metalness={0.82}
+              roughness={0.25}
+            />
           </mesh>
         </group>
       ))}
-      <mesh position={[0, -0.135, -0.002]} castShadow>
-        <boxGeometry args={[0.112, 0.026, 0.132]} />
-        <meshStandardMaterial color="#17191a" metalness={0.32} roughness={0.48} />
-      </mesh>
-    </group>
-  )
-}
-
-function PistolFrame() {
-  return (
-    <group>
-      <mesh position={[0, -0.015, 0.035]} castShadow receiveShadow>
-        <boxGeometry args={[0.098, 0.085, 0.285]} />
+      <mesh position={[0, -0.143, 0]} castShadow>
+        <boxGeometry args={[0.13, 0.032, 0.148]} />
         <meshStandardMaterial
-          color={FRAME_METAL}
-          metalness={0.58}
-          roughness={0.38}
-          emissive="#151a1c"
-          emissiveIntensity={0.22}
+          color={DARK_BRASS}
+          metalness={0.76}
+          roughness={0.34}
         />
       </mesh>
-      <mesh position={[0, -0.005, 0.17]} castShadow>
-        <boxGeometry args={[0.09, 0.052, 0.16]} />
-        <meshStandardMaterial color="#292f32" metalness={0.55} roughness={0.42} />
-      </mesh>
-      <mesh position={[0, 0.015, -0.125]} rotation={[0.22, 0, 0]} castShadow>
-        <boxGeometry args={[0.11, 0.045, 0.085]} />
-        <meshStandardMaterial color={FRAME_METAL} metalness={0.55} roughness={0.42} />
-      </mesh>
-
-      {/* トリガーガードと湾曲したトリガー。 */}
-      <mesh
-        position={[0, -0.09, 0.035]}
-        rotation={[0, Math.PI / 2, 0]}
-        scale={[1, 1.12, 0.78]}
-        castShadow
-      >
-        <torusGeometry args={[0.054, 0.011, 8, 22]} />
-        <meshStandardMaterial color={DARK_STEEL} metalness={0.62} roughness={0.38} />
-      </mesh>
-      <mesh position={[0, -0.075, 0.002]} rotation={[-0.28, 0, 0]} castShadow>
-        <boxGeometry args={[0.018, 0.065, 0.014]} />
-        <meshStandardMaterial color="#111416" metalness={0.65} roughness={0.32} />
-      </mesh>
-
-      {/* スライドストップ／分解レバー。 */}
-      <mesh position={[0.054, 0.015, -0.035]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.015, 0.015, 0.012, 14]} />
-        <meshStandardMaterial color="#171b1d" metalness={0.7} roughness={0.32} />
-      </mesh>
-      <mesh position={[0.058, 0.02, 0.01]} castShadow>
-        <boxGeometry args={[0.012, 0.018, 0.07]} />
-        <meshStandardMaterial color="#171b1d" metalness={0.68} roughness={0.34} />
-      </mesh>
     </group>
   )
 }
 
-function PistolSlide() {
+function VintageFrame() {
   return (
     <group>
-      {/* 銃身を覆う低く長いスライド。 */}
-      <mesh position={[0, 0.075, 0.065]} castShadow receiveShadow>
-        <boxGeometry args={[0.108, 0.108, 0.39]} />
+      <mesh position={[0, -0.005, -0.02]} castShadow receiveShadow>
+        <boxGeometry args={[0.12, 0.09, 0.22]} />
         <meshStandardMaterial
-          color={GUNMETAL}
+          color={DARK_BRASS}
+          metalness={0.78}
+          roughness={0.32}
+        />
+      </mesh>
+
+      {/* 参考画像の大きな角型トリガーガード。 */}
+      <mesh position={[0, -0.16, 0.045]} castShadow>
+        <boxGeometry args={[0.115, 0.014, 0.17]} />
+        <meshStandardMaterial color={AGED_BRASS} metalness={0.8} roughness={0.3} />
+      </mesh>
+      {([-0.035, 0.125] as const).map((z) => (
+        <mesh key={z} position={[0, -0.1, z]} castShadow>
+          <boxGeometry args={[0.115, 0.135, 0.014]} />
+          <meshStandardMaterial
+            color={AGED_BRASS}
+            metalness={0.8}
+            roughness={0.3}
+          />
+        </mesh>
+      ))}
+
+      {/* 引き金を収める機関部。ガード上部を塞ぎ、筒抜けに見せない。 */}
+      <mesh position={[0, -0.062, 0.022]} castShadow receiveShadow>
+        <boxGeometry args={[0.086, 0.058, 0.145]} />
+        <meshStandardMaterial
+          color={DARK_BRASS}
+          metalness={0.76}
+          roughness={0.34}
+        />
+      </mesh>
+      <mesh position={[0, -0.085, 0.098]} castShadow>
+        <boxGeometry args={[0.072, 0.055, 0.036]} />
+        <meshStandardMaterial color={AGED_BRASS} metalness={0.8} roughness={0.3} />
+      </mesh>
+      <mesh position={[0, -0.072, -0.052]} castShadow>
+        <boxGeometry args={[0.108, 0.12, 0.05]} />
+        <meshStandardMaterial
+          color={DARK_BRASS}
+          metalness={0.76}
+          roughness={0.34}
+        />
+      </mesh>
+
+      {/* 引き金：支点から下へ湾曲する、厚みのある真鍮レバー。 */}
+      <mesh position={[0, -0.08, 0.022]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.013, 0.013, 0.052, 14]} />
+        <meshStandardMaterial
+          color={POLISHED_BRASS}
+          metalness={0.86}
+          roughness={0.22}
+        />
+      </mesh>
+      <mesh position={[0, -0.098, 0.016]} rotation={[-0.16, 0, 0]} castShadow>
+        <boxGeometry args={[0.032, 0.05, 0.04]} />
+        <meshStandardMaterial
+          color={BLUE_ENAMEL}
+          metalness={0.26}
+          roughness={0.32}
+        />
+      </mesh>
+      <mesh position={[0, -0.121, 0.004]} rotation={[-0.42, 0, 0]} castShadow>
+        <boxGeometry args={[0.032, 0.044, 0.036]} />
+        <meshStandardMaterial
+          color={BLUE_ENAMEL}
+          metalness={0.26}
+          roughness={0.32}
+        />
+      </mesh>
+      <mesh position={[0, -0.13, -0.004]} rotation={[-0.8, 0, 0]} castShadow>
+        <boxGeometry args={[0.032, 0.03, 0.028]} />
+        <meshStandardMaterial
+          color={POLISHED_BRASS}
+          metalness={0.86}
+          roughness={0.22}
+        />
+      </mesh>
+
+      {/* 後部の機械式ハンマーとサイト。 */}
+      <mesh position={[0, 0.18, -0.13]} rotation={[-0.4, 0, 0]} castShadow>
+        <boxGeometry args={[0.075, 0.075, 0.028]} />
+        <meshStandardMaterial
+          color={AGED_BRASS}
           metalness={0.78}
           roughness={0.3}
-          emissive="#1b2023"
-          emissiveIntensity={0.26}
         />
-      </mesh>
-      <mesh position={[0, 0.135, 0.065]} castShadow>
-        <boxGeometry args={[0.082, 0.018, 0.325]} />
-        <meshStandardMaterial color="#353a3d" metalness={0.76} roughness={0.28} />
-      </mesh>
-
-      {/* 排莢口。 */}
-      <mesh position={[0.025, 0.145, 0.075]}>
-        <boxGeometry args={[0.055, 0.009, 0.095]} />
-        <meshStandardMaterial color="#101416" metalness={0.72} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.055, 0.09, 0.075]}>
-        <boxGeometry args={[0.008, 0.048, 0.09]} />
-        <meshStandardMaterial color="#171a1c" metalness={0.68} roughness={0.3} />
-      </mesh>
-
-      <SlideSerrations side={-1} />
-      <SlideSerrations side={1} />
-
-      {/* 前後サイト。 */}
-      {([-0.028, 0.028] as const).map((x) => (
-        <mesh key={x} position={[x, 0.162, -0.108]} castShadow>
-          <boxGeometry args={[0.018, 0.032, 0.034]} />
-          <meshStandardMaterial color="#111517" metalness={0.68} roughness={0.34} />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.158, 0.235]} castShadow>
-        <boxGeometry args={[0.018, 0.027, 0.032]} />
-        <meshStandardMaterial color="#111517" metalness={0.68} roughness={0.34} />
-      </mesh>
-      <mesh position={[0, 0.173, 0.245]}>
-        <sphereGeometry args={[0.005, 8, 6]} />
-        <meshBasicMaterial color="#e6e1cb" />
-      </mesh>
-
-      {/* 銃口面と、スライド内部に収まるバレル。 */}
-      <mesh position={[0, 0.075, 0.264]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.035, 0.012, 20]} />
-        <meshStandardMaterial color="#454a4c" metalness={0.82} roughness={0.24} />
-      </mesh>
-      <mesh position={[0, 0.075, 0.271]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.021, 0.021, 0.014, 20]} />
-        <meshStandardMaterial color="#080a0b" metalness={0.3} roughness={0.62} />
-      </mesh>
-
-      {/* 後部ハンマー。 */}
-      <mesh position={[0, 0.127, -0.15]} rotation={[-0.35, 0, 0]} castShadow>
-        <boxGeometry args={[0.055, 0.06, 0.03]} />
-        <meshStandardMaterial color="#171a1c" metalness={0.72} roughness={0.34} />
       </mesh>
     </group>
   )
 }
 
-function SlideSerrations({ side }: { side: -1 | 1 }) {
+function VintageReceiver() {
   return (
-    <group position={[side * 0.056, 0.085, -0.075]}>
-      {[-0.045, -0.022, 0, 0.022, 0.045].map((z) => (
-        <mesh key={z} position={[0, 0, z]} rotation={[0.18, 0, 0]}>
-          <boxGeometry args={[0.007, 0.074, 0.009]} />
-          <meshStandardMaterial color="#111416" metalness={0.72} roughness={0.34} />
+    <group>
+      {/* 真鍮製の露出エネルギーチャンバー。 */}
+      <mesh
+        position={[0, 0.08, 0.045]}
+        rotation={[Math.PI / 2, 0, 0]}
+        castShadow
+        receiveShadow
+      >
+        <cylinderGeometry args={[0.066, 0.066, 0.29, 24]} />
+        <meshStandardMaterial
+          color={AGED_BRASS}
+          metalness={0.82}
+          roughness={0.28}
+          emissive="#261707"
+          emissiveIntensity={0.1}
+        />
+      </mesh>
+      {([-0.105, 0.115] as const).map((z) => (
+        <mesh key={`chamber-ring-${z}`} position={[0, 0.08, z]} castShadow>
+          <torusGeometry args={[0.069, 0.009, 10, 24]} />
+          <meshStandardMaterial
+            color={POLISHED_BRASS}
+            metalness={0.88}
+            roughness={0.22}
+          />
         </mesh>
       ))}
+      {[-0.145, -0.12, -0.095].map((z, index) => (
+        <mesh key={`rear-coil-${z}`} position={[0, 0.08, z]} castShadow>
+          <torusGeometry args={[0.056 - index * 0.004, 0.011, 10, 22]} />
+          <meshStandardMaterial
+            color={index % 2 === 0 ? DARK_STEEL : POLISHED_BRASS}
+            metalness={0.84}
+            roughness={0.28}
+          />
+        </mesh>
+      ))}
+
+      {/* 段付きの前部バレルと放熱リング。 */}
+      <mesh
+        position={[0, 0.08, 0.27]}
+        rotation={[Math.PI / 2, 0, 0]}
+        castShadow
+      >
+        <cylinderGeometry args={[0.057, 0.064, 0.2, 24]} />
+        <meshStandardMaterial
+          color={DARK_BRASS}
+          metalness={0.84}
+          roughness={0.26}
+        />
+      </mesh>
+      {[0.205, 0.245, 0.285, 0.325].map((z) => (
+        <mesh key={`barrel-ring-${z}`} position={[0, 0.08, z]} castShadow>
+          <torusGeometry args={[0.064, 0.009, 8, 22]} />
+          <meshStandardMaterial
+            color={POLISHED_BRASS}
+            metalness={0.88}
+            roughness={0.22}
+          />
+        </mesh>
+      ))}
+      <mesh
+        position={[0, 0.08, 0.382]}
+        rotation={[Math.PI / 2, 0, 0]}
+        castShadow
+      >
+        <cylinderGeometry args={[0.067, 0.058, 0.035, 24]} />
+        <meshStandardMaterial
+          color={AGED_BRASS}
+          metalness={0.86}
+          roughness={0.24}
+        />
+      </mesh>
+      <mesh position={[0, 0.08, 0.401]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.024, 0.024, 0.012, 20]} />
+        <meshStandardMaterial color="#090a09" metalness={0.2} roughness={0.66} />
+      </mesh>
+
+      <VintageCageRails />
+    </group>
+  )
+}
+
+function VintageCageRails() {
+  return (
+    <group>
+      {([-0.015, 0.178] as const).map((y) => (
+        <mesh key={y} position={[0, y, 0.055]} castShadow>
+          <boxGeometry args={[0.128, 0.012, 0.43]} />
+          <meshStandardMaterial
+            color={AGED_BRASS}
+            metalness={0.82}
+            roughness={0.3}
+          />
+        </mesh>
+      ))}
+      {([-0.07, 0.19] as const).map((z) => (
+        <group key={z}>
+          {([-0.068, 0.068] as const).map((x) => (
+            <mesh key={x} position={[x, 0.08, z]} castShadow>
+              <boxGeometry args={[0.011, 0.19, 0.014]} />
+              <meshStandardMaterial
+                color={AGED_BRASS}
+                metalness={0.82}
+                roughness={0.3}
+              />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      <mesh position={[0, 0.21, 0.17]} castShadow>
+        <boxGeometry args={[0.075, 0.065, 0.025]} />
+        <meshStandardMaterial
+          color={POLISHED_BRASS}
+          metalness={0.86}
+          roughness={0.24}
+        />
+      </mesh>
     </group>
   )
 }
