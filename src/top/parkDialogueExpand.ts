@@ -13,8 +13,10 @@ export type ParkDialoguePools = {
   gameStreet: string[]
   gameMountain: string[]
   gameNeon: string[]
+  gameShooting: string[]
   gameRunway: string[]
   gameLookLocker: string[]
+  gameSergito: string[]
   featuredAny: string[]
   featuredMatched: string[]
   themeAny: string[]
@@ -233,6 +235,44 @@ const JA_LOOK_LOCKER = [
   'ルックロッカー、人が入ってた。',
   'この姿でランウェイ見に行く。',
   '帽子、三つ試した。',
+]
+
+const JA_SHOOTING = [
+  '的の真ん中を抜いた。次は端だった。',
+  '金の的を追ってたら、普通の的を見失った。',
+  '赤い的、反射で撃ちそうになった。',
+  '四十五秒って、構えてると短い。',
+  '最後の一発だけ、きれいに当たった。',
+  'コンボが続いたら、急に手が固くなった。',
+  '百点の的が動き出してから忙しかった。',
+  '瓶の隙間を狙った。瓶は無事。',
+  'ロッジのポスター、撃つ前に見入った。',
+  '銃を下ろしたら、右腕だけ疲れてた。',
+  '真ん中は二倍だって、終わってから気づいた。',
+  'ゴールド、止まると思って待った。止まらなかった。',
+  'デッドアイまで、あと少しだったらしい。',
+  'カウントが始まる前から照準を動かしてた。',
+  '点数より、最後に外した一発を覚えてる。',
+  'カウンターの向こう、見た目より的が多い。',
+]
+
+const JA_SERGITO = [
+  'Sergito、最初に帽子を見た。',
+  'シャツの話から、靴の話まで行った。',
+  '工房の棚、同じ顔が一体もいなかった。',
+  '自分では気にしてない色を、Sergitoは覚えてた。',
+  '話しかけたら、眼鏡を先に褒められた。',
+  '二回話したら、今度は髪の話だった。',
+  '奥のフィギュア、近くで見ると細かい。',
+  '工房を出てから、自分の服を見直した。',
+  'Sergito、こっちが忘れてた特徴まで見てた。',
+  '棚の前で長居した。本人とは短く話した。',
+  '同じタイプでも、並ぶと全然違う。',
+  '靴の色を言い当てられて、下を見た。',
+  '工房の中、歩いてる子まで展示みたいだった。',
+  '感想を聞きに行ったのに、こっちが観察された。',
+  '出口まで来て、もう一回話しに戻った。',
+  '砂を落として入ったのに、帰りはまた砂だらけ。',
 ]
 
 const JA_FEAT = [
@@ -636,6 +676,44 @@ const EN_LOOK_LOCKER = [
   'Tried three hats.',
 ]
 
+const EN_SHOOTING = [
+  'Hit the center once. Caught the edge next.',
+  'Chased the gold target and lost the easy ones.',
+  'Nearly fired at a red target on instinct.',
+  'Forty-five seconds gets short once you’re aiming.',
+  'Last shot was the clean one.',
+  'The combo held. Then my hand went stiff.',
+  'Those hundred-point targets got busy later.',
+  'Shot through the bottles. Bottles survived.',
+  'Got distracted by the old posters before I started.',
+  'Put the pistol down. Right arm felt twice as heavy.',
+  'Found out about double points after I was done.',
+  'Waited for gold to stop moving. It never did.',
+  'Missed Deadeye by less than I wanted to know.',
+  'Started moving the aim before the countdown ended.',
+  'Forgot the score. Remembered the last miss.',
+  'More targets behind that counter than it first looks.',
+]
+
+const EN_SERGITO = [
+  'Sergito noticed the hat first.',
+  'Started with my shirt. Ended up talking shoes.',
+  'Not one repeated face on those workshop shelves.',
+  'Sergito remembered a color I barely notice.',
+  'Walked up and got a comment about my glasses.',
+  'Talked twice. Second time was all about the hair.',
+  'Those figures have tiny details up close.',
+  'Left the workshop checking my own outfit.',
+  'Sergito caught a trait I’d forgotten about.',
+  'Spent longer by the shelves than in the conversation.',
+  'Same Type. Completely different side by side.',
+  'Got my shoe color called out. Had to look down.',
+  'Even the walkers inside looked like part of the display.',
+  'Went in for an opinion. Got studied instead.',
+  'Reached the exit, then went back for one more talk.',
+  'Knocked off the sand going in. Left with more.',
+]
+
 const EN_FEAT = [
   'Today’s Star looks a little sleepy.',
   'Watching the crowd more than the statue.',
@@ -827,63 +905,171 @@ const EN_SEA_FLAVOR = [
 ]
 
 const JA_ASTRO_GREET = [
-  '真空の匂い、する？',
-  'エアロック、通りました？',
-  'ようこそ、アストロへ。',
-  'ロボットとビジターの夜です。',
-  'ハッチの先がここ。',
-  '軌道側の風、感じる？',
-  '工事灯がきれいでしょう。',
-  'ドッキング、完了？',
+  'あ、床の線を見てた。',
+  '山側から来た？',
+  'こっちは静かだね。',
+  '金属の床、足音が響く。',
+  '三つとも、まだ工事中。',
+  'ロボット、多い夜だね。',
+  '紫の灯り、さっき点いた。',
+  'カルチャーから歩いてきた。',
+  'こんばんは。少し迷ってる。',
+  'この先、まだ入れないみたい。',
+  '星、広場より見やすい。',
+  '足元、少し冷たい。',
+  'さっき資材が通った。',
+  'ここで一息ついてる。',
+  '門を間違えて、ここまで来た。',
+  'やあ。建物を見てた。',
 ]
 
 const JA_ASTRO_FLAVOR = [
   'スタードーム、まだ骨組みだけ。',
-  'ルナラボから電波が聞こえる。',
+  'ルナラボの奥で、金属の音がした。',
   'オービタルポートのリングが光ってる。',
   'ロボが資材を運んでた。',
   'ビジターの靴跡が残ってる。',
-  'シアンの線、踏まないでね。',
-  '工事中の建物、全部入らないで。',
-  '山側の門から来た？',
-  'カルチャーの東から？',
-  'クレーターの影、休憩にいい。',
-  'アンテナが今日もうるさそう。',
+  'シアンの線を追ったら、同じ場所に戻った。',
+  '三つの建物、今日は外から見るだけ。',
+  '山側の門、振り返ると岩だらけ。',
+  'カルチャーの光、ここからも見える。',
+  'クレーターの縁で靴を直した。',
   '紫のビーコンが点滅してる。',
   '足場の下、金属の音。',
-  '今夜は星が近い。',
+  '星を数えてた。途中で資材が通った。',
   'ロボットの歩幅、規則正しい。',
-  'ビジターは地図を見てる。',
+  '地図を見てたビジター、同じ角を二回曲がった。',
+  'スタードームの前、写真を撮る人が多い。',
+  'ルナラボの扉、昨日より厚く見える。',
+  'オービタルポート、輪だけ先に完成しそう。',
+  '工事の音が止まると、急に静か。',
+  '暗い床だと、靴の色が変わって見える。',
+  'ロボットに道を聞いたら、建物を指された。',
+  '門を二つ見比べて、まだ迷ってる。',
+  '資材箱、さっきと場所が違う。',
+  '帰る前に、三つの看板をもう一度見る。',
 ]
 
 const EN_ASTRO_GREET = [
-  'Smell that vacuum air?',
-  'Through the airlock yet?',
-  'Welcome to Astro.',
-  'Robots and visitors tonight.',
-  'Past the hatch — you’re here.',
-  'Feel the orbital breeze?',
-  'Nice construction lights, right?',
-  'Docking complete?',
+  'Oh. I was watching the floor line.',
+  'Come through the mountain side?',
+  'Quiet over here.',
+  'Footsteps carry on this metal.',
+  'All three are still under construction.',
+  'A lot of robots out tonight.',
+  'That purple light just came on.',
+  'Walked over from Culture.',
+  'Hey. Slightly lost.',
+  'Still can’t go in there.',
+  'Stars are easier to see from here.',
+  'Floor’s cold under the shoes.',
+  'A load of materials just went by.',
+  'Taking a minute here.',
+  'Wrong gate brought me all the way out.',
+  'Hey. Just looking at the buildings.',
 ]
 
 const EN_ASTRO_FLAVOR = [
   'Star Dome’s still just ribs.',
-  'Lunar Lab’s buzzing with signals.',
+  'Heard metal clanking deep in Lunar Lab.',
   'Orbital Port ring’s glowing.',
   'A robot hauled crates past me.',
   'Visitor footprints on the metal.',
-  'Don’t step on the cyan line.',
-  'All three buildings are closed — under construction.',
-  'Came in from the mountain gate?',
-  'Or from Culture’s east side?',
-  'Crater shadow’s a good rest stop.',
-  'Antenna’s chatty tonight.',
+  'Followed the cyan line. Ended up where I started.',
+  'All three are closed. Just looking from outside.',
+  'Mountain gate is all rock when you look back.',
+  'Can still see Culture’s glow from here.',
+  'Fixed my shoe by the crater rim.',
   'Purple beacon keeps blinking.',
   'Metal clanks under the scaffold.',
-  'Stars feel close.',
+  'Was counting stars. A material cart interrupted.',
   'Robots walk like metronomes.',
-  'Visitor’s checking a map.',
+  'Visitor with a map passed the same corner twice.',
+  'People keep taking photos by Star Dome.',
+  'Lunar Lab’s door looks thicker than yesterday.',
+  'Orbital Port might finish the ring first.',
+  'When construction stops, this place gets very quiet.',
+  'Dark floor changes the color of every shoe.',
+  'Asked a robot for directions. It pointed at a building.',
+  'Compared both gates. Still undecided.',
+  'That supply crate moved since I last looked.',
+  'One more look at all three signs before I leave.',
+]
+
+const JA_FEAT_ASTRO = [
+  '広場の主役、ここまで噂が来てる。',
+  '今日の主役を見てから、こっちへ来た。',
+  '像の帽子だけ覚えてる。',
+  'ロボットが主役の番号を言ってた。',
+  'スタードームの前でも、主役の話してた。',
+  '主役の看板、写真だけ見せてもらった。',
+  '広場まで戻ったら、もう一度像を見る。',
+  '今日の主役、ここの照明だと違って見えそう。',
+  'ビジターが主役の服を細かく説明してた。',
+  '像を見てないのに、特徴だけ詳しくなった。',
+  '主役の番号、資材箱に書きそうになった。',
+  'ここには像がないから、噂だけ増える。',
+  '広場の銅像、ロボットも見に行くらしい。',
+  '主役と同じ帽子、さっき門の近くにいた。',
+  '工事の話より、今日は主役の話が多い。',
+  '帰りに噴水へ寄る。今度こそ忘れない。',
+]
+
+const EN_FEAT_ASTRO = [
+  'Talk of the plaza Star made it all the way here.',
+  'Saw today’s Star before walking over.',
+  'Only remember the statue’s hat.',
+  'A robot was reciting the Star’s number.',
+  'They were talking about the Star by Star Dome too.',
+  'Someone showed me a photo of the Star board.',
+  'I’ll look at the statue again when I head back.',
+  'Today’s Star would look different under these lights.',
+  'A visitor gave a very detailed report on the outfit.',
+  'Haven’t seen the statue. Somehow know every trait.',
+  'Nearly wrote the Star’s number on a supply crate.',
+  'No statue here, so the story keeps changing.',
+  'Even the robots are going to see the plaza statue.',
+  'Saw the same hat by the gate a minute ago.',
+  'More Star talk than construction talk tonight.',
+  'Stopping by the fountain on the way back. This time.',
+]
+
+const JA_THEME_ASTRO = [
+  'ここの照明だと、{value} が少し青く見える。',
+  'さっき門の近くで {value} を見た。',
+  '広場の看板、今日は {theme} だった。',
+  '{value} の子、金属の床だと見つけやすい。',
+  'ロボットが {value} を数えてた。',
+  'スタードームの前に、{value} が集まってた。',
+  '{value}、暗い床では目立つね。',
+  'ビジターが {theme} の話をしてた。',
+  '工事灯の下だと、{value} の色が変わる。',
+  '山側の門で {value} とすれ違った。',
+  '今日よく見るのは {value}。ここでも同じ。',
+  '{theme}、看板を見なくても覚えた。',
+  '資材箱の横にも {value} がいた。',
+  'ルナラボの前、{value} が二人いた。',
+  '帰り道でも {value} を探しそう。',
+  'ここまで来ても、今日の {value} は多い。',
+]
+
+const EN_THEME_ASTRO = [
+  '{value} looks a little blue under these lights.',
+  'Saw {value} by the gate a minute ago.',
+  'Plaza board said {theme} today.',
+  '{value} is easy to spot against the metal floor.',
+  'A robot was counting the {value} crowd.',
+  'A few {value} folks gathered by Star Dome.',
+  '{value} stands out on the dark floor.',
+  'A visitor was talking about {theme}.',
+  'Construction lights change the look of {value}.',
+  'Passed someone with {value} at the mountain gate.',
+  'Seeing {value} everywhere today. Same out here.',
+  'Remembered {theme} without checking the board again.',
+  'Saw {value} beside the supply crates.',
+  'Two {value} visitors by Lunar Lab.',
+  'I’ll probably keep spotting {value} on the way back.',
+  'Came all this way. Still seeing plenty of {value}.',
 ]
 
 // ─── build ───────────────────────────────────────────────────────────
@@ -942,11 +1128,33 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
     gameStreet: isJa ? JA_STREET : EN_STREET,
     gameMountain: isJa ? JA_MT_GAME : EN_MT_GAME,
     gameNeon: isJa ? JA_NEON : EN_NEON,
+    gameShooting: isJa ? JA_SHOOTING : EN_SHOOTING,
     gameRunway: isJa ? JA_RUNWAY : EN_RUNWAY,
     gameLookLocker: isJa ? JA_LOOK_LOCKER : EN_LOOK_LOCKER,
-    featuredAny: isMt || isAstro ? (isJa ? JA_FEAT_MT : EN_FEAT_MT) : isJa ? JA_FEAT : EN_FEAT,
+    gameSergito: isJa ? JA_SERGITO : EN_SERGITO,
+    featuredAny: isAstro
+      ? isJa
+        ? JA_FEAT_ASTRO
+        : EN_FEAT_ASTRO
+      : isMt
+        ? isJa
+          ? JA_FEAT_MT
+          : EN_FEAT_MT
+        : isJa
+          ? JA_FEAT
+          : EN_FEAT,
     featuredMatched: isJa ? JA_FEAT_MATCH : EN_FEAT_MATCH,
-    themeAny: isMt || isAstro ? (isJa ? JA_THEME_MT : EN_THEME_MT) : isJa ? JA_THEME : EN_THEME,
+    themeAny: isAstro
+      ? isJa
+        ? JA_THEME_ASTRO
+        : EN_THEME_ASTRO
+      : isMt
+        ? isJa
+          ? JA_THEME_MT
+          : EN_THEME_MT
+        : isJa
+          ? JA_THEME
+          : EN_THEME,
     themeMatched: isJa ? JA_THEME_MATCH : EN_THEME_MATCH,
     flavor,
   }
@@ -971,8 +1179,10 @@ export function countParkDialogueLines(pools: ParkDialoguePools) {
     pools.gameStreet.length +
     pools.gameMountain.length +
     pools.gameNeon.length +
+    pools.gameShooting.length +
     pools.gameRunway.length +
     pools.gameLookLocker.length +
+    pools.gameSergito.length +
     pools.featuredAny.length +
     pools.featuredMatched.length +
     pools.themeAny.length +

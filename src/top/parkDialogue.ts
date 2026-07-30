@@ -85,12 +85,16 @@ export function selectParkDialogueLines(
   if (npc.isFeatured) {
     second =
       locale === 'ja'
-        ? isMountain || isCulture || isSea || isAstro
+        ? isAstro
+          ? `広場の銅像、#${featuredId}。ぼく。ここまで来ると、別の人の話みたい。`
+          : isMountain || isCulture || isSea
           ? `噴水の銅像、#${featuredId}。ぼく。遠くからだと信じにくいよね。`
           : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
-        : isMountain || isCulture || isSea || isAstro
-          ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
-          : `Fountain statue’s #${featuredId}. That’s me. Looks different from the side.`
+        : isAstro
+          ? `Plaza statue’s #${featuredId}. That’s me. Feels like they’re talking about someone else out here.`
+          : isMountain || isCulture || isSea
+            ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
+            : `Fountain statue’s #${featuredId}. That’s me. Looks different from the side.`
   } else if (npc.matched && branch <= 2) {
     second = fillTheme(pickLine(pools.themeMatched, seed, talkCount, 23), themeTrait)
     if (branch === 0) {
@@ -101,21 +105,27 @@ export function selectParkDialogueLines(
       ? pickLine(pools.gameMountain, seed, talkCount, 31)
       : isCulture
         ? pickLine(pools.gameRunway, seed, talkCount, 31)
-        : isSea || isAstro
-          ? pickLine(pools.flavor, seed, talkCount, 31)
-          : pickLine(pools.gameFind, seed, talkCount, 31)
+        : isSea
+          ? pickLine(pools.gameSergito, seed, talkCount, 31)
+          : isAstro
+            ? pickLine(pools.flavor, seed, talkCount, 31)
+            : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
     second = isMountain
       ? pickLine(pools.gameNeon, seed, talkCount, 37)
       : isCulture
         ? pickLine(pools.gameLookLocker, seed, talkCount, 37)
-        : isSea || isAstro
-          ? pickLine(pools.flavor, seed, talkCount, 37)
-          : pickLine(pools.gameTraits, seed, talkCount, 37)
+        : isSea
+          ? pickLine(pools.gameSergito, seed, talkCount, 37)
+          : isAstro
+            ? pickLine(pools.flavor, seed, talkCount, 37)
+            : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
-    second = isMountain || isCulture || isSea || isAstro
-      ? pickLine(pools.flavor, seed, talkCount, 41)
-      : pickLine(pools.gameStreet, seed, talkCount, 41)
+    second = isMountain
+      ? pickLine(pools.gameShooting, seed, talkCount, 41)
+      : isCulture || isSea || isAstro
+        ? pickLine(pools.flavor, seed, talkCount, 41)
+        : pickLine(pools.gameStreet, seed, talkCount, 41)
   } else {
     second =
       talkCount % 2 === 0

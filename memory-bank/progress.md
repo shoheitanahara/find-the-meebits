@@ -9,7 +9,8 @@
 - [x] Astro 地面・外周・ポータル・工事中3棟（STAR DOME / LUNAR LAB / ORBITAL PORT）
 - [x] 共通建物スロット正本化（`parkAttractionSlots.ts`）
 - [x] Robot / Visitor 8体＋他Type 7体の日次15 NPC + Astro 会話プール
-- [x] Astro専用環状ライト街灯（個別pointLight削減、パーク共通ベンチ撤去）
+- [x] Astro専用ベンチ＋環状ライト街灯（個別pointLight削減、ベンチ横オブジェ撤去）
+- [x] Astro専用の挨拶・地区雑談・今日の主役・Trait会話
 
 ### Mountain Shooting Gallery（`/shooting-gallery`）
 
@@ -18,10 +19,12 @@
 - [x] PC マウス照準 + クリック／SP 画面ドラッグ + Fire
 - [x] 複数種の動く的（Meebit/trait 的なし）・レイキャスト命中
 - [x] スコア／コンボ／赤ペナルティ／金色ボーナス／リザルト評価
+- [x] Mountain NPC向け Shooting Gallery専用会話（日英）
 
 ### Meebits Park（ハブ / `top`）
 
 - [x] `/` を Park に、本編を `/find-the-meebit` に移設（互換リダイレクトなし）
+- [x] Sea NPC向け Meet Sergito専用会話、Culture NPC向け Look Locker専用会話（日英）
 - [x] アバター選択カード（番号 / ランダム + 実 VRM プレビュー）
 - [x] 固定追従カメラ（本編相当の距離感）+ WASD/ジョイスティック移動
 - [x] Plaza 3 建物（find / traits / street）+ Mountain 地区＋ Coming Soon 棟

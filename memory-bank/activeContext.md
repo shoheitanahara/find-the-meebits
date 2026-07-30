@@ -4,6 +4,13 @@
 
 ## 直近の作業サマリー
 
+### Park NPC 会話
+
+- Mountain NPC: Mt. Meeb / Jerry Mountain / Shooting Gallery の3施設を個別プールで話す
+- Culture NPC: Runway / Look Locker を個別プールで話す
+- Sea NPC: Meet Sergito 工房での観察・Traitコメント体験を話す
+- Astro NPC: 地区固有の挨拶・工事中3棟・主役・Trait会話を使う
+
 ### Astro District（パーク新ゾーン）— Open（工事中建物のみ）
 
 - **Zone ID**: `astro`（Mountain の北 × Culture の東）
@@ -11,8 +18,9 @@
 - **地面**: `AstroDistrictGround`（レゴリス・金属パネル・シアン発光ライン）
 - **建物**: 共通3スロットに工事中のみ（STAR DOME / LUNAR LAB / ORBITAL PORT）。`TOP_ATTRACTIONS` 未登録＝進入不可
 - **NPC**: 日次15体・Robot / Visitor 8体＋他Type 7体（`dailyFeatured` STORAGE_KEY `v11`）
-- **家具**: Astro専用の環状ライト街灯（パーク共通ベンチは全ゾーンから撤去）
+- **家具**: Astro専用ベンチ＋環状ライト街灯（ベンチ横オブジェは置かない）
 - **軽量化**: Astroの街灯・ビーコン・工事中棟はemissive表現を維持し、個別pointLightを省略
+- **NPC会話**: Astro専用の挨拶・地区雑談・今日の主役・Trait会話。Mountain会話の流用なし
 - **スロット正本**: `src/top/parkAttractionSlots.ts`（Mountain 配置を全区デフォルト化）
 
 ### Mountain Shooting Gallery（`/shooting-gallery`）— Open

@@ -22,7 +22,7 @@
 >
 > と感じられる状態を作る。
 >
-> 最終更新: 2026-07-26（日本語優先の二段階生成・自然会話フィルター追加）
+> 最終更新: 2026-07-30（Shooting Gallery / Look Locker / Meet Sergito / Astro 対応）
 
 ---
 
@@ -50,11 +50,14 @@ Bible の理想と、いまの実装は完全一致しない。**ズレがある
 | トピック | いまのアプリ | セリフでの扱い |
 |----------|--------------|----------------|
 | **Culture の Meebits Runway** | 入場可。日替わりカラーのキャットウォーク＋客席着席 | 「今日の色」「ショー」「空席」「座った／見た」は可。工事・Coming Soon 扱いにしない |
-| **Mountain / Sea の Coming Soon** | 建設中スロットあり | 屋根・壁・音・「昨日より進んでる」は可。完成日・開発進捗は不可 |
+| **Mountain Shooting Gallery** | 入場可。45秒の射的。入口看板は工事中表示 | 的・スコア・コンボ・赤／金の的・ロッジ内装の体験談は可。攻略説明にしない |
+| **Culture Look Locker** | 入場可。現在と試着姿を比較できる | 帽子・髪・服の試着、タイプ別の見比べは可。旧称 Closet / Locker Studio は使わない |
+| **Sea Meet Sergito** | 入場可。工房内で Sergito が見た目の Trait にコメント | Sergito、工房、棚のフィギュア、話者が観察された体験は可。Trait 判定ロジックは説明しない |
+| **Astro の3棟** | 地区は入場可。Star Dome / Lunar Lab / Orbital Port は工事中 | 建物名、資材、金属音、外から眺めた話は可。完成日・開発進捗は不可 |
 | **季節サイクル** | 現状なし（旧夏シーズンは廃止） | 「秋になった」など季節切替を仕様として語らない。光・風・潮の感覚は可 |
 | **時間帯** | パークは夜の空気が主 | 「もう夕方」は感覚として可。昼夜システム説明は不可 |
 | **Plaza 来場者** | 日替わり約 30 体（うち共通点マッチ約 15） | 人数を言わない。「今日よく見る服」「似た集団」は可 |
-| **Mountain / Sea / Culture 来場者** | 各地区 約 15 体 | 同上。内部定数をセリフに出さない |
+| **Mountain / Sea / Culture / Astro 来場者** | 各地区 約 15 体。Astro は Robot / Visitor 約半数＋他Type | 同上。人数や比率を言わない。周囲の Robot / Visitor を観察する話は可 |
 | **今日の主役** | 噴水銅像＋看板。日付（JST）で入替 | 「今日の主役」「Today’s Star」「銅像」で可。抽選・日付計算は不可 |
 | **Mt. Meeb / Jerry Mountain** | 日替わりルート＋進捗も毎日 Stage 1 から | 消えた近道・今日の失敗は可。seed / リセット仕様は不可 |
 | **8th Street / Find / Trait Hunt** | Plaza から入るアトラクション（別画面） | パーク内の「遊んだあと／これから行く」雑談として可。攻略・乱数説明は不可 |
@@ -209,8 +212,12 @@ NPC は「アップデート」と言わない。変化は現実の出来事と�
 | 今日の主役 | 噴水の銅像と関連 Trait が日付で変わる | 推し、見物人、像の印象、噂 | 抽選方法、日付計算 |
 | 日替わり来場者 | Plaza〜各地区で顔ぶれが変わる | 今日よく見る服、似た集団、偶然の再会 | 「30体」等の内部仕様 |
 | Culture / Meebits Runway | 入場可。日替わりカラー・客席着席 | 今日の色、歩き、空席、座って見た | 工事・Coming Soon 扱い、仕様説明 |
+| Mountain / Shooting Gallery | 入場可。45秒の射的 | 外した一発、動く的、赤／金の的、腕の疲れ | 点数表の読み上げ、操作説明 |
+| Culture / Look Locker | 入場可。見た目の試着・比較 | 試した帽子、髪型、別Typeの見え方 | UI操作、内部候補数 |
+| Sea / Meet Sergito | 入場可。Traitに応じた工房内会話 | Sergitoに見られた特徴、棚、フィギュア | Trait抽出処理、会話生成ロジック |
+| Astro District | 地区は入場可。3棟は工事中 | 金属床、資材、門、Robot / Visitor、建物の変化 | NPC比率、座標、完成日 |
 | 建設中エリア | Coming Soon 棟 | 屋根、壁、作業音、完成予想 | リリース日、開発進捗率 |
-| 地区の空気 | Plaza / Mountain / Culture / Sea | 光、風、音、砂、木、混雑 | zoneId、座標、ロード方式 |
+| 地区の空気 | Plaza / Mountain / Culture / Sea / Astro | 光、風、音、砂、木、金属床、混雑 | zoneId、座標、ロード方式 |
 
 ---
 
@@ -843,11 +850,20 @@ const {{TARGET_POOL}} = [
 - 今日はここから動かない。  
 - I only came to look at the sea. Somehow it’s evening.
 
-### Culture（工事寄り）
+### Culture
 
-- 屋根、昨日より一枚増えてる。  
-- 完成したら最初に来る。忘れてなければ。  
-- There’s one more piece of roof than yesterday.
+- 帽子、三つ試した。  
+- この姿でランウェイ見に行く。  
+- Tried three hats.
+
+### Shooting Gallery / Meet Sergito / Astro
+
+- 点数より、最後に外した一発を覚えてる。  
+- Sergito、最初に帽子を見た。  
+- シアンの線を追ったら、同じ場所に戻った。  
+- Forgot the score. Remembered the last miss.  
+- Sergito noticed the hat first.  
+- Followed the cyan line. Ended up where I started.
 
 ### 8th / Find / Trait（抜粋）
 
@@ -869,9 +885,13 @@ const {{TARGET_POOL}} = [
 | `gameStreet` | 異変、歩行者 | `EN_STREET_` / `JA_STREET_` |
 | `gameMountain` | 日替わりルート、失敗 | `EN_MT_GAME_` / `JA_MT_GAME_` |
 | `gameNeon` | Jerry Mountain | `EN_NEON_GAME_` / `JA_NEON_GAME_` |
+| `gameShooting` | Shooting Gallery の的・スコア・失敗 | `EN_SHOOTING` / `JA_SHOOTING` |
+| `gameRunway` | Runway の色・歩き・客席 | `EN_RUNWAY` / `JA_RUNWAY` |
+| `gameLookLocker` | Look Locker の試着・比較 | `EN_LOOK_LOCKER` / `JA_LOOK_LOCKER` |
+| `gameSergito` | Sergito 工房での観察・会話 | `EN_SERGITO` / `JA_SERGITO` |
 | `featured*` | 今日の主役、噴水 | `EN_FEAT_` / `JA_FEAT_` |
 | `theme*` | 今日のリンク Trait（`{theme}` / `{value}`） | `EN_THEME_` / `JA_THEME_` |
-| `flavor` | ゾーン別空気（工事ネタもここ） | `EN_PLAZA_FLAVOR_` / `EN_MT_FLAVOR_` / `EN_CU_FLAVOR_` / `EN_SEA_FLAVOR_` ほか |
+| `flavor` | ゾーン別空気（工事ネタもここ） | `EN_PLAZA_FLAVOR` / `EN_MT_FLAVOR` / `EN_CU_FLAVOR` / `EN_SEA_FLAVOR` / `EN_ASTRO_FLAVOR` ほか |
 
 ゾーン追加時は抽象 flavor のコピペ禁止。その場所だけの音・地面・光・失敗を先に定義する。
 
