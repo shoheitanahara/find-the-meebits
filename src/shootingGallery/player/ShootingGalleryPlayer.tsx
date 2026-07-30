@@ -27,7 +27,8 @@ export function ShootingGalleryPlayer() {
     localTimeRef.current += dt
     const store = useShootingGalleryStore.getState()
     const aimYawRadians = -store.aimX * SHOOTING_GALLERY.cameraAimYawMax
-    const aimPitchRadians = -store.aimY * SHOOTING_GALLERY.cameraAimPitchMax
+    // VRMボーンのX回転は銃オブジェクトとPitchの正方向が逆になる。
+    const aimPitchRadians = store.aimY * SHOOTING_GALLERY.cameraAimPitchMax
     const root = rootRef.current
     const { playerAnchor } = SHOOTING_GALLERY
     if (root) {

@@ -1,6 +1,19 @@
+import { useEffect, useState } from 'react'
 import { Text } from '@react-three/drei'
-import { Vector2 } from 'three'
+import { CanvasTexture, SRGBColorSpace, TextureLoader, Vector2, type Texture } from 'three'
 import { SHOOTING_GALLERY } from '../config'
+import {
+  createSeededRng,
+  getJstDateKey,
+  hashStringToSeed,
+  MEEBIT_ID_MAX,
+} from '../../top/dailyFeatured'
+import {
+  DEFAULT_PREVIEW_PRIORITY,
+  getTargetPreviewImage,
+  requestTargetPreview,
+  subscribeTargetPreview,
+} from '../../ui/targetPreviewCache'
 
 const FLOOR_PLANK_Z = [-7.8, -6.2, -4.6, -3, -1.4, 0.2, 1.8, 3.4, 5] as const
 const BACK_WALL_PLANK_Y = [0.45, 1.15, 1.85, 2.55, 3.25, 3.95, 4.65] as const
@@ -318,8 +331,7 @@ function LodgeBackWall() {
         <meshStandardMaterial color="#795033" roughness={0.72} />
       </mesh>
 
-      <LodgeSkiRack position={[-2.05, 1.82, 0.23]} accentColor="#9a493c" />
-      <LodgeSkiRack position={[2.05, 1.82, 0.23]} accentColor="#4c7180" />
+      <WeatheredMeebitPosters />
       <LodgeLantern position={[-3.3, 3.2, 0.28]} />
       <LodgeLantern position={[3.3, 3.2, 0.28]} />
 
@@ -345,33 +357,210 @@ function LodgeBackWall() {
   )
 }
 
-function LodgeSkiRack({
+/**
+ * ポスターの Meebit は日替わりの固定 2 体。
+ * 訪問ごとの完全ランダムにすると毎回新規プレビュー生成が走るため、
+ * 日付シードで全ユーザー共通にしてキャッシュを効かせる。
+ */
+function pickDailyPosterIds(): [number, number] {
+  const rng = createSeededRng(hashStringToSeed(`shooting-gallery-poster:${getJstDateKey()}`))
+  const first = Math.floor(rng() * MEEBIT_ID_MAX) + 1
+  let second = Math.floor(rng() * MEEBIT_ID_MAX) + 1
+  if (second === first) {
+    second = (second % MEEBIT_ID_MAX) + 1
+  }
+  return [first, second]
+}
+
+const POSTER_MEEBIT_IDS = pickDailyPosterIds()
+
+/** Preview画像だけにセピア・黄ばみ・周辺劣化を焼き込む。元キャッシュは変更しない。 */
+function createWeatheredPosterTexture(source: Texture): Texture {
+  const image = source.image as HTMLImageElement | undefined
+  const width = image?.naturalWidth || image?.width || 0
+  const height = image?.naturalHeight || image?.height || 0
+  if (!image || width <= 0 || height <= 0) {
+    source.colorSpace = SRGBColorSpace
+    return source
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext('2d')
+  if (!context) {
+    source.colorSpace = SRGBColorSpace
+    return source
+  }
+
+  try {
+    context.filter = 'sepia(68%) saturate(58%) contrast(88%) brightness(92%)'
+    context.drawImage(image, 0, 0, width, height)
+    context.filter = 'none'
+
+    context.globalCompositeOperation = 'multiply'
+    context.fillStyle = 'rgba(185, 137, 63, 0.22)'
+    context.fillRect(0, 0, width, height)
+
+    const edgeStain = context.createRadialGradient(
+      width * 0.5,
+      height * 0.46,
+      Math.min(width, height) * 0.2,
+      width * 0.5,
+      height * 0.46,
+      Math.max(width, height) * 0.72,
+    )
+    edgeStain.addColorStop(0, 'rgba(255, 245, 205, 0)')
+    edgeStain.addColorStop(0.72, 'rgba(122, 78, 28, 0.08)')
+    edgeStain.addColorStop(1, 'rgba(77, 43, 17, 0.36)')
+    context.fillStyle = edgeStain
+    context.fillRect(0, 0, width, height)
+
+    context.globalCompositeOperation = 'source-over'
+    context.fillStyle = 'rgba(91, 55, 23, 0.09)'
+    for (let index = 0; index < 12; index += 1) {
+      const x = ((index * 83 + 37) % 101) / 101 * width
+      const y = ((index * 47 + 19) % 97) / 97 * height
+      const radius = Math.max(2, Math.min(width, height) * (0.008 + (index % 3) * 0.004))
+      context.beginPath()
+      context.arc(x, y, radius, 0, Math.PI * 2)
+      context.fill()
+    }
+  } catch {
+    source.colorSpace = SRGBColorSpace
+    return source
+  }
+
+  const weatheredTexture = new CanvasTexture(canvas)
+  weatheredTexture.colorSpace = SRGBColorSpace
+  source.dispose()
+  return weatheredTexture
+}
+
+/** 既存プレビューキャッシュ（静止画 → VRM キャプチャ）経由でテクスチャを得る。 */
+function useMeebitPosterTexture(meebitNumber: number) {
+  const [imageSrc, setImageSrc] = useState(() => getTargetPreviewImage(meebitNumber))
+  const [texture, setTexture] = useState<Texture | null>(null)
+
+  useEffect(() => {
+    requestTargetPreview(meebitNumber, DEFAULT_PREVIEW_PRIORITY)
+    setImageSrc(getTargetPreviewImage(meebitNumber))
+    return subscribeTargetPreview(meebitNumber, () => {
+      setImageSrc(getTargetPreviewImage(meebitNumber))
+    })
+  }, [meebitNumber])
+
+  useEffect(() => {
+    if (!imageSrc) return
+
+    let disposed = false
+    let loaded: Texture | null = null
+
+    new TextureLoader().load(imageSrc, (next) => {
+      if (disposed) {
+        next.dispose()
+        return
+      }
+      loaded = createWeatheredPosterTexture(next)
+      setTexture(loaded)
+    })
+
+    return () => {
+      disposed = true
+      loaded?.dispose()
+    }
+  }, [imageSrc])
+
+  return texture
+}
+
+function WeatheredMeebitPosters() {
+  const [leftMeebitId, rightMeebitId] = POSTER_MEEBIT_IDS
+  const leftTexture = useMeebitPosterTexture(leftMeebitId)
+  const rightTexture = useMeebitPosterTexture(rightMeebitId)
+
+  return (
+    <group>
+      <WeatheredMeebitPoster
+        position={[-1.9, 1.82, 0.24]}
+        rotationZ={-0.045}
+        meebitId={leftMeebitId}
+        texture={leftTexture}
+      />
+      <WeatheredMeebitPoster
+        position={[1.9, 1.82, 0.24]}
+        rotationZ={0.035}
+        meebitId={rightMeebitId}
+        texture={rightTexture}
+      />
+    </group>
+  )
+}
+
+function WeatheredMeebitPoster({
   position,
-  accentColor,
+  rotationZ,
+  meebitId,
+  texture,
 }: {
   position: [number, number, number]
-  accentColor: string
+  rotationZ: number
+  meebitId: number
+  texture: Texture | null
 }) {
   return (
-    <group position={position}>
-      {([-0.18, 0.18] as const).map((rotationZ, index) => (
-        <group key={rotationZ} rotation={[0, 0, rotationZ]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.1, 1.65, 0.08]} />
-            <meshStandardMaterial color={index === 0 ? accentColor : '#d5bd8d'} roughness={0.55} />
-          </mesh>
-          <mesh position={[0, 0.12, 0.06]} castShadow>
-            <boxGeometry args={[0.18, 0.24, 0.1]} />
-            <meshStandardMaterial color="#302923" roughness={0.68} metalness={0.18} />
-          </mesh>
-          {([-0.62, 0.62] as const).map((y) => (
-            <mesh key={y} position={[0, y, 0.05]}>
-              <boxGeometry args={[0.105, 0.1, 0.02]} />
-              <meshStandardMaterial color="#eee0bd" roughness={0.6} />
-            </mesh>
-          ))}
-        </group>
+    <group position={position} rotation={[0, 0, rotationZ]}>
+      <mesh castShadow>
+        <boxGeometry args={[1.12, 1.48, 0.055]} />
+        <meshStandardMaterial color="#b69a69" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 0.05, 0.034]}>
+        <planeGeometry args={[0.84, 0.9]} />
+        <meshBasicMaterial
+          map={texture ?? undefined}
+          color={texture ? '#d8c18e' : '#665944'}
+          toneMapped={false}
+        />
+      </mesh>
+      <Text
+        position={[0, 0.62, 0.04]}
+        fontSize={0.105}
+        color="#4e3322"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.08}
+      >
+        MOUNTAIN CLUB
+      </Text>
+      <Text
+        position={[0, -0.59, 0.04]}
+        fontSize={0.095}
+        color="#513522"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.06}
+      >
+        {`MEEBIT #${meebitId}`}
+      </Text>
+      {([
+        [-0.49, -0.66],
+        [0.49, -0.66],
+        [-0.49, 0.66],
+        [0.49, 0.66],
+      ] as const).map(([x, y]) => (
+        <mesh key={`${x}-${y}`} position={[x, y, 0.055]}>
+          <sphereGeometry args={[0.025, 10, 8]} />
+          <meshStandardMaterial color="#553b28" metalness={0.42} roughness={0.5} />
+        </mesh>
       ))}
+      <mesh position={[-0.41, 0.52, 0.05]} rotation={[0, 0, -0.35]}>
+        <circleGeometry args={[0.13, 18]} />
+        <meshBasicMaterial color="#68472d" transparent opacity={0.18} depthWrite={false} />
+      </mesh>
+      <mesh position={[0.43, -0.48, 0.05]} rotation={[0, 0, 0.25]}>
+        <circleGeometry args={[0.1, 18]} />
+        <meshBasicMaterial color="#68472d" transparent opacity={0.16} depthWrite={false} />
+      </mesh>
     </group>
   )
 }

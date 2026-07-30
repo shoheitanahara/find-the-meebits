@@ -5,6 +5,7 @@ import { ACESFilmicToneMapping } from 'three'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher'
+import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { SHOOTING_GALLERY } from './config'
 import { ShootingGalleryCamera } from './player/ShootingGalleryCamera'
@@ -93,6 +94,7 @@ export function ShootingGalleryApp() {
         <ShootingGalleryScene />
       </Canvas>
 
+      <TargetPreviewCapture />
       <ParkReturnButton />
       <LanguageSwitcher
         className="pointer-events-auto absolute right-4 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60]"
