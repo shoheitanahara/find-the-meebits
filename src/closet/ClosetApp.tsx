@@ -25,7 +25,6 @@ const copy = {
     subtitle: 'Pick a type first — then mix looks and try them on.',
     typeStep: 'Step 1 · Type',
     typeHint: 'Who are you dressing up?',
-    changeType: 'Change',
     looksStep: 'Step 2 · Looks',
     selectTypeFirst: 'Pick a type above to unlock looks.',
     matches: 'Matches',
@@ -47,7 +46,6 @@ const copy = {
     subtitle: 'まずタイプ → 見た目を足す → きせかえ！',
     typeStep: 'ステップ1 · タイプ',
     typeHint: 'どんな Meebit をきせかえる？',
-    changeType: '変更',
     looksStep: 'ステップ2 · 見た目',
     selectTypeFirst: '上でタイプを選ぶと、見た目を選べるよ。',
     matches: 'マッチ',
@@ -138,7 +136,6 @@ export function ClosetApp() {
   const [activeLookType, setActiveLookType] = useState(lookTraitTypes[0] ?? 'Hair Style')
   const [selections, setSelections] = useState<ClosetTraitSelection[]>([])
   const [previewId, setPreviewId] = useState(savedMeebit)
-  const [typePickerOpen, setTypePickerOpen] = useState(true)
   const [matchLimit, setMatchLimit] = useState(CLOSET_MATCH_PREVIEW_LIMIT)
 
   useEffect(() => {
@@ -154,12 +151,6 @@ export function ClosetApp() {
   const selectedType = selections.find((item) => item.traitType === 'Type')
   const hasTypeSelected = Boolean(selectedType)
 
-  useEffect(() => {
-    if (!hasTypeSelected) {
-      setTypePickerOpen(true)
-    }
-  }, [hasTypeSelected])
-
   const activeOptions = traitsByType.get(activeLookType) ?? []
   const compatibleOptions = useMemo(
     () => (hasTypeSelected ? filterCompatibleTraitOptions(selections, activeOptions) : []),
@@ -174,7 +165,7 @@ export function ClosetApp() {
     return counts
   }, [lookTraitTypes, selections, traitsByType])
 
-  // Human 以外は Hair Style が実質 Bald のみなので、選択肢タブから外す。
+  // Human 以外は Hair Style が実質 Bald のみなので、選択肢タブから外す（Hat から開始）。
   const availableLookTypes = useMemo(() => {
     const isHuman = selectedType?.traitValue === 'Human'
     return lookTraitTypes.filter((type) => {
@@ -192,12 +183,13 @@ export function ClosetApp() {
     [matchLimit, savedMeebit, selections],
   )
 
+  // 非 Human で Hair が消えたあと、active が Hair のまま残らないようにする。
   useEffect(() => {
     if (!hasTypeSelected) return
-    if ((compatibleCountByType.get(activeLookType) ?? 0) > 0) return
+    if (availableLookTypes.includes(activeLookType)) return
     const fallback = availableLookTypes[0]
     if (fallback) setActiveLookType(fallback)
-  }, [activeLookType, availableLookTypes, compatibleCountByType, hasTypeSelected])
+  }, [activeLookType, availableLookTypes, hasTypeSelected])
 
   useEffect(() => {
     if (selections.length === 0) return
@@ -210,19 +202,12 @@ export function ClosetApp() {
   const toggleTrait = (option: ClosetTraitOption) => {
     void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
     setSelections((prev) => applyTraitSelection(prev, option))
-    if (option.traitType === 'Type') {
-      const isDeselect = selections.some(
-        (item) => item.traitType === 'Type' && item.traitValue === option.traitValue,
-      )
-      setTypePickerOpen(isDeselect)
-    }
   }
 
   const clearSelections = () => {
     void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
     setSelections([])
     setPreviewId(savedMeebit)
-    setTypePickerOpen(true)
   }
 
   const selectMatch = (meebitNumber: number) => {
@@ -248,7 +233,6 @@ export function ClosetApp() {
     )
 
   const isWearingPreview = previewId === savedMeebit
-  const showTypeGrid = typePickerOpen || !hasTypeSelected
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#070914] text-[#f4ead2]">
@@ -381,46 +365,20 @@ export function ClosetApp() {
                   <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#8eb4e8]">
                     {t.typeStep}
                   </p>
-                  {!showTypeGrid && selectedType ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
-                        setTypePickerOpen(true)
-                      }}
-                      className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.12em] text-[#c8d4e8]"
-                    >
-                      {t.changeType}
-                    </button>
-                  ) : (
-                    <p className="text-[0.62rem] text-[#a8b4c8]">{t.typeHint}</p>
-                  )}
+                  <p className="text-[0.62rem] text-[#a8b4c8]">{t.typeHint}</p>
                 </div>
 
-                {!showTypeGrid && selectedType ? (
-                  <div className="mt-2 flex items-center gap-2">
-                    <TraitQuestVisual
-                      traitType={selectedType.traitType}
-                      traitValue={selectedType.traitValue}
-                      sizeClassName="h-12 w-12 shrink-0 rounded-lg border-0 bg-[#f4f6fa]"
+                <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-7">
+                  {typeOptions.map((option) => (
+                    <TraitOptionButton
+                      key={option.poolKey}
+                      option={option}
+                      selected={isSelected(option)}
+                      onToggle={toggleTrait}
+                      compact
                     />
-                    <p className="text-sm font-semibold text-[#e8f0ff]">
-                      {formatTraitDisplayName(selectedType.traitType, selectedType.traitValue)}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mt-2 grid grid-cols-4 gap-1.5 sm:grid-cols-7">
-                    {typeOptions.map((option) => (
-                      <TraitOptionButton
-                        key={option.poolKey}
-                        option={option}
-                        selected={isSelected(option)}
-                        onToggle={toggleTrait}
-                        compact
-                      />
-                    ))}
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
 
               {/* Step 2 — 高さは中身任せ、max だけ制限 */}
