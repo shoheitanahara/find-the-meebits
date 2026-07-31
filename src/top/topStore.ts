@@ -24,6 +24,10 @@ type TopState = {
   meebitNumber: number
   nearestAttraction: AttractionId | null
   nearestGateId: string | null
+  /** Culture の About Meebits 看板に近づいているか */
+  nearestAboutBoard: boolean
+  /** アプリ内ブラウザ表示中 */
+  aboutBrowserOpen: boolean
   activeZoneId: ParkZoneId
   /** ゾーン切替中の短いフェード用 */
   zoneTransitioning: boolean
@@ -34,6 +38,8 @@ type TopState = {
   setMeebitNumber: (meebitNumber: number) => void
   setNearestAttraction: (attraction: AttractionId | null) => void
   setNearestGateId: (gateId: string | null) => void
+  setNearestAboutBoard: (nearestAboutBoard: boolean) => void
+  setAboutBrowserOpen: (aboutBrowserOpen: boolean) => void
   setActiveZone: (zoneId: ParkZoneId, spawn?: { x: number; z: number; rotationY: number }) => void
   setZoneTransitioning: (zoneTransitioning: boolean) => void
 }
@@ -43,6 +49,8 @@ export const useTopStore = create<TopState>((set) => ({
   meebitNumber: 4274,
   nearestAttraction: null,
   nearestGateId: null,
+  nearestAboutBoard: false,
+  aboutBrowserOpen: false,
   activeZoneId: readStoredParkZone(),
   zoneTransitioning: false,
   start: (meebitNumber, spawn) => {
@@ -60,12 +68,16 @@ export const useTopStore = create<TopState>((set) => ({
       activeZoneId: zoneId,
       nearestAttraction: null,
       nearestGateId: null,
+      nearestAboutBoard: false,
+      aboutBrowserOpen: false,
       zoneTransitioning: false,
     })
   },
   setMeebitNumber: (meebitNumber) => set({ meebitNumber }),
   setNearestAttraction: (nearestAttraction) => set({ nearestAttraction }),
   setNearestGateId: (nearestGateId) => set({ nearestGateId }),
+  setNearestAboutBoard: (nearestAboutBoard) => set({ nearestAboutBoard }),
+  setAboutBrowserOpen: (aboutBrowserOpen) => set({ aboutBrowserOpen }),
   setActiveZone: (zoneId, spawn) => {
     const zone = getParkZone(zoneId)
     writeStoredParkZone(zoneId)
@@ -78,6 +90,8 @@ export const useTopStore = create<TopState>((set) => ({
       activeZoneId: zoneId,
       nearestAttraction: null,
       nearestGateId: null,
+      nearestAboutBoard: false,
+      aboutBrowserOpen: false,
     })
   },
   setZoneTransitioning: (zoneTransitioning) => set({ zoneTransitioning }),

@@ -3,11 +3,13 @@ import { useTouchControlsStore } from '../stores/touchControlsStore'
 import { useNpcStore } from '../stores/npcStore'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { ui } from '../i18n/ui'
+import { interactWithAboutMeebitsBoard } from './AboutMeebitsBrowser'
 import {
   advanceParkDialogue,
   interactWithNearestParkNpc,
 } from './interactWithParkNpc'
 import { getParkNpcById } from './parkNpcRegistry'
+import { useTopStore } from './topStore'
 import { unlockAudioIfNeeded } from '../ui/sfx'
 import { dialogueChromeDimClass } from '../ui/dialogueChrome'
 import { DoneIcon, InspectIcon, NextIcon } from '../ui/mobile/MobileActionIcons'
@@ -18,6 +20,9 @@ const KNOB_SIZE = 44
 
 export function TopMobileControls() {
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
+  const aboutBrowserOpen = useTopStore((state) => state.aboutBrowserOpen)
+
+  if (aboutBrowserOpen) return null
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
@@ -33,11 +38,13 @@ export function TopMobileControls() {
 
 function ParkTalkButton() {
   const nearestNpcId = useNpcStore((state) => state.nearestNpcId)
+  const nearestAboutBoard = useTopStore((state) => state.nearestAboutBoard)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const lines = useDialogueStore((state) => state.lines)
   const currentIndex = useDialogueStore((state) => state.currentIndex)
   const t = ui()
   const canTalk = Boolean(nearestNpcId && getParkNpcById(nearestNpcId))
+  const canReadAbout = nearestAboutBoard
   const isLastLine = currentIndex >= lines.length - 1
 
   if (isDialogueOpen) {
@@ -54,6 +61,26 @@ function ParkTalkButton() {
         {isLastLine ? <DoneIcon /> : <NextIcon />}
         <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
           {isLastLine ? t.done : t.nextLine}
+        </span>
+      </button>
+    )
+  }
+
+  if (canReadAbout) {
+    return (
+      <button
+        type="button"
+        className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-[#5ce0ff]/55 bg-neutral-950/85 text-white shadow-2xl backdrop-blur-md active:scale-95"
+        onPointerDown={(event) => {
+          event.preventDefault()
+          void unlockAudioIfNeeded().then(() => {
+            interactWithAboutMeebitsBoard()
+          })
+        }}
+      >
+        <InspectIcon />
+        <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">
+          {t.readAboutAction}
         </span>
       </button>
     )

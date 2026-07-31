@@ -28,7 +28,9 @@ type UiMessages = {
   autoRun: string
   escClose: string
   pressEInspect: string
+  pressEReadAbout: string
   inspectAction: string
+  readAboutAction: string
   retry: string
   retryStage: string
   titleBtn: string
@@ -168,7 +170,9 @@ const en: UiMessages = {
   autoRun: 'Auto Run: On',
   escClose: 'Esc: Close',
   pressEInspect: 'Press E to talk',
+  pressEReadAbout: 'Press E to read',
   inspectAction: 'Talk',
+  readAboutAction: 'Read',
   retry: 'Retry',
   retryStage: 'Retry Stage',
   titleBtn: 'Title',
@@ -317,7 +321,9 @@ const ja: UiMessages = {
   autoRun: '自動ダッシュ: ON',
   escClose: 'Esc: 閉じる',
   pressEInspect: 'Eで話す',
+  pressEReadAbout: 'Eで記事を読む',
   inspectAction: '話す',
+  readAboutAction: '読む',
   retry: 'リトライ',
   retryStage: 'リトライ',
   titleBtn: 'タイトル',

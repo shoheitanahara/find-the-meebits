@@ -3,6 +3,7 @@ import { useNpcStore } from '../stores/npcStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getMeebitTalkCount, recordMeebitTalk } from '../systems/save/localStorage'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
+import { interactWithAboutMeebitsBoard } from './AboutMeebitsBrowser'
 import type { DailyThemeTrait } from './dailyFeatured'
 import { selectParkDialogueLines } from './parkDialogue'
 import { getParkNpcById } from './parkNpcRegistry'
@@ -59,9 +60,12 @@ export function advanceParkDialogue() {
   }
 }
 
-/** パーク用キーボード（E で会話 / 会話中は進行）。 */
+/** パーク用キーボード（E で会話 / 看板 / 会話中は進行）。 */
 export function handleParkDialogueKeyDown(event: KeyboardEvent) {
   const dialogue = useDialogueStore.getState()
+  const top = useTopStore.getState()
+
+  if (top.aboutBrowserOpen) return
 
   if (event.code === 'Escape' && dialogue.isOpen) {
     event.preventDefault()
@@ -79,6 +83,7 @@ export function handleParkDialogueKeyDown(event: KeyboardEvent) {
 
   if (event.code === 'KeyE') {
     event.preventDefault()
+    if (interactWithAboutMeebitsBoard()) return
     interactWithNearestParkNpc()
   }
 }

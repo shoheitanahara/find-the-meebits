@@ -2,7 +2,7 @@
  * 日付（JST）シードで「本日の主役」と来場者を決定的に選ぶ。
  * 誰がアクセスしても同日は同じラインナップになる。
  *
- * 広場: マッチ枠15体 + ランダム15体（計30）
+ * 広場: マッチ枠15体 + ランダム5体（計20）
  * マウンテン地区: ランダム15体（広場と重複しない）
  * シーエリア: 15体（全員が上裸 / チューブトップ）
  * カルチャー地区: 15体（スーツが半数）
@@ -17,7 +17,7 @@ import {
 } from '../data/meebitTraits'
 import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 
-export const DAILY_VISITOR_COUNT = 30
+export const DAILY_VISITOR_COUNT = 20
 export const DAILY_MATCHED_VISITOR_COUNT = 15
 export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
 export const DAILY_SEA_VISITOR_COUNT = 15
@@ -31,7 +31,7 @@ export const SEA_BEACH_SHIRT_MIN_RATIO = 1
 export const CULTURE_SUIT_MIN_RATIO = 0.5
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v11'
+const STORAGE_KEY = 'meebits-park-daily-v12'
 
 /** ビーチらしい上半身（上裸・チューブトップ） */
 const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])

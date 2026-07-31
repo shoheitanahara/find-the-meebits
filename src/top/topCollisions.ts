@@ -1,4 +1,9 @@
 import { MathUtils } from 'three'
+import {
+  ABOUT_MEEBITS_BOARD_HALF_X,
+  ABOUT_MEEBITS_BOARD_HALF_Z,
+  ABOUT_MEEBITS_BOARD_POSITION,
+} from './aboutMeebits'
 import { FEATURED_BOARD_POSITION, FOUNTAIN_CENTER_Z } from './dailyFeatured'
 import { getAttractionsForZone } from './topConfig'
 import {
@@ -182,6 +187,18 @@ function buildFeaturedBoardObstacle(zoneId: ParkZoneId): ObstacleBox[] {
   ]
 }
 
+function buildAboutMeebitsBoardObstacle(zoneId: ParkZoneId): ObstacleBox[] {
+  if (zoneId !== 'culture') return []
+  return [
+    boxFromCenter(
+      ABOUT_MEEBITS_BOARD_POSITION[0],
+      ABOUT_MEEBITS_BOARD_POSITION[2],
+      ABOUT_MEEBITS_BOARD_HALF_X,
+      ABOUT_MEEBITS_BOARD_HALF_Z,
+    ),
+  ]
+}
+
 /** ゲート開口の半幅（柵の切れ目）。斜め時は投影幅を使う */
 function gateOpeningHalf(gate: { halfWidth: number; alcoveDepth: number; yaw?: number }) {
   const yaw = gate.yaw ?? 0
@@ -268,6 +285,7 @@ function rebuildObstacles(zoneId: ParkZoneId) {
     ...buildAttractionObstacles(zoneId),
     ...buildBenchObstacles(zoneId),
     ...buildFeaturedBoardObstacle(zoneId),
+    ...buildAboutMeebitsBoardObstacle(zoneId),
     ...buildRailingObstacles(zoneId),
     ...buildPerimeterObstacles(zoneId),
     ...buildGatePillarObstacles(zoneId),

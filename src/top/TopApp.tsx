@@ -18,6 +18,7 @@ import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { ParkTipsOverlay } from './ParkTipsOverlay'
 import { ParkBgmSystem } from './ParkBgmSystem'
+import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
 import { useTopStore, type AttractionId } from './topStore'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
@@ -105,6 +106,7 @@ export function TopApp() {
   const started = useTopStore((state) => state.started)
   const nearestAttraction = useTopStore((state) => state.nearestAttraction)
   const nearestGateId = useTopStore((state) => state.nearestGateId)
+  const aboutBrowserOpen = useTopStore((state) => state.aboutBrowserOpen)
   const activeZoneId = useTopStore((state) => state.activeZoneId)
   const zoneTransitioning = useTopStore((state) => state.zoneTransitioning)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
@@ -334,8 +336,9 @@ export function TopApp() {
           <ParkDialogueSystem />
           <ParkDialogueBox />
           <ParkInteractionPrompt />
+          <AboutMeebitsBrowser />
           <div
-            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen)}`}
+            className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
           >
             <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
               Meebits Park
@@ -345,7 +348,7 @@ export function TopApp() {
             </p>
           </div>
 
-          {nearest && nearestAttraction && !isDialogueOpen && !nearestGate ? (
+          {nearest && nearestAttraction && !isDialogueOpen && !aboutBrowserOpen && !nearestGate ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
               <button
                 type="button"
@@ -357,7 +360,7 @@ export function TopApp() {
             </div>
           ) : null}
 
-          {nearestGate && !isDialogueOpen ? (
+          {nearestGate && !isDialogueOpen && !aboutBrowserOpen ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
               <button
                 type="button"

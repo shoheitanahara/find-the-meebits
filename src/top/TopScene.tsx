@@ -27,6 +27,11 @@ import {
   type DailyThemeTrait,
   type DailyVisitor,
 } from './dailyFeatured'
+import { AboutMeebitsBoard } from './AboutMeebitsBoard'
+import {
+  ABOUT_MEEBITS_BOARD_POSITION,
+  ABOUT_MEEBITS_INTERACT_DISTANCE,
+} from './aboutMeebits'
 import { setParkDialogueContext } from './interactWithParkNpc'
 import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs, getParkNpcById } from './parkNpcRegistry'
 import { ParkPerimeter } from './ParkPerimeter'
@@ -178,6 +183,7 @@ export function TopScene({
           locale={locale}
         />
       ) : null}
+      {activeZoneId === 'culture' ? <AboutMeebitsBoard locale={locale} /> : null}
       <ParkLamps
         look={look}
         lamps={zone.lamps}
@@ -1620,6 +1626,7 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
   const footstepTimer = useRef(0)
   const nearestRef = useRef<AttractionId | null>(null)
   const nearestGateRef = useRef<string | null>(null)
+  const nearestAboutBoardRef = useRef(false)
   const isEnteringRef = useRef(false)
   const isGateCrossingRef = useRef(false)
 
@@ -1628,6 +1635,7 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
       if (event.code !== 'Enter' && event.code !== 'Space') return
       if (useDialogueStore.getState().isOpen) return
       const store = useTopStore.getState()
+      if (store.aboutBrowserOpen) return
       if (store.nearestGateId) {
         const gate = getParkZone(store.activeZoneId).gates.find((item) => item.id === store.nearestGateId)
         if (gate) {
@@ -1645,6 +1653,7 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
   useFrame((_, delta) => {
     const state = useTopStore.getState()
     if (state.zoneTransitioning) return
+    if (state.aboutBrowserOpen) return
 
     const zone = getParkZone(state.activeZoneId)
     const layout = zone.layout
@@ -1764,6 +1773,15 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     if (nearestGateId !== nearestGateRef.current) {
       nearestGateRef.current = nearestGateId
       useTopStore.getState().setNearestGateId(nearestGateId)
+    }
+
+    const nearAboutBoard =
+      state.activeZoneId === 'culture' &&
+      Math.hypot(x - ABOUT_MEEBITS_BOARD_POSITION[0], z - ABOUT_MEEBITS_BOARD_POSITION[2]) <
+        ABOUT_MEEBITS_INTERACT_DISTANCE
+    if (nearAboutBoard !== nearestAboutBoardRef.current) {
+      nearestAboutBoardRef.current = nearAboutBoard
+      useTopStore.getState().setNearestAboutBoard(nearAboutBoard)
     }
   })
 
