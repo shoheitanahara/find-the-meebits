@@ -174,10 +174,14 @@ export function ClosetApp() {
     return counts
   }, [lookTraitTypes, selections, traitsByType])
 
-  const availableLookTypes = useMemo(
-    () => lookTraitTypes.filter((type) => (compatibleCountByType.get(type) ?? 0) > 0),
-    [compatibleCountByType, lookTraitTypes],
-  )
+  // Human 以外は Hair Style が実質 Bald のみなので、選択肢タブから外す。
+  const availableLookTypes = useMemo(() => {
+    const isHuman = selectedType?.traitValue === 'Human'
+    return lookTraitTypes.filter((type) => {
+      if (!isHuman && type === 'Hair Style') return false
+      return (compatibleCountByType.get(type) ?? 0) > 0
+    })
+  }, [compatibleCountByType, lookTraitTypes, selectedType?.traitValue])
 
   useEffect(() => {
     setMatchLimit(CLOSET_MATCH_PREVIEW_LIMIT)

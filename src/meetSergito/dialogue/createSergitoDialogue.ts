@@ -47,14 +47,6 @@ const COLOR_JA: Record<string, string> = {
   Yellow: 'イエロー',
 }
 
-const TYPE_JA: Record<string, string> = {
-  Human: 'ヒューマン',
-  Robot: 'ロボット',
-  Elephant: 'エレファント',
-  Pig: 'ピッグ',
-  Skeleton: 'スケルトン',
-}
-
 function pickLocalized(text: LocalizedText) {
   return getLocale() === 'ja' ? text.ja : text.en
 }
@@ -109,10 +101,11 @@ function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
   const type = getTrait(traits, 'Type')
 
   if (type && type !== 'Human') {
+    // Type名はカタカナ化せず、Trait表記どおり Pig / Robot 等を使う。
     features.push({
       id: 'type',
       category: 'body',
-      ja: `${TYPE_JA[type] ?? type}ボディ`,
+      ja: `「${type}」`,
       en: `${type} body`,
       impact: 100,
     })
@@ -147,25 +140,11 @@ function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
       impact: 84,
     }),
     makeStyledFeature({
-      id: 'hair',
-      value: getTrait(traits, 'Hair Style'),
-      color: getTrait(traits, 'Hair Color'),
-      category: 'head',
-      impact: 82,
-    }),
-    makeStyledFeature({
       id: 'pants',
       value: getTrait(traits, 'Pants'),
       color: getTrait(traits, 'Pants Color'),
       category: 'clothing',
       impact: 76,
-    }),
-    makeStyledFeature({
-      id: 'beard',
-      value: getTrait(traits, 'Beard'),
-      color: getTrait(traits, 'Beard Color'),
-      category: 'face',
-      impact: 74,
     }),
     makeStyledFeature({
       id: 'shoes',
@@ -181,6 +160,26 @@ function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
       impact: 66,
     }),
   )
+
+  // Human 以外は Hair Style がほぼ Bald 固定なので言及しない。代わりに他特徴へ寄せる。
+  if (!type || type === 'Human') {
+    features.push(
+      makeStyledFeature({
+        id: 'hair',
+        value: getTrait(traits, 'Hair Style'),
+        color: getTrait(traits, 'Hair Color'),
+        category: 'head',
+        impact: 82,
+      }),
+      makeStyledFeature({
+        id: 'beard',
+        value: getTrait(traits, 'Beard'),
+        color: getTrait(traits, 'Beard Color'),
+        category: 'face',
+        impact: 74,
+      }),
+    )
+  }
 
   if (getTrait(traits, 'Tattoo')) {
     features.push({
