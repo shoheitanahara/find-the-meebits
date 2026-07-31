@@ -191,12 +191,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'SHOOTING GALLERY',
     subtitle: 'The Fair Booth',
     description: {
-      en: 'Moving targets. Forty-five seconds.\nAim from the counter and\nchase a high score.',
-      ja: '動く的。制限時間45秒。\nカウンターから狙って、\n高得点を目指そう。',
+      en: 'Forty-five seconds.\nGold targets. Red traps.\nHow high can you score?',
+      ja: '制限時間は45秒。\n金の的、赤い罠。\nどこまで狙える？',
     },
     storyTitle: {
-      en: 'HIT THE MARK',
-      ja: '的を射抜け',
+      en: 'AIM TRUE',
+      ja: '狙い打て',
     },
     color: '#6a5038',
     roofColor: '#c8a060',
@@ -214,7 +214,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       ],
     },
     infoBoardLocal: [5.2, 4.0],
-    underConstruction: true,
   },
   {
     id: 'runway',

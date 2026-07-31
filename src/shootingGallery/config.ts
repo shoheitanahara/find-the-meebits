@@ -52,10 +52,21 @@ export const SHOOTING_GALLERY = {
   targetYRange: { min: 0.45, max: 2.85 },
   targetMotionAmplitude: { normal: 1.7, small: 1.3, vertical: 0.9 },
   maxActiveTargets: 10,
-  /** フェーズ別の赤的上限。終盤のみ5枚まで同時出現させる。 */
-  maxActiveRedTargets: [0, 3, 5] as const,
-  /** フェーズ別の赤的抽選率。 */
-  redTargetSpawnChance: [0, 0.15, 0.45] as const,
+  /** フェーズ別の赤的上限。終盤のみ多めに同時出現させる。 */
+  maxActiveRedTargets: [0, 2, 5] as const,
+  /** フェーズ別の赤的抽選率。中盤もきちんと赤が出るよう確保する。 */
+  redTargetSpawnChance: [0, 0.3, 0.45] as const,
+  /**
+   * 終盤ゴールド的の公平スポーン。
+   * 乱数一発ではなく、最短/最長間隔で出現頻度を安定させる。
+   */
+  goldSpawn: {
+    maxActive: 1,
+    /** この秒数未満では連続出現させない */
+    minIntervalSec: 2.0,
+    /** この秒数を超えたら必ず出す（同時上限に空きがある場合） */
+    maxIntervalSec: 3.5,
+  },
   /** 難易度切り替え時に既存の的を残し、段階的に入れ替える時間。 */
   difficultyTransitionGraceSec: 1.4,
   difficultyTransitionStaggerSec: 0.16,

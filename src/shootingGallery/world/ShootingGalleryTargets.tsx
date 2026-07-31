@@ -67,7 +67,40 @@ function pickMovingMotion(roll: number): TargetMotion {
   return roll < 0.5 ? 'horizontal' : 'vertical'
 }
 
-function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
+type GoldSpawnDecision = 'force' | 'allow' | 'block'
+
+/**
+ * 終盤ゴールドの公平判定。
+ * - 同時上限を超えない
+ * - 最短間隔未満は出さない
+ * - 最長間隔を超えたら強制
+ * - その間は経過に応じて確率を上げる
+ */
+function decideGoldSpawn(
+  elapsed: number,
+  lastGoldAt: number | null,
+  activeGoldCount: number,
+): GoldSpawnDecision {
+  const { maxActive, minIntervalSec, maxIntervalSec } = SHOOTING_GALLERY.goldSpawn
+  if (activeGoldCount >= maxActive) return 'block'
+
+  // 終盤開始（30秒）直後から間隔を測る。
+  const phase2Start = 30
+  const since = lastGoldAt === null ? elapsed - phase2Start : elapsed - lastGoldAt
+  if (since < minIntervalSec) return 'block'
+  if (since >= maxIntervalSec) return 'force'
+
+  const t = (since - minIntervalSec) / (maxIntervalSec - minIntervalSec)
+  // 最短直後は控えめ、保証直前は高確率。
+  const chance = 0.22 + t * 0.6
+  return Math.random() < chance ? 'force' : 'allow'
+}
+
+function pickSpawnPlan(
+  phase: 0 | 1 | 2,
+  canSpawnRed: boolean,
+  goldDecision: GoldSpawnDecision = 'block',
+): SpawnPlan {
   const lane = Math.floor(Math.random() * 3) as 0 | 1 | 2
   if (phase === 0) {
     const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal']
@@ -92,12 +125,9 @@ function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
       small,
     }
   }
-  const specialTargetRoll = Math.random()
-  if (canSpawnRed && specialTargetRoll < SHOOTING_GALLERY.redTargetSpawnChance[phase]) {
-    return { kind: 'red', motion: 'horizontal', lane, small: false }
-  }
-  const roll = Math.random()
-  if (roll < 0.14) {
+
+  // 終盤: ゴールドの公平性を最優先。保証時は赤より先に出す。
+  if (goldDecision === 'force') {
     return {
       kind: 'gold',
       motion: pickMovingMotion(Math.random()),
@@ -105,6 +135,14 @@ function pickSpawnPlan(phase: 0 | 1 | 2, canSpawnRed: boolean): SpawnPlan {
       small: true,
     }
   }
+
+  const specialTargetRoll = Math.random()
+  if (canSpawnRed && specialTargetRoll < SHOOTING_GALLERY.redTargetSpawnChance[phase]) {
+    return { kind: 'red', motion: 'horizontal', lane, small: false }
+  }
+
+  // allow でも乱数で追加抽選しない。間隔タイマー側で頻度を管理する。
+  const roll = Math.random()
   const kinds: TargetKind[] = ['plate', 'star', 'can', 'bottle', 'animal', 'trolley']
   const small = Math.random() < 0.55
   return {
@@ -250,6 +288,7 @@ export function ShootingGalleryTargets() {
   const localTimeRef = useRef(0)
   const spawnCooldownRef = useRef(0)
   const difficultyRef = useRef<0 | 1 | 2>(0)
+  const lastGoldSpawnAtRef = useRef<number | null>(null)
 
   useEffect(() => {
     shootingTargetsRuntime.targets = []
@@ -257,6 +296,7 @@ export function ShootingGalleryTargets() {
     localTimeRef.current = 0
     spawnCooldownRef.current = 0
     difficultyRef.current = 0
+    lastGoldSpawnAtRef.current = null
     nextTargetId = 1
     for (const group of poolRef.current) {
       if (!group) continue
@@ -286,6 +326,10 @@ export function ShootingGalleryTargets() {
         staggerTargetsAcrossDifficultyTransition(targets)
         difficultyRef.current = difficulty
         spawnCooldownRef.current = 0
+        if (difficulty === 2) {
+          // 終盤開始時点から間隔を測り、最初のゴールドも安定させる。
+          lastGoldSpawnAtRef.current = null
+        }
       }
       spawnCooldownRef.current -= dt
       const aliveVisible = targets.filter((t) => t.alive && t.visible).length
@@ -294,13 +338,20 @@ export function ShootingGalleryTargets() {
         const activeRedTargetCount = targets.filter(
           (target) => target.alive && target.kind === 'red',
         ).length
+        const activeGoldCount = targets.filter(
+          (target) => target.alive && target.kind === 'gold',
+        ).length
         const canSpawnRed =
           activeRedTargetCount < SHOOTING_GALLERY.maxActiveRedTargets[difficulty]
-        const next = createTarget(
-          pickSpawnPlan(difficulty, canSpawnRed),
-          elapsed,
-          targets,
-        )
+        const goldDecision =
+          difficulty === 2
+            ? decideGoldSpawn(elapsed, lastGoldSpawnAtRef.current, activeGoldCount)
+            : 'block'
+        const plan = pickSpawnPlan(difficulty, canSpawnRed, goldDecision)
+        const next = createTarget(plan, elapsed, targets)
+        if (plan.kind === 'gold') {
+          lastGoldSpawnAtRef.current = elapsed
+        }
         if (freeSlot >= 0) {
           targets[freeSlot] = next
         } else if (targets.length < POOL_SIZE) {
