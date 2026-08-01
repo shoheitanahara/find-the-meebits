@@ -100,7 +100,7 @@ export function StarlightRushPlayPrompt() {
             onClick={() => {
               requestAimPointerLock()
               startGame()
-              void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
+              void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
             }}
           >
             {t.play}

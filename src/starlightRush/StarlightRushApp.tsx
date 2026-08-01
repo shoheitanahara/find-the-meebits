@@ -62,7 +62,10 @@ export function StarlightRushApp() {
   }, [])
 
   useEffect(() => {
-    if (phase === 'result') {
+    if (phase === 'playing') {
+      void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
+    }
+    if (phase === 'docking') {
       void unlockAudioIfNeeded().then(() => playSfx('timeUp'))
       if (document.pointerLockElement) document.exitPointerLock()
     }

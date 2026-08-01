@@ -14,7 +14,7 @@ const BASIS = new Matrix4()
 
 /**
  * 出発はオープンな宇宙（駅は後ろに見える）。
- * 到着駅は曲線の先に置き、船は rideEndProgress で手前停止。
+ * 到着駅は曲線の先に置き、船は dockEndProgress まで近づいて停止。
  */
 const CONTROL_POINTS = [
   new Vector3(0, 3, 36),
@@ -42,7 +42,7 @@ export const starlightRideRuntime = {
   position: new Vector3(0, 3, 36),
   quaternion: new Quaternion(),
   bank: 0,
-  speed: STARLIGHT_RUSH.railSpeed.early,
+  speed: STARLIGHT_RUSH.railSpeed.early as number,
   warpBoost: 0,
 }
 
@@ -76,13 +76,16 @@ function buildOrientation(tangent: Vector3, bank: number, out: Quaternion) {
 }
 
 /** progress から姿勢をサンプリングして runtime に書く。 */
-export function sampleStarlightRide(progress: number, bankLerp = 1) {
-  const end = STARLIGHT_RUSH.rideEndProgress
-  const t = MathUtils.clamp(progress, 0, end)
+export function sampleStarlightRide(
+  progress: number,
+  bankLerp = 1,
+  maxProgress = STARLIGHT_RUSH.dockEndProgress,
+) {
+  const t = MathUtils.clamp(progress, 0, maxProgress)
   RIDE_CURVE.getPoint(t, TMP_POS)
   RIDE_CURVE.getTangent(t, TMP_TAN).normalize()
 
-  const lookAhead = Math.min(end, t + 0.03)
+  const lookAhead = Math.min(maxProgress, t + 0.03)
   RIDE_CURVE.getTangent(lookAhead, TMP_AHEAD).normalize()
   const sway = TMP_TAN.clone().cross(TMP_AHEAD).y
   const targetBank = MathUtils.clamp(sway * 8, -STARLIGHT_RUSH.bankMax, STARLIGHT_RUSH.bankMax)
@@ -94,15 +97,34 @@ export function sampleStarlightRide(progress: number, bankLerp = 1) {
 }
 
 /**
- * ゲーム時間 0..1 → レール progress。
- * タイマーと同期し、終了直前まで動き続ける（駅で固まらない）。
+ * 本編経過時間 0..duration → レール progress。
+ * 離陸済みの launchEnd から rideEnd まで。
  */
 export function progressFromElapsed(elapsedSec: number): number {
   const duration = STARLIGHT_RUSH.gameDurationSec
   const u = MathUtils.clamp(elapsedSec / duration, 0, 1)
-  // smoothstep で発進はゆっくり、終盤は到着感
   const eased = u * u * (3 - 2 * u)
-  return eased * STARLIGHT_RUSH.rideEndProgress
+  const start = STARLIGHT_RUSH.launchEndProgress
+  const end = STARLIGHT_RUSH.rideEndProgress
+  return start + eased * (end - start)
+}
+
+/** 離陸 intro: 0 → launchEndProgress（ease-out） */
+export function progressFromLaunchElapsed(elapsedSec: number): number {
+  const duration = Math.max(0.01, STARLIGHT_RUSH.launchIntroSec)
+  const u = MathUtils.clamp(elapsedSec / duration, 0, 1)
+  const eased = 1 - (1 - u) * (1 - u)
+  return eased * STARLIGHT_RUSH.launchEndProgress
+}
+
+/** ドック outro: rideEnd → dockEnd（ease-in-out） */
+export function progressFromDockElapsed(elapsedSec: number): number {
+  const duration = Math.max(0.01, STARLIGHT_RUSH.dockingSec)
+  const u = MathUtils.clamp(elapsedSec / duration, 0, 1)
+  const eased = u * u * (3 - 2 * u)
+  const start = STARLIGHT_RUSH.rideEndProgress
+  const end = STARLIGHT_RUSH.dockEndProgress
+  return start + eased * (end - start)
 }
 
 export function resetStarlightRide() {
@@ -112,7 +134,7 @@ export function resetStarlightRide() {
   sampleStarlightRide(0, 1)
 }
 
-/** playing 中にレール進行。countdown/idle は姿勢だけ更新。 */
+/** フェーズに応じてレール進行。 */
 export function advanceStarlightRide(delta: number) {
   const store = useStarlightRushStore.getState()
   const dt = Math.min(delta, 0.05)
@@ -125,18 +147,35 @@ export function advanceStarlightRide(delta: number) {
     return
   }
 
+  if (store.startedAt === null) return
+  const elapsed = (performance.now() - store.startedAt - getTabPausedMs()) / 1000
+  const prev = starlightRideRuntime.progress
+
   if (store.phase === 'countdown') {
-    sampleStarlightRide(0, 1 - Math.exp(-dt * 4))
+    const launch = STARLIGHT_RUSH.launchIntroSec
+    let next: number
+    if (elapsed < launch) {
+      next = progressFromLaunchElapsed(elapsed)
+    } else {
+      next = STARLIGHT_RUSH.launchEndProgress
+    }
+    starlightRideRuntime.speed = Math.max(0.0001, (next - prev) / Math.max(dt, 1e-4))
     starlightRideRuntime.warpBoost = 0
+    sampleStarlightRide(next, 1 - Math.exp(-dt * 3.5))
     return
   }
 
-  // playing: 経過時間に同期
-  if (store.startedAt === null) return
+  if (store.phase === 'docking') {
+    const next = progressFromDockElapsed(elapsed)
+    starlightRideRuntime.speed = Math.max(0.0001, (next - prev) / Math.max(dt, 1e-4))
+    starlightRideRuntime.warpBoost = MathUtils.lerp(starlightRideRuntime.warpBoost, 0, 1 - Math.exp(-dt * 4))
+    sampleStarlightRide(next, 1 - Math.exp(-dt * 2.5))
+    return
+  }
 
-  const elapsed = (performance.now() - store.startedAt - getTabPausedMs()) / 1000
+  if (store.phase !== 'playing') return
+
   const next = progressFromElapsed(elapsed)
-  const prev = starlightRideRuntime.progress
   starlightRideRuntime.speed = Math.max(0.0001, (next - prev) / Math.max(dt, 1e-4))
 
   if (store.remainingSec <= STARLIGHT_RUSH.warpRemainingSec) {

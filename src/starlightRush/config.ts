@@ -7,6 +7,14 @@ export const STARLIGHT_RUSH = {
   gameDurationSec: 90,
   fireCooldownMs: 220,
   countdownSec: 3,
+  /** カウントダウン前の離陸演出（秒）。この間に駅を離れる */
+  launchIntroSec: 3.2,
+  /** 離陸終了時のレール progress（ここから本編タイマー開始） */
+  launchEndProgress: 0.06,
+  /** タイマー終了後の到着ドック演出（秒） */
+  dockingSec: 4.2,
+  /** ドック完了時の progress（rideEnd より先、到着駅手前） */
+  dockEndProgress: 0.88,
 
   /** ライド内ローカル: 船は原点、進行方向は -Z */
   shipLocal: { x: 0, y: 0.15, z: 0 },

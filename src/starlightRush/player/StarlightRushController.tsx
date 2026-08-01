@@ -94,6 +94,11 @@ export function StarlightRushController() {
       return
     }
 
+    if (store.phase === 'docking') {
+      store.tickDocking(now)
+      return
+    }
+
     if (store.phase !== 'playing') return
 
     store.tickPlaying(now)

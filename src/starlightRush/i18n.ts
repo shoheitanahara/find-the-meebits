@@ -12,6 +12,8 @@ type StarlightCopy = {
   storyDepart: string
   storyCruise: string
   storyApproach: string
+  storyLaunching: string
+  storyDocking: string
   play: string
   rulesTitle: string
   controls: string
@@ -44,6 +46,8 @@ const en: StarlightCopy = {
   storyDepart: 'Departing Aurora Station',
   storyCruise: 'Open space',
   storyApproach: 'Approaching Zenith Station',
+  storyLaunching: 'Launching…',
+  storyDocking: 'Docking at Zenith…',
   play: 'Launch',
   rulesTitle: '90 Second Cosmic Ride',
   controls: 'Aim with the mouse or drag the screen. Fire at the center crosshair while the ship flies itself.',
@@ -88,6 +92,8 @@ const ja: StarlightCopy = {
   storyDepart: 'オーロラ駅 発進',
   storyCruise: '宇宙航路',
   storyApproach: 'ゼニス駅 接近',
+  storyLaunching: '発進中…',
+  storyDocking: 'ゼニス駅 ドッキング…',
   play: '発進',
   rulesTitle: '90秒の宇宙ライド',
   controls: '宇宙船は自動走行。マウスまたはドラッグで照準し、中央の照準で撃とう。',

@@ -10,7 +10,7 @@ import {
   type StarlightRatingId,
 } from './config'
 
-export type StarlightPhase = 'idle' | 'countdown' | 'playing' | 'result'
+export type StarlightPhase = 'idle' | 'countdown' | 'playing' | 'docking' | 'result'
 
 export type FloatingScore = {
   id: number
@@ -43,6 +43,7 @@ type StarlightState = {
   startGame: () => void
   tickCountdown: (now: number) => void
   tickPlaying: (now: number) => void
+  tickDocking: (now: number) => void
   setAim: (x: number, y: number) => void
   addAimDelta: (dx: number, dy: number) => void
   setAimOnTarget: (onTarget: boolean) => void
@@ -97,7 +98,8 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
       score: 0,
       combo: 0,
       remainingSec: STARLIGHT_RUSH.gameDurationSec,
-      countdownValue: STARLIGHT_RUSH.countdownSec,
+      /** 0 = 離陸中、1..countdownSec = カウントダウン数字 */
+      countdownValue: 0,
       startedAt: performance.now(),
       lastFireAt: 0,
       aimX: 0,
@@ -115,8 +117,16 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
     const state = get()
     if (state.phase !== 'countdown' || state.startedAt === null) return
     const elapsed = (now - state.startedAt - getTabPausedMs()) / 1000
-    const nextValue = Math.ceil(STARLIGHT_RUSH.countdownSec - elapsed)
-    if (elapsed >= STARLIGHT_RUSH.countdownSec) {
+    const launch = STARLIGHT_RUSH.launchIntroSec
+    const count = STARLIGHT_RUSH.countdownSec
+
+    if (elapsed < launch) {
+      if (state.countdownValue !== 0) set({ countdownValue: 0 })
+      return
+    }
+
+    const countElapsed = elapsed - launch
+    if (countElapsed >= count) {
       resetTabPauseClock()
       set({
         phase: 'playing',
@@ -126,8 +136,10 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
       })
       return
     }
+
+    const nextValue = Math.max(1, Math.ceil(count - countElapsed))
     if (nextValue !== state.countdownValue) {
-      set({ countdownValue: Math.max(1, nextValue) })
+      set({ countdownValue: nextValue })
     }
   },
   tickPlaying: (now) => {
@@ -135,12 +147,27 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
     if (state.phase !== 'playing' || state.startedAt === null) return
     const remaining = remainingFromStartedAt(state.startedAt, now)
     if (remaining <= 0) {
-      get().finishGame()
+      resetTabPauseClock()
+      set({
+        phase: 'docking',
+        remainingSec: 0,
+        startedAt: performance.now(),
+        aimOnTarget: false,
+        floatingScores: [],
+      })
       return
     }
     const remainingTenths = remainingToTenths(remaining)
     if (remainingTenths !== state.remainingSec) {
       set({ remainingSec: remainingTenths })
+    }
+  },
+  tickDocking: (now) => {
+    const state = get()
+    if (state.phase !== 'docking' || state.startedAt === null) return
+    const elapsed = (now - state.startedAt - getTabPausedMs()) / 1000
+    if (elapsed >= STARLIGHT_RUSH.dockingSec) {
+      get().finishGame()
     }
   },
   setAim: (x, y) =>
@@ -201,7 +228,7 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
   },
   finishGame: () => {
     const state = get()
-    if (state.phase !== 'playing') return
+    if (state.phase !== 'docking') return
     const bestScore = writeBestScore(state.score)
     set({
       phase: 'result',
@@ -210,6 +237,7 @@ export const useStarlightRushStore = create<StarlightState>((set, get) => ({
       bestScore,
       aimOnTarget: false,
       floatingScores: [],
+      startedAt: null,
     })
   },
   replay: () => {
