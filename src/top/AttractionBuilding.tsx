@@ -16,6 +16,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - sergito: シーエリアの工房（Meet Sergito）
  * - shooting: マウンテン地区の木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
+ * - pfp: カルチャー東の PFP スタジオ
  */
 export function AttractionBuilding({
   attraction,
@@ -43,6 +44,8 @@ export function AttractionBuilding({
                     ? '#e8b060'
                     : attraction.id === 'starlight'
                       ? '#5ce0ff'
+                      : attraction.id === 'pfp'
+                        ? '#8eb4e8'
                       : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
@@ -70,6 +73,8 @@ export function AttractionBuilding({
         <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'starlight' ? (
         <StarlightDomeLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'pfp' ? (
+        <PfpStudioLandmark color={attraction.color} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -538,6 +543,52 @@ function ShootingGalleryLandmark({
         <meshStandardMaterial color="#6a5030" roughness={0.9} />
       </mesh>
       <pointLight position={[0, 2.8, 1.5]} intensity={10} distance={11} color={accent} />
+    </group>
+  )
+}
+
+/** Culture 東棟: PFP スタジオ（カラーパネル＋カメラブース） */
+function PfpStudioLandmark({ color, accent }: { color: string; accent: string }) {
+  const swatches = ['#638596', '#f2c94c', '#8550a0', '#e07a6a', '#3d6bb3']
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.28, 7.2]} />
+        <meshStandardMaterial color="#121820" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[6.2, 3.5, 5.8]} />
+        <meshStandardMaterial color={color} roughness={0.82} metalness={0.14} />
+      </mesh>
+      <mesh position={[0, 3.75, -0.35]} castShadow>
+        <boxGeometry args={[6.6, 0.32, 6.2]} />
+        <meshStandardMaterial color="#0a1018" metalness={0.3} roughness={0.5} />
+      </mesh>
+      {/* 背景カラーウォール */}
+      <mesh position={[0, 2.1, -3.05]} castShadow>
+        <boxGeometry args={[5.4, 2.8, 0.2]} />
+        <meshStandardMaterial color="#638596" roughness={0.7} />
+      </mesh>
+      {swatches.map((hex, index) => (
+        <mesh key={hex} position={[-2.0 + index * 1.0, 3.45, 2.95]} castShadow>
+          <boxGeometry args={[0.72, 0.55, 0.12]} />
+          <meshStandardMaterial color={hex} roughness={0.55} metalness={0.1} />
+        </mesh>
+      ))}
+      {/* カメラ三脚風 */}
+      <mesh position={[2.1, 1.35, 2.55]} castShadow>
+        <cylinderGeometry args={[0.06, 0.1, 2.2, 8]} />
+        <meshStandardMaterial color="#2a3038" metalness={0.55} roughness={0.4} />
+      </mesh>
+      <mesh position={[2.1, 2.55, 2.55]} castShadow>
+        <boxGeometry args={[0.55, 0.35, 0.7]} />
+        <meshStandardMaterial color="#1a1e24" metalness={0.45} roughness={0.35} />
+      </mesh>
+      <mesh position={[2.1, 2.55, 2.95]}>
+        <circleGeometry args={[0.18, 16]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} />
+      </mesh>
+      <pointLight position={[0, 2.9, 1.2]} intensity={11} distance={12} color={accent} />
     </group>
   )
 }

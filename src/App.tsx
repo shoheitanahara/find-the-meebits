@@ -12,6 +12,7 @@ import { ClosetApp } from './closet/ClosetApp'
 import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
 import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
 import { StarlightRushApp } from './starlightRush/StarlightRushApp'
+import { PhotoStudioApp } from './photoStudio/PhotoStudioApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
@@ -170,6 +171,15 @@ export default function App() {
     return (
       <>
         <StarlightRushApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'pfp') {
+    return (
+      <>
+        <PhotoStudioApp />
         <Analytics />
       </>
     )

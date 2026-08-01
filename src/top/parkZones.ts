@@ -331,7 +331,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   culture: {
     id: 'culture',
     title: { en: 'Culture District', ja: 'カルチャー地区' },
-    attractionIds: ['runway', 'closet'],
+    attractionIds: ['runway', 'closet', 'pfp'],
     layout: CULTURE_LAYOUT,
     perimeter: {
       theme: 'culture',
@@ -368,15 +368,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [12.5, 9],
       [-12.5, -1.5],
       [12.5, -1.5],
-    ],
-    comingSoonSlots: [
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
-        theme: 'culture',
-        title: { en: 'PFP STUDIO', ja: 'PFPクリエイター' },
-        subtitle: { en: 'Craft your profile look', ja: 'プロフィール用の姿を作る' },
-      },
     ],
     gates: [
       {

@@ -46,6 +46,7 @@ const copy = {
       sergito: 'Meet Sergito',
       shooting: 'Shooting Gallery',
       starlight: 'Starlight Rush',
+      pfp: 'PFP Studio',
     },
   },
   ja: {
@@ -68,6 +69,7 @@ const copy = {
       sergito: 'Meet Sergito',
       shooting: 'シューティングギャラリー',
       starlight: 'スターライト・ラッシュ',
+      pfp: 'PFPスタジオ',
     },
   },
 } as const
@@ -83,6 +85,7 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'sergito') return `${localePrefix}/meet-sergito`
   if (id === 'shooting') return `${localePrefix}/shooting-gallery`
   if (id === 'starlight') return `${localePrefix}/starlight-rush`
+  if (id === 'pfp') return `${localePrefix}/pfp-studio`
   return `${localePrefix}/mountain`
 }
 
@@ -99,7 +102,8 @@ function getReturningAttractionId(): AttractionId | null {
     from === 'closet' ||
     from === 'sergito' ||
     from === 'shooting' ||
-    from === 'starlight'
+    from === 'starlight' ||
+    from === 'pfp'
     ? from
     : null
 }

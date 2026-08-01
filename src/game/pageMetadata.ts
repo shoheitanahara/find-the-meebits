@@ -47,6 +47,10 @@ const metadata = {
       title: 'Starlight Rush | Meebits Park',
       description: 'Ride a cosmic coaster and shoot colorful stars racing toward you. Ninety seconds of Starlight Rush.',
     },
+    pfp: {
+      title: 'PFP Studio | Meebits Park',
+      description: 'Pick a CryptoPunks / BAYC-inspired background and pose, then export a clean square Meebit PFP.',
+    },
   },
   ja: {
     top: {
@@ -92,6 +96,10 @@ const metadata = {
     starlight: {
       title: 'スターライト・ラッシュ | Meebits Park',
       description: '宇宙ジェットコースターに乗り、奥から流れてくる星を撃て。90秒のスコアアタック。',
+    },
+    pfp: {
+      title: 'PFPスタジオ | Meebits Park',
+      description: 'CryptoPunks / BAYC風の背景とポーズを選んで、きれいな正方形のMeebit PFPを書き出そう。',
     },
   },
 } as const

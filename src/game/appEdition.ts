@@ -11,6 +11,7 @@ export type AppEdition =
   | 'sergito'
   | 'shooting'
   | 'starlight'
+  | 'pfp'
   | 'top'
 
 export function getPathSegments(pathname = typeof window !== 'undefined' ? window.location.pathname : '/') {
@@ -21,6 +22,9 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   const segments = getPathSegments(pathname)
   if (segments.includes('starlight-rush')) {
     return 'starlight'
+  }
+  if (segments.includes('pfp-studio')) {
+    return 'pfp'
   }
   if (segments.includes('shooting-gallery')) {
     return 'shooting'

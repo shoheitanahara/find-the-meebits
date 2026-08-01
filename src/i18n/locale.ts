@@ -63,6 +63,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/starlight-rush' : '/starlight-rush'
   }
 
+  if (segments.includes('pfp-studio')) {
+    return locale === 'ja' ? '/jp/pfp-studio' : '/pfp-studio'
+  }
+
   if (segments.includes('shooting-gallery')) {
     return locale === 'ja' ? '/jp/shooting-gallery' : '/shooting-gallery'
   }

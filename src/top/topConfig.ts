@@ -277,6 +277,37 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     infoBoardLocal: [-5.2, 4.0],
   },
   {
+    id: 'pfp',
+    zoneId: 'culture',
+    title: 'PFP STUDIO',
+    subtitle: 'The Photo Booth',
+    description: {
+      en: 'Pick a background and pose.\nShoot a clean square PFP\nfor your profile.',
+      ja: '背景とポーズを選んで、\nきれいな正方形PFPを\n撮影しよう。',
+    },
+    storyTitle: {
+      en: 'SQUARE SHOT',
+      ja: 'スクエアショット',
+    },
+    color: '#1a2438',
+    roofColor: '#8eb4e8',
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.east.entranceZ,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [5.2, 4.0],
+    underConstruction: true,
+  },
+  {
     id: 'sergito',
     zoneId: 'sea',
     title: 'MEET SERGITO',
