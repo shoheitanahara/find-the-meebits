@@ -14,7 +14,7 @@ export const STARLIGHT_RUSH = {
   /** タイマー終了後の到着ドック演出（秒） */
   dockingSec: 4.2,
   /** ドック完了時の progress（rideEnd より先、到着駅手前） */
-  dockEndProgress: 0.88,
+  dockEndProgress: 0.97,
 
   /** ライド内ローカル: 船は原点、進行方向は -Z */
   shipLocal: { x: 0, y: 0.15, z: 0 },
@@ -90,10 +90,10 @@ export const STARLIGHT_RUSH = {
   /** 終了直前ワープ演出（残り秒） */
   warpRemainingSec: 12,
   /**
-   * 船が進む progress の上限。
-   * 1.0（到着駅）までは行かず、手前で止めて駅に突っ込まない。
+   * 本編中のレール上限。終盤〜ゼニス接近まで進み続ける。
+   * 到着駅（1.0）までは行かず、dockEnd でさらに少し寄る。
    */
-  rideEndProgress: 0.78,
+  rideEndProgress: 0.9,
 
   rating: [
     { min: 25000, id: 'legend' as const },

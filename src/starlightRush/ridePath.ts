@@ -30,9 +30,12 @@ const CONTROL_POINTS = [
   new Vector3(4, 2, -84),
   new Vector3(-2, 5, -96),
   new Vector3(0, 8, -108),
-  // 到着アプローチ（船はここより手前で止まる）
-  new Vector3(0, 9, -118),
-  new Vector3(0, 8, -128),
+  // ゼニス接近の長い直線（終盤10秒でも距離が残る）
+  new Vector3(1, 8.5, -120),
+  new Vector3(0, 9, -132),
+  new Vector3(-1, 8.5, -144),
+  new Vector3(0, 8, -156),
+  new Vector3(0, 7.5, -168),
 ]
 
 const RIDE_CURVE = new CatmullRomCurve3(CONTROL_POINTS, false, 'catmullrom', 0.45)
@@ -98,12 +101,15 @@ export function sampleStarlightRide(
 
 /**
  * 本編経過時間 0..duration → レール progress。
- * 離陸済みの launchEnd から rideEnd まで。
+ * smoothstep だけだと終端付近の速度がほぼ 0 になり、ゼニス前で止まったように見える。
+ * 線形寄りにして終盤（ワープ帯）も距離を稼ぎ続ける。
  */
 export function progressFromElapsed(elapsedSec: number): number {
   const duration = STARLIGHT_RUSH.gameDurationSec
   const u = MathUtils.clamp(elapsedSec / duration, 0, 1)
-  const eased = u * u * (3 - 2 * u)
+  const smooth = u * u * (3 - 2 * u)
+  // 終盤の減速を抑えつつ、発進は少しだけ滑らかに
+  const eased = MathUtils.lerp(u, smooth, 0.28)
   const start = STARLIGHT_RUSH.launchEndProgress
   const end = STARLIGHT_RUSH.rideEndProgress
   return start + eased * (end - start)

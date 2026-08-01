@@ -25,7 +25,7 @@ export function StarlightStations() {
         progress={1}
         variant="arrival"
         /** 曲線のさらに先＝到着駅は前方に見える */
-        alongOffset={14}
+        alongOffset={18}
         heightOffset={3}
       />
       <WaypointRing progress={0.35} />

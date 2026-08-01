@@ -37,7 +37,7 @@ function useTabFrameloop() {
 function StarlightRushScene() {
   return (
     <>
-      <PerspectiveCamera makeDefault fov={STARLIGHT_RUSH.cameraFov} near={0.1} far={160} />
+      <PerspectiveCamera makeDefault fov={STARLIGHT_RUSH.cameraFov} near={0.1} far={240} />
       <StarlightSpace>
         <StarlightRushPlayer />
         <StarlightStars />
