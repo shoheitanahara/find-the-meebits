@@ -3,7 +3,22 @@ import { Object3D } from 'three'
 import { applyVRMFigurePose, applyVRMSitPose } from '../avatar/VRMLocomotion'
 import type { PhotoStudioPoseId } from './config'
 
-const attentionArmZ = { left: 1.56, right: -1.56 }
+/**
+ * Meebit VRM（normalized）腕 — PFP Studio 落とし所。
+ *
+ * コツ: 手をひねらない。上げは z のみ（attention と同符号）。肘曲げ近似の
+ * 「腰に手／腕組み／パワー」は見た目が崩れるためポーズ自体を差し替えている。
+ *
+ * attention z: 左 +1.56 / 右 −1.56
+ */
+const attentionArmZ = { left: 1.56, right: -1.56 } as const
+/** 手を振る */
+const waveArmZ = { right: -0.28 } as const
+/** 両手開き（やや上げ） */
+const openArmZ = { left: 1.05, right: -1.05 } as const
+/** 万歳（高く・同符号のまま |z|→0 寄り） */
+const cheerArmZ = { left: 0.12, right: -0.12 } as const
+const elbowRest = 0.03
 const kneeBaseBend = -0.16
 
 function bone(vrm: VRM, name: VRMHumanBoneName) {
@@ -18,6 +33,40 @@ function set(
   if (rotation.x !== undefined) node.rotation.x = rotation.x
   if (rotation.y !== undefined) node.rotation.y = rotation.y
   if (rotation.z !== undefined) node.rotation.z = rotation.z
+}
+
+function setArmLift(
+  vrm: VRM,
+  side: 'left' | 'right',
+  upperZ: number,
+  lowerX = elbowRest,
+) {
+  const upper =
+    side === 'left'
+      ? bone(vrm, VRMHumanBoneName.LeftUpperArm)
+      : bone(vrm, VRMHumanBoneName.RightUpperArm)
+  const lower =
+    side === 'left'
+      ? bone(vrm, VRMHumanBoneName.LeftLowerArm)
+      : bone(vrm, VRMHumanBoneName.RightLowerArm)
+  const hand =
+    side === 'left'
+      ? bone(vrm, VRMHumanBoneName.LeftHand)
+      : bone(vrm, VRMHumanBoneName.RightHand)
+
+  set(upper, { x: 0, y: 0, z: upperZ })
+  set(lower, { x: lowerX, y: 0, z: 0 })
+  set(hand, { x: 0, y: 0, z: 0 })
+}
+
+function resetShoulders(vrm: VRM) {
+  set(bone(vrm, VRMHumanBoneName.LeftShoulder), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightShoulder), { x: 0, y: 0, z: 0 })
+}
+
+function resetHands(vrm: VRM) {
+  set(bone(vrm, VRMHumanBoneName.LeftHand), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightHand), { x: 0, y: 0, z: 0 })
 }
 
 function resetTorso(vrm: VRM) {
@@ -36,13 +85,15 @@ function resetLegs(vrm: VRM) {
   set(bone(vrm, VRMHumanBoneName.RightFoot), { x: 0.04, y: 0, z: 0 })
 }
 
-/** スタジオ用立正 — 膝を曲げず直立 */
+function armsDown(vrm: VRM, lowerX = elbowRest) {
+  setArmLift(vrm, 'left', attentionArmZ.left, lowerX)
+  setArmLift(vrm, 'right', attentionArmZ.right, lowerX)
+}
+
 function applyStudioAttentionPose(vrm: VRM) {
   resetTorso(vrm)
-  set(bone(vrm, VRMHumanBoneName.LeftUpperArm), { x: 0, y: 0, z: attentionArmZ.left })
-  set(bone(vrm, VRMHumanBoneName.RightUpperArm), { x: 0, y: 0, z: attentionArmZ.right })
-  set(bone(vrm, VRMHumanBoneName.LeftLowerArm), { x: 0.03, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.RightLowerArm), { x: 0.03, y: 0, z: 0 })
+  resetShoulders(vrm)
+  armsDown(vrm, 0.03)
   set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0, y: 0, z: 0 })
   set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 0, y: 0, z: 0 })
   set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: 0, y: 0, z: 0 })
@@ -51,7 +102,7 @@ function applyStudioAttentionPose(vrm: VRM) {
   set(bone(vrm, VRMHumanBoneName.RightFoot), { x: 0, y: 0, z: 0 })
 }
 
-/** Photo Studio 用ポーズ一式。 */
+/** Photo Studio 用ポーズ。腕は z 上げ中心（捻り・肘近似の難ポーズは採用しない）。 */
 export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (!vrm) return
 
@@ -69,12 +120,12 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   }
 
   resetTorso(vrm)
+  resetShoulders(vrm)
+  resetHands(vrm)
   resetLegs(vrm)
 
-  const leftUpperArm = bone(vrm, VRMHumanBoneName.LeftUpperArm)
-  const rightUpperArm = bone(vrm, VRMHumanBoneName.RightUpperArm)
-  const leftLowerArm = bone(vrm, VRMHumanBoneName.LeftLowerArm)
-  const rightLowerArm = bone(vrm, VRMHumanBoneName.RightLowerArm)
+  const L = attentionArmZ.left
+  const R = attentionArmZ.right
 
   switch (poseId) {
     case 'contrapposto':
@@ -82,60 +133,64 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
       set(bone(vrm, VRMHumanBoneName.Spine), { x: 0.04, y: 0, z: -0.06 })
       set(bone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0.05, z: 0 })
       set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: -0.08, z: 0 })
-      set(leftUpperArm, { x: 0.12, y: 0, z: attentionArmZ.left })
-      set(rightUpperArm, { x: 0.05, y: 0, z: attentionArmZ.right - 0.08 })
-      set(leftLowerArm, { x: 0.12, y: 0, z: 0 })
-      set(rightLowerArm, { x: 0.08, y: 0, z: 0 })
+      setArmLift(vrm, 'left', L, 0.05)
+      setArmLift(vrm, 'right', -1.42, 0.05)
       set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0.08, y: 0, z: 0.04 })
       set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: -0.05, y: 0, z: -0.02 })
       break
-    case 'handOnHip':
-      set(leftUpperArm, { x: 0.15, y: 0.35, z: 1.15 })
-      set(leftLowerArm, { x: 1.1, y: 0, z: 0.15 })
-      set(rightUpperArm, { x: 0.08, y: 0, z: attentionArmZ.right })
-      set(rightLowerArm, { x: 0.06, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: -0.06 })
-      set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: 0.1, z: 0 })
+
+    case 'bow':
+      // お辞儀: 体を前に倒す。腕はそのまま下ろし
+      set(bone(vrm, VRMHumanBoneName.Hips), { x: 0.18, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Spine), { x: 0.28, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.22, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Head), { x: 0.2, y: 0, z: 0 })
+      armsDown(vrm, 0.05)
       break
-    case 'crossArms':
-      set(leftUpperArm, { x: 0.55, y: 0.55, z: 0.85 })
-      set(leftLowerArm, { x: 1.35, y: 0.2, z: 0.1 })
-      set(rightUpperArm, { x: 0.55, y: -0.55, z: -0.85 })
-      set(rightLowerArm, { x: 1.35, y: -0.2, z: -0.1 })
-      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.05, y: 0, z: 0 })
+
+    case 'open':
+      // 両手を少し開いて歓迎ポーズ（z のみ）
+      setArmLift(vrm, 'left', openArmZ.left, 0.05)
+      setArmLift(vrm, 'right', openArmZ.right, 0.05)
+      set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.02, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Head), { x: -0.02, y: 0, z: 0 })
       break
+
     case 'wave':
-      set(leftUpperArm, { x: 0.1, y: 0, z: attentionArmZ.left })
-      set(leftLowerArm, { x: 0.08, y: 0, z: 0 })
-      set(rightUpperArm, { x: -0.35, y: -0.2, z: -0.35 })
-      set(rightLowerArm, { x: 0.15, y: 0, z: -0.2 })
-      set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: -0.12, z: 0 })
+      setArmLift(vrm, 'left', L, elbowRest)
+      setArmLift(vrm, 'right', waveArmZ.right, 0.08)
+      set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: -0.08, z: 0 })
       break
-    case 'think':
-      set(leftUpperArm, { x: 0.1, y: 0, z: attentionArmZ.left })
-      set(leftLowerArm, { x: 0.08, y: 0, z: 0 })
-      set(rightUpperArm, { x: 0.85, y: -0.65, z: -0.55 })
-      set(rightLowerArm, { x: 1.55, y: -0.15, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Head), { x: 0.12, y: 0.15, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.06, y: 0, z: 0 })
+
+    case 'lookAway':
+      // 振り向き: 頭・胸を回す。腕は下ろし
+      armsDown(vrm, 0.05)
+      set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0.06, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0.18, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0.28, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Head), { x: 0.04, y: 0.55, z: 0 })
       break
+
     case 'cheer':
-      set(leftUpperArm, { x: -0.55, y: 0.25, z: 0.55 })
-      set(leftLowerArm, { x: 0.2, y: 0, z: 0.15 })
-      set(rightUpperArm, { x: -0.55, y: -0.25, z: -0.55 })
-      set(rightLowerArm, { x: 0.2, y: 0, z: -0.15 })
-      set(bone(vrm, VRMHumanBoneName.Head), { x: -0.08, y: 0, z: 0 })
+      setArmLift(vrm, 'left', cheerArmZ.left, 0.05)
+      setArmLift(vrm, 'right', cheerArmZ.right, 0.05)
+      set(bone(vrm, VRMHumanBoneName.Head), { x: -0.04, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.03, y: 0, z: 0 })
+      break
+
+    case 'hero':
+      // ヒーロー立ち: 足を開き、胸を張り、腕は自然に下ろす
+      armsDown(vrm, 0.05)
+      set(bone(vrm, VRMHumanBoneName.Hips), { x: -0.02, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Spine), { x: -0.04, y: 0, z: 0 })
       set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.06, y: 0, z: 0 })
-      break
-    case 'power':
-      set(leftUpperArm, { x: 0.95, y: 0.35, z: 0.95 })
-      set(leftLowerArm, { x: 1.45, y: 0, z: 0 })
-      set(rightUpperArm, { x: 0.95, y: -0.35, z: -0.95 })
-      set(rightLowerArm, { x: 1.45, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Hips), { x: 0.04, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.08, y: 0, z: 0 })
       set(bone(vrm, VRMHumanBoneName.Head), { x: -0.05, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0, y: 0, z: 0.14 })
+      set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 0, y: 0, z: -0.14 })
+      set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: kneeBaseBend, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.RightLowerLeg), { x: kneeBaseBend, y: 0, z: 0 })
       break
+
     default:
       applyStudioAttentionPose(vrm)
   }

@@ -1,6 +1,6 @@
 import { Environment, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { MathUtils, Vector3 } from 'three'
+import { MathUtils, PerspectiveCamera as ThreePerspectiveCamera, Vector3 } from 'three'
 import { getBackground, getCameraSetup, PHOTO_STUDIO } from '../config'
 import { usePhotoStudioStore } from '../store'
 
@@ -114,12 +114,15 @@ function StudioCameraRig() {
   const cameraAngleId = usePhotoStudioStore((state) => state.cameraAngleId)
 
   useFrame(({ camera }, delta) => {
+    if (!(camera instanceof ThreePerspectiveCamera)) return
     const state = usePhotoStudioStore.getState()
     const setup = getCameraSetup(state.framingId, state.cameraAngleId)
     const dt = Math.min(delta, 0.05)
     const t = 1 - Math.exp(-dt * 8)
-    cameraPos.set(...setup.cameraPosition)
-    lookAt.set(...setup.cameraLookAt)
+    const [px, py, pz] = setup.cameraPosition
+    const [lx, ly, lz] = setup.cameraLookAt
+    cameraPos.set(px, py, pz)
+    lookAt.set(lx, ly, lz)
     camera.position.lerp(cameraPos, t)
     camera.fov = MathUtils.lerp(camera.fov, setup.fov, t)
     camera.lookAt(lookAt)
