@@ -81,12 +81,12 @@ export function StarlightShip() {
         </group>
       ))}
 
-      {/* 垂直尾翼（高さを半分にし、下端がアバター股に刺さらないよう上寄せ） */}
-      <mesh position={[0, 0.68, 0.74]} rotation={[0.15, 0, 0]} castShadow>
+      {/* 垂直尾翼（高さを半分にし、下寄せ） */}
+      <mesh position={[0, 0.38, 0.74]} rotation={[0.15, 0, 0]} castShadow>
         <boxGeometry args={[0.06, 0.28, 0.32]} />
         <meshStandardMaterial color={hullDark} metalness={0.5} roughness={0.35} />
       </mesh>
-      <mesh position={[0, 0.84, 0.66]}>
+      <mesh position={[0, 0.54, 0.66]}>
         <boxGeometry args={[0.08, 0.08, 0.18]} />
         <meshStandardMaterial color={magenta} emissive={magenta} emissiveIntensity={0.55} />
       </mesh>
