@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { getLocale } from '../../i18n/locale'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { usePlayerStore } from '../../stores/playerStore'
+import { TargetPreview } from '../../ui/TargetPreview'
 import {
   clampMeebitId,
   getBackground,
@@ -40,6 +41,9 @@ export function PhotoStudioStartScreen() {
 
   const parsed = Number(draftMeebitInput.trim())
   const canEnter = Number.isFinite(parsed)
+  const previewMeebitNumber = clampMeebitId(
+    Number.isFinite(parsed) ? parsed : savedMeebit,
+  )
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-black/55 backdrop-blur-sm">
@@ -55,7 +59,17 @@ export function PhotoStudioStartScreen() {
           <p className="mt-1 text-center text-xs leading-relaxed text-[#8eb4e8]/75">{t.storyLine}</p>
           <p className="mt-2 text-center text-xs leading-relaxed text-white/50">{t.controls}</p>
 
-          <label className="mt-6 block">
+          <div className="mt-5 flex flex-col items-center">
+            <TargetPreview
+              meebitNumber={previewMeebitNumber}
+              sizeClassName="h-36 w-36 rounded-[1.35rem] border border-[#8eb4e8]/35 bg-[#0a1018] shadow-xl sm:h-44 sm:w-44"
+            />
+            <p className="mt-2 font-mono text-sm tracking-wide text-[#8eb4e8]/90">
+              #{previewMeebitNumber}
+            </p>
+          </div>
+
+          <label className="mt-5 block">
             <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/55">
               {t.meebitId}
             </span>

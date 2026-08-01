@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ACESFilmicToneMapping } from 'three'
-import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { usePlayerStore } from '../stores/playerStore'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { LanguageSwitcher } from '../ui/LanguageSwitcher'
@@ -87,18 +86,19 @@ export function PhotoStudioApp() {
             <Canvas
               id={PHOTO_STUDIO.canvasElementId}
               frameloop={frameloop}
-              dpr={[1, Math.min(getMaxCanvasDpr(), 1.75)]}
+              // 撮影アトラクション: SP でも PC と同じ画質（perfConfig のモバイル制限を使わない）
+              dpr={[1, PHOTO_STUDIO.canvasMaxDpr]}
               gl={{
-                antialias: getEnableAntialias(),
+                antialias: true,
                 powerPreference: 'high-performance',
                 preserveDrawingBuffer: true,
               }}
-        shadows
-        onCreated={({ gl }) => {
-          gl.toneMapping = ACESFilmicToneMapping
-          gl.toneMappingExposure = PHOTO_STUDIO.lighting.exposureDefault
-          setStudioGl(gl)
-        }}
+              shadows
+              onCreated={({ gl }) => {
+                gl.toneMapping = ACESFilmicToneMapping
+                gl.toneMappingExposure = PHOTO_STUDIO.lighting.exposureDefault
+                setStudioGl(gl)
+              }}
               className="absolute inset-0 !h-full !w-full"
             >
               <PhotoStudioScene />

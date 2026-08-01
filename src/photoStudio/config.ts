@@ -4,6 +4,11 @@ export const PHOTO_STUDIO = {
   canvasElementId: 'photo-studio-canvas',
   /** 書き出し解像度（正方形） */
   exportSize: 1024,
+  /**
+   * プレビュー Canvas の最大 DPR。
+   * パーク全体のモバイル制限（DPR1・AAオフ）は使わず、PC/SP とも同じ高画質にする。
+   */
+  canvasMaxDpr: 2,
   meebitIdMin: 1,
   meebitIdMax: 20000,
   modelScale: 1.0,
