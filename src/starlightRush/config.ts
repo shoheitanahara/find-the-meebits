@@ -43,7 +43,7 @@ export const STARLIGHT_RUSH = {
   touchAimSensitivity: 0.0065,
 
   /** 星スポーン（ライドローカル）。進行方向 -Z なので小さいほど奥。全星ここから手前へ。 */
-  starSpawnZ: -22,
+  starSpawnZ: -42,
   starPassZ: 6,
   starHitRadius: 0.55,
   maxActiveStars: 14,
@@ -73,13 +73,16 @@ export const STARLIGHT_RUSH = {
       spreadY: 3.0,
       size: 0.72,
     },
-    /** 終盤は速度・密度で難しくする。散布を広げすぎると照準が届かない */
+    /**
+     * 終盤は速度・密度・車体の動きで難しくする。
+     * 散布は中盤を上限（広げると照準が届かない＆視認が追いつかない）。
+     */
     late: {
       spawnInterval: 0.32,
       maxActive: 14,
       approachSpeed: 16,
-      spreadX: 4.9,
-      spreadY: 2.85,
+      spreadX: 4.8,
+      spreadY: 3.0,
       size: 0.62,
     },
   },

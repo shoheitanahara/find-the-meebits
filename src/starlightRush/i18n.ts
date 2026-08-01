@@ -72,7 +72,7 @@ const en: StarlightCopy = {
   resultEyebrow: 'Docked at Zenith',
   resultHeadline: 'Final Score',
   finalScore: 'Score',
-  bestScore: "Today's Best",
+  bestScore: 'Your Best Today',
   rating: {
     cadet: 'Cadet',
     voyager: 'Voyager',
@@ -118,7 +118,7 @@ const ja: StarlightCopy = {
   resultEyebrow: 'ゼニス駅 到着',
   resultHeadline: '最終スコア',
   finalScore: 'スコア',
-  bestScore: '本日のベスト',
+  bestScore: '今日のあなたのベスト',
   rating: {
     cadet: 'カデット',
     voyager: 'ボイジャー',

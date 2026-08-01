@@ -58,7 +58,7 @@ const en: ShootingGalleryCopy = {
   resultEyebrow: 'Time Up',
   resultHeadline: 'Final Score',
   finalScore: 'Score',
-  bestScore: "Today's Best",
+  bestScore: 'Your Best Today',
   rating: {
     rookie: 'Rookie',
     goodShot: 'Good Shot',
@@ -98,7 +98,7 @@ const ja: ShootingGalleryCopy = {
   resultEyebrow: 'タイムアップ',
   resultHeadline: '最終スコア',
   finalScore: 'スコア',
-  bestScore: '本日のベスト',
+  bestScore: '今日のあなたのベスト',
   rating: {
     rookie: 'ルーキー',
     goodShot: 'グッドショット',
