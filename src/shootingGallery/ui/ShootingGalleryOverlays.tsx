@@ -29,7 +29,7 @@ export function ShootingGalleryPlayPrompt() {
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-black/55 backdrop-blur-sm">
-      <div className="flex min-h-full items-center justify-center px-4 py-4">
+      <div className="flex min-h-full items-start justify-center px-4 pb-6 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.75rem))] sm:items-center sm:py-6">
         <section className="w-full max-w-xl rounded-[2rem] border border-amber-200/35 bg-[#101820]/95 p-5 text-[#f4ead2] shadow-2xl sm:p-7">
         <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-amber-200/80">
           {t.rulesTitle}
