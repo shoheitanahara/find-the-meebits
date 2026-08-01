@@ -190,11 +190,22 @@ export function getCameraAngle(id: PhotoStudioCameraAngleId) {
   return PHOTO_STUDIO.cameraAngles.find((a) => a.id === id) ?? PHOTO_STUDIO.cameraAngles[0]
 }
 
+export type PhotoStudioCameraSetup = {
+  fov: number
+  cameraPosition: readonly [number, number, number]
+  cameraLookAt: readonly [number, number, number]
+}
+
 /** 構図 × カメラ角度から実カメラ設定を返す */
 export function getCameraSetup(
   framingId: PhotoStudioFramingId,
   angleId: PhotoStudioCameraAngleId,
-) {
+): PhotoStudioCameraSetup {
   const angle = getCameraAngle(angleId)
-  return angle.setups[framingId] ?? angle.setups.full
+  const setup = angle.setups[framingId] ?? angle.setups.full
+  return {
+    fov: setup.fov,
+    cameraPosition: [setup.cameraPosition[0], setup.cameraPosition[1], setup.cameraPosition[2]],
+    cameraLookAt: [setup.cameraLookAt[0], setup.cameraLookAt[1], setup.cameraLookAt[2]],
+  }
 }

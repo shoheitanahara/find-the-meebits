@@ -101,9 +101,10 @@ export function StudioCamera() {
   const framingId = usePhotoStudioStore((state) => state.framingId)
   const cameraAngleId = usePhotoStudioStore((state) => state.cameraAngleId)
   const setup = getCameraSetup(framingId, cameraAngleId)
+  const [px, py, pz] = setup.cameraPosition
 
   return (
-    <PerspectiveCamera makeDefault fov={setup.fov} near={0.1} far={40} position={[...setup.cameraPosition]}>
+    <PerspectiveCamera makeDefault fov={setup.fov} near={0.1} far={40} position={[px, py, pz]}>
       <StudioCameraRig />
     </PerspectiveCamera>
   )
@@ -113,23 +114,32 @@ function StudioCameraRig() {
   const framingId = usePhotoStudioStore((state) => state.framingId)
   const cameraAngleId = usePhotoStudioStore((state) => state.cameraAngleId)
 
-  useFrame(({ camera }, delta) => {
-    if (!(camera instanceof ThreePerspectiveCamera)) return
-    const state = usePhotoStudioStore.getState()
-    const setup = getCameraSetup(state.framingId, state.cameraAngleId)
+  useFrame((state, delta) => {
+    const cam = state.camera
+    if (!isPerspectiveCamera(cam)) return
+
+    const studio = usePhotoStudioStore.getState()
+    const setup = getCameraSetup(studio.framingId, studio.cameraAngleId)
     const dt = Math.min(delta, 0.05)
     const t = 1 - Math.exp(-dt * 8)
-    const [px, py, pz] = setup.cameraPosition
-    const [lx, ly, lz] = setup.cameraLookAt
-    cameraPos.set(px, py, pz)
-    lookAt.set(lx, ly, lz)
-    camera.position.lerp(cameraPos, t)
-    camera.fov = MathUtils.lerp(camera.fov, setup.fov, t)
-    camera.lookAt(lookAt)
-    camera.updateProjectionMatrix()
+    cameraPos.set(setup.cameraPosition[0], setup.cameraPosition[1], setup.cameraPosition[2])
+    lookAt.set(setup.cameraLookAt[0], setup.cameraLookAt[1], setup.cameraLookAt[2])
+    cam.position.lerp(cameraPos, t)
+    cam.fov = MathUtils.lerp(cam.fov, setup.fov, t)
+    cam.lookAt(lookAt)
+    cam.updateProjectionMatrix()
   })
 
   void framingId
   void cameraAngleId
   return null
+}
+
+function isPerspectiveCamera(camera: unknown): camera is ThreePerspectiveCamera {
+  return (
+    typeof camera === 'object' &&
+    camera !== null &&
+    'isPerspectiveCamera' in camera &&
+    (camera as ThreePerspectiveCamera).isPerspectiveCamera === true
+  )
 }
