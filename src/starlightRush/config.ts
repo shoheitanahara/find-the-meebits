@@ -32,6 +32,10 @@ export const STARLIGHT_RUSH = {
   /** カメラ追従の緩さ（レールの急変を抑える） */
   cameraFollowLerp: 8,
   bankMax: 0.42,
+  /** 終盤（ゼニス接近）のバンク上限。左右ロールを強める */
+  bankMaxLate: 0.62,
+  /** 終盤バンクを強め始める progress 比率（rideEnd に対する比） */
+  bankLateProgressRatio: 0.72,
 
   aimLimitX: 0.9,
   aimLimitY: 0.75,

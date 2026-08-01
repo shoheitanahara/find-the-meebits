@@ -30,12 +30,15 @@ const CONTROL_POINTS = [
   new Vector3(4, 2, -84),
   new Vector3(-2, 5, -96),
   new Vector3(0, 8, -108),
-  // ゼニス接近の長い直線（終盤10秒でも距離が残る）
-  new Vector3(1, 8.5, -120),
-  new Vector3(0, 9, -132),
-  new Vector3(-1, 8.5, -144),
-  new Vector3(0, 8, -156),
-  new Vector3(0, 7.5, -168),
+  // ゼニス接近: 左右に大きく振る（ストレート回避）
+  new Vector3(16, 7, -118),
+  new Vector3(-18, 9.5, -128),
+  new Vector3(20, 6, -138),
+  new Vector3(-17, 8.5, -148),
+  new Vector3(14, 7, -158),
+  new Vector3(-10, 8, -166),
+  new Vector3(4, 7.5, -172),
+  new Vector3(0, 7.5, -178),
 ]
 
 const RIDE_CURVE = new CatmullRomCurve3(CONTROL_POINTS, false, 'catmullrom', 0.45)
@@ -88,10 +91,14 @@ export function sampleStarlightRide(
   RIDE_CURVE.getPoint(t, TMP_POS)
   RIDE_CURVE.getTangent(t, TMP_TAN).normalize()
 
-  const lookAhead = Math.min(maxProgress, t + 0.03)
+  const lookAhead = Math.min(maxProgress, t + 0.028)
   RIDE_CURVE.getTangent(lookAhead, TMP_AHEAD).normalize()
   const sway = TMP_TAN.clone().cross(TMP_AHEAD).y
-  const targetBank = MathUtils.clamp(sway * 8, -STARLIGHT_RUSH.bankMax, STARLIGHT_RUSH.bankMax)
+  const late =
+    t >= STARLIGHT_RUSH.rideEndProgress * STARLIGHT_RUSH.bankLateProgressRatio
+  const bankCap = late ? STARLIGHT_RUSH.bankMaxLate : STARLIGHT_RUSH.bankMax
+  const swayGain = late ? 12.5 : 8
+  const targetBank = MathUtils.clamp(sway * swayGain, -bankCap, bankCap)
   starlightRideRuntime.bank = MathUtils.lerp(starlightRideRuntime.bank, targetBank, bankLerp)
 
   starlightRideRuntime.progress = t
