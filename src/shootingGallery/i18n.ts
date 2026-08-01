@@ -16,12 +16,15 @@ type ShootingGalleryCopy = {
   countdown: (n: number) => string
   score: string
   combo: string
+  floatCombo: (mult: number) => string
+  floatBull: string
   time: string
   fire: string
   dragToAim: string
   resultEyebrow: string
   resultHeadline: string
   finalScore: string
+  bestScore: string
   rating: Record<ShootingRatingId, string>
   replay: string
   exit: string
@@ -47,12 +50,15 @@ const en: ShootingGalleryCopy = {
   countdown: (n) => String(n),
   score: 'Score',
   combo: 'Combo',
+  floatCombo: (mult) => `Combo x${mult}`,
+  floatBull: 'Bull x 2',
   time: 'Time',
   fire: 'Fire',
   dragToAim: 'Drag to aim',
   resultEyebrow: 'Time Up',
   resultHeadline: 'Final Score',
   finalScore: 'Score',
+  bestScore: "Today's Best",
   rating: {
     rookie: 'Rookie',
     goodShot: 'Good Shot',
@@ -84,12 +90,15 @@ const ja: ShootingGalleryCopy = {
   countdown: (n) => String(n),
   score: 'スコア',
   combo: 'コンボ',
+  floatCombo: (mult) => `Combo x${mult}`,
+  floatBull: 'Bull x 2',
   time: '残り時間',
   fire: '撃つ',
   dragToAim: 'ドラッグで照準',
   resultEyebrow: 'タイムアップ',
   resultHeadline: '最終スコア',
   finalScore: 'スコア',
+  bestScore: '本日のベスト',
   rating: {
     rookie: 'ルーキー',
     goodShot: 'グッドショット',

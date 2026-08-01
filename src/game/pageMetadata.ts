@@ -43,6 +43,10 @@ const metadata = {
       title: 'Shooting Gallery | Meebits Park',
       description: 'Aim at moving fairground targets from the mountain booth. Forty-five seconds to chase a high score.',
     },
+    starlight: {
+      title: 'Starlight Rush | Meebits Park',
+      description: 'Ride a cosmic coaster and shoot colorful stars racing toward you. Ninety seconds of Starlight Rush.',
+    },
   },
   ja: {
     top: {
@@ -84,6 +88,10 @@ const metadata = {
     shooting: {
       title: 'シューティングギャラリー | Meebits Park',
       description: 'マウンテン地区の射的場で、動く的を狙おう。制限時間45秒のスコアアタック。',
+    },
+    starlight: {
+      title: 'スターライト・ラッシュ | Meebits Park',
+      description: '宇宙ジェットコースターに乗り、奥から流れてくる星を撃て。90秒のスコアアタック。',
     },
   },
 } as const

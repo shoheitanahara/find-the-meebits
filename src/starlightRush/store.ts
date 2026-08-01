@@ -5,41 +5,38 @@ import {
   getComboMultiplier,
   getRatingId,
   readBestScore,
-  SHOOTING_GALLERY,
+  STARLIGHT_RUSH,
   writeBestScore,
-  type ShootingRatingId,
-  type TargetKind,
+  type StarlightRatingId,
 } from './config'
 
-export type ShootingPhase = 'idle' | 'countdown' | 'playing' | 'result'
+export type StarlightPhase = 'idle' | 'countdown' | 'playing' | 'result'
 
 export type FloatingScore = {
   id: number
   points: number
-  /** 適用されたコンボ倍率（1 / 1.5 / 2）。ペナルティ時は 1 */
+  /** 適用されたコンボ倍率（1 / 1.5 / 2） */
   comboMultiplier: number
-  bullseye: boolean
   x: number
   y: number
   z: number
   createdAt: number
 }
 
-type ShootingState = {
-  phase: ShootingPhase
+type StarlightState = {
+  phase: StarlightPhase
   score: number
   combo: number
   remainingSec: number
   countdownValue: number
   startedAt: number | null
   lastFireAt: number
-  /** 正規化照準 -1..1（画面中央が 0） */
   aimX: number
   aimY: number
   aimOnTarget: boolean
   fireFlashUntil: number
   recoilUntil: number
-  ratingId: ShootingRatingId | null
+  ratingId: StarlightRatingId | null
   bestScore: number
   floatingScores: FloatingScore[]
   sessionKey: number
@@ -51,9 +48,7 @@ type ShootingState = {
   setAimOnTarget: (onTarget: boolean) => void
   tryFire: () => boolean
   registerHit: (
-    kind: TargetKind,
-    small: boolean,
-    bullseye: boolean,
+    kindIndex: number,
     world: { x: number; y: number; z: number },
   ) => number
   registerMiss: () => void
@@ -71,20 +66,19 @@ function clampAim(value: number, limit: number) {
 
 function remainingFromStartedAt(startedAt: number, now: number) {
   const elapsed = (now - startedAt - getTabPausedMs()) / 1000
-  return Math.max(0, SHOOTING_GALLERY.gameDurationSec - elapsed)
+  return Math.max(0, STARLIGHT_RUSH.gameDurationSec - elapsed)
 }
 
-/** カウントダウン表示用に、残り時間を100ms単位で切り上げる。 */
 function remainingToTenths(remainingSec: number) {
   return Math.ceil(remainingSec * 10) / 10
 }
 
-export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
+export const useStarlightRushStore = create<StarlightState>((set, get) => ({
   phase: 'idle',
   score: 0,
   combo: 0,
-  remainingSec: SHOOTING_GALLERY.gameDurationSec,
-  countdownValue: SHOOTING_GALLERY.countdownSec,
+  remainingSec: STARLIGHT_RUSH.gameDurationSec,
+  countdownValue: STARLIGHT_RUSH.countdownSec,
   startedAt: null,
   lastFireAt: 0,
   aimX: 0,
@@ -102,8 +96,8 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
       phase: 'countdown',
       score: 0,
       combo: 0,
-      remainingSec: SHOOTING_GALLERY.gameDurationSec,
-      countdownValue: SHOOTING_GALLERY.countdownSec,
+      remainingSec: STARLIGHT_RUSH.gameDurationSec,
+      countdownValue: STARLIGHT_RUSH.countdownSec,
       startedAt: performance.now(),
       lastFireAt: 0,
       aimX: 0,
@@ -113,22 +107,22 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
       recoilUntil: 0,
       ratingId: null,
       floatingScores: [],
-      bestScore: readBestScore(),
       sessionKey: state.sessionKey + 1,
+      bestScore: readBestScore(),
     }))
   },
   tickCountdown: (now) => {
     const state = get()
     if (state.phase !== 'countdown' || state.startedAt === null) return
     const elapsed = (now - state.startedAt - getTabPausedMs()) / 1000
-    const nextValue = Math.ceil(SHOOTING_GALLERY.countdownSec - elapsed)
-    if (elapsed >= SHOOTING_GALLERY.countdownSec) {
+    const nextValue = Math.ceil(STARLIGHT_RUSH.countdownSec - elapsed)
+    if (elapsed >= STARLIGHT_RUSH.countdownSec) {
       resetTabPauseClock()
       set({
         phase: 'playing',
         countdownValue: 0,
         startedAt: performance.now(),
-        remainingSec: SHOOTING_GALLERY.gameDurationSec,
+        remainingSec: STARLIGHT_RUSH.gameDurationSec,
       })
       return
     }
@@ -151,13 +145,13 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
   },
   setAim: (x, y) =>
     set({
-      aimX: clampAim(x, SHOOTING_GALLERY.aimLimitX),
-      aimY: clampAim(y, SHOOTING_GALLERY.aimLimitY),
+      aimX: clampAim(x, STARLIGHT_RUSH.aimLimitX),
+      aimY: clampAim(y, STARLIGHT_RUSH.aimLimitY),
     }),
   addAimDelta: (dx, dy) =>
     set((state) => ({
-      aimX: clampAim(state.aimX + dx, SHOOTING_GALLERY.aimLimitX),
-      aimY: clampAim(state.aimY + dy, SHOOTING_GALLERY.aimLimitY),
+      aimX: clampAim(state.aimX + dx, STARLIGHT_RUSH.aimLimitX),
+      aimY: clampAim(state.aimY + dy, STARLIGHT_RUSH.aimLimitY),
     })),
   setAimOnTarget: (aimOnTarget) =>
     set((state) => (state.aimOnTarget === aimOnTarget ? state : { aimOnTarget })),
@@ -165,7 +159,7 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
     const state = get()
     if (state.phase !== 'playing') return false
     const now = performance.now()
-    if (now - state.lastFireAt < SHOOTING_GALLERY.fireCooldownMs) return false
+    if (now - state.lastFireAt < STARLIGHT_RUSH.fireCooldownMs) return false
     set({
       lastFireAt: now,
       fireFlashUntil: now + 90,
@@ -173,30 +167,25 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
     })
     return true
   },
-  registerHit: (kind, small, bullseye, world) => {
+  registerHit: (kindIndex, world) => {
     const state = get()
     if (state.phase !== 'playing') return 0
 
-    const isPenalty = kind === 'red'
-    const nextCombo = isPenalty ? 0 : state.combo + 1
-    const multiplier = isPenalty ? 1 : getComboMultiplier(nextCombo)
-    const base = getBaseScore(kind, small)
-    const bullseyeMultiplier =
-      bullseye && !isPenalty ? SHOOTING_GALLERY.score.bullseyeMultiplier : 1
-    const points = Math.round(base * (isPenalty ? 1 : multiplier) * bullseyeMultiplier)
-    const nextScore = Math.max(0, state.score + points)
+    const nextCombo = state.combo + 1
+    const multiplier = getComboMultiplier(nextCombo)
+    const base = getBaseScore(kindIndex)
+    const points = Math.round(base * multiplier)
     floatingId += 1
 
     set({
-      score: nextScore,
+      score: state.score + points,
       combo: nextCombo,
       floatingScores: [
         ...state.floatingScores.slice(-8),
         {
           id: floatingId,
           points,
-          comboMultiplier: isPenalty ? 1 : multiplier,
-          bullseye: bullseye && !isPenalty,
+          comboMultiplier: multiplier,
           x: world.x,
           y: world.y,
           z: world.z,
@@ -231,8 +220,8 @@ export const useShootingGalleryStore = create<ShootingState>((set, get) => ({
       phase: 'idle',
       score: 0,
       combo: 0,
-      remainingSec: SHOOTING_GALLERY.gameDurationSec,
-      countdownValue: SHOOTING_GALLERY.countdownSec,
+      remainingSec: STARLIGHT_RUSH.gameDurationSec,
+      countdownValue: STARLIGHT_RUSH.countdownSec,
       startedAt: null,
       aimX: 0,
       aimY: 0,

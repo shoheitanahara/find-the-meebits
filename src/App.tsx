@@ -11,6 +11,7 @@ import { RunwayApp } from './runway/RunwayApp'
 import { ClosetApp } from './closet/ClosetApp'
 import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
 import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
+import { StarlightRushApp } from './starlightRush/StarlightRushApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
 import { VenueBgmSystem } from './systems/VenueBgmSystem'
@@ -160,6 +161,15 @@ export default function App() {
     return (
       <>
         <ShootingGalleryApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'starlight') {
+    return (
+      <>
+        <StarlightRushApp />
         <Analytics />
       </>
     )

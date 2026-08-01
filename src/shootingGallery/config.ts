@@ -1,3 +1,5 @@
+import { getJstDateKey } from '../top/dailyFeatured'
+
 /** Shooting Gallery 定数の正本。マジックナンバーを JSX に直書きしない。 */
 
 export const SHOOTING_GALLERY = {
@@ -91,6 +93,9 @@ export const SHOOTING_GALLERY = {
     { min: 3000, id: 'goodShot' as const },
     { min: 0, id: 'rookie' as const },
   ],
+
+  /** JST 日替わり Today's Best */
+  bestScoreKey: 'meebits-shooting-best-daily',
 } as const
 
 export type ShootingRatingId = (typeof SHOOTING_GALLERY.rating)[number]['id']
@@ -138,4 +143,43 @@ export function getDifficultyPhase(elapsedSec: number): 0 | 1 | 2 {
   if (elapsedSec >= 30) return 2
   if (elapsedSec >= 15) return 1
   return 0
+}
+
+type DailyBestPayload = {
+  dateKey: string
+  score: number
+}
+
+function parseDailyBest(raw: string | null, today: string): number {
+  if (!raw) return 0
+  try {
+    const parsed = JSON.parse(raw) as DailyBestPayload
+    if (parsed?.dateKey === today && typeof parsed.score === 'number' && Number.isFinite(parsed.score)) {
+      return Math.max(0, Math.floor(parsed.score))
+    }
+  } catch {
+    /* ignore */
+  }
+  return 0
+}
+
+export function readBestScore(): number {
+  try {
+    return parseDailyBest(window.localStorage.getItem(SHOOTING_GALLERY.bestScoreKey), getJstDateKey())
+  } catch {
+    return 0
+  }
+}
+
+export function writeBestScore(score: number): number {
+  const today = getJstDateKey()
+  const prev = readBestScore()
+  const next = Math.max(prev, Math.floor(score))
+  try {
+    const payload: DailyBestPayload = { dateKey: today, score: next }
+    window.localStorage.setItem(SHOOTING_GALLERY.bestScoreKey, JSON.stringify(payload))
+  } catch {
+    /* ignore */
+  }
+  return next
 }

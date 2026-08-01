@@ -308,6 +308,36 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     infoBoardLocal: [5.2, 4.0],
     underConstruction: true,
   },
+  {
+    id: 'starlight',
+    zoneId: 'astro',
+    title: 'STARLIGHT RUSH',
+    subtitle: 'The Cosmic Coaster',
+    description: {
+      en: 'Hop in a starship.\nShoot the rushing stars.\nRide the rails of space.',
+      ja: '宇宙船に乗って、\n流れてくる星を撃て。\n宇宙ジェットコースター。',
+    },
+    storyTitle: {
+      en: 'STARLIGHT RUSH',
+      ja: 'スターライト・ラッシュ',
+    },
+    color: '#1a2234',
+    roofColor: '#5ce0ff',
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.center.entranceZ,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [5.2, 4.0],
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

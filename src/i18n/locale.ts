@@ -59,6 +59,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/meet-sergito' : '/meet-sergito'
   }
 
+  if (segments.includes('starlight-rush')) {
+    return locale === 'ja' ? '/jp/starlight-rush' : '/starlight-rush'
+  }
+
   if (segments.includes('shooting-gallery')) {
     return locale === 'ja' ? '/jp/shooting-gallery' : '/shooting-gallery'
   }

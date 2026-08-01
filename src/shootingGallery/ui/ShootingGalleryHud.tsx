@@ -48,17 +48,17 @@ export function ShootingGalleryHud() {
             </div>
           </div>
 
-          <div
-            className="pointer-events-none absolute left-3 top-[calc(env(safe-area-inset-top)+3.25rem)] z-30 rounded-xl border border-white/25 bg-black/50 px-3 py-2.5 text-white backdrop-blur"
-          >
-            <p className="text-[0.65rem] uppercase tracking-[0.2em] text-white/55">{t.title}</p>
-            <div className="mt-1.5 space-y-0.5 border-t border-white/15 pt-1.5 text-xs">
-              <p className="tabular-nums">
-                {t.score} {score}
+          <div className="pointer-events-none absolute left-3 top-[calc(env(safe-area-inset-top)+3.25rem)] z-30 sm:left-5">
+            <div className="rounded-2xl border border-amber-200/35 bg-black/60 px-4 py-2 backdrop-blur-md">
+              <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-amber-100/80">
+                {t.score}
               </p>
-              <p className="tabular-nums text-amber-100/90">
-                {t.combo} ×{combo}
-              </p>
+              <p className="font-mono text-2xl font-black tabular-nums text-[#f4ead2]">{score}</p>
+              {combo >= 2 ? (
+                <p className="mt-0.5 font-mono text-xs font-bold tabular-nums text-amber-100/90">
+                  {t.combo} ×{combo}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -88,25 +88,40 @@ export function ShootingGalleryHud() {
 export function ShootingGalleryFloatingScores() {
   const floatingScores = useShootingGalleryStore((state) => state.floatingScores)
   const phase = useShootingGalleryStore((state) => state.phase)
+  const t = shootingGalleryUi()
   if (phase !== 'playing' || floatingScores.length === 0) return null
 
   return (
     <group>
-      {floatingScores.map((item) => (
-        <Html key={item.id} position={[item.x, item.y + 0.35, item.z]} center>
-          <div
-            className={`whitespace-nowrap text-sm font-black drop-shadow ${
-              item.points < 0
-                ? 'text-rose-300'
-                : item.points >= 500
-                  ? 'text-amber-200'
-                  : 'text-white'
-            }`}
-          >
-            {item.points > 0 ? `+${item.points}` : item.points}
-          </div>
-        </Html>
-      ))}
+      {floatingScores.map((item) => {
+        const colorClass =
+          item.points < 0
+            ? 'text-rose-300'
+            : item.points >= 500
+              ? 'text-amber-200'
+              : 'text-white'
+        return (
+          <Html key={item.id} position={[item.x, item.y + 0.35, item.z]} center>
+            <div
+              className={`pointer-events-none select-none text-center text-sm font-black drop-shadow ${colorClass}`}
+            >
+              <div className="tabular-nums whitespace-nowrap">
+                {item.points > 0 ? `+${item.points}` : item.points}
+              </div>
+              {item.comboMultiplier > 1 ? (
+                <div className="whitespace-nowrap text-[0.7em] leading-tight tracking-wide">
+                  {t.floatCombo(item.comboMultiplier)}
+                </div>
+              ) : null}
+              {item.bullseye ? (
+                <div className="whitespace-nowrap text-[0.7em] leading-tight tracking-wide">
+                  {t.floatBull}
+                </div>
+              ) : null}
+            </div>
+          </Html>
+        )
+      })}
     </group>
   )
 }

@@ -479,12 +479,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   },
   /**
    * Astro: Mountain の北 × Culture の東。
-   * 全棟工事中。NPC は Robot / Visitor 約半数＋他Type（dailyFeatured）。
+   * 中央は Starlight Rush。西・東は工事中。
    */
   astro: {
     id: 'astro',
     title: { en: 'Astro District', ja: 'アストロエリア' },
-    attractionIds: [],
+    attractionIds: ['starlight'],
     layout: ASTRO_LAYOUT,
     perimeter: {
       theme: 'astro',
@@ -519,13 +519,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     // 樹木なし（宇宙小物は地面コンポーネント側）
     trees: [],
     comingSoonSlots: [
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
-        theme: 'astro',
-        title: { en: 'STAR DOME', ja: 'スタードーム' },
-        subtitle: { en: 'Orbital amphitheater', ja: '軌道アンフィシアター' },
-      },
       {
         x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
         z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,

@@ -22,6 +22,7 @@ function requestAimPointerLock() {
 export function ShootingGalleryPlayPrompt() {
   const phase = useShootingGalleryStore((state) => state.phase)
   const startGame = useShootingGalleryStore((state) => state.startGame)
+  const bestScore = useShootingGalleryStore((state) => state.bestScore)
   const t = shootingGalleryUi()
 
   if (phase !== 'idle') return null
@@ -88,6 +89,11 @@ export function ShootingGalleryPlayPrompt() {
                 </div>
               ))}
             </div>
+            {bestScore > 0 ? (
+              <p className="mt-3 text-center text-xs text-[#f1d48c]">
+                {t.bestScore}: {bestScore}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -113,6 +119,7 @@ export function ShootingGalleryPlayPrompt() {
 export function ShootingGalleryResult() {
   const phase = useShootingGalleryStore((state) => state.phase)
   const score = useShootingGalleryStore((state) => state.score)
+  const bestScore = useShootingGalleryStore((state) => state.bestScore)
   const ratingId = useShootingGalleryStore((state) => state.ratingId)
   const replay = useShootingGalleryStore((state) => state.replay)
   const exitToIdle = useShootingGalleryStore((state) => state.exitToIdle)
@@ -129,6 +136,9 @@ export function ShootingGalleryResult() {
         <h2 className="mt-2 text-3xl font-black">{t.resultHeadline}</h2>
         <p className="mt-4 font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tabular-nums text-amber-100">
           {score}
+        </p>
+        <p className="mt-2 text-sm text-[#f1d48c]">
+          {t.bestScore}: {bestScore}
         </p>
         <p className="mt-3 text-sm uppercase tracking-[0.2em] text-white/70">{t.rating[ratingId]}</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">

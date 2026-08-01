@@ -7,9 +7,23 @@ export type ShootingPistolHandle = {
   getMuzzleWorldPosition: (out: { x: number; y: number; z: number }) => void
 }
 
+export type ShootingPistolFireTiming = {
+  fireFlashUntil: number
+  recoilUntil: number
+}
+
+type ShootingPistolProps = {
+  visible: boolean
+  /**
+   * 射撃フラッシュ／リコイルのタイミング取得。
+   * 省略時は Shooting Gallery ストアを使う（Starlight 等は差し替え可）。
+   */
+  getFireTiming?: () => ShootingPistolFireTiming
+}
+
 /** 一般的なセミオート拳銃の構造を持つ射的用ピストル。特定モデルは再現しない。 */
-export const ShootingPistol = forwardRef<ShootingPistolHandle, { visible: boolean }>(
-  function ShootingPistol({ visible }, ref) {
+export const ShootingPistol = forwardRef<ShootingPistolHandle, ShootingPistolProps>(
+  function ShootingPistol({ visible, getFireTiming }, ref) {
     const rootRef = useRef<Group>(null)
     const muzzleRef = useRef<Group>(null)
     const flashRef = useRef<Group>(null)
@@ -35,14 +49,13 @@ export const ShootingPistol = forwardRef<ShootingPistolHandle, { visible: boolea
       const root = rootRef.current
       if (!root) return
       const now = performance.now()
-      const recoilUntil = useShootingGalleryStore.getState().recoilUntil
-      const fireFlashUntil = useShootingGalleryStore.getState().fireFlashUntil
-      const targetRecoil = now < recoilUntil ? 1 : 0
+      const timing = getFireTiming?.() ?? useShootingGalleryStore.getState()
+      const targetRecoil = now < timing.recoilUntil ? 1 : 0
       recoilRef.current = MathUtils.lerp(recoilRef.current, targetRecoil, 1 - Math.exp(-delta * 22))
       root.rotation.x = -recoilRef.current * 0.28
       root.position.z = -recoilRef.current * 0.04
       if (flashRef.current) {
-        flashRef.current.visible = now < fireFlashUntil
+        flashRef.current.visible = now < timing.fireFlashUntil
       }
     })
 
@@ -55,19 +68,21 @@ export const ShootingPistol = forwardRef<ShootingPistolHandle, { visible: boolea
           <VintageFrame />
           <VintageReceiver />
 
-          <group ref={muzzleRef} position={[0, 0.075, 0.405]} />
-          <group ref={flashRef} position={[0, 0.075, 0.435]} visible={false}>
-            <mesh>
-              <sphereGeometry args={[0.045, 10, 8]} />
-              <meshStandardMaterial
-                color="#ffe8a0"
-                emissive="#ffb040"
-                emissiveIntensity={2.2}
-                transparent
-                opacity={0.85}
-              />
-            </mesh>
-            <pointLight intensity={6} distance={2.2} color="#ffc060" />
+          {/* バレル黒穴 tip ≈ (0, 0.08, 0.407)。フラッシュはその直前〜直後に置く */}
+          <group ref={muzzleRef} position={[0, 0.08, 0.408]}>
+            <group ref={flashRef} position={[0, 0, 0.01]} visible={false}>
+              <mesh scale={[0.7, 0.7, 1.15]}>
+                <sphereGeometry args={[0.038, 10, 8]} />
+                <meshStandardMaterial
+                  color="#ffe8a0"
+                  emissive="#ffb040"
+                  emissiveIntensity={2.2}
+                  transparent
+                  opacity={0.85}
+                />
+              </mesh>
+              <pointLight intensity={5.5} distance={1.8} color="#ffc060" />
+            </group>
           </group>
         </group>
       </group>

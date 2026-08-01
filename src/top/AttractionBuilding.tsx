@@ -15,6 +15,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  * - sergito: シーエリアの工房（Meet Sergito）
  * - shooting: マウンテン地区の木造射的場
+ * - starlight: アストロ中央のスターライトラッシュ
  */
 export function AttractionBuilding({
   attraction,
@@ -40,7 +41,9 @@ export function AttractionBuilding({
                   ? '#d4a060'
                   : attraction.id === 'shooting'
                     ? '#e8b060'
-                    : '#c4a060'
+                    : attraction.id === 'starlight'
+                      ? '#5ce0ff'
+                      : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -65,6 +68,8 @@ export function AttractionBuilding({
         <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'shooting' ? (
         <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : attraction.id === 'starlight' ? (
+        <StarlightDomeLandmark color={attraction.color} accent={accent} />
       ) : (
         <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
       )}
@@ -426,6 +431,48 @@ function MeetSergitoLandmark({
 }
 
 /** Mountain 東棟: 木造射的場（カウンター・樽・的レーン看板） */
+/** Astro 中央: Starlight Rush ドーム入口 */
+function StarlightDomeLandmark({ color, accent }: { color: string; accent: string }) {
+  const hullDark = '#0e1422'
+  const panel = '#2a3448'
+  return (
+    <group>
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[6.4, 0.32, 5.8]} />
+        <meshStandardMaterial color={hullDark} roughness={0.55} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.38, 0]} receiveShadow>
+        <boxGeometry args={[5.8, 0.1, 5.2]} />
+        <meshStandardMaterial color={panel} roughness={0.45} metalness={0.55} />
+      </mesh>
+      <mesh position={[0, 1.6, -0.4]} castShadow receiveShadow>
+        <cylinderGeometry args={[2.2, 2.4, 2.4, 16]} />
+        <meshStandardMaterial color={color} roughness={0.42} metalness={0.62} />
+      </mesh>
+      <mesh position={[0, 3.15, -0.4]} castShadow>
+        <sphereGeometry args={[1.55, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.28}
+          transparent
+          opacity={0.55}
+          roughness={0.25}
+          metalness={0.4}
+        />
+      </mesh>
+      <mesh position={[0, 0.85, 1.5]} castShadow>
+        <boxGeometry args={[2.4, 1.2, 1.4]} />
+        <meshStandardMaterial color={panel} roughness={0.4} metalness={0.58} />
+      </mesh>
+      <mesh position={[0, 2.6, 1.55]}>
+        <torusGeometry args={[0.55, 0.06, 8, 20]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.65} />
+      </mesh>
+    </group>
+  )
+}
+
 function ShootingGalleryLandmark({
   color,
   roofColor,
