@@ -342,32 +342,10 @@ export function PhotoStudioPreviewChrome() {
   )
 }
 
-function DownloadAgainButton() {
-  const lastCaptureUrl = usePhotoStudioStore((state) => state.lastCaptureUrl)
-  const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
-  const t = photoStudioUi()
-
-  if (!lastCaptureUrl) return null
-
-  return (
-    <button
-      type="button"
-      className="w-full rounded-full border border-white/30 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
-      onClick={() => {
-        downloadDataUrl(lastCaptureUrl, `meebit-${meebitNumber}-pfp.png`)
-        playSfx('uiConfirm')
-      }}
-    >
-      {t.downloadAgain}
-    </button>
-  )
-}
-
 function CaptureButton({ className = '' }: { className?: string }) {
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
   const capturing = usePhotoStudioStore((state) => state.capturing)
   const setCapturing = usePhotoStudioStore((state) => state.setCapturing)
-  const setLastCaptureUrl = usePhotoStudioStore((state) => state.setLastCaptureUrl)
   const t = photoStudioUi()
 
   return (
@@ -384,7 +362,6 @@ function CaptureButton({ className = '' }: { className?: string }) {
             const dataUrl = captureSquarePfp(gl)
             setCapturing(false)
             if (!dataUrl) return
-            setLastCaptureUrl(dataUrl)
             downloadDataUrl(dataUrl, `meebit-${meebitNumber}-pfp.png`)
             void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
           })

@@ -19,7 +19,6 @@ type PhotoStudioCopy = {
   resetRotation: string
   capture: string
   downloading: string
-  downloadAgain: string
   backSetup: string
 }
 
@@ -42,7 +41,6 @@ const en: PhotoStudioCopy = {
   resetRotation: 'Reset rotation',
   capture: 'Capture PFP',
   downloading: 'Saving…',
-  downloadAgain: 'Download again',
   backSetup: 'Change Meebit',
 }
 
@@ -65,7 +63,6 @@ const ja: PhotoStudioCopy = {
   resetRotation: '回転をリセット',
   capture: 'PFPを撮影',
   downloading: '保存中…',
-  downloadAgain: 'もう一度ダウンロード',
   backSetup: 'Meebitを変更',
 }
 

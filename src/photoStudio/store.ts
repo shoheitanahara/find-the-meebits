@@ -43,7 +43,6 @@ type PhotoStudioState = {
   /** 左右回転のみ（Y 軸, rad） */
   rotYaw: number
   capturing: boolean
-  lastCaptureUrl: string | null
   enterStudio: (meebitNumber: number) => void
   setDraftMeebitInput: (value: string) => void
   applyDraftMeebit: () => boolean
@@ -55,7 +54,6 @@ type PhotoStudioState = {
   nudgeYaw: (dYaw: number) => void
   resetRotation: () => void
   setCapturing: (value: boolean) => void
-  setLastCaptureUrl: (url: string | null) => void
   exitToIdle: () => void
 }
 
@@ -70,14 +68,12 @@ export const usePhotoStudioStore = create<PhotoStudioState>((set, get) => ({
   brightness: PHOTO_STUDIO.lighting.exposureDefault,
   rotYaw: PHOTO_STUDIO.orbit.defaultYaw,
   capturing: false,
-  lastCaptureUrl: null,
   enterStudio: (meebitNumber) => {
     const id = clampMeebitId(meebitNumber)
     set({
       phase: 'studio',
       meebitNumber: id,
       draftMeebitInput: String(id),
-      lastCaptureUrl: null,
       capturing: false,
       rotYaw: PHOTO_STUDIO.orbit.defaultYaw,
       cameraAngleId: 'default',
@@ -89,7 +85,7 @@ export const usePhotoStudioStore = create<PhotoStudioState>((set, get) => ({
     const parsed = Number(get().draftMeebitInput.trim())
     if (!Number.isFinite(parsed)) return false
     const id = clampMeebitId(parsed)
-    set({ meebitNumber: id, draftMeebitInput: String(id), lastCaptureUrl: null })
+    set({ meebitNumber: id, draftMeebitInput: String(id) })
     return true
   },
   setBackgroundId: (backgroundId) => set({ backgroundId }),
@@ -100,12 +96,10 @@ export const usePhotoStudioStore = create<PhotoStudioState>((set, get) => ({
   nudgeYaw: (dYaw) => set({ rotYaw: wrapYaw(get().rotYaw + dYaw) }),
   resetRotation: () => set({ rotYaw: PHOTO_STUDIO.orbit.defaultYaw }),
   setCapturing: (capturing) => set({ capturing }),
-  setLastCaptureUrl: (lastCaptureUrl) => set({ lastCaptureUrl }),
   exitToIdle: () =>
     set({
       phase: 'idle',
       capturing: false,
-      lastCaptureUrl: null,
       rotYaw: PHOTO_STUDIO.orbit.defaultYaw,
       cameraAngleId: 'default',
     }),
