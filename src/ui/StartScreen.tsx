@@ -19,7 +19,6 @@ import { useGameStore } from '../stores/gameStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { getCachedAppEdition } from '../game/appEdition'
 import { questIgnoresColorAndPattern, formatTraitDisplayName } from '../game/traitHunt'
-import { LanguageSwitcher } from './LanguageSwitcher'
 import { START_SCREEN_TARGET_PREVIEW_PRIORITY } from './targetPreviewCache'
 import { TargetPreview } from './TargetPreview'
 import { TraitQuestVisual } from './TraitQuestVisual'
@@ -123,12 +122,8 @@ export function StartScreen() {
           )}
         </div>
         <div className="relative">
-          <LanguageSwitcher
-            className="absolute right-0 top-0 z-10"
-            tone={isClubVenue ? 'dark' : 'light'}
-          />
           <p
-            className={`pr-24 text-xs font-semibold uppercase tracking-[0.35em] max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
+            className={`text-xs font-semibold uppercase tracking-[0.35em] max-lg:text-[0.6rem] max-lg:tracking-[0.25em] ${
               isClubVenue
                 ? 'text-fuchsia-300'
                 : isTraitHunt

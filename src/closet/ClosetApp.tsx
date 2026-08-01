@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { ensureClosetTypePools } from './closetPools'
 import { getLocale } from '../i18n/locale'
 import { usePlayerStore } from '../stores/playerStore'
-import { LanguageSwitcher } from '../ui/LanguageSwitcher'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { TargetPreview } from '../ui/TargetPreview'
@@ -238,10 +241,7 @@ export function ClosetApp() {
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#070914] text-[#f4ead2]">
       <TargetPreviewCapture />
       <ParkReturnButton />
-      <LanguageSwitcher
-        className="pointer-events-auto absolute right-4 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60]"
-        tone="dark"
-      />
+      <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(88,120,180,0.28),transparent_42%),linear-gradient(180deg,#0c1428_0%,#070914_55%,#05060e_100%)]" />
 

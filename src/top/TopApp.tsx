@@ -252,8 +252,7 @@ export function TopApp() {
 
       {parkReady ? (
         <LanguageSwitcher
-          className="pointer-events-auto absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-[60]"
-          tone="dark"
+          className="pointer-events-auto absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-[60] sm:right-4"
           persistParkSessionOnSwitch
         />
       ) : null}

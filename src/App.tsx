@@ -39,6 +39,10 @@ import { IntroFlow } from './ui/IntroFlow'
 import { TargetHUD } from './ui/TargetHUD'
 import { TargetPreviewCapture } from './ui/TargetPreviewCapture'
 import { ParkReturnButton } from './ui/ParkReturnButton'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from './ui/LanguageSwitcher'
 import { useGameStore } from './stores/gameStore'
 
 function AfterHoursUnlockGate() {
@@ -58,6 +62,8 @@ function AfterHoursUnlockGate() {
 }
 
 function HuntApp() {
+  const gamePhase = useGameStore((state) => state.gamePhase)
+
   useEffect(() => {
     if (getCachedAppEdition() === 'v2') {
       void loadMeebitTraitsDataset()
@@ -86,6 +92,9 @@ function HuntApp() {
       <LoadingScreen />
       <ErrorMessage />
       <IntroFlow />
+      {gamePhase === 'intro' ? (
+        <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
+      ) : null}
       <AfterHoursUnlockGate />
       <TipsOverlay />
       <PrepareOverlay />

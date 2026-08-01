@@ -7,6 +7,10 @@ import { ClimbController, useMountainKeyboardBridge } from './player/ClimbContro
 import { MountainMobileControls } from './player/MobileControls'
 import { useMountainStore, applyDevMountainBootstrap } from './store'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { ClearOverlay, ClimbHud, TitleScreen } from './ui/Screens'
 import { MountainAtmosphere, VoxelMountain } from './world/VoxelMountain'
 import { MountainTrailNpcs } from './world/MountainTrailNpcs'
@@ -73,6 +77,9 @@ export function MountainApp() {
       <ClimbHud />
       <ClearOverlay />
       <ParkReturnButton />
+      {phase === 'title' ? (
+        <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
+      ) : null}
       {phase === 'playing' ? <MountainMobileControls /> : null}
     </main>
   )

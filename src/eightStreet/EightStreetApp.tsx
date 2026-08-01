@@ -13,6 +13,10 @@ import { HowToPlay } from './ui/HowToPlay'
 import { EightStreetClearOverlay } from './ui/ClearOverlay'
 import { ControlsHud, LoadingOverlay, WrapWash } from './ui/ProgressHud'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -79,6 +83,9 @@ export function EightStreetApp() {
       <LoadingOverlay />
       <WrapWash />
       <ParkReturnButton />
+      {phase === 'title' ? (
+        <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
+      ) : null}
       <ControlsHud />
       <EightStreetClearOverlay />
       {phase === 'playing' && <EightStreetMobileControls />}

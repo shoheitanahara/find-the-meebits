@@ -3,6 +3,10 @@ import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { RunwayPlayer } from './player/RunwayPlayer'
 import { RunwayTouchLookPad } from './player/RunwayTouchLookPad'
 import { RunwayCatwalkShow } from './show/RunwayCatwalkShow'
@@ -91,6 +95,9 @@ export function RunwayApp() {
       <RunwayTitleScreen />
       <RunwayHud />
       <ParkReturnButton />
+      {phase === 'title' ? (
+        <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
+      ) : null}
       {phase === 'playing' ? (
         <>
           <RunwayTouchLookPad />

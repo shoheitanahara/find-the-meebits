@@ -4,6 +4,10 @@ import { PerspectiveCamera } from '@react-three/drei'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { loadMeebitTraitsDataset } from '../data/meebitTraits'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { MeetSergitoPlayer } from './player/MeetSergitoPlayer'
 import { MeetSergitoTouchLookPad } from './player/MeetSergitoTouchLookPad'
@@ -88,6 +92,7 @@ export function MeetSergitoApp() {
       </Canvas>
 
       <ParkReturnButton />
+      <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
       <TargetPreviewCapture />
       <MeetSergitoLoadingOverlay />
       {bootPhase === 'ready' ? (

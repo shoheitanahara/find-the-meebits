@@ -1,5 +1,4 @@
 import { ui } from '../i18n/ui'
-import { LanguageSwitcher } from './LanguageSwitcher'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 const STORY_VIDEO_SRC = '/video/meebits-4274-3s.gif'
@@ -31,9 +30,7 @@ export function StoryIntro({ onComplete }: { onComplete: () => void }) {
         </div>
 
         <div className="relative min-w-0">
-          <LanguageSwitcher className="absolute right-0 top-0 z-10" tone="light" />
-
-          <p className="pr-24 text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500 max-lg:pr-20 max-lg:text-[0.6rem] max-lg:tracking-[0.25em]">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500 max-lg:text-[0.6rem] max-lg:tracking-[0.25em]">
             {t.storyBrand}
           </p>
           <h1

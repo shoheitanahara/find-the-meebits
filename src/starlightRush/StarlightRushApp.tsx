@@ -4,7 +4,10 @@ import { PerspectiveCamera } from '@react-three/drei'
 import { ACESFilmicToneMapping } from 'three'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
-import { LanguageSwitcher } from '../ui/LanguageSwitcher'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { STARLIGHT_RUSH } from './config'
@@ -89,10 +92,9 @@ export function StarlightRushApp() {
 
       <TargetPreviewCapture />
       <ParkReturnButton />
-      <LanguageSwitcher
-        className="pointer-events-auto absolute right-4 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60]"
-        tone="dark"
-      />
+      {phase === 'idle' ? (
+        <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
+      ) : null}
 
       <StarlightRushHud />
       <StarlightRushPlayPrompt />

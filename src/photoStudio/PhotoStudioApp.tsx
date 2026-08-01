@@ -3,7 +3,10 @@ import { Canvas } from '@react-three/fiber'
 import { ACESFilmicToneMapping } from 'three'
 import { usePlayerStore } from '../stores/playerStore'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
-import { LanguageSwitcher } from '../ui/LanguageSwitcher'
+import {
+  LANGUAGE_SWITCHER_ATTRACTION_CLASS,
+  LanguageSwitcher,
+} from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { unlockAudioIfNeeded } from '../ui/sfx'
 import { PHOTO_STUDIO, clampMeebitId } from './config'
@@ -68,10 +71,7 @@ export function PhotoStudioApp() {
   return (
     <main className="relative flex h-dvh w-dvw flex-col overflow-hidden bg-[#101820] text-[#f4ead2]">
       <ParkReturnButton />
-      <LanguageSwitcher
-        className="pointer-events-auto absolute right-4 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60]"
-        tone="dark"
-      />
+      <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
 
       {/* ヘッダー下: モバイルは縦、lg以上は左調整 / 右プレビュー */}
       <div className="flex min-h-0 flex-1 flex-col pt-[max(2.75rem,calc(env(safe-area-inset-top)+2.35rem))] lg:flex-row">

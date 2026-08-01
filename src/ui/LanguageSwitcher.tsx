@@ -2,9 +2,13 @@ import { getLocale, getLocaleHomePath, type Locale } from '../i18n/locale'
 import { ui } from '../i18n/ui'
 import { saveParkLocaleResume } from '../top/parkSession'
 
+/** ParkReturnButton ヘッダー直下・右上（各アトラクション共通） */
+export const LANGUAGE_SWITCHER_ATTRACTION_CLASS =
+  'pointer-events-auto absolute right-3 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60] sm:right-4'
+
 export function LanguageSwitcher({
   className = '',
-  tone = 'light',
+  tone = 'dark',
   persistParkSessionOnSwitch = false,
 }: {
   className?: string
