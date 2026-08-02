@@ -12,8 +12,10 @@ import type { PhotoStudioPoseId } from './config'
  * attention z: 左 +1.56 / 右 −1.56
  */
 const attentionArmZ = { left: 1.56, right: -1.56 } as const
-/** 手を振る */
-const waveArmZ = { right: -0.28 } as const
+/** 手を振る（右上腕 z。符号は見た目で調整してよい） */
+const waveArmZ = { right: +0.99 } as const
+/** 手振りの肘 — LowerArm.x のみ。大きいほど曲がる（目安 0.1〜0.45） */
+const waveElbowX = 1
 /** 両手開き（やや上げ） */
 const openArmZ = { left: 1.05, right: -1.05 } as const
 /** 万歳（高く・同符号のまま |z|→0 寄り） */
@@ -140,11 +142,11 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
       break
 
     case 'bow':
-      // お辞儀: 体を前に倒す。腕はそのまま下ろし
-      set(bone(vrm, VRMHumanBoneName.Hips), { x: 0.18, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Spine), { x: 0.28, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.22, y: 0, z: 0 })
-      set(bone(vrm, VRMHumanBoneName.Head), { x: 0.2, y: 0, z: 0 })
+      // お辞儀: 体幹 x 負 = 前傾（ジャンプ前傾と同符号）。腕は下ろし
+      set(bone(vrm, VRMHumanBoneName.Hips), { x: -0.18, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Spine), { x: -0.28, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.22, y: 0, z: 0 })
+      set(bone(vrm, VRMHumanBoneName.Head), { x: -0.2, y: 0, z: 0 })
       armsDown(vrm, 0.05)
       break
 
@@ -158,7 +160,8 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
 
     case 'wave':
       setArmLift(vrm, 'left', L, elbowRest)
-      setArmLift(vrm, 'right', waveArmZ.right, 0.08)
+      // 第4引数 = LowerArm.x（肘曲げ）。y/z は触らない
+      setArmLift(vrm, 'right', waveArmZ.right, waveElbowX)
       set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: -0.08, z: 0 })
       break
 
