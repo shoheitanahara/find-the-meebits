@@ -1,37 +1,15 @@
 import { getLocale } from '../i18n/locale'
-import { readBestScore as readShootingBest } from '../shootingGallery/config'
-import { readBestScore as readStarlightBest } from '../starlightRush/config'
+import {
+  collectVisitPassLines,
+  type VisitPassLine,
+} from '../park/dailyRecords'
 
-export type VisitPassRecord = {
-  id: 'starlight' | 'shooting'
-  label: string
-  score: number
-}
+/** @deprecated 互換用エイリアス。detail 文字列を使う VisitPassLine を正とする。 */
+export type VisitPassRecord = VisitPassLine & { score?: number }
 
-/** 今日プレイ済み（デイリーベスト > 0）のアトラクション記録。 */
-export function collectTodayVisitRecords(): VisitPassRecord[] {
-  const locale = getLocale()
-  const records: VisitPassRecord[] = []
-
-  const starlight = readStarlightBest()
-  if (starlight > 0) {
-    records.push({
-      id: 'starlight',
-      label: locale === 'ja' ? 'スターライト・ラッシュ' : 'Starlight Rush',
-      score: starlight,
-    })
-  }
-
-  const shooting = readShootingBest()
-  if (shooting > 0) {
-    records.push({
-      id: 'shooting',
-      label: locale === 'ja' ? 'シューティングギャラリー' : 'Shooting Gallery',
-      score: shooting,
-    })
-  }
-
-  return records
+/** 今日プレイ済みのアトラクション記録（来場証用）。 */
+export function collectTodayVisitRecords(): VisitPassLine[] {
+  return collectVisitPassLines()
 }
 
 /** 来場証用の日時（端末のローカルタイムゾーン）。 */

@@ -5,8 +5,8 @@ import {
   collectTodayVisitRecords,
   formatVisitTimestamp,
   getVisitTimezoneLabel,
-  type VisitPassRecord,
 } from '../visitPassRecords'
+import type { VisitPassLine } from '../../park/dailyRecords'
 
 /** 書き出し解像度（印刷寄りのシャープさ） */
 const CARD_W = 1024
@@ -32,7 +32,7 @@ const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
 export type VisitPassOptions = {
   meebitNumber: number
   issuedAt?: Date
-  records?: VisitPassRecord[]
+  records?: VisitPassLine[]
 }
 
 /**
@@ -274,9 +274,9 @@ function drawField(
 function paintRecords(
   ctx: CanvasRenderingContext2D,
   locale: 'en' | 'ja',
-  records: VisitPassRecord[],
+  records: VisitPassLine[],
 ) {
-  const bandY = CARD_H - 148
+  const bandY = CARD_H - 168
   const bandX = MARGIN + 4
   const bandW = CARD_W - MARGIN * 2 - 8
 
@@ -290,40 +290,61 @@ function paintRecords(
   ctx.fillStyle = INK_MUTED
   ctx.font = `600 10px ${SANS}`
   const heading = locale === 'ja' ? '本日のパーク記録' : "Today's park records"
-  ctx.fillText(heading.toUpperCase(), bandX, bandY + 22)
+  ctx.fillText(heading.toUpperCase(), bandX, bandY + 20)
 
   if (records.length === 0) {
     ctx.fillStyle = INK_FAINT
-    ctx.font = `italic 14px ${SERIF}`
+    ctx.font = `italic 13px ${SERIF}`
     const empty =
       locale === 'ja' ? '本日のプレイ記録なし' : 'No play records yet today'
-    ctx.fillText(empty, bandX, bandY + 56)
+    ctx.fillText(empty, bandX, bandY + 52)
     return
   }
 
-  let rowY = bandY + 44
-  for (const record of records) {
+  const colGap = 28
+  const colW = (bandW - colGap) / 2
+  const rowH = 22
+  const startY = bandY + 40
+  const maxRows = 5
+
+  records.slice(0, maxRows * 2).forEach((record, index) => {
+    const col = index < maxRows ? 0 : 1
+    const row = index % maxRows
+    const x = bandX + col * (colW + colGap)
+    const y = startY + row * rowH
+
     ctx.fillStyle = INK
-    ctx.font = `500 14px ${SANS}`
-    ctx.fillText(record.label, bandX, rowY)
-    const labelWidth = ctx.measureText(record.label).width
+    ctx.font = `500 11px ${SANS}`
+    const label = truncateToWidth(ctx, record.label, colW * 0.58)
+    ctx.fillText(label, x, y)
+    const labelWidth = ctx.measureText(label).width
 
-    const score = record.score.toLocaleString()
-    ctx.font = `600 14px ${MONO}`
-    const scoreW = ctx.measureText(score).width
-    ctx.fillText(score, bandX + bandW - scoreW, rowY)
+    ctx.font = `600 11px ${MONO}`
+    const detail = truncateToWidth(ctx, record.detail, colW * 0.38)
+    const detailW = ctx.measureText(detail).width
+    ctx.fillText(detail, x + colW - detailW, y)
 
-    ctx.strokeStyle = 'rgba(26, 36, 56, 0.12)'
-    ctx.lineWidth = 1
-    ctx.setLineDash([1.5, 4])
-    ctx.beginPath()
-    ctx.moveTo(bandX + labelWidth + 12, rowY - 4)
-    ctx.lineTo(bandX + bandW - scoreW - 12, rowY - 4)
-    ctx.stroke()
-    ctx.setLineDash([])
+    if (colW - detailW - labelWidth > 28) {
+      ctx.strokeStyle = 'rgba(26, 36, 56, 0.1)'
+      ctx.lineWidth = 1
+      ctx.setLineDash([1, 3])
+      ctx.beginPath()
+      ctx.moveTo(x + labelWidth + 8, y - 3)
+      ctx.lineTo(x + colW - detailW - 8, y - 3)
+      ctx.stroke()
+      ctx.setLineDash([])
+    }
+  })
+}
 
-    rowY += 28
+function truncateToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  if (ctx.measureText(text).width <= maxWidth) return text
+  const ellipsis = '…'
+  let trimmed = text
+  while (trimmed.length > 1 && ctx.measureText(trimmed + ellipsis).width > maxWidth) {
+    trimmed = trimmed.slice(0, -1)
   }
+  return trimmed + ellipsis
 }
 
 function paintFooter(

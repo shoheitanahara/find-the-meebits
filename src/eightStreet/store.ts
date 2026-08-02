@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { loadMeebitTraitsDataset } from '../data/meebitTraits'
+import { recordStreetClear } from '../park/dailyRecords'
 import { EIGHT_STREET } from './config'
 import { generateRound, type GeneratedRound, type RoundKind } from './logic/generateRound'
 import { isAnswerCorrect, type PlayerAnswer } from './logic/judgeAnswer'
@@ -248,6 +249,7 @@ export const useEightStreetStore = create<EightStreetState>((set, get) => ({
         const clearTimeSeconds = state.startedAt
           ? (Date.now() - state.startedAt) / 1000
           : null
+        recordStreetClear(clearTimeSeconds)
         set({
           normalStreak,
           anomalyStreak,

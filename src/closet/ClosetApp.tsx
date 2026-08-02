@@ -12,6 +12,7 @@ import { TargetPreview } from '../ui/TargetPreview'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { TraitQuestVisual } from '../ui/TraitQuestVisual'
 import { formatTraitDisplayName } from '../game/traitHunt'
+import { recordClosetWear } from '../park/dailyRecords'
 import { getMatchPreviewIds, applyTraitSelection, filterCompatibleTraitOptions } from './matchMeebits'
 import {
   CLOSET_MATCH_PREVIEW_LIMIT,
@@ -226,6 +227,7 @@ export function ClosetApp() {
   const wearPreview = () => {
     if (previewId === savedMeebit) return
     void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+    recordClosetWear(previewId)
     setMeebitNumber(previewId)
     returnToPark(locale)
   }

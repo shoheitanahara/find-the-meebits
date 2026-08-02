@@ -2,6 +2,7 @@ import { getCachedMeebitTraits, loadMeebitTraitsDataset } from '../../data/meebi
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { usePlayerStore } from '../../stores/playerStore'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
+import { recordSergitoTalk } from '../../park/dailyRecords'
 import { SERGITO_NPC_ID } from '../config'
 import { useMeetSergitoStore } from '../store'
 import { createSergitoDialogue } from './createSergitoDialogue'
@@ -21,6 +22,7 @@ export async function openSergitoDialogue() {
   usePlayerStore.getState().setMovementLocked(true)
   useDialogueStore.getState().openDialogue(SERGITO_NPC_ID, lines)
   incrementTalkCount()
+  recordSergitoTalk()
 }
 
 export function closeSergitoDialogue() {

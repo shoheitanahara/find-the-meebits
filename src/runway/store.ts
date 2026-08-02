@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import type { MeebitTraitMap } from '../data/meebitTraits'
+import { getLocale } from '../i18n/locale'
+import { recordRunwayVisit } from '../park/dailyRecords'
 import type { DailyThemeTrait } from '../top/dailyFeatured'
+import { formatRunwayThemeLabel } from './dailyRunway'
 
 export type RunwayPhase = 'title' | 'playing'
 
@@ -49,7 +52,8 @@ export const useRunwayStore = create<RunwayState>((set, get) => ({
   roamerIds: [],
   playerSeatIndex: null,
   nearestEmptySeatIndex: null,
-  start: ({ themeTrait, matchingIds, audienceIds, emptySeatIndices, roamerIds }) =>
+  start: ({ themeTrait, matchingIds, audienceIds, emptySeatIndices, roamerIds }) => {
+    recordRunwayVisit(formatRunwayThemeLabel(themeTrait, getLocale()))
     set({
       phase: 'playing',
       themeTrait,
@@ -61,7 +65,8 @@ export const useRunwayStore = create<RunwayState>((set, get) => ({
       onScreen: null,
       playerSeatIndex: null,
       nearestEmptySeatIndex: null,
-    }),
+    })
+  },
   setOnScreen: (onScreen) => set({ onScreen }),
   pushRecentId: (meebitNumber) =>
     set((state) => ({

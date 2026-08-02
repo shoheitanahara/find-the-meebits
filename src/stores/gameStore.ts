@@ -16,6 +16,7 @@ import { getDevBootstrapConfig } from '../game/devBootstrap'
 import { getProgressionStep, getStageLabel, type StageKind } from '../game/gameProgression'
 import type { VenueId } from '../game/venueConfig'
 import { getCachedAppEdition } from '../game/appEdition'
+import { recordHuntStageClear } from '../park/dailyRecords'
 import { pickRandomTargetNpcIds } from '../game/targetSelection'
 import {
   pickTraitHuntMeebitNumbers,
@@ -308,6 +309,13 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const nextIndex = state.progressionIndex + 1
     const nextStep = getProgressionStep(nextIndex, state.venueId)
+    const clearedStageNumber = state.stage
+    const huntEdition = getCachedAppEdition() === 'v2' ? 'traits' : 'find'
+    recordHuntStageClear({
+      edition: huntEdition,
+      stageNumber: clearedStageNumber,
+      clearTimeSeconds,
+    })
 
     if (!nextStep) {
       if (getCachedAppEdition() !== 'v2') {
