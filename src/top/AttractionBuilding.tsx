@@ -1,5 +1,6 @@
 import { Text } from '@react-three/drei'
 import type { Attraction } from './topConfig'
+import { VisitPassPromoBoard } from './VisitPassPromoBoard'
 import { VoxelBlockMat } from './VoxelBlockMat'
 import type { BlockKind } from '../mountain/config'
 import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
@@ -92,14 +93,22 @@ export function AttractionBuilding({
         z={frontZ + 0.28}
       />
       <pointLight position={[0, 2.4, frontZ + 1.4]} intensity={12} distance={12} color={accent} />
-      <AttractionInfoBoard
-        position={[attraction.infoBoardLocal[0], 0, attraction.infoBoardLocal[1]]}
-        accentColor={accent}
-        description={attraction.description[locale]}
-        heading={attraction.storyTitle[locale]}
-        locale={locale}
-        underConstruction={attraction.underConstruction}
-      />
+      {attraction.id === 'pfp' && !attraction.underConstruction ? (
+        <VisitPassPromoBoard
+          position={[attraction.infoBoardLocal[0], 0, attraction.infoBoardLocal[1]]}
+          accentColor={accent}
+          locale={locale}
+        />
+      ) : (
+        <AttractionInfoBoard
+          position={[attraction.infoBoardLocal[0], 0, attraction.infoBoardLocal[1]]}
+          accentColor={accent}
+          description={attraction.description[locale]}
+          heading={attraction.storyTitle[locale]}
+          locale={locale}
+          underConstruction={attraction.underConstruction}
+        />
+      )}
     </group>
   )
 }

@@ -286,8 +286,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       ja: '正方形PFPを撮って、\n今日の来場証明書を\n発行しよう。',
     },
     storyTitle: {
-      en: 'PARK PASS',
-      ja: '来場証明書',
+      en: 'Get your Visitor Pass',
+      ja: 'VisitorPassを受け取る',
     },
     color: '#1a2438',
     roofColor: '#8eb4e8',
@@ -305,7 +305,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       ],
     },
     infoBoardLocal: [5.2, 4.0],
-    underConstruction: true,
   },
   {
     id: 'sergito',
