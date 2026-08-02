@@ -19,14 +19,16 @@ type PhotoStudioCopy = {
   resetRotation: string
   capture: string
   downloading: string
+  issuePass: string
+  issuingPass: string
   backSetup: string
 }
 
 const en: PhotoStudioCopy = {
-  title: 'PFP Studio',
-  subtitle: 'Square profile shots',
-  storyLine: 'Pick a background and pose, then export a clean square PFP.',
-  play: 'Enter studio',
+  title: 'Photo Booth',
+  subtitle: 'PFP & visit pass',
+  storyLine: 'Shoot a clean square PFP, then issue today’s Meebits Park visit pass.',
+  play: 'Enter booth',
   rulesTitle: 'Photo Booth',
   controls: 'Change Meebit ID if you want, then shoot with soft studio lighting.',
   meebitId: 'Meebit ID',
@@ -41,14 +43,16 @@ const en: PhotoStudioCopy = {
   resetRotation: 'Reset rotation',
   capture: 'Capture PFP',
   downloading: 'Saving…',
+  issuePass: 'Issue Visit Pass',
+  issuingPass: 'Issuing…',
   backSetup: 'Change Meebit',
 }
 
 const ja: PhotoStudioCopy = {
-  title: 'PFPスタジオ',
-  subtitle: '正方形プロフィール写真',
-  storyLine: '背景とポーズを選んで、きれいな正方形PFPを書き出そう。',
-  play: 'スタジオへ',
+  title: 'フォトブース',
+  subtitle: 'PFPと来場証明書',
+  storyLine: 'きれいな正方形PFPを撮って、今日のミービッツ・パーク来場証明書を発行しよう。',
+  play: 'ブースへ',
   rulesTitle: 'フォトブース',
   controls: '必要ならMeebit IDを変えてから、スタジオ照明で撮影。',
   meebitId: 'Meebit ID',
@@ -63,6 +67,8 @@ const ja: PhotoStudioCopy = {
   resetRotation: '回転をリセット',
   capture: 'PFPを撮影',
   downloading: '保存中…',
+  issuePass: '来場証明書を発行',
+  issuingPass: '発行中…',
   backSetup: 'Meebitを変更',
 }
 

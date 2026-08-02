@@ -51,7 +51,7 @@ export function ParkReturnButton() {
           ? 'shooting'
           : pathSegments.includes('starlight-rush')
             ? 'starlight'
-            : pathSegments.includes('pfp-studio')
+            : pathSegments.includes('photo-booth') || pathSegments.includes('pfp-studio')
               ? 'pfp'
           : pathSegments.includes('runway')
       ? 'runway'

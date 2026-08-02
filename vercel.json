@@ -1,4 +1,10 @@
 {
+  "redirects": [
+    { "source": "/pfp-studio", "destination": "/photo-booth", "permanent": true },
+    { "source": "/pfp-studio/(.*)", "destination": "/photo-booth", "permanent": true },
+    { "source": "/jp/pfp-studio", "destination": "/jp/photo-booth", "permanent": true },
+    { "source": "/jp/pfp-studio/(.*)", "destination": "/jp/photo-booth", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/jp", "destination": "/index.html" },
     { "source": "/jp/(.*)", "destination": "/index.html" },
@@ -20,8 +26,8 @@
     { "source": "/shooting-gallery/(.*)", "destination": "/index.html" },
     { "source": "/starlight-rush", "destination": "/index.html" },
     { "source": "/starlight-rush/(.*)", "destination": "/index.html" },
-    { "source": "/pfp-studio", "destination": "/index.html" },
-    { "source": "/pfp-studio/(.*)", "destination": "/index.html" },
+    { "source": "/photo-booth", "destination": "/index.html" },
+    { "source": "/photo-booth/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },
     { "source": "/find-the-meebit/(.*)", "destination": "/index.html" }
   ]

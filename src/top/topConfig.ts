@@ -279,15 +279,15 @@ export const TOP_ATTRACTIONS: Attraction[] = [
   {
     id: 'pfp',
     zoneId: 'culture',
-    title: 'PFP STUDIO',
-    subtitle: 'The Photo Booth',
+    title: 'PHOTO BOOTH',
+    subtitle: 'Visit Pass',
     description: {
-      en: 'Pick a background and pose.\nShoot a clean square PFP\nfor your profile.',
-      ja: '背景とポーズを選んで、\nきれいな正方形PFPを\n撮影しよう。',
+      en: 'Shoot a square PFP,\nthen issue today’s\nvisit pass.',
+      ja: '正方形PFPを撮って、\n今日の来場証明書を\n発行しよう。',
     },
     storyTitle: {
-      en: 'SQUARE SHOT',
-      ja: 'スクエアショット',
+      en: 'PARK PASS',
+      ja: '来場証明書',
     },
     color: '#1a2438',
     roofColor: '#8eb4e8',

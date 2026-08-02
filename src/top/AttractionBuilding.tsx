@@ -16,7 +16,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - sergito: シーエリアの工房（Meet Sergito）
  * - shooting: マウンテン地区の木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
- * - pfp: カルチャー東の PFP スタジオ
+ * - pfp: カルチャー東のフォトブース
  */
 export function AttractionBuilding({
   attraction,
@@ -547,7 +547,7 @@ function ShootingGalleryLandmark({
   )
 }
 
-/** Culture 東棟: PFP スタジオ（カラーパネル＋カメラブース） */
+/** Culture 東棟: フォトブース（カラーパネル＋カメラブース） */
 function PfpStudioLandmark({ color, accent }: { color: string; accent: string }) {
   const swatches = ['#638596', '#f2c94c', '#8550a0', '#e07a6a', '#3d6bb3']
   return (

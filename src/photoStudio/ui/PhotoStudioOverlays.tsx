@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getLocale } from '../../i18n/locale'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { usePlayerStore } from '../../stores/playerStore'
@@ -13,15 +13,10 @@ import {
   type PhotoStudioPoseId,
 } from '../config'
 import { captureSquarePfp, downloadDataUrl } from '../capture/captureSquare'
+import { composeVisitPass } from '../capture/composeVisitPass'
 import { getStudioGl } from '../capture/studioGlBridge'
 import { photoStudioUi } from '../i18n'
 import { usePhotoStudioStore } from '../store'
-
-function returnToCulture() {
-  const locale = getLocale()
-  const path = locale === 'ja' ? '/jp' : '/'
-  window.location.assign(`${path}?from=pfp`)
-}
 
 /** スタート: 引き継いだ ID を表示しつつ変更可能。 */
 export function PhotoStudioStartScreen() {
@@ -171,7 +166,7 @@ export function PhotoStudioControls() {
       <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
         <div>
           <p className="text-[0.55rem] font-bold uppercase tracking-[0.22em] text-[#8eb4e8]/80">
-            PFP Studio
+            {t.title}
           </p>
           <p className="mt-0.5 font-mono text-sm text-white/80">#{meebitNumber}</p>
         </div>
@@ -318,16 +313,7 @@ export function PhotoStudioControls() {
 
       <div className="space-y-2 border-t border-white/10 px-4 py-3">
         <CaptureButton className="w-full" />
-        <button
-          type="button"
-          className="w-full rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white/70"
-          onClick={() => {
-            playSfx('uiClick')
-            returnToCulture()
-          }}
-        >
-          {locale === 'ja' ? 'カルチャーへ' : 'Back to Culture'}
-        </button>
+        <VisitPassButton className="w-full" />
       </div>
     </aside>
   )
@@ -383,6 +369,38 @@ function CaptureButton({ className = '' }: { className?: string }) {
       }}
     >
       {t.capture}
+    </button>
+  )
+}
+
+function VisitPassButton({ className = '' }: { className?: string }) {
+  const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
+  const capturing = usePhotoStudioStore((state) => state.capturing)
+  const [issuing, setIssuing] = useState(false)
+  const t = photoStudioUi()
+  const busy = capturing || issuing
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      className={`rounded-full border border-[#8eb4e8]/50 bg-[#8eb4e8]/10 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-[#c5d8f2] transition hover:bg-[#8eb4e8]/18 disabled:opacity-50 ${className}`}
+      onClick={() => {
+        const gl = getStudioGl()
+        if (!gl) return
+        setIssuing(true)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const dataUrl = composeVisitPass(gl, { meebitNumber })
+            setIssuing(false)
+            if (!dataUrl) return
+            downloadDataUrl(dataUrl, `meebit-${meebitNumber}-visit-pass.png`)
+            void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+          })
+        })
+      }}
+    >
+      {issuing ? t.issuingPass : t.issuePass}
     </button>
   )
 }

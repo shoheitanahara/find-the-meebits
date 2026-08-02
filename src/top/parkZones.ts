@@ -238,7 +238,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // 北門は左寄り → 着地は Culture 入口センター・手前すぐ内側
         targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
-        subtitle: { en: 'Runway · Locker · PFP', ja: 'ランウェイ・ロッカー・PFP' },
+        subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
       {
         id: 'plaza-to-sea',
@@ -553,7 +553,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // Culture 東門すぐ内側・西向き
         targetSpawn: { x: 20.5, z: 1, rotationY: -Math.PI / 2 },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
-        subtitle: { en: 'Runway · Locker · PFP', ja: 'ランウェイ・ロッカー・PFP' },
+        subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
     ],
   },

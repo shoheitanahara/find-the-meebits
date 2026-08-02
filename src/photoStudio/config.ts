@@ -1,4 +1,4 @@
-/** Photo Studio（正方形 PFP）定数の正本。 */
+/** Photo Booth（正方形 PFP + 来場証明書）定数の正本。 */
 
 export const PHOTO_STUDIO = {
   canvasElementId: 'photo-studio-canvas',

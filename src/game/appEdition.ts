@@ -23,7 +23,7 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   if (segments.includes('starlight-rush')) {
     return 'starlight'
   }
-  if (segments.includes('pfp-studio')) {
+  if (segments.includes('photo-booth') || segments.includes('pfp-studio')) {
     return 'pfp'
   }
   if (segments.includes('shooting-gallery')) {
