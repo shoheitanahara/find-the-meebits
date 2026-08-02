@@ -17,30 +17,33 @@ export const PHOTO_STUDIO = {
 
   /**
    * PFP 映えする単色背景。
-   * 先頭 = Meebit 公式寄りのデフォルトブルー。以降は Punks / BAYC 系など。
+   * 先頭がデフォルト。ストアは backgrounds[0] を初期値に使う。
    */
   backgrounds: [
-    { id: 'meebit-blue', color: '#2b0fa1', label: { en: 'Meebit Blue', ja: 'ミービットブルー' } },
     { id: 'punk-blue', color: '#638596', label: { en: 'Punk Blue', ja: 'パンクブルー' } },
+    { id: 'meebit-blue', color: '#2b0fa1', label: { en: 'Meebit Blue', ja: 'ミービットブルー' } },
     { id: 'punk-purple', color: '#8550a0', label: { en: 'Punk Purple', ja: 'パンクパープル' } },
     { id: 'punk-teal', color: '#4a8a8a', label: { en: 'Punk Teal', ja: 'パンクティール' } },
+    { id: 'lemon', color: '#f5e84c', label: { en: 'Lemon Yellow', ja: 'レモンイエロー' } },
     { id: 'bayc-yellow', color: '#f2c94c', label: { en: 'Ape Yellow', ja: 'エイプイエロー' } },
     { id: 'bayc-orange', color: '#e89a3c', label: { en: 'Ape Orange', ja: 'エイプオレンジ' } },
     { id: 'bayc-blue', color: '#3d6bb3', label: { en: 'Ape Blue', ja: 'エイプブルー' } },
     { id: 'bayc-violet', color: '#6b4c9a', label: { en: 'Ape Violet', ja: 'エイプバイオレット' } },
     { id: 'mint', color: '#7ec8b0', label: { en: 'Mint', ja: 'ミント' } },
+    { id: 'peach', color: '#f0b090', label: { en: 'Peach', ja: 'ピーチ' } },
     { id: 'coral', color: '#e07a6a', label: { en: 'Coral', ja: 'コーラル' } },
     { id: 'hot-pink', color: '#e05aa0', label: { en: 'Hot Pink', ja: 'ホットピンク' } },
     { id: 'lime', color: '#9bc53d', label: { en: 'Lime', ja: 'ライム' } },
-    { id: 'navy', color: '#1e3a5f', label: { en: 'Navy', ja: 'ネイビー' } },
-    { id: 'cream', color: '#f0e6d8', label: { en: 'Cream', ja: 'クリーム' } },
-    { id: 'charcoal', color: '#2c2c2c', label: { en: 'Charcoal', ja: 'チャコール' } },
-    { id: 'slate', color: '#8a95a5', label: { en: 'Slate', ja: 'スレート' } },
+    { id: 'ice', color: '#d8eef8', label: { en: 'Ice', ja: 'アイス' } },
     { id: 'sky', color: '#9ec9e8', label: { en: 'Sky', ja: 'スカイ' } },
+    { id: 'navy', color: '#1e3a5f', label: { en: 'Navy', ja: 'ネイビー' } },
     { id: 'lavender', color: '#c4b0e0', label: { en: 'Lavender', ja: 'ラベンダー' } },
+    { id: 'cream', color: '#f0e6d8', label: { en: 'Cream', ja: 'クリーム' } },
+    { id: 'sand', color: '#d4c4a8', label: { en: 'Sand', ja: 'サンド' } },
     { id: 'forest', color: '#3d6b4f', label: { en: 'Forest', ja: 'フォレスト' } },
     { id: 'maroon', color: '#7a3040', label: { en: 'Maroon', ja: 'マルーン' } },
-    { id: 'sand', color: '#d4c4a8', label: { en: 'Sand', ja: 'サンド' } },
+    { id: 'slate', color: '#8a95a5', label: { en: 'Slate', ja: 'スレート' } },
+    { id: 'charcoal', color: '#2c2c2c', label: { en: 'Charcoal', ja: 'チャコール' } },
   ] as const,
 
   framings: [

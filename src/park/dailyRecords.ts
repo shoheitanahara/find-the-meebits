@@ -1,11 +1,13 @@
 import { getLocale } from '../i18n/locale'
 import { getJstDateKey } from '../top/dailyFeatured'
 
-/** 来場証1行 */
+/** 来場証1行（常時枠。未記録は detail が空表示用） */
 export type VisitPassLine = {
   id: string
   label: string
   detail: string
+  /** 今日の実記録があるか */
+  filled: boolean
 }
 
 const KEYS = {
@@ -133,111 +135,105 @@ function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
 
-/** 来場証用: 今日記録があるアトラクションをすべて集約。 */
+const EMPTY = '—'
+
+/**
+ * 来場証用: 全アトラクションを固定順で返す（未プレイは —）。
+ * Photo Booth 自身は含めない。
+ */
 export function collectVisitPassLines(): VisitPassLine[] {
   const locale = getLocale()
-  const lines: VisitPassLine[] = []
 
   const starlight = readDailyJson<ScorePayload>(KEYS.starlight)
-  if (starlight && starlight.score > 0) {
-    lines.push({
-      id: 'starlight',
-      label: locale === 'ja' ? 'スターライト・ラッシュ' : 'Starlight Rush',
-      detail: scoreDetail(starlight.score, locale),
-    })
-  }
-
   const shooting = readDailyJson<ScorePayload>(KEYS.shooting)
-  if (shooting && shooting.score > 0) {
-    lines.push({
-      id: 'shooting',
-      label: locale === 'ja' ? 'シューティングギャラリー' : 'Shooting Gallery',
-      detail: scoreDetail(shooting.score, locale),
-    })
-  }
-
   const mountain = readDailyJson<HeightPayload>(KEYS.mountain)
-  if (mountain && (mountain.heightBestM ?? 0) > 0) {
-    lines.push({
-      id: 'mountain',
-      label: 'Mt. Meeb',
-      detail: `${Math.floor(mountain.heightBestM ?? 0)}m`,
-    })
-  }
-
   const neon = readDailyJson<HeightPayload>(KEYS.neon)
-  if (neon && (neon.heightBestM ?? 0) > 0) {
-    lines.push({
-      id: 'neon',
-      label: locale === 'ja' ? 'ジェリーマウンテン' : 'Jerry Mountain',
-      detail: `${Math.floor(neon.heightBestM ?? 0)}m`,
-    })
-  }
-
   const street = readDailyJson<StreetPayload>(KEYS.street)
-  if (street?.cleared) {
-    const time = formatClearTimeDetail(street.clearTimeSeconds)
-    lines.push({
-      id: 'street',
-      label: locale === 'ja' ? '8番ストリート' : '8th Street',
-      detail: locale === 'ja' ? `クリア ${time}` : `Clear ${time}`,
-    })
-  }
-
   const find = readDailyJson<HuntPayload>(KEYS.find)
-  if (find) {
-    lines.push({
-      id: 'find',
-      label: 'Find the Meebit',
-      detail:
-        locale === 'ja'
-          ? `ステージ ${find.stageNumber}`
-          : `Stage ${find.stageNumber}`,
-    })
-  }
-
   const traits = readDailyJson<HuntPayload>(KEYS.traits)
-  if (traits) {
-    lines.push({
-      id: 'traits',
-      label: locale === 'ja' ? 'トレイトハント' : 'Trait Hunt',
-      detail:
-        locale === 'ja'
-          ? `ステージ ${traits.stageNumber}`
-          : `Stage ${traits.stageNumber}`,
-    })
-  }
-
   const runway = readDailyJson<RunwayPayload>(KEYS.runway)
-  if (runway?.visited) {
-    lines.push({
-      id: 'runway',
-      label: 'Meebits Runway',
-      detail: runway.themeLabel?.trim()
-        ? runway.themeLabel
-        : locale === 'ja'
-          ? '入場'
-          : 'Visited',
-    })
-  }
-
   const closet = readDailyJson<ClosetPayload>(KEYS.closet)
-  if (closet?.meebitNumber) {
-    lines.push({
-      id: 'closet',
-      label: locale === 'ja' ? 'ルックロッカー' : 'Look Locker',
-      detail: `#${closet.meebitNumber}`,
-    })
-  }
-
   const sergito = readDailyJson<SergitoPayload>(KEYS.sergito)
-  if (sergito?.talked) {
-    lines.push({
-      id: 'sergito',
-      label: 'Meet Sergito',
-      detail: locale === 'ja' ? '会話済' : 'Visited',
-    })
-  }
 
-  return lines
+  const line = (
+    id: string,
+    label: string,
+    detail: string | null,
+  ): VisitPassLine => ({
+    id,
+    label,
+    detail: detail && detail.trim() ? detail : EMPTY,
+    filled: Boolean(detail && detail.trim()),
+  })
+
+  return [
+    line(
+      'starlight',
+      locale === 'ja' ? 'スターライト・ラッシュ' : 'Starlight Rush',
+      starlight && starlight.score > 0 ? scoreDetail(starlight.score, locale) : null,
+    ),
+    line(
+      'shooting',
+      locale === 'ja' ? 'シューティングギャラリー' : 'Shooting Gallery',
+      shooting && shooting.score > 0 ? scoreDetail(shooting.score, locale) : null,
+    ),
+    line(
+      'mountain',
+      'Mt. Meeb',
+      mountain && (mountain.heightBestM ?? 0) > 0
+        ? `${Math.floor(mountain.heightBestM ?? 0)}m`
+        : null,
+    ),
+    line(
+      'neon',
+      locale === 'ja' ? 'ジェリーマウンテン' : 'Jerry Mountain',
+      neon && (neon.heightBestM ?? 0) > 0
+        ? `${Math.floor(neon.heightBestM ?? 0)}m`
+        : null,
+    ),
+    line(
+      'street',
+      locale === 'ja' ? '8番ストリート' : '8th Street',
+      street?.cleared
+        ? locale === 'ja'
+          ? `クリア ${formatClearTimeDetail(street.clearTimeSeconds)}`
+          : `Clear ${formatClearTimeDetail(street.clearTimeSeconds)}`
+        : null,
+    ),
+    line(
+      'find',
+      'Find the Meebit',
+      find
+        ? locale === 'ja'
+          ? `ステージ ${find.stageNumber}`
+          : `Stage ${find.stageNumber}`
+        : null,
+    ),
+    line(
+      'traits',
+      locale === 'ja' ? 'トレイトハント' : 'Trait Hunt',
+      traits
+        ? locale === 'ja'
+          ? `ステージ ${traits.stageNumber}`
+          : `Stage ${traits.stageNumber}`
+        : null,
+    ),
+    line(
+      'runway',
+      'Meebits Runway',
+      runway?.visited
+        ? runway.themeLabel?.trim() || (locale === 'ja' ? '入場' : 'Visited')
+        : null,
+    ),
+    line(
+      'closet',
+      locale === 'ja' ? 'ルックロッカー' : 'Look Locker',
+      closet?.meebitNumber ? `#${closet.meebitNumber}` : null,
+    ),
+    line(
+      'sergito',
+      'Meet Sergito',
+      sergito?.talked ? (locale === 'ja' ? '会話済' : 'Visited') : null,
+    ),
+  ]
 }

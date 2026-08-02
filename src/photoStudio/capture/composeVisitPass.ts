@@ -276,7 +276,18 @@ function paintRecords(
   locale: 'en' | 'ja',
   records: VisitPassLine[],
 ) {
-  const bandY = CARD_H - 168
+  const count = records.length
+  if (count === 0) return
+
+  const footerTop = CARD_H - 52
+  /** 写真マット下端より下に収める */
+  const photoBottom = PHOTO_Y + PHOTO + 18
+  const maxBandH = Math.max(80, footerTop - photoBottom - 6)
+  const layout = planRecordsLayout(count, maxBandH)
+
+  const headingH = 28
+  const bandH = headingH + layout.rows * layout.rowH + 6
+  const bandY = footerTop - bandH
   const bandX = MARGIN + 4
   const bandW = CARD_W - MARGIN * 2 - 8
 
@@ -288,43 +299,36 @@ function paintRecords(
   ctx.stroke()
 
   ctx.fillStyle = INK_MUTED
-  ctx.font = `600 10px ${SANS}`
+  ctx.font = `600 9px ${SANS}`
   const heading = locale === 'ja' ? '本日のパーク記録' : "Today's park records"
-  ctx.fillText(heading.toUpperCase(), bandX, bandY + 20)
+  ctx.fillText(heading.toUpperCase(), bandX, bandY + 16)
 
-  if (records.length === 0) {
-    ctx.fillStyle = INK_FAINT
-    ctx.font = `italic 13px ${SERIF}`
-    const empty =
-      locale === 'ja' ? '本日のプレイ記録なし' : 'No play records yet today'
-    ctx.fillText(empty, bandX, bandY + 52)
-    return
-  }
+  const colGap = layout.cols >= 4 ? 12 : layout.cols === 3 ? 16 : 20
+  const gridTop = bandY + headingH
+  const colW = (bandW - colGap * (layout.cols - 1)) / layout.cols
+  const labelFont = `500 ${layout.fontSize}px ${SANS}`
+  const detailFontFilled = `600 ${layout.fontSize}px ${MONO}`
+  const detailFontEmpty = `500 ${layout.fontSize}px ${MONO}`
 
-  const colGap = 28
-  const colW = (bandW - colGap) / 2
-  const rowH = 22
-  const startY = bandY + 40
-  const maxRows = 5
+  records.forEach((record, index) => {
+    const col = Math.floor(index / layout.rows)
+    const row = index % layout.rows
+    if (col >= layout.cols) return
 
-  records.slice(0, maxRows * 2).forEach((record, index) => {
-    const col = index < maxRows ? 0 : 1
-    const row = index % maxRows
     const x = bandX + col * (colW + colGap)
-    const y = startY + row * rowH
+    const y = gridTop + row * layout.rowH + layout.fontSize
 
-    ctx.fillStyle = INK
-    ctx.font = `500 11px ${SANS}`
-    const label = truncateToWidth(ctx, record.label, colW * 0.58)
-    ctx.fillText(label, x, y)
-    const labelWidth = ctx.measureText(label).width
+    ctx.fillStyle = record.filled ? INK_MUTED : INK_FAINT
+    ctx.font = labelFont
+    ctx.fillText(record.label, x, y)
+    const labelWidth = ctx.measureText(record.label).width
 
-    ctx.font = `600 11px ${MONO}`
-    const detail = truncateToWidth(ctx, record.detail, colW * 0.38)
-    const detailW = ctx.measureText(detail).width
-    ctx.fillText(detail, x + colW - detailW, y)
+    ctx.fillStyle = record.filled ? INK : INK_FAINT
+    ctx.font = record.filled ? detailFontFilled : detailFontEmpty
+    const detailW = ctx.measureText(record.detail).width
+    ctx.fillText(record.detail, x + colW - detailW, y)
 
-    if (colW - detailW - labelWidth > 28) {
+    if (record.filled && colW - detailW - labelWidth > 24) {
       ctx.strokeStyle = 'rgba(26, 36, 56, 0.1)'
       ctx.lineWidth = 1
       ctx.setLineDash([1, 3])
@@ -337,14 +341,40 @@ function paintRecords(
   })
 }
 
-function truncateToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  if (ctx.measureText(text).width <= maxWidth) return text
-  const ellipsis = '…'
-  let trimmed = text
-  while (trimmed.length > 1 && ctx.measureText(trimmed + ellipsis).width > maxWidth) {
-    trimmed = trimmed.slice(0, -1)
+/**
+ * 件数に応じて列数を増やし、写真〜フッター間に収まる行高・文字サイズを決める。
+ * 正式名称を省略しない前提で、まず 2 列 → 足りなければ 3 → 4 列。
+ */
+function planRecordsLayout(count: number, maxBandH: number) {
+  const headingH = 28
+  const padding = 6
+  const usable = Math.max(40, maxBandH - headingH - padding)
+  const minRowH = 14
+  const maxRowH = 22
+
+  for (const cols of [2, 3, 4] as const) {
+    const rows = Math.max(1, Math.ceil(count / cols))
+    const rowH = usable / rows
+    if (rowH >= minRowH) {
+      const clamped = Math.min(maxRowH, rowH)
+      return {
+        cols,
+        rows,
+        rowH: clamped,
+        fontSize: clamped >= 19 ? 11 : clamped >= 16 ? 10 : 9,
+      }
+    }
   }
-  return trimmed + ellipsis
+
+  const cols = 4
+  const rows = Math.max(1, Math.ceil(count / cols))
+  const rowH = Math.max(12, usable / rows)
+  return {
+    cols,
+    rows,
+    rowH,
+    fontSize: rowH >= 15 ? 9 : 8,
+  }
 }
 
 function paintFooter(
@@ -352,7 +382,15 @@ function paintFooter(
   locale: 'en' | 'ja',
   serial: string,
 ) {
-  const y = CARD_H - 36
+  const y = CARD_H - 28
+
+  ctx.strokeStyle = RULE
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(MARGIN + 4, y - 14)
+  ctx.lineTo(CARD_W - MARGIN - 4, y - 14)
+  ctx.stroke()
+
   ctx.fillStyle = INK_FAINT
   ctx.font = `500 9px ${MONO}`
   ctx.fillText(serial, MARGIN + 4, y)
