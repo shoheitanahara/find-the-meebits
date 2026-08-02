@@ -55,10 +55,8 @@ import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
 import { useTopStore, type AttractionId } from './topStore'
 
 const MOVE_SPEED = 7
-const ENTER_DISTANCE = 3.6
 const ENTRANCE_HALF_WIDTH = 1.45
 const ENTRANCE_TRIGGER_DEPTH = 0.55
-const GATE_ENTER_DISTANCE = 2.8
 const GATE_TRIGGER_HALF = 1.35
 const ZONE_TRANSITION_MS = 280
 const TOP_NPC_WALK_SPEED = 1.15
@@ -1624,31 +1622,9 @@ function TopPlayer() {
 function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void }) {
   const controlsRef = useKeyboardControls()
   const footstepTimer = useRef(0)
-  const nearestRef = useRef<AttractionId | null>(null)
-  const nearestGateRef = useRef<string | null>(null)
   const nearestAboutBoardRef = useRef(false)
   const isEnteringRef = useRef(false)
   const isGateCrossingRef = useRef(false)
-
-  useEffect(() => {
-    const handleEnter = (event: KeyboardEvent) => {
-      if (event.code !== 'Enter' && event.code !== 'Space') return
-      if (useDialogueStore.getState().isOpen) return
-      const store = useTopStore.getState()
-      if (store.aboutBrowserOpen) return
-      if (store.nearestGateId) {
-        const gate = getParkZone(store.activeZoneId).gates.find((item) => item.id === store.nearestGateId)
-        if (gate) {
-          transitionToZone(gate.targetZone, gate.targetSpawn)
-          return
-        }
-      }
-      const nearest = nearestRef.current
-      if (nearest) onEnter(nearest)
-    }
-    window.addEventListener('keydown', handleEnter)
-    return () => window.removeEventListener('keydown', handleEnter)
-  }, [onEnter])
 
   useFrame((_, delta) => {
     const state = useTopStore.getState()
@@ -1708,8 +1684,6 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
 
     if (useDialogueStore.getState().isOpen) return
 
-    let nearest: AttractionId | null = null
-    let nearestDistance = Number.POSITIVE_INFINITY
     let insideAnyEntrance = false
 
     for (const attraction of getAttractionsForZone(state.activeZoneId)) {
@@ -1727,16 +1701,8 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
           return
         }
       }
-
-      const distance = Math.hypot(x - attraction.x, z - attraction.entranceZ)
-      if (distance < ENTER_DISTANCE && distance < nearestDistance) {
-        nearest = attraction.id
-        nearestDistance = distance
-      }
     }
 
-    let nearestGateId: string | null = null
-    let nearestGateDistance = Number.POSITIVE_INFINITY
     let insideGate = false
 
     for (const gate of zone.gates) {
@@ -1755,24 +1721,16 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
           return
         }
       }
-
-      const distance = Math.hypot(dx, dz)
-      if (distance < GATE_ENTER_DISTANCE && distance < nearestGateDistance) {
-        nearestGateId = gate.id
-        nearestGateDistance = distance
-      }
     }
 
     if (!insideAnyEntrance) isEnteringRef.current = false
     if (!insideGate) isGateCrossingRef.current = false
 
-    if (nearest !== nearestRef.current) {
-      nearestRef.current = nearest
-      useTopStore.getState().setNearestAttraction(nearest)
+    if (useTopStore.getState().nearestAttraction != null) {
+      useTopStore.getState().setNearestAttraction(null)
     }
-    if (nearestGateId !== nearestGateRef.current) {
-      nearestGateRef.current = nearestGateId
-      useTopStore.getState().setNearestGateId(nearestGateId)
+    if (useTopStore.getState().nearestGateId != null) {
+      useTopStore.getState().setNearestGateId(null)
     }
 
     const nearAboutBoard =

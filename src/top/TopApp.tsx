@@ -17,6 +17,7 @@ import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { ParkTipsOverlay } from './ParkTipsOverlay'
+import { ParkDailyResetNotice } from './ParkDailyResetNotice'
 import { ParkBgmSystem } from './ParkBgmSystem'
 import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
 import { useTopStore, type AttractionId } from './topStore'
@@ -112,8 +113,6 @@ export function TopApp() {
   const locale = getLocale()
   const t = copy[locale]
   const started = useTopStore((state) => state.started)
-  const nearestAttraction = useTopStore((state) => state.nearestAttraction)
-  const nearestGateId = useTopStore((state) => state.nearestGateId)
   const aboutBrowserOpen = useTopStore((state) => state.aboutBrowserOpen)
   const activeZoneId = useTopStore((state) => state.activeZoneId)
   const zoneTransitioning = useTopStore((state) => state.zoneTransitioning)
@@ -214,24 +213,6 @@ export function TopApp() {
     void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
   }
 
-  const nearest = nearestAttraction ? getAttractionById(nearestAttraction) : null
-  const nearestGate = nearestGateId
-    ? getParkZone(activeZoneId).gates.find((gate) => gate.id === nearestGateId) ?? null
-    : null
-
-  const enterNearestGate = () => {
-    if (!nearestGate) return
-    const store = useTopStore.getState()
-    if (store.zoneTransitioning) return
-    store.setZoneTransitioning(true)
-    playSfx('uiConfirm')
-    window.setTimeout(() => {
-      setParkCollisionZone(nearestGate.targetZone)
-      useTopStore.getState().setActiveZone(nearestGate.targetZone, nearestGate.targetSpawn)
-      useTopStore.getState().setZoneTransitioning(false)
-    }, 280)
-  }
-
   const showSelectionCard = !started && !isReturningFromGame && !showParkTips
   const parkReady = lineup !== null
 
@@ -294,6 +275,7 @@ export function TopApp() {
                 </h1>
                 <div className="mt-4 h-px w-14 bg-[#caa75b]" />
                 <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6]">{t.subtitle}</p>
+                <ParkDailyResetNotice />
 
                 <div className="mt-7">
                   <div className="flex items-center justify-between gap-3">
@@ -354,30 +336,6 @@ export function TopApp() {
               {getParkZone(activeZoneId).title[locale]}
             </p>
           </div>
-
-          {nearest && nearestAttraction && !isDialogueOpen && !aboutBrowserOpen && !nearestGate ? (
-            <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
-              <button
-                type="button"
-                className="pointer-events-auto rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition hover:bg-[#2a2230] active:scale-95"
-                onClick={() => enterAttraction(nearestAttraction)}
-              >
-                {t.attractions[nearestAttraction]} — {t.enter}
-              </button>
-            </div>
-          ) : null}
-
-          {nearestGate && !isDialogueOpen && !aboutBrowserOpen ? (
-            <div className="pointer-events-none absolute inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4 max-lg:bottom-36">
-              <button
-                type="button"
-                className="pointer-events-auto rounded-full border border-[#ead394]/60 bg-[#11111d]/90 px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#f1d48c] shadow-2xl backdrop-blur transition hover:bg-[#2a2230] active:scale-95"
-                onClick={enterNearestGate}
-              >
-                {nearestGate.label[locale]} — {t.enter}
-              </button>
-            </div>
-          ) : null}
 
           {zoneTransitioning ? (
             <div className="pointer-events-none absolute inset-0 z-50 bg-[#070914]/55 transition-opacity" />

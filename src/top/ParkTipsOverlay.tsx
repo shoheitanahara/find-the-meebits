@@ -3,6 +3,7 @@ import { getLocale } from '../i18n/locale'
 import { ui } from '../i18n/ui'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { getParkTips } from './parkTips'
+import { ParkDailyResetNotice } from './ParkDailyResetNotice'
 
 function RedMarkerIcon({ className = 'size-4' }: { className?: string }) {
   return (
@@ -41,6 +42,7 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
           {t.beforeStart}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-[#b8b2a6] max-lg:text-xs">{park.lead}</p>
+        <ParkDailyResetNotice />
 
         <ul className="mt-5 space-y-3">
           {park.tips.map((tip, index) => (
