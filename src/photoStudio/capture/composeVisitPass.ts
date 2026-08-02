@@ -4,6 +4,7 @@ import { getJstDateKey } from '../../top/dailyFeatured'
 import {
   collectTodayVisitRecords,
   formatVisitTimestamp,
+  getVisitTimezoneLabel,
   type VisitPassRecord,
 } from '../visitPassRecords'
 
@@ -57,6 +58,7 @@ export function composeVisitPass(
   const issuedAt = options.issuedAt ?? new Date()
   const records = options.records ?? collectTodayVisitRecords()
   const timestamp = formatVisitTimestamp(issuedAt)
+  const timezoneLabel = getVisitTimezoneLabel(issuedAt)
   const dateKey = getJstDateKey(issuedAt)
   const serial = buildSerial(options.meebitNumber, dateKey)
 
@@ -64,7 +66,7 @@ export function composeVisitPass(
   paintOuterFrame(ctx)
   paintHeader(ctx, locale)
   paintPhoto(ctx, source, sw, sh)
-  paintIdentity(ctx, locale, options.meebitNumber, timestamp)
+  paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel)
   paintRecords(ctx, locale, records)
   paintFooter(ctx, locale, serial)
 
@@ -209,6 +211,7 @@ function paintIdentity(
   locale: 'en' | 'ja',
   meebitNumber: number,
   timestamp: string,
+  timezoneLabel: string,
 ) {
   const textX = PHOTO_X + PHOTO + 48
   const colW = CARD_W - textX - MARGIN - 8
@@ -217,10 +220,9 @@ function paintIdentity(
   const zoneLabel = locale === 'ja' ? 'タイムゾーン' : 'Timezone'
   const idValue = String(meebitNumber).padStart(5, '0')
 
-  // フィールドブロック
   drawField(ctx, textX, PHOTO_Y + 8, colW, idLabel, `#${idValue}`, 36)
   drawField(ctx, textX, PHOTO_Y + 108, colW, issuedLabel, timestamp, 22)
-  drawField(ctx, textX, PHOTO_Y + 188, colW * 0.45, zoneLabel, 'JST (UTC+9)', 18)
+  drawField(ctx, textX, PHOTO_Y + 188, colW * 0.72, zoneLabel, timezoneLabel, 18)
 
   // 右下の静かな印章（回転スタンプは使わない）
   const sealX = CARD_W - MARGIN - 72
