@@ -1,6 +1,7 @@
 import type { WebGLRenderer } from 'three'
 import { getLocale } from '../../i18n/locale'
 import { getJstDateKey } from '../../top/dailyFeatured'
+import { PHOTO_STUDIO } from '../config'
 import {
   collectTodayVisitRecords,
   formatVisitTimestamp,
@@ -8,9 +9,11 @@ import {
 } from '../visitPassRecords'
 import type { VisitPassLine } from '../../park/dailyRecords'
 
-/** 書き出し解像度（印刷寄りのシャープさ） */
+/** レイアウト基準サイズ（見た目の座標） */
 const CARD_W = 1024
 const CARD_H = 648
+/** PNG 書き出し倍率。写真スロットもこの分シャープになる */
+const EXPORT_SCALE = 2
 
 const MARGIN = 44
 const PHOTO = 268
@@ -49,10 +52,15 @@ export function composeVisitPass(
   if (sw < 2 || sh < 2) return null
 
   const canvas = document.createElement('canvas')
-  canvas.width = CARD_W
-  canvas.height = CARD_H
+  canvas.width = CARD_W * EXPORT_SCALE
+  canvas.height = CARD_H * EXPORT_SCALE
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
+
+  // レイアウト座標のまま描き、端末ピクセルは EXPORT_SCALE 倍
+  ctx.setTransform(EXPORT_SCALE, 0, 0, EXPORT_SCALE, 0, 0)
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
 
   const locale = getLocale()
   const issuedAt = options.issuedAt ?? new Date()
@@ -185,6 +193,18 @@ function paintPhoto(
   const sx = Math.floor((sw - side) / 2)
   const sy = Math.floor((sh - side) / 2)
 
+  // PFP と同じ解像度で一度正方形に切り出し、スロットへ（直引きだと 268px に潰れる）
+  const hiSize = Math.max(PHOTO_STUDIO.exportSize, PHOTO * EXPORT_SCALE)
+  const hi = document.createElement('canvas')
+  hi.width = hiSize
+  hi.height = hiSize
+  const hiCtx = hi.getContext('2d')
+  if (!hiCtx) return
+
+  hiCtx.imageSmoothingEnabled = true
+  hiCtx.imageSmoothingQuality = 'high'
+  hiCtx.drawImage(source, sx, sy, side, side, 0, 0, hiSize, hiSize)
+
   // 写真マット
   ctx.fillStyle = PAPER_EDGE
   ctx.fillRect(PHOTO_X - 10, PHOTO_Y - 10, PHOTO + 20, PHOTO + 20)
@@ -194,7 +214,7 @@ function paintPhoto(
 
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
-  ctx.drawImage(source, sx, sy, side, side, PHOTO_X, PHOTO_Y, PHOTO, PHOTO)
+  ctx.drawImage(hi, PHOTO_X, PHOTO_Y, PHOTO, PHOTO)
 
   // 細い内側ライン
   ctx.strokeStyle = 'rgba(244, 240, 232, 0.35)'
@@ -220,22 +240,129 @@ function paintIdentity(
   drawField(ctx, textX, PHOTO_Y + 108, colW, issuedLabel, timestamp, 22)
   drawField(ctx, textX, PHOTO_Y + 188, colW * 0.72, zoneLabel, timezoneLabel, 18)
 
-  // 右下の静かな印章（回転スタンプは使わない）
-  const sealX = CARD_W - MARGIN - 72
-  const sealY = PHOTO_Y + PHOTO - 28
+  paintVerifiedSeal(ctx, CARD_W - MARGIN - 78, PHOTO_Y + PHOTO - 36)
+}
+
+/** 公証印／ラバースタンプ風の Verified 印章 */
+function paintVerifiedSeal(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
+  const ink = 'rgba(132, 42, 48, 0.78)'
+  const inkSoft = 'rgba(132, 42, 48, 0.55)'
+  const outerR = 46
+  const midR = 40
+  const innerR = 28
+  const arcR = (midR + innerR) / 2 + 1
+
   ctx.save()
-  ctx.strokeStyle = 'rgba(61, 90, 128, 0.35)'
-  ctx.lineWidth = 1.25
+  ctx.translate(cx, cy)
+  // 少し斜めに押した公証印らしい傾き
+  ctx.rotate(-0.16)
+
+  // 押印のにじみ（下地）
   ctx.beginPath()
-  ctx.arc(sealX, sealY, 36, 0, Math.PI * 2)
+  ctx.arc(1.2, 0.8, outerR + 1.5, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(132, 42, 48, 0.12)'
+  ctx.lineWidth = 3
   ctx.stroke()
+
+  ctx.strokeStyle = ink
+  ctx.lineWidth = 2.4
   ctx.beginPath()
-  ctx.arc(sealX, sealY, 30, 0, Math.PI * 2)
+  ctx.arc(0, 0, outerR, 0, Math.PI * 2)
   ctx.stroke()
-  ctx.fillStyle = 'rgba(61, 90, 128, 0.55)'
-  ctx.font = `italic 11px ${SERIF}`
-  const seal = 'Verified'
-  ctx.fillText(seal, sealX - ctx.measureText(seal).width / 2, sealY + 4)
+
+  ctx.lineWidth = 1.1
+  ctx.beginPath()
+  ctx.arc(0, 0, midR, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.lineWidth = 1.6
+  ctx.beginPath()
+  ctx.arc(0, 0, innerR, 0, Math.PI * 2)
+  ctx.stroke()
+
+  // 外〜中環の放射状ギザ
+  ctx.strokeStyle = inkSoft
+  ctx.lineWidth = 1
+  for (let i = 0; i < 36; i += 1) {
+    const a = (i / 36) * Math.PI * 2
+    ctx.beginPath()
+    ctx.moveTo(Math.cos(a) * (midR + 1.5), Math.sin(a) * (midR + 1.5))
+    ctx.lineTo(Math.cos(a) * (outerR - 2), Math.sin(a) * (outerR - 2))
+    ctx.stroke()
+  }
+
+  // 上弧: 左→右、足元は中心向き
+  paintSealArcText(ctx, 'MEEBITS PARK', arcR, -Math.PI * 0.86, -Math.PI * 0.14, ink, 7.4, false)
+  // 下弧: 正立で左→右に読める（文字もカード基準で正立）
+  paintSealArcText(ctx, 'VISITOR PASS', arcR, Math.PI * 0.86, Math.PI * 0.14, ink, 7.1, true)
+
+  // 中央の小さな五芒星 + VERIFIED
+  ctx.fillStyle = inkSoft
+  paintSealStar(ctx, 0, -10, 4.2)
+
+  ctx.fillStyle = ink
+  ctx.font = `700 9px ${SANS}`
+  const verified = 'VERIFIED'
+  ctx.fillText(verified, -ctx.measureText(verified).width / 2, 5)
+
+  ctx.beginPath()
+  ctx.arc(-20, 1, 1.35, 0, Math.PI * 2)
+  ctx.arc(20, 1, 1.35, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.restore()
+}
+
+function paintSealStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.beginPath()
+  for (let i = 0; i < 5; i += 1) {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5
+    const b = a + Math.PI / 5
+    const ox = Math.cos(a) * r
+    const oy = Math.sin(a) * r
+    const ix = Math.cos(b) * r * 0.4
+    const iy = Math.sin(b) * r * 0.4
+    if (i === 0) ctx.moveTo(x + ox, y + oy)
+    else ctx.lineTo(x + ox, y + oy)
+    ctx.lineTo(x + ix, y + iy)
+  }
+  ctx.closePath()
+  ctx.fill()
+}
+
+/** 円弧上に1文字ずつ配置。upright=true でカード正立のまま読める下弧向け */
+function paintSealArcText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  color: string,
+  fontSize: number,
+  upright: boolean,
+) {
+  const chars = [...text]
+  const step = (endAngle - startAngle) / Math.max(chars.length - 1, 1)
+
+  ctx.save()
+  ctx.fillStyle = color
+  ctx.font = `700 ${fontSize}px ${SANS}`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  chars.forEach((char, index) => {
+    if (char === ' ') return
+    const angle = startAngle + step * index
+    const x = Math.cos(angle) * radius
+    const y = Math.sin(angle) * radius
+    ctx.save()
+    ctx.translate(x, y)
+    // 上弧: 足元→中心 / 下弧: カード正立で LTR に読める向き
+    ctx.rotate(upright ? angle - Math.PI / 2 : angle + Math.PI / 2)
+    ctx.fillText(char, 0, 0)
+    ctx.restore()
+  })
+
   ctx.restore()
 }
 
