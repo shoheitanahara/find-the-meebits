@@ -68,7 +68,7 @@ export function composeVisitPass(
   paintPhoto(ctx, source, sw, sh)
   paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel)
   paintRecords(ctx, locale, records)
-  paintFooter(ctx, locale, serial)
+  paintFooter(ctx, serial)
 
   return canvas.toDataURL('image/png')
 }
@@ -144,7 +144,7 @@ function paintOuterFrame(ctx: CanvasRenderingContext2D) {
 
 function paintHeader(ctx: CanvasRenderingContext2D, locale: 'en' | 'ja') {
   const brand = 'Meebits Park'
-  const pass = locale === 'ja' ? '来場証明書' : 'Visitor Pass'
+  const pass = 'Visitor Pass'
   const district =
     locale === 'ja' ? 'カルチャー地区 · フォトブース' : 'Culture District · Photo Booth'
 
@@ -153,13 +153,9 @@ function paintHeader(ctx: CanvasRenderingContext2D, locale: 'en' | 'ja') {
   ctx.font = `600 11px ${SANS}`
   ctx.fillText(brand.toUpperCase(), MARGIN + 4, 52)
 
-  // 書類名を主役に
+  // 書類名は常に英語表記
   ctx.fillStyle = INK
-  if (locale === 'ja') {
-    ctx.font = `700 36px ${SANS}`
-  } else {
-    ctx.font = `italic 40px ${SERIF}`
-  }
+  ctx.font = `italic 40px ${SERIF}`
   ctx.fillText(pass, MARGIN + 4, 92)
 
   // アクセントの短いアンダーライン
@@ -215,7 +211,7 @@ function paintIdentity(
 ) {
   const textX = PHOTO_X + PHOTO + 48
   const colW = CARD_W - textX - MARGIN - 8
-  const idLabel = locale === 'ja' ? 'Meebit 番号' : 'Meebit ID'
+  const idLabel = 'Meebit ID'
   const issuedLabel = locale === 'ja' ? '来場日時' : 'Date of visit'
   const zoneLabel = locale === 'ja' ? 'タイムゾーン' : 'Timezone'
   const idValue = String(meebitNumber).padStart(5, '0')
@@ -238,7 +234,7 @@ function paintIdentity(
   ctx.stroke()
   ctx.fillStyle = 'rgba(61, 90, 128, 0.55)'
   ctx.font = `italic 11px ${SERIF}`
-  const seal = locale === 'ja' ? '確認済' : 'Verified'
+  const seal = 'Verified'
   ctx.fillText(seal, sealX - ctx.measureText(seal).width / 2, sealY + 4)
   ctx.restore()
 }
@@ -377,11 +373,7 @@ function planRecordsLayout(count: number, maxBandH: number) {
   }
 }
 
-function paintFooter(
-  ctx: CanvasRenderingContext2D,
-  locale: 'en' | 'ja',
-  serial: string,
-) {
+function paintFooter(ctx: CanvasRenderingContext2D, serial: string) {
   const y = CARD_H - 28
 
   ctx.strokeStyle = RULE
@@ -395,10 +387,7 @@ function paintFooter(
   ctx.font = `500 9px ${MONO}`
   ctx.fillText(serial, MARGIN + 4, y)
 
-  const note =
-    locale === 'ja'
-      ? '本証はMeebits Parkでの来場記録です。譲渡・改変を禁じます。'
-      : 'This pass records a visit to Meebits Park. Not transferable.'
+  const note = 'This pass records a visit to Meebits Park. Not transferable.'
   ctx.font = `400 9px ${SANS}`
   const noteW = ctx.measureText(note).width
   ctx.fillText(note, CARD_W - MARGIN - 4 - noteW, y)
