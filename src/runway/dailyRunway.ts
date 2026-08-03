@@ -13,7 +13,7 @@ import {
 import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 import {
   createSeededRng,
-  getJstDateKey,
+  getUtcDateKey,
   hashStringToSeed,
   MEEBIT_ID_MAX,
   type DailyThemeTrait,
@@ -55,7 +55,7 @@ let memoryCache: DailyRunwayShow | null = null
 let loadPromise: Promise<DailyRunwayShow> | null = null
 
 export async function getDailyRunwayShow(): Promise<DailyRunwayShow> {
-  const dateKey = getJstDateKey()
+  const dateKey = getUtcDateKey()
   if (memoryCache?.dateKey === dateKey) return memoryCache
   if (loadPromise) return loadPromise
 

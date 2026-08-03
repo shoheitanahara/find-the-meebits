@@ -14,7 +14,7 @@ export type MountainPhase = 'title' | 'playing' | 'stageCleared' | 'allCleared'
 const PROGRESS_KEY = getClimbTheme().progressKey
 
 type ProgressPayload = {
-  /** JST 日付。違う日なら進捗をリセット */
+  /** UTC 日付。違う日なら進捗をリセット */
   dateKey?: string
   unlockedStage?: number
   /** 当日の最高到達高度（表示m）。日替わりで消える */

@@ -1,4 +1,4 @@
-import { getJstDateKey } from '../top/dailyFeatured'
+import { getUtcDateKey } from '../top/dailyFeatured'
 
 /** Shooting Gallery 定数の正本。マジックナンバーを JSX に直書きしない。 */
 
@@ -94,7 +94,7 @@ export const SHOOTING_GALLERY = {
     { min: 0, id: 'rookie' as const },
   ],
 
-  /** JST 日替わり Today's Best */
+  /** UTC 日替わり Today's Best */
   bestScoreKey: 'meebits-shooting-best-daily',
 } as const
 
@@ -165,14 +165,14 @@ function parseDailyBest(raw: string | null, today: string): number {
 
 export function readBestScore(): number {
   try {
-    return parseDailyBest(window.localStorage.getItem(SHOOTING_GALLERY.bestScoreKey), getJstDateKey())
+    return parseDailyBest(window.localStorage.getItem(SHOOTING_GALLERY.bestScoreKey), getUtcDateKey())
   } catch {
     return 0
   }
 }
 
 export function writeBestScore(score: number): number {
-  const today = getJstDateKey()
+  const today = getUtcDateKey()
   const prev = readBestScore()
   const next = Math.max(prev, Math.floor(score))
   try {

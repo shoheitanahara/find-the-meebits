@@ -1,5 +1,5 @@
 import { getLocale } from '../i18n/locale'
-import { getJstDateKey } from '../top/dailyFeatured'
+import { getUtcDateKey } from '../top/dailyFeatured'
 
 /** 来場証1行（常時枠。未記録は detail が空表示用） */
 export type VisitPassLine = {
@@ -39,7 +39,7 @@ export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
     const raw = window.localStorage.getItem(key)
     if (!raw) return null
     const parsed = JSON.parse(raw) as T
-    if (!parsed || parsed.dateKey !== getJstDateKey()) return null
+    if (!parsed || parsed.dateKey !== getUtcDateKey()) return null
     return parsed
   } catch {
     return null
@@ -49,7 +49,7 @@ export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
 export function writeDailyJson<T extends DailyEnvelope>(key: string, payload: T) {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(key, JSON.stringify({ ...payload, dateKey: getJstDateKey() }))
+    window.localStorage.setItem(key, JSON.stringify({ ...payload, dateKey: getUtcDateKey() }))
   } catch {
     /* ignore */
   }
@@ -73,7 +73,7 @@ export function recordStreetClear(clearTimeSeconds: number | null) {
   if (prev && prev.clearTimeSeconds > 0 && (time <= 0 || prev.clearTimeSeconds <= time)) {
     return
   }
-  writeDailyJson(KEYS.street, { dateKey: getJstDateKey(), cleared: true, clearTimeSeconds: time })
+  writeDailyJson(KEYS.street, { dateKey: getUtcDateKey(), cleared: true, clearTimeSeconds: time })
 }
 
 /** Find / Trait Hunt: 最高ステージ優先、同ステージなら短いクリアタイム。 */
@@ -105,14 +105,14 @@ export function recordHuntStageClear(options: {
     }
   }
 
-  writeDailyJson(key, { dateKey: getJstDateKey(), stageNumber, clearTimeSeconds })
+  writeDailyJson(key, { dateKey: getUtcDateKey(), stageNumber, clearTimeSeconds })
 }
 
 /** Runway: 入場（テーマ名があれば更新）。 */
 export function recordRunwayVisit(themeLabel?: string) {
   const prev = readDailyJson<RunwayPayload>(KEYS.runway)
   writeDailyJson(KEYS.runway, {
-    dateKey: getJstDateKey(),
+    dateKey: getUtcDateKey(),
     visited: true,
     themeLabel: themeLabel?.trim() || prev?.themeLabel,
   })
@@ -121,14 +121,14 @@ export function recordRunwayVisit(themeLabel?: string) {
 /** Look Locker: Wear した Meebit。 */
 export function recordClosetWear(meebitNumber: number) {
   writeDailyJson(KEYS.closet, {
-    dateKey: getJstDateKey(),
+    dateKey: getUtcDateKey(),
     meebitNumber: Math.max(1, Math.floor(meebitNumber)),
   })
 }
 
 /** Meet Sergito: 会話開始。 */
 export function recordSergitoTalk() {
-  writeDailyJson(KEYS.sergito, { dateKey: getJstDateKey(), talked: true })
+  writeDailyJson(KEYS.sergito, { dateKey: getUtcDateKey(), talked: true })
 }
 
 function scoreDetail(score: number, locale: 'en' | 'ja') {

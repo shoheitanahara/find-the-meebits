@@ -1,6 +1,6 @@
 import type { WebGLRenderer } from 'three'
 import { getLocale } from '../../i18n/locale'
-import { getJstDateKey } from '../../top/dailyFeatured'
+import { getUtcDateKey } from '../../top/dailyFeatured'
 import { PHOTO_STUDIO } from '../config'
 import {
   collectTodayVisitRecords,
@@ -67,7 +67,7 @@ export function composeVisitPass(
   const records = options.records ?? collectTodayVisitRecords()
   const timestamp = formatVisitTimestamp(issuedAt)
   const timezoneLabel = getVisitTimezoneLabel(issuedAt)
-  const dateKey = getJstDateKey(issuedAt)
+  const dateKey = getUtcDateKey(issuedAt)
   const serial = buildSerial(options.meebitNumber, dateKey)
 
   paintPaper(ctx)

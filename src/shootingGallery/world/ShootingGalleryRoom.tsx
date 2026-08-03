@@ -4,7 +4,7 @@ import { CanvasTexture, SRGBColorSpace, TextureLoader, Vector2, type Texture } f
 import { SHOOTING_GALLERY } from '../config'
 import {
   createSeededRng,
-  getJstDateKey,
+  getUtcDateKey,
   hashStringToSeed,
   MEEBIT_ID_MAX,
 } from '../../top/dailyFeatured'
@@ -363,7 +363,7 @@ function LodgeBackWall() {
  * 日付シードで全ユーザー共通にしてキャッシュを効かせる。
  */
 function pickDailyPosterIds(): [number, number] {
-  const rng = createSeededRng(hashStringToSeed(`shooting-gallery-poster:${getJstDateKey()}`))
+  const rng = createSeededRng(hashStringToSeed(`shooting-gallery-poster:${getUtcDateKey()}`))
   const first = Math.floor(rng() * MEEBIT_ID_MAX) + 1
   let second = Math.floor(rng() * MEEBIT_ID_MAX) + 1
   if (second === first) {

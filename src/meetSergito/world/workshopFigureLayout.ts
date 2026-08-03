@@ -1,4 +1,4 @@
-import { getJstDateKey, hashStringToSeed } from '../../top/dailyFeatured'
+import { getUtcDateKey, hashStringToSeed } from '../../top/dailyFeatured'
 import { SERGITO_MEEBIT_ID, WORKSHOP_DESK_TOP_Y } from '../config'
 
 export type WorkshopFigureKind = 'shelf' | 'desk'
@@ -47,9 +47,9 @@ export const WORKSHOP_SHELF = {
 
 const SHELF_COLUMNS = WORKSHOP_SHELF.columnCount
 
-/** JST 日付キー（YYYY-MM-DD） */
+/** UTC 日付キー（YYYY-MM-DD） */
 export function getWorkshopFigureDateKey(now = new Date()) {
-  return getJstDateKey(now)
+  return getUtcDateKey(now)
 }
 
 /** 同日・全員同じ並びになる決定的 ID プール */

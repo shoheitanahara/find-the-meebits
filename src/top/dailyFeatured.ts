@@ -1,5 +1,5 @@
 /**
- * 日付（JST）シードで「本日の主役」と来場者を決定的に選ぶ。
+ * 日付（UTC）シードで「本日の主役」と来場者を決定的に選ぶ。
  * 誰がアクセスしても同日は同じラインナップになる。
  *
  * 広場: マッチ枠15体 + ランダム5体（計20）
@@ -85,15 +85,13 @@ type StoredDailyLineup = {
 let memoryCache: DailyParkLineup | null = null
 let loadPromise: Promise<DailyParkLineup> | null = null
 
-/** JST の YYYY-MM-DD。日替わり境界は日本時間 0:00。 */
-export function getJstDateKey(now = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now)
+/** UTC の YYYY-MM-DD。日替わり境界は協定世界時 0:00。 */
+export function getUtcDateKey(now = new Date()): string {
+  return now.toISOString().slice(0, 10)
 }
+
+/** @deprecated 互換用。`getUtcDateKey` を使うこと。 */
+export const getJstDateKey = getUtcDateKey
 
 /** 文字列から 32bit シードを作る（同日・同キーで常に同じ）。 */
 export function hashStringToSeed(input: string): number {
@@ -553,7 +551,7 @@ function hydrateFromStored(
  * メモリ → sessionStorage → 日付シード再計算の順。
  */
 export async function getDailyParkLineup(now = new Date()): Promise<DailyParkLineup> {
-  const dateKey = getJstDateKey(now)
+  const dateKey = getUtcDateKey(now)
 
   if (memoryCache?.dateKey === dateKey) {
     return memoryCache

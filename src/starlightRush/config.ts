@@ -1,4 +1,4 @@
-import { getJstDateKey } from '../top/dailyFeatured'
+import { getUtcDateKey } from '../top/dailyFeatured'
 
 /** Starlight Rush 定数の正本。 */
 
@@ -190,7 +190,7 @@ type DailyBestPayload = {
   score: number
 }
 
-/** JST 日付。日が変われば Today's Best は 0 から。 */
+/** UTC 日付。日が変われば Today's Best は 0 から。 */
 function parseDailyBest(raw: string | null, today: string): number {
   if (!raw) return 0
   try {
@@ -206,14 +206,14 @@ function parseDailyBest(raw: string | null, today: string): number {
 
 export function readBestScore(): number {
   try {
-    return parseDailyBest(window.localStorage.getItem(STARLIGHT_RUSH.bestScoreKey), getJstDateKey())
+    return parseDailyBest(window.localStorage.getItem(STARLIGHT_RUSH.bestScoreKey), getUtcDateKey())
   } catch {
     return 0
   }
 }
 
 export function writeBestScore(score: number): number {
-  const today = getJstDateKey()
+  const today = getUtcDateKey()
   const prev = readBestScore()
   const next = Math.max(prev, Math.floor(score))
   try {

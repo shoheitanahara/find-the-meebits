@@ -1,28 +1,18 @@
 import type { Locale } from '../i18n/locale'
 
-const DAY_MS = 24 * 60 * 60 * 1000
-
-/** 次のパーク日替わり（JST 0:00）までのミリ秒。 */
+/** 次のパーク日替わり（UTC 0:00）までのミリ秒。 */
 export function getMsUntilParkDailyReset(now = new Date()): number {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Tokyo',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hourCycle: 'h23',
-    })
-      .formatToParts(now)
-      .filter((part) => part.type !== 'literal')
-      .map((part) => [part.type, part.value]),
-  ) as Record<string, string>
-
-  const hour = Number(parts.hour ?? 0)
-  const minute = Number(parts.minute ?? 0)
-  const second = Number(parts.second ?? 0)
-  const elapsedMs = (hour * 3600 + minute * 60 + second) * 1000 + now.getMilliseconds()
-  const remaining = DAY_MS - elapsedMs
-  return remaining <= 0 ? DAY_MS : remaining
+  const nextUtcMidnight = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    0,
+    0,
+    0,
+    0,
+  )
+  const remaining = nextUtcMidnight - now.getTime()
+  return remaining <= 0 ? 24 * 60 * 60 * 1000 : remaining
 }
 
 /** 例: `あと5時間23分` / `in 5h 23m` */
@@ -59,14 +49,14 @@ export function getParkDailyResetCopy(locale: Locale, now = new Date()) {
   if (locale === 'ja') {
     return {
       title: '毎日リセット',
-      summary: 'パークの来場者・記録・コースは毎日リセットされます（日本時間 0:00）。',
+      summary: 'パークの来場者・記録・コースは毎日リセットされます（UTC 0:00 ／ 日本時間 9:00）。',
       countdownLine: `次のリセットまで ${countdown}（あなたの地域では ${localClock}）`,
     }
   }
 
   return {
     title: 'Daily reset',
-    summary: 'Park guests, records, and courses reset every day at midnight Japan time (JST).',
+    summary: 'Park guests, records, and courses reset every day at midnight UTC (9:00 Japan time).',
     countdownLine: `Next reset ${countdown} (at ${localClock} your time)`,
   }
 }

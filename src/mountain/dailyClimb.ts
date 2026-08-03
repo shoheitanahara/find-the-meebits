@@ -1,14 +1,14 @@
 /**
  * 登山（Mt. Meeb / Jerry Mountain）の日替わり。
- * 日付境界はパーク来場者と同じく JST 0:00。
+ * 日付境界はパーク来場者と同じく UTC 0:00。
  */
 
-import { getJstDateKey, hashStringToSeed } from '../top/dailyFeatured'
+import { getUtcDateKey, hashStringToSeed } from '../top/dailyFeatured'
 import type { ClimbThemeId } from './climbTheme'
 
-/** 本日の日付キー（JST YYYY-MM-DD） */
+/** 本日の日付キー（UTC YYYY-MM-DD） */
 export function getClimbDayKey(now = new Date()) {
-  return getJstDateKey(now)
+  return getUtcDateKey(now)
 }
 
 /**
