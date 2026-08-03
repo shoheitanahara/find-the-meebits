@@ -222,7 +222,10 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'runway',
       'Meebits Runway',
       runway?.visited
-        ? runway.themeLabel?.trim() || (locale === 'ja' ? '入場' : 'Visited')
+        ? (() => {
+            const theme = runway.themeLabel?.trim()
+            return theme ? `Visited · ${theme}` : 'Visited'
+          })()
         : null,
     ),
     line(
@@ -233,7 +236,7 @@ export function collectVisitPassLines(): VisitPassLine[] {
     line(
       'sergito',
       'Meet Sergito',
-      sergito?.talked ? (locale === 'ja' ? '会話済' : 'Visited') : null,
+      sergito?.talked ? 'Visited' : null,
     ),
   ]
 }

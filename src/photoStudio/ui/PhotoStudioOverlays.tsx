@@ -123,7 +123,8 @@ export function PhotoStudioDragLayer() {
         const dxPx = event.clientX - lastXRef.current
         lastXRef.current = event.clientX
         const scale = 1 / PHOTO_STUDIO.orbit.pixelsPerRadian
-        nudgeYaw(-dxPx * scale)
+        // 右ドラッグでモデルが右回り（直感的なターンテーブル）
+        nudgeYaw(dxPx * scale)
       }}
       onPointerUp={(event) => {
         draggingRef.current = false
