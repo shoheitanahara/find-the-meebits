@@ -11,7 +11,7 @@ export type ClimbTheme = {
   brand: { en: string; ja: string }
   /** タイトル画面のキャッチ（大きく表示） */
   tagline: { en: string; ja: string }
-  /** 日替わりリセット等の補足（小さく表示） */
+  /** 日替わりアップデート等の補足（小さく表示） */
   dailyNote: { en: string; ja: string }
   eyebrow: { en: string; ja: string }
   /** Canvas 背後の DOM 背景 */
@@ -58,8 +58,8 @@ const MEEB_THEME: ClimbTheme = {
     ja: '隙間を跳び、棚を駆け、頂の旗を掴め！',
   },
   dailyNote: {
-    en: '20 stages to 1000m. The mountain reshapes every day — route and progress reset at midnight UTC.',
-    ja: '全20ステージ、標高1000m。山は毎日形を変える — ルートと進捗は毎日 UTC 0:00（日本時間 9:00）にリセット。',
+    en: '20 stages to 1000m. The mountain reshapes every day — route and progress update automatically at midnight UTC.',
+    ja: '全20ステージ、標高1000m。山は毎日形を変える — ルートと進捗は毎日 UTC 0:00（日本時間 9:00）に自動アップデート。',
   },
   shellBg: 'bg-[#87b8d8]',
   titleGradient: 'bg-gradient-to-b from-[#6a9fc0] via-[#87b8d8] to-[#3d6b3a]',
@@ -96,8 +96,8 @@ const NEON_THEME: ClimbTheme = {
     ja: 'ネオンのブロック、底なしの闇。一歩ミスれば、落下。',
   },
   dailyNote: {
-    en: 'Same climb as Mt. Meeb — new neon maze every day. Progress resets at midnight UTC.',
-    ja: 'Mt. Meeb と同じ登り。ネオンの迷路は毎日変わる。進捗は毎日 UTC 0:00（日本時間 9:00）にリセット。',
+    en: 'Same climb as Mt. Meeb — new neon maze every day. Progress updates automatically at midnight UTC.',
+    ja: 'Mt. Meeb と同じ登り。ネオンの迷路は毎日変わる。進捗は毎日 UTC 0:00（日本時間 9:00）に自動アップデート。',
   },
   shellBg: 'bg-[#242060]',
   titleGradient: 'bg-gradient-to-b from-[#2e2870] via-[#3a3090] to-[#4a38a8]',

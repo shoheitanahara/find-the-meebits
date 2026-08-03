@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getLocale } from '../i18n/locale'
 import { getParkDailyResetCopy } from './parkDailyReset'
 
-/** 入場前に日替わりリセットと残り時間を示す。 */
+/** 入場前に日替わりアップデートと残り時間を示す。 */
 export function ParkDailyResetNotice({ compact = false }: { compact?: boolean }) {
   const locale = getLocale()
   const [copy, setCopy] = useState(() => getParkDailyResetCopy(locale))

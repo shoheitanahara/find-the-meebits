@@ -32,7 +32,7 @@ export function formatParkResetCountdown(ms: number, locale: Locale): string {
   return `in ${hours}h ${minutes}m`
 }
 
-/** 次リセット時刻を端末ローカル時刻で表示。例: `8:00` / `午前8:00` */
+/** 次のアップデート時刻を端末ローカル時刻で表示。例: `8:00` / `午前8:00` */
 export function formatParkResetLocalClock(msUntilReset: number, locale: Locale, now = new Date()): string {
   const resetAt = new Date(now.getTime() + msUntilReset)
   return new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', {
@@ -48,15 +48,15 @@ export function getParkDailyResetCopy(locale: Locale, now = new Date()) {
 
   if (locale === 'ja') {
     return {
-      title: '毎日リセット',
-      summary: 'パークの来場者・記録・コースは毎日リセットされます（UTC 0:00 ／ 日本時間 9:00）。',
-      countdownLine: `次のリセットまで ${countdown}（あなたの地域では ${localClock}）`,
+      title: '毎日アップデート！',
+      summary: 'パークの来場者・記録・コースは毎日自動で新しくなります（UTC 0:00 ／ 日本時間 9:00）。',
+      countdownLine: `次のアップデートまで ${countdown}（あなたの地域では ${localClock}）`,
     }
   }
 
   return {
-    title: 'Daily reset',
-    summary: 'Park guests, records, and courses reset every day at midnight UTC (9:00 Japan time).',
-    countdownLine: `Next reset ${countdown} (at ${localClock} your time)`,
+    title: 'Daily update!',
+    summary: 'Park guests, records, and courses refresh automatically every day at midnight UTC (9:00 Japan time).',
+    countdownLine: `Next update ${countdown} (at ${localClock} your time)`,
   }
 }
