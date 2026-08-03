@@ -18,6 +18,7 @@ import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { ParkTipsOverlay } from './ParkTipsOverlay'
 import { ParkDailyResetNotice } from './ParkDailyResetNotice'
+import { ParkCreatorCredit } from './ParkCreatorCredit'
 import { ParkBgmSystem } from './ParkBgmSystem'
 import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
 import { useTopStore, type AttractionId } from './topStore'
@@ -276,6 +277,7 @@ export function TopApp() {
                 <div className="mt-4 h-px w-14 bg-[#caa75b]" />
                 <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6]">{t.subtitle}</p>
                 <ParkDailyResetNotice />
+                <ParkCreatorCredit />
 
                 <div className="mt-7">
                   <div className="flex items-center justify-between gap-3">
