@@ -154,7 +154,7 @@ function paintHeader(ctx: CanvasRenderingContext2D, locale: 'en' | 'ja') {
   const brand = 'Meebits Park'
   const pass = 'Visitor Pass'
   const district =
-    locale === 'ja' ? 'カルチャー地区 · フォトブース' : 'Culture District · Photo Booth'
+    locale === 'ja' ? 'カルチャーエリア · フォトブース' : 'Culture District · Photo Booth'
 
   // ブランドは小さく上に
   ctx.fillStyle = ACCENT

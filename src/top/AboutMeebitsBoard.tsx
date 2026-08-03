@@ -1,7 +1,7 @@
 import { Text } from '@react-three/drei'
 import { ABOUT_MEEBITS_BOARD_POSITION } from './aboutMeebits'
 
-/** Culture 地区: About Meebits 掲示板。 */
+/** Culture エリア: About Meebits 掲示板。 */
 export function AboutMeebitsBoard({ locale }: { locale: 'en' | 'ja' }) {
   const heading = locale === 'ja' ? 'ABOUT MEEBITS' : 'ABOUT MEEBITS'
   const title = locale === 'ja' ? 'ミービッツとは' : 'What are Meebits?'

@@ -8,7 +8,7 @@ import type { ParkBenchPropKind } from './parkLook'
  * - flowers: 花壇プランター
  * - beachSet: パラソル＋ビーチボール（Plaza / Culture / Sea のデフォルト）
  * - surfboard: 立てかけサーフボード
- * - campRock: ボクセル岩＋苔（マウンテン地区）
+ * - campRock: ボクセル岩＋苔（マウンテンエリア）
  */
 export type { ParkBenchPropKind }
 
@@ -233,7 +233,7 @@ function SurfboardStand({
   )
 }
 
-/** マウンテン地区: ボクセル岩の小さな山（マインクラフト風） */
+/** マウンテンエリア: ボクセル岩の小さな山（マインクラフト風） */
 function CampRockPile({
   position,
   variant,

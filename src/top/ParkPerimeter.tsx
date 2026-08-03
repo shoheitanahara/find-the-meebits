@@ -218,7 +218,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
               )
             })}
             {wallSegments.map((seg, index) => {
-              // シー地区: 壁・砂丘は一切出さない（海と砂だけ）
+              // シーエリア: 壁・砂丘は一切出さない（海と砂だけ）
               if (isSeaTheme(spec)) return null
 
               const wallSize: [number, number, number] =

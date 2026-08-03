@@ -45,7 +45,7 @@ export type ParkLook = {
   environmentPreset: ParkEnvironmentPreset
   environmentIntensity: number
 
-  /** 地区床（崖の内側） */
+  /** エリア床（崖の内側） */
   districtColor: string
   plazaColor: string
   pathColor: string

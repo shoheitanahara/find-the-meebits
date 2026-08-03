@@ -1,5 +1,5 @@
 /**
- * Mountain 地区床 — Mt. Meeb と同系の 1×1 ボクセルタイル（ニアレスト草・土・道）。
+ * Mountain エリア床 — Mt. Meeb と同系の 1×1 ボクセルタイル（ニアレスト草・土・道）。
  */
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import {

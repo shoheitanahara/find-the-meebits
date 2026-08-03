@@ -45,7 +45,7 @@ const copy = {
     sameLook: 'Same look',
   },
   ja: {
-    eyebrow: 'カルチャー地区',
+    eyebrow: 'カルチャーエリア',
     title: 'ルックロッカー',
     subtitle: 'まずタイプ → 見た目を足す → きせかえ！',
     typeStep: 'ステップ1 · タイプ',

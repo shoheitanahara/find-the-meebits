@@ -23,7 +23,7 @@ export type ParkZoneLayout = ParkZoneBounds & {
   pathEdgeX: number
   treeX: number
   groundZ: number
-  /** 地区床（外周崖の内側）の広さ */
+  /** エリア床（外周崖の内側）の広さ */
   districtHalfX: number
   districtHalfZ: number
   plazaRadius: number
@@ -223,7 +223,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetZone: 'mountain',
         // 西川のすぐ内側（橋を降りた直後）
         targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
-        label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテン地区' },
+        label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテンエリア' },
         subtitle: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
       },
       {
@@ -237,7 +237,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetZone: 'culture',
         // 北門は左寄り → 着地は Culture 入口センター・手前すぐ内側
         targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
-        label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
       {
@@ -258,7 +258,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   },
   mountain: {
     id: 'mountain',
-    title: { en: 'Mountain District', ja: 'マウンテン地区' },
+    title: { en: 'Mountain District', ja: 'マウンテンエリア' },
     attractionIds: ['mountain', 'neon', 'shooting'],
     layout: MOUNTAIN_LAYOUT,
     perimeter: {
@@ -330,7 +330,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   },
   culture: {
     id: 'culture',
-    title: { en: 'Culture District', ja: 'カルチャー地区' },
+    title: { en: 'Culture District', ja: 'カルチャーエリア' },
     attractionIds: ['runway', 'closet', 'pfp'],
     layout: CULTURE_LAYOUT,
     perimeter: {
@@ -378,7 +378,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         halfWidth: 2.55,
         alcoveDepth: 2.4,
         theme: 'plaza',
-        // Three.js: yaw=π/2 でローカル +X → 南(-Z)。接近・敷石が地区側を向く
+        // Three.js: yaw=π/2 でローカル +X → 南(-Z)。接近・敷石がエリア側を向く
         yaw: Math.PI / 2,
         targetZone: 'plaza',
         // 対向のプラザ北門（左寄り）すぐ内側・噴水方向へ
@@ -533,12 +533,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         halfWidth: 2.55,
         alcoveDepth: 2.4,
         theme: 'mountain',
-        // Astro 地区内（−Z側）から近づく向きに門正面を合わせる。
+        // Astro エリア内（−Z側）から近づく向きに門正面を合わせる。
         yaw: -Math.PI / 2,
         targetZone: 'mountain',
-        // Mountain 北門（左寄り）すぐ内側・地区奥向き
+        // Mountain 北門（左寄り）すぐ内側・エリア奥向き
         targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
-        label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテン地区' },
+        label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテンエリア' },
         subtitle: { en: 'Peaks · Neon · Gallery', ja: '山頂・ネオン・射撃' },
       },
       {
@@ -552,7 +552,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetZone: 'culture',
         // Culture 東門すぐ内側・西向き
         targetSpawn: { x: 20.5, z: 1, rotationY: -Math.PI / 2 },
-        label: { en: 'CULTURE DISTRICT', ja: 'カルチャー地区' },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
     ],

@@ -10,7 +10,7 @@
 - [x] 共通建物スロット正本化（`parkAttractionSlots.ts`）
 - [x] Robot / Visitor 8体＋他Type 7体の日次15 NPC + Astro 会話プール
 - [x] Astro専用ベンチ＋環状ライト街灯（個別pointLight削減、ベンチ横オブジェ撤去）
-- [x] Astro専用の挨拶・地区雑談・今日の主役・Trait会話
+- [x] Astro専用の挨拶・エリア雑談・今日の主役・Trait会話
 
 ### Mountain Shooting Gallery（`/shooting-gallery`）
 
@@ -27,7 +27,7 @@
 - [x] Sea NPC向け Meet Sergito専用会話、Culture NPC向け Look Locker専用会話（日英）
 - [x] アバター選択カード（番号 / ランダム + 実 VRM プレビュー）
 - [x] 固定追従カメラ（本編相当の距離感）+ WASD/ジョイスティック移動
-- [x] Plaza 3 建物（find / traits / street）+ Mountain 地区＋ Coming Soon 棟
+- [x] Plaza 3 建物（find / traits / street）+ Mountain エリア＋ Coming Soon 棟
 - [x] 外周キット（川・壁・橋・本ゲート・封印門）+ ゾーン切替
 - [x] **Canonical Default Layout 凍結**（`parkDesigner.md` §14 / 2026-07-24）
 - [x] ストーリーテリング調の説明看板（EN/JA）

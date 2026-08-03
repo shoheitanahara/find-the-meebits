@@ -91,7 +91,7 @@ const metadata = {
     },
     shooting: {
       title: 'シューティングギャラリー | Meebits Park',
-      description: 'マウンテン地区の射的場で、動く的を狙おう。制限時間45秒のスコアアタック。',
+      description: 'マウンテンエリアの射的場で、動く的を狙おう。制限時間45秒のスコアアタック。',
     },
     starlight: {
       title: 'スターライト・ラッシュ | Meebits Park',
@@ -104,13 +104,31 @@ const metadata = {
   },
 } as const
 
+/** SNS / OG 用画像（public/）。summary カード向け正方形。 */
+export const SHARE_IMAGE_PATH = '/og-image-square.png'
+export const SHARE_IMAGE_WIDTH = 1200
+export const SHARE_IMAGE_HEIGHT = 1200
+
 function setMetaContent(selector: string, content: string) {
   document.querySelector<HTMLMetaElement>(selector)?.setAttribute('content', content)
 }
 
+function ensureMeta(attr: 'name' | 'property', key: string, content: string) {
+  const selector = `meta[${attr}="${key}"]`
+  let el = document.querySelector<HTMLMetaElement>(selector)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', content)
+}
+
 export function applyPageMetadata(edition: AppEdition, locale: Locale) {
   const pageMetadata = metadata[locale][edition]
-  const canonicalUrl = new URL(window.location.pathname, window.location.origin).toString()
+  const origin = window.location.origin
+  const canonicalUrl = new URL(window.location.pathname, origin).toString()
+  const imageUrl = new URL(SHARE_IMAGE_PATH, origin).toString()
 
   document.title = pageMetadata.title
   document.documentElement.lang = locale
@@ -118,7 +136,14 @@ export function applyPageMetadata(edition: AppEdition, locale: Locale) {
   setMetaContent('meta[property="og:title"]', pageMetadata.title)
   setMetaContent('meta[property="og:description"]', pageMetadata.description)
   setMetaContent('meta[property="og:url"]', canonicalUrl)
+  ensureMeta('property', 'og:image', imageUrl)
+  ensureMeta('property', 'og:image:secure_url', imageUrl)
+  ensureMeta('property', 'og:image:type', 'image/png')
+  ensureMeta('property', 'og:image:width', String(SHARE_IMAGE_WIDTH))
+  ensureMeta('property', 'og:image:height', String(SHARE_IMAGE_HEIGHT))
   setMetaContent('meta[name="twitter:title"]', pageMetadata.title)
   setMetaContent('meta[name="twitter:description"]', pageMetadata.description)
+  ensureMeta('name', 'twitter:card', 'summary')
+  ensureMeta('name', 'twitter:image', imageUrl)
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute('href', canonicalUrl)
 }

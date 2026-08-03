@@ -15,7 +15,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - runway: 暗いパビリオン＋発光ランウェイ
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  * - sergito: シーエリアの工房（Meet Sergito）
- * - shooting: マウンテン地区の木造射的場
+ * - shooting: マウンテンエリアの木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
  * - pfp: カルチャー東のフォトブース
  */

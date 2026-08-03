@@ -28,6 +28,7 @@ import {
   type DailyVisitor,
 } from './dailyFeatured'
 import { AboutMeebitsBoard } from './AboutMeebitsBoard'
+import { ParkMapBoard } from './ParkMapBoard'
 import {
   ABOUT_MEEBITS_BOARD_POSITION,
   ABOUT_MEEBITS_INTERACT_DISTANCE,
@@ -182,6 +183,7 @@ export function TopScene({
         />
       ) : null}
       {activeZoneId === 'culture' ? <AboutMeebitsBoard locale={locale} /> : null}
+      {activeZoneId === 'plaza' ? <ParkMapBoard locale={locale} /> : null}
       <ParkLamps
         look={look}
         lamps={zone.lamps}
@@ -391,7 +393,7 @@ function HubGround({
         <AstroDistrictGround layout={layout} />
       ) : (
         <>
-          {/* 地区床（海・砂浜は置かない。外周は将来の崖・川） */}
+          {/* エリア床（海・砂浜は置かない。外周は将来の崖・川） */}
           <mesh position={[0, -0.08, groundZ]} receiveShadow>
             <boxGeometry args={[districtHalfX * 2, 0.2, districtHalfZ * 2]} />
             <meshStandardMaterial color={look.districtColor} roughness={0.94} />
@@ -887,7 +889,7 @@ function ClassicBench({
   )
 }
 
-/** Astro地区の気密モジュール風ベンチ。 */
+/** Astroエリアの気密モジュール風ベンチ。 */
 function AstroBench({
   position,
   rotationY,
@@ -1019,7 +1021,7 @@ function FeaturedInfoBoard({
         <meshStandardMaterial color="#d4b46a" emissive="#8b632b" emissiveIntensity={0.35} />
       </mesh>
 
-      {/* 本日の共通トレイト（マッチ枠15体の基準） */}
+      {/* 本日の共通トレイト（マッチ枠10体の基準） */}
       <Text
         position={[0, boardTopY - 0.63, 0.15]}
         fontSize={0.1}

@@ -15,7 +15,7 @@ const copy = {
     hint: 'WASD to walk · Click to look around · Esc to release',
   },
   ja: {
-    eyebrow: 'カルチャー地区',
+    eyebrow: 'カルチャーエリア',
     title: 'Meebits Runway',
     theme: '本日のルック',
     enter: '会場に入る',

@@ -1,5 +1,5 @@
 /**
- * Culture 地区の About Meebits 看板。
+ * Culture エリアの About Meebits 看板。
  * E / タップでアプリ内ブラウザを開き、Larva Labs 公式記事を読む。
  */
 

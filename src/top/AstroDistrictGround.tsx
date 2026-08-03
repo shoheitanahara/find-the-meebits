@@ -1,5 +1,5 @@
 /**
- * Astro 地区床 — 暗い月面レゴリス＋金属パネル園路＋発光ライン。
+ * Astro エリア床 — 暗い月面レゴリス＋金属パネル園路＋発光ライン。
  * 共通床骨格上に宇宙基地感を載せる。
  */
 import { useLayoutEffect, useMemo, useRef } from 'react'

@@ -96,17 +96,11 @@ export const PHOTO_STUDIO = {
 
   /**
    * スタジオポーズ。applyStudioPose でボーンを直接セット。
+   * 追加予定のため、いったん最小セットのみ。
    */
   poses: [
-    { id: 'attention', label: { en: 'Attention', ja: '立正' } },
-    { id: 'casual', label: { en: 'Casual', ja: 'カジュアル' } },
-    { id: 'contrapposto', label: { en: 'Contrapposto', ja: 'コントラポスト' } },
-    { id: 'bow', label: { en: 'Bow', ja: 'お辞儀' } },
-    { id: 'open', label: { en: 'Open arms', ja: '両手開き' } },
+    { id: 'attention', label: { en: 'Stand', ja: '直立' } },
     { id: 'wave', label: { en: 'Wave', ja: '手を振る' } },
-    { id: 'lookAway', label: { en: 'Look away', ja: '振り向き' } },
-    { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
-    { id: 'hero', label: { en: 'Hero', ja: 'ヒーロー' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 

@@ -2,10 +2,10 @@
  * 日付（UTC）シードで「本日の主役」と来場者を決定的に選ぶ。
  * 誰がアクセスしても同日は同じラインナップになる。
  *
- * 広場: マッチ枠15体 + ランダム5体（計20）
- * マウンテン地区: ランダム15体（広場と重複しない）
+ * 広場: マッチ枠10体 + ランダム10体（計20・半々）
+ * マウンテンエリア: ランダム15体（広場と重複しない）
  * シーエリア: 15体（全員が上裸 / チューブトップ）
- * カルチャー地区: 15体（スーツが半数）
+ * カルチャーエリア: 15体（スーツが半数）
  * アストロエリア: 15体（Robot / Visitor が約半数、残りは他 Type）
  */
 
@@ -18,7 +18,8 @@ import {
 import { CREATOR_MEEBIT_ID } from '../game/gameConfig'
 
 export const DAILY_VISITOR_COUNT = 20
-export const DAILY_MATCHED_VISITOR_COUNT = 15
+/** 本日のトレイト一致枠（主役含む）。残りはランダム訪問者。 */
+export const DAILY_MATCHED_VISITOR_COUNT = 10
 export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
 export const DAILY_SEA_VISITOR_COUNT = 15
 export const DAILY_CULTURE_VISITOR_COUNT = 15
@@ -31,7 +32,7 @@ export const SEA_BEACH_SHIRT_MIN_RATIO = 1
 export const CULTURE_SUIT_MIN_RATIO = 0.5
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v12'
+const STORAGE_KEY = 'meebits-park-daily-v13'
 
 /** ビーチらしい上半身（上裸・チューブトップ） */
 const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])
@@ -61,11 +62,11 @@ export type DailyParkLineup = {
   /** 本日のマッチ枠の基準になるトレイト1つ。 */
   themeTrait: DailyThemeTrait
   visitors: DailyVisitor[]
-  /** マウンテン地区の日替わり来場者（ランダム・広場と非重複）。 */
+  /** マウンテンエリアの日替わり来場者（ランダム・広場と非重複）。 */
   mountainVisitors: DailyVisitor[]
-  /** シーエリアの日替わり来場者（全員ビーチ服・他地区と非重複）。 */
+  /** シーエリアの日替わり来場者（全員ビーチ服・他エリアと非重複）。 */
   seaVisitors: DailyVisitor[]
-  /** カルチャー地区の日替わり来場者（スーツ半数・他地区と非重複）。 */
+  /** カルチャーエリアの日替わり来場者（スーツ半数・他エリアと非重複）。 */
   cultureVisitors: DailyVisitor[]
   /** アストロエリアの日替わり来場者（Robot / Visitor 約半数＋他Type）。 */
   astroVisitors: DailyVisitor[]
@@ -130,7 +131,7 @@ export function isCultureSuitShirt(traits: MeebitTraitMap | null | undefined) {
   return typeof shirt === 'string' && CULTURE_SUIT_SHIRTS.has(shirt)
 }
 
-/** Astro 地区で優先する Type。 */
+/** Astro エリアで優先する Type。 */
 export function isAstroMeebitType(traits: MeebitTraitMap | null | undefined) {
   const type = traits?.Type
   return type === 'Robot' || type === 'Visitor'
@@ -209,7 +210,7 @@ function pickCultureVisitors(
 
 /**
  * Astro: Robot / Visitor を半数（15体中8体）、残りを他 Type から抽選する。
- * 他地区未使用プールを優先し、足りないカテゴリだけ全域から補完する。
+ * 他エリア未使用プールを優先し、足りないカテゴリだけ全域から補完する。
  */
 function pickAstroVisitors(
   dataset: MeebitTraitsDataset,
@@ -425,7 +426,7 @@ function buildLineupFromScratch(
 
   shuffleInPlace(visitors, rng)
 
-  // マウンテン地区: 広場未使用プールから日替わり15体
+  // マウンテンエリア: 広場未使用プールから日替わり15体
   const mountainRng = createSeededRng(hashStringToSeed(`meebits-park-mountain:${dateKey}`))
   const mountainPool = allOtherIds.filter((id) => !used.has(id))
   shuffleInPlace(mountainPool, mountainRng)
@@ -442,7 +443,7 @@ function buildLineupFromScratch(
   const seaVisitors = pickSeaVisitors(dataset, seaPool, seaRng)
   for (const visitor of seaVisitors) used.add(visitor.meebitNumber)
 
-  // カルチャー地区: スーツ半数
+  // カルチャーエリア: スーツ半数
   const cultureRng = createSeededRng(hashStringToSeed(`meebits-park-culture:${dateKey}`))
   const culturePool = allOtherIds.filter((id) => !used.has(id))
   const cultureVisitors = pickCultureVisitors(dataset, culturePool, cultureRng)

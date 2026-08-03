@@ -1,5 +1,5 @@
 /**
- * パーク各地区の建物スロット（Mountain で完成した配置を正本とする）。
+ * パーク各エリアの建物スロット（Mountain で完成した配置を正本とする）。
  * 新区はこの座標をデフォルトに使い、必要時だけ個別にずらす。
  */
 export type ParkAttractionSlotId = 'center' | 'west' | 'east'

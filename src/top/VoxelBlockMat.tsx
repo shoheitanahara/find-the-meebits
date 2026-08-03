@@ -1,5 +1,5 @@
 /**
- * Mt. Meeb / Mountain 地区共通のボクセルブロック材質（ニアレストテクスチャ）。
+ * Mt. Meeb / Mountain エリア共通のボクセルブロック材質（ニアレストテクスチャ）。
  */
 import { useMemo } from 'react'
 import { MeshStandardMaterial, type Material } from 'three'

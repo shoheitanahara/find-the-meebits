@@ -72,7 +72,7 @@ function MountainPortalGate({
   gate: ParkGateDef
   locale: 'en' | 'ja'
 }) {
-  // ローカル −X = 広場（接近）側、+X = 地区側
+  // ローカル −X = 広場（接近）側、+X = エリア側
   const faceSign = -1
   const corridorHalf = gate.halfWidth * 0.52
   const rockZ = gate.halfWidth * 0.98
@@ -154,7 +154,7 @@ function MountainPortalGate({
         </Text>
       </group>
 
-      {/* 背後の尾根シルエット（地区側） */}
+      {/* 背後の尾根シルエット（エリア側） */}
       <VoxelRidge position={[-faceSign * 1.35, 0, 0]} />
     </group>
   )
@@ -483,7 +483,7 @@ function PortalLantern({ position }: { position: [number, number, number] }) {
   )
 }
 
-/** プラザ側：カルチャー地区への入口（ギャラリーアーチ） */
+/** プラザ側：カルチャーエリアへの入口（ギャラリーアーチ） */
 function CulturePortalGate({
   gate,
   locale,
@@ -687,7 +687,7 @@ function SeaPortalGate({
   )
 }
 
-/** Astro 地区への入口（エアロック風ポータル） */
+/** Astro エリアへの入口（エアロック風ポータル） */
 function AstroPortalGate({
   gate,
   locale,
@@ -1061,7 +1061,7 @@ function ClassicComingSoonShell() {
   )
 }
 
-/** カルチャー地区の工事棟（濃紺ギャラリー躯体＋ランウェイ基壇） */
+/** カルチャーエリアの工事棟（濃紺ギャラリー躯体＋ランウェイ基壇） */
 function CultureComingSoonShell() {
   const marble = '#2a4068'
   const accent = '#6a9ee8'
@@ -1133,7 +1133,7 @@ function CultureComingSoonShell() {
   )
 }
 
-/** シー地区の工事棟（砂の基壇＋木の躯体） */
+/** シーエリアの工事棟（砂の基壇＋木の躯体） */
 function SeaComingSoonShell() {
   const sand = '#d2b48c'
   const wood = '#8a6a48'

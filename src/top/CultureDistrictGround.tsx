@@ -1,5 +1,5 @@
 /**
- * Culture 地区床 — 濃紺ベースのギャラリー／ランウェイ模様。
+ * Culture エリア床 — 濃紺ベースのギャラリー／ランウェイ模様。
  * 中央帯はキャットウォーク風ストライプ、周囲はダイヤ格子。
  */
 import { useLayoutEffect, useMemo, useRef } from 'react'

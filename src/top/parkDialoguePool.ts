@@ -1,6 +1,6 @@
 /**
  * Meebits Park 来場者のセリフプール（EN / JA）。
- * 完結した一言の配列。地区・言語別に `getParkDialoguePools` で取得。
+ * 完結した一言の配列。エリア・言語別に `getParkDialoguePools` で取得。
  */
 export {
   countParkDialogueLines,
