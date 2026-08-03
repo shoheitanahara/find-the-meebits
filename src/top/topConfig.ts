@@ -95,7 +95,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       doorHalfWidth: 1.25,
       alcoveDepth: 2.2,
     },
-    infoBoardLocal: [4.6, 3.8],
+    // 入口正面から見て建物左側
+    infoBoardLocal: [-4.6, 3.8],
   },
   {
     id: 'street',
