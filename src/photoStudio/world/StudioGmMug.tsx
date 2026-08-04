@@ -65,25 +65,46 @@ export function StudioGmMug({ letterColor, colorId }: StudioGmMugProps) {
       scale={scale}
       rotation={[rotation[0], rotation[1], rotation[2]]}
     >
-      {/* カップ本体（やや上すぼまり） */}
+      {/*
+        外壁は中空シェル（openEnded）。中実だと上面キャップがコーヒーを隠す。
+      */}
       <mesh position={[0, 0.055, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.055, 0.06, 0.115, 20]} />
-        <meshStandardMaterial color={colors.body} roughness={0.68} metalness={0.03} />
+        <cylinderGeometry args={[0.055, 0.06, 0.115, 20, 1, true]} />
+        <meshStandardMaterial
+          color={colors.body}
+          roughness={0.68}
+          metalness={0.03}
+          side={DoubleSide}
+        />
       </mesh>
-      {/* 内側 */}
-      <mesh position={[0, 0.07, 0]}>
-        <cylinderGeometry args={[0.046, 0.05, 0.095, 16]} />
-        <meshStandardMaterial color={colors.inside} roughness={0.92} metalness={0} />
+      {/* 内側の壁 */}
+      <mesh position={[0, 0.05, 0]}>
+        <cylinderGeometry args={[0.048, 0.052, 0.09, 16, 1, true]} />
+        <meshStandardMaterial
+          color={colors.inside}
+          roughness={0.9}
+          metalness={0}
+          side={DoubleSide}
+        />
+      </mesh>
+      {/* コーヒー液面 — リムより凹ませても、中空なので上から見える */}
+      <mesh position={[0, 0.113, 0]}>
+        <cylinderGeometry args={[0.047, 0.047, 0.008, 20]} />
+        <meshStandardMaterial color={colors.coffee} roughness={0.42} metalness={0.08} />
       </mesh>
       {/* リム */}
       <mesh position={[0, 0.111, 0]} castShadow>
         <cylinderGeometry args={[0.057, 0.057, 0.01, 20]} />
         <meshStandardMaterial color={colors.rim} roughness={0.6} metalness={0.05} />
       </mesh>
-      {/* 底（掌に載せる基準） */}
+      {/* 底（掌に載せる基準）＋カップ内底 */}
       <mesh position={[0, 0, 0]} castShadow>
         <cylinderGeometry args={[0.058, 0.058, 0.012, 16]} />
         <meshStandardMaterial color={colors.rim} roughness={0.75} metalness={0.03} />
+      </mesh>
+      <mesh position={[0, 0.01, 0]}>
+        <cylinderGeometry args={[0.05, 0.05, 0.008, 16]} />
+        <meshStandardMaterial color={colors.inside} roughness={0.92} metalness={0} />
       </mesh>
 
       {/*
