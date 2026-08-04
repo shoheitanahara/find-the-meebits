@@ -102,8 +102,21 @@ export const PHOTO_STUDIO = {
     { id: 'attention', label: { en: 'Stand', ja: '直立' } },
     { id: 'wave', label: { en: 'Wave', ja: '手を振る' } },
     { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
+    { id: 'shoot', label: { en: 'Shoot', ja: '射撃' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
+
+  /**
+   * Shoot ポーズのピストル（射的場と同じ ShootingPistol）。
+   * 右手ボーン追従時の高さオフセット。
+   */
+  shootPistol: {
+    handOffsetY: 0.11,
+    /** 手首持ちに見えないよう、銃を腕の前方（バレル方向＝local +Z）へ出す */
+    handOffsetZ: 0.14,
+    /** 右手ボーン未取得時のフォールバック位置 */
+    fallbackPosition: [0.28, 1.1, 0.36] as const,
+  },
 
   /**
    * Sit 用ボクセル長椅子（1 人用・Runway ベンチの短縮版）。

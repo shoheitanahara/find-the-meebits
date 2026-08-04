@@ -21,6 +21,8 @@ export const STARLIGHT_RUSH = {
   /** Meebit は船の座席やや後ろ */
   playerLocal: { x: 0, y: 0.35, z: 0.55, rotationY: Math.PI },
   pistolHandOffsetY: 0.11,
+  /** 手首持ちに見えないよう、銃を腕の前方（バレル方向＝local +Z）へ出す */
+  pistolHandOffsetZ: 0.14,
 
   /** 三人称: 船の右後ろから前方を見る */
   cameraOffset: { x: 1.15, y: 2.05, z: 4.2 },

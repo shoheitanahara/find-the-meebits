@@ -20,6 +20,8 @@ export const SHOOTING_GALLERY = {
   cameraAimPitchMax: 0.36,
   /** 右手をグリップ下側に合わせるため、銃を高さの約半分だけ上げる */
   pistolHandOffsetY: 0.11,
+  /** 手首持ちに見えないよう、銃を腕の前方（バレル方向＝local +Z）へ出す */
+  pistolHandOffsetZ: 0.14,
 
   aimLimitX: 0.92,
   aimLimitY: 0.78,

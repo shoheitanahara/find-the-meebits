@@ -1,6 +1,6 @@
 import { VRM, VRMHumanBoneName } from '@pixiv/three-vrm'
 import { Object3D } from 'three'
-import { applyVRMSitPose } from '../avatar/VRMLocomotion'
+import { applyVRMSitPose, applyVRMShootingPose } from '../avatar/VRMLocomotion'
 import type { PhotoStudioPoseId } from './config'
 
 /**
@@ -174,6 +174,11 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   }
   if (poseId === 'cheer') {
     applyStudioCheerPose(vrm)
+    return
+  }
+  if (poseId === 'shoot') {
+    // 射的場と同じ構え（照準・反動なしの正面構え）
+    applyVRMShootingPose(vrm, { aimPitch: 0, recoil: 0 })
     return
   }
 

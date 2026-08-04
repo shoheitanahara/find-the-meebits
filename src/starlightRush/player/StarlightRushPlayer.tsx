@@ -67,6 +67,7 @@ export function StarlightRushPlayer() {
     root.worldToLocal(handWorld)
     pistol.position.copy(handWorld)
     pistol.position.y += STARLIGHT_RUSH.pistolHandOffsetY
+    pistol.position.z += STARLIGHT_RUSH.pistolHandOffsetZ
 
     const { aimY } = useStarlightRushStore.getState()
     pistol.rotation.set(-aimY * STARLIGHT_RUSH.cameraAimPitchMax, 0, 0)

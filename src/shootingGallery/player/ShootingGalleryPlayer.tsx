@@ -70,6 +70,7 @@ export function ShootingGalleryPlayer() {
     root.worldToLocal(handWorld)
     pistol.position.copy(handWorld)
     pistol.position.y += SHOOTING_GALLERY.pistolHandOffsetY
+    pistol.position.z += SHOOTING_GALLERY.pistolHandOffsetZ
 
     const { aimY } = useShootingGalleryStore.getState()
     pistol.rotation.set(
