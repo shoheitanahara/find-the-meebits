@@ -103,6 +103,7 @@ export const PHOTO_STUDIO = {
     { id: 'wave', label: { en: 'Wave', ja: '手を振る' } },
     { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
     { id: 'shoot', label: { en: 'Shoot', ja: '射撃' } },
+    { id: 'gm', label: { en: 'GM', ja: 'GM' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 
@@ -116,6 +117,28 @@ export const PHOTO_STUDIO = {
     handOffsetZ: 0.14,
     /** 右手ボーン未取得時のフォールバック位置 */
     fallbackPosition: [0.28, 1.1, 0.36] as const,
+  },
+
+  /**
+   * GM ポーズのマグカップ（右手追従・射撃と同じ前方持ち）。
+   * GM 文字色はスタジオ背景色に連動。
+   */
+  gmMug: {
+    /** マグ全体スケール（見た目の大きさ） */
+    scale: 1.5,
+    /** 掌に収まるよう少し内側・低め・手前寄り */
+    handOffsetX: 0.1,
+    handOffsetY: -0.08,
+    handOffsetZ: 0.06,
+    fallbackPosition: [0.26, 1.02, 0.3] as const,
+    /** マグ直立（取っ手はメッシュ側で -X＝体側） */
+    rotation: [0, 0, 0] as const,
+    colors: {
+      body: '#f4eee6',
+      rim: '#ebe3d8',
+      handle: '#ddd4c8',
+      inside: '#3a322c',
+    },
   },
 
   /**

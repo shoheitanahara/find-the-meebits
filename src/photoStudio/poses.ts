@@ -160,6 +160,20 @@ function applyStudioCheerPose(vrm: VRM) {
   set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.04, y: 0, z: 0 })
 }
 
+/**
+ * マグを前に出して持つ — 射撃と同じ腕。
+ * 射撃の前傾は消し、顎を上げて挨拶（正 X ≒ 顎上げ）。
+ */
+function applyStudioGmPose(vrm: VRM) {
+  applyVRMShootingPose(vrm, { aimPitch: 0, recoil: 0 })
+  // 射撃由来の前傾をリセットして直立に近づける
+  set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0, z: 0 })
+  // 顎上げ（負 X は顎引きになるので正方向）
+  set(bone(vrm, VRMHumanBoneName.Head), { x: 0.12, y: 0.06, z: 0 })
+}
+
 /** Photo Booth 用ポーズ。 */
 export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (!vrm) return
@@ -179,6 +193,10 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (poseId === 'shoot') {
     // 射的場と同じ構え（照準・反動なしの正面構え）
     applyVRMShootingPose(vrm, { aimPitch: 0, recoil: 0 })
+    return
+  }
+  if (poseId === 'gm') {
+    applyStudioGmPose(vrm)
     return
   }
 
