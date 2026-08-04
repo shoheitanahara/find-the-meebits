@@ -104,6 +104,7 @@ export const PHOTO_STUDIO = {
     { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
     { id: 'shoot', label: { en: 'Shoot', ja: '射撃' } },
     { id: 'gm', label: { en: 'GM', ja: 'GM' } },
+    { id: 'walk', label: { en: 'Walk', ja: '歩き' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 

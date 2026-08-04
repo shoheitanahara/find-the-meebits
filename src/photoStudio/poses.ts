@@ -1,6 +1,10 @@
 import { VRM, VRMHumanBoneName } from '@pixiv/three-vrm'
 import { Object3D } from 'three'
-import { applyVRMSitPose, applyVRMShootingPose } from '../avatar/VRMLocomotion'
+import {
+  applyVRMLocomotion,
+  applyVRMSitPose,
+  applyVRMShootingPose,
+} from '../avatar/VRMLocomotion'
 import type { PhotoStudioPoseId } from './config'
 
 /**
@@ -30,6 +34,12 @@ const waveArm = {
 const cheerArm = { upperX: 0.28, upperZ: -0.55, elbowX: 0.22 } as const
 const elbowRest = 0.03
 const kneeBaseBend = -0.16
+
+/**
+ * Runway 歩行（applyVRMLocomotion）を静止させた位相。
+ * speed=7 で sin(elapsed*7) = -1 → 左手前・右足前（counterStride = +1）。
+ */
+const WALK_POSE_ELAPSED = (3 * Math.PI) / 14
 
 function bone(vrm: VRM, name: VRMHumanBoneName) {
   return vrm.humanoid.getNormalizedBoneNode(name)
@@ -174,6 +184,15 @@ function applyStudioGmPose(vrm: VRM) {
   set(bone(vrm, VRMHumanBoneName.Head), { x: 0.12, y: 0.06, z: 0 })
 }
 
+/** Runway と同じ歩行モーションを、左手前・右足前の瞬間で固定。 */
+function applyStudioWalkPose(vrm: VRM) {
+  applyVRMLocomotion(vrm, {
+    elapsedTime: WALK_POSE_ELAPSED,
+    isMoving: true,
+    isRunning: false,
+  })
+}
+
 /** Photo Booth 用ポーズ。 */
 export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (!vrm) return
@@ -197,6 +216,10 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   }
   if (poseId === 'gm') {
     applyStudioGmPose(vrm)
+    return
+  }
+  if (poseId === 'walk') {
+    applyStudioWalkPose(vrm)
     return
   }
 
