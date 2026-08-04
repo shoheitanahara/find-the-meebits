@@ -14,6 +14,8 @@ export const PHOTO_STUDIO = {
   modelScale: 1.0,
   /** VRM_FEET_Y_OFFSET(0.06) 分沈めて影受け面に接地 */
   modelGroundY: -0.055,
+  /** Jump ポーズ時に少し浮かせる（着地に見えないよう） */
+  jumpLiftY: 0.28,
 
   /**
    * PFP 映えする単色背景。
@@ -105,6 +107,7 @@ export const PHOTO_STUDIO = {
     { id: 'shoot', label: { en: 'Shoot', ja: '射撃' } },
     { id: 'gm', label: { en: 'GM', ja: 'GM' } },
     { id: 'walk', label: { en: 'Walk', ja: '歩き' } },
+    { id: 'jump', label: { en: 'Jump', ja: 'ジャンプ' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 

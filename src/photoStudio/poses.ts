@@ -193,6 +193,15 @@ function applyStudioWalkPose(vrm: VRM) {
   })
 }
 
+/** Mountain と同じ空中ジャンプポーズ（脚たたみ・前傾）。 */
+function applyStudioJumpPose(vrm: VRM) {
+  applyVRMLocomotion(vrm, {
+    elapsedTime: 0,
+    isMoving: false,
+    isAirborne: true,
+  })
+}
+
 /** Photo Booth 用ポーズ。 */
 export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (!vrm) return
@@ -220,6 +229,10 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   }
   if (poseId === 'walk') {
     applyStudioWalkPose(vrm)
+    return
+  }
+  if (poseId === 'jump') {
+    applyStudioJumpPose(vrm)
     return
   }
 

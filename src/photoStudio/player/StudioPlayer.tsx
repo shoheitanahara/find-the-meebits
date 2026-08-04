@@ -72,7 +72,10 @@ export function StudioPlayer() {
   const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
   const isShoot = poseId === 'shoot'
   const isGm = poseId === 'gm'
+  const isJump = poseId === 'jump'
   const letterColor = getBackground(backgroundId).color
+  const groundY =
+    PHOTO_STUDIO.modelGroundY + (isJump ? PHOTO_STUDIO.jumpLiftY : 0)
 
   useEffect(() => {
     if (status !== 'ready' || !vrmRef.current) return
@@ -103,7 +106,7 @@ export function StudioPlayer() {
   return (
     <group
       ref={rootRef}
-      position={[0, PHOTO_STUDIO.modelGroundY, 0]}
+      position={[0, groundY, 0]}
       rotation={[0, rotYaw, 0]}
     >
       {poseId === 'sit' ? <StudioSitChair /> : null}
