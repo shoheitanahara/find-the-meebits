@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { CanvasTexture, SRGBColorSpace } from 'three'
+import { CanvasTexture, DoubleSide, SRGBColorSpace } from 'three'
 import { PHOTO_STUDIO, getGmMugColorVariant, type PhotoStudioGmMugColorId } from '../config'
 
 type StudioGmMugProps = {
@@ -37,9 +37,13 @@ function createGmLabelTexture(letterColor: string) {
   return tex
 }
 
+/** ラベル弧（ラジアン）。+Z 正面を中心にカップ曲面へ沿わせる */
+const LABEL_ARC = 1.35
+const LABEL_THETA_START = Math.PI / 8 - LABEL_ARC
+
 /**
  * GM ポーズ用マグカップ。
- * 取っ手は本体に食い込ませて隙間なし。前面に縦長 GM ラベル。
+ * 取っ手は本体に食い込ませて隙間なし。GM は円弧シェルでカップ外面に密着。
  */
 export function StudioGmMug({ letterColor, colorId }: StudioGmMugProps) {
   const { scale, rotation } = PHOTO_STUDIO.gmMug
@@ -101,15 +105,33 @@ export function StudioGmMug({ letterColor, colorId }: StudioGmMugProps) {
         </mesh>
       </group>
 
-      {/* GM ラベル（大きめ・縦長テクスチャ） */}
-      <mesh position={[-0.02, 0.055, 0.059]} castShadow>
-        <planeGeometry args={[0.1, 0.09]} />
+      {/*
+        GM ラベル — 本体よりわずかに大きい円弧シェルで曲面に密着。
+        theta: +Z 正面中心。半径差は z-fight 回避用の極薄オフセット。
+      */}
+      <mesh position={[0, 0.055, 0]}>
+        <cylinderGeometry
+          args={[
+            0.0578,
+            0.0605,
+            0.082,
+            28,
+            1,
+            true,
+            LABEL_THETA_START,
+            LABEL_ARC,
+          ]}
+        />
         <meshStandardMaterial
           map={labelTexture}
           transparent
           roughness={0.55}
           metalness={0.02}
           depthWrite={false}
+          side={DoubleSide}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-1}
         />
       </mesh>
     </group>
