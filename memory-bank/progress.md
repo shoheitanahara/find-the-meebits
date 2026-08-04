@@ -2,6 +2,16 @@
 
 ## 完了済み
 
+### Photo Booth（`/photo-booth`）
+
+- [x] 正方形 PFP 撮影 + 来場証明書発行
+- [x] ポーズ: Stand / Wave / Cheer / Shoot / GM / Walk / Jump / Sit
+- [x] Walk・Jump は `VRMLocomotion` 再利用（Walk 位相固定・Jump は `jumpLiftY`）
+- [x] GM マグ（白／黒選択・GM 文字は背景色連動・右手追従）
+- [x] Sit 用ボクセル椅子（脚長は `sitChair.leg`）
+- [x] カメラ角度: default / high / higher / low（中央寄せは lookAt Y）
+- [x] 操作ノウハウを `memory-bank/photoStudio.md` に記録（腕規約も更新）
+
 ### Astro District（パーク新ゾーン）
 
 - [x] `ParkZoneId` に `astro` 追加（Mountain 北 × Culture 東）

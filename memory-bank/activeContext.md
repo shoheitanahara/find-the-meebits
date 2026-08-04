@@ -1,8 +1,26 @@
 # Active Context
 
-最終更新: 2026-08-03
+最終更新: 2026-08-05
 
 ## 直近の作業サマリー
+
+### Photo Booth（`/photo-booth`）— アバター操作の仕上がり
+
+- **体験**: 正方形 PFP + 来場証明書。ポーズ／背景／構図／カメラ角度／明るさ／左右回転
+- **ポーズ**: Stand / Wave / Cheer / Shoot / GM / Walk / Jump / Sit
+  - Walk・Jump・Shoot・Sit は `VRMLocomotion` 再利用（Walk は左手前・右足前で位相固定）
+  - GM: 射撃腕 + 前傾リセット + 顎上げ（Head **正 X**）+ マグ（白／黒・文字は背景色）
+- **カメラ**: default / high / higher（high の少し上）/ low。下寄り補正は `cameraLookAt.Y` を下げる
+- **ノウハウ正本**: `memory-bank/photoStudio.md`（腕は `meebitVrmArms.md` も更新済み）
+
+主要ファイル:
+
+| 用途 | パス |
+|------|------|
+| 定数・カメラ・マグ・椅子 | `src/photoStudio/config.ts` |
+| ポーズ | `src/photoStudio/poses.ts` |
+| プレイヤー | `src/photoStudio/player/StudioPlayer.tsx` |
+| メモリ | `memory-bank/photoStudio.md` |
 
 ### JA ゾーン表記
 - すべて「〜エリア」に統一（地区は使わない）
@@ -100,40 +118,37 @@
 
 ## 現在のブランチ状態
 
-- Fashion Runway（着席・ベンチ当たり・タッチ視点反転・BGM・接地調整）は **作業ツリーに未コミットの可能性あり**
+- Photo Booth（ポーズ拡充・GM マグ・カメラ角度・Sit 椅子）は **作業ツリーに未コミットの可能性あり**
 - Worker / Vercel VRM 構成は以前どおり（変更なし）
 
 ## 次に触る可能性が高いファイル
 
 | 用途 | パス |
 |------|------|
+| Photo Booth 定数 | `src/photoStudio/config.ts` |
+| Photo Booth ポーズ | `src/photoStudio/poses.ts` |
+| Photo Booth メモ | `memory-bank/photoStudio.md` |
 | Runway 寸法・接地・当たり | `src/runway/config.ts` |
 | Runway 衝突 | `src/runway/collisions.ts` |
-| Runway 座席 | `src/runway/runwaySeats.ts` |
-| Runway プレイヤー | `src/runway/player/RunwayPlayer.tsx` |
 | Three.js 座標 | `.cursor/rules/threejs-coordinates.mdc` |
 | パーク UI/入場 | `src/top/TopApp.tsx` |
 | パーク建物設定 | `src/top/topConfig.ts` |
-| パーク ゾーン | `src/top/parkZones.ts` |
 | ルート判定 | `src/game/appEdition.ts` |
-| SPA fallback | `vite.config.ts`, `vercel.json` |
-| Club 座標・DJ | `src/world/clubLandmarks.ts`, `ClubProps.tsx` |
-| BGM（会場） | `src/systems/VenueBgmSystem.tsx`, `src/audio/venueAudioConfig.ts` |
-| BGM（Runway） | `src/runway/RunwayBgmSystem.tsx`, `src/audio/runwayAudioConfig.ts` |
 
 ## エージェント向け注意
 
 1. **Next.js ではない** — Vite + React
 2. **`/` は Park**（`top`）。本編は `/find-the-meebit`。新ルートは `vite.config.ts` + `vercel.json` の両方に登録
 3. **本番ドメイン変更時は Worker `ALLOWED_ORIGINS` を更新して再デプロイ**（忘れると VRM が CORS 全滅）
-4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts` / **Runway → `runway/config.ts`**
+4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts` / **Runway → `runway/config.ts`** / **Photo Booth → `photoStudio/config.ts`**
 5. **パーク NPC は `useVRMModel(exclusive:true)`**（プール共有だと T ポーズになる）
 6. **DJ ブース collision** は `CLUB_DJ_BOOTH_LAYOUT` と `ClubProps` を同期すること
 7. **Shawn Club 回転** は `0`（+Z = ダンスフロア）。`Math.PI` は後ろ向きになる
 8. タブ非表示は **全部止める**方針。常時 delta クランプは使わない
 9. **Runway 座標**: +Z=手前（入口）、−Z=奥。ベンチ mesh は local X=長辺 / local Z=奥行。詳細は `.cursor/rules/threejs-coordinates.mdc`
 10. **Runway タッチ視点**: pitch は `-lookDeltaY`（マウスの `+movementY` とは逆）。変えるときは両方確認
-11. commit はユーザー依頼時のみ
+11. **Photo Booth**: ポーズ・カメラ・マグは `photoStudio.md`。顎は Head **正 X＝上げ**。カメラ下寄りは lookAt Y を下げる
+12. commit はユーザー依頼時のみ
 
 ## デプロイチェックリスト
 
