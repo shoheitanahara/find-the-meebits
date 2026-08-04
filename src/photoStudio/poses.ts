@@ -5,15 +5,29 @@ import type { PhotoStudioPoseId } from './config'
 
 /**
  * Meebit VRM（normalized）腕 — Photo Booth。
- * 直立 / 手振り / 座り。追加ポーズは後ほど。
  *
- * attention z: 左 +1.56 / 右 −1.56
+ * UpperArm Z: 体側へ下ろす（左 +1.56 / 右 −1.56 が直立）
+ * UpperArm X: 前後振り（正 = 前）
+ * LowerArm X: 肘曲げ
+ * UpperArm Y: 内側寄せ（左右で符号反転）。Wave のみ使用
  */
 const attentionArmZ = { left: 1.56, right: -1.56 } as const
-/** 手を振る（右上腕 z） */
-const waveArmZ = { right: +0.99 } as const
-/** 手振りの肘 — LowerArm.x のみ */
-const waveElbowX = 1
+/**
+ * Wave — 右手を顔横へ上げる（旧 Think の見え方を Wave として採用）。
+ * upperY は setArm 内で右＝負方向に反転する前提の「寄せ量」。
+ */
+const waveArm = {
+  upperX: 0.2,
+  upperY: -1.2,
+  upperZ: 0.35,
+  elbowX: 1.4,
+  lowerY: -0.24,
+} as const
+/**
+ * Cheer — 両手を頭上へ。
+ * Z=0 が T ポーズ、正が体側下ろしなので、万歳は Z を 0 より少し反対側へ。
+ */
+const cheerArm = { upperX: 0.28, upperZ: -0.55, elbowX: 0.22 } as const
 const elbowRest = 0.03
 const kneeBaseBend = -0.16
 
@@ -31,11 +45,16 @@ function set(
   if (rotation.z !== undefined) node.rotation.z = rotation.z
 }
 
-function setArmLift(
+function setArm(
   vrm: VRM,
   side: 'left' | 'right',
-  upperZ: number,
-  lowerX = elbowRest,
+  options: {
+    upperZ: number
+    upperX?: number
+    upperY?: number
+    lowerX?: number
+    lowerY?: number
+  },
 ) {
   const upper =
     side === 'left'
@@ -50,8 +69,17 @@ function setArmLift(
       ? bone(vrm, VRMHumanBoneName.LeftHand)
       : bone(vrm, VRMHumanBoneName.RightHand)
 
-  set(upper, { x: 0, y: 0, z: upperZ })
-  set(lower, { x: lowerX, y: 0, z: 0 })
+  const sideSign = side === 'left' ? 1 : -1
+  set(upper, {
+    x: options.upperX ?? 0,
+    y: (options.upperY ?? 0) * sideSign,
+    z: options.upperZ,
+  })
+  set(lower, {
+    x: options.lowerX ?? elbowRest,
+    y: (options.lowerY ?? 0) * sideSign,
+    z: 0,
+  })
   set(hand, { x: 0, y: 0, z: 0 })
 }
 
@@ -84,8 +112,8 @@ function resetLegs(vrm: VRM) {
 function applyStudioAttentionPose(vrm: VRM) {
   resetTorso(vrm)
   resetShoulders(vrm)
-  setArmLift(vrm, 'left', attentionArmZ.left, 0.03)
-  setArmLift(vrm, 'right', attentionArmZ.right, 0.03)
+  setArm(vrm, 'left', { upperZ: attentionArmZ.left, lowerX: 0.03 })
+  setArm(vrm, 'right', { upperZ: attentionArmZ.right, lowerX: 0.03 })
   set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0, y: 0, z: 0 })
   set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 0, y: 0, z: 0 })
   set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: 0, y: 0, z: 0 })
@@ -94,17 +122,45 @@ function applyStudioAttentionPose(vrm: VRM) {
   set(bone(vrm, VRMHumanBoneName.RightFoot), { x: 0, y: 0, z: 0 })
 }
 
+/** 右手を顔横へ上げる。 */
 function applyStudioWavePose(vrm: VRM) {
   resetTorso(vrm)
   resetShoulders(vrm)
   resetHands(vrm)
   resetLegs(vrm)
-  setArmLift(vrm, 'left', attentionArmZ.left, elbowRest)
-  setArmLift(vrm, 'right', waveArmZ.right, waveElbowX)
-  set(bone(vrm, VRMHumanBoneName.Head), { x: 0, y: -0.08, z: 0 })
+  setArm(vrm, 'left', { upperZ: attentionArmZ.left, lowerX: elbowRest })
+  setArm(vrm, 'right', {
+    upperX: waveArm.upperX,
+    upperY: waveArm.upperY,
+    upperZ: waveArm.upperZ,
+    lowerX: waveArm.elbowX,
+    lowerY: waveArm.lowerY,
+  })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: 0.08, y: 0.16, z: -0.04 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: 0.02, y: 0.04, z: 0 })
 }
 
-/** Photo Booth 用ポーズ（直立 / 手振り / 座り）。 */
+/** 両手を斜め上へ。 */
+function applyStudioCheerPose(vrm: VRM) {
+  resetTorso(vrm)
+  resetShoulders(vrm)
+  resetHands(vrm)
+  resetLegs(vrm)
+  setArm(vrm, 'left', {
+    upperX: cheerArm.upperX,
+    upperZ: cheerArm.upperZ,
+    lowerX: cheerArm.elbowX,
+  })
+  setArm(vrm, 'right', {
+    upperX: cheerArm.upperX,
+    upperZ: -cheerArm.upperZ,
+    lowerX: cheerArm.elbowX,
+  })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: -0.06, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.04, y: 0, z: 0 })
+}
+
+/** Photo Booth 用ポーズ。 */
 export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   if (!vrm) return
 
@@ -114,6 +170,10 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
   }
   if (poseId === 'wave') {
     applyStudioWavePose(vrm)
+    return
+  }
+  if (poseId === 'cheer') {
+    applyStudioCheerPose(vrm)
     return
   }
 

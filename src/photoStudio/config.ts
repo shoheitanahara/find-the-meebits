@@ -96,11 +96,12 @@ export const PHOTO_STUDIO = {
 
   /**
    * スタジオポーズ。applyStudioPose でボーンを直接セット。
-   * 追加予定のため、いったん最小セットのみ。
+   * UpperArm Z=体側へ下ろす / X=前後 / LowerArm X=肘。
    */
   poses: [
     { id: 'attention', label: { en: 'Stand', ja: '直立' } },
     { id: 'wave', label: { en: 'Wave', ja: '手を振る' } },
+    { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 
