@@ -15,7 +15,7 @@ export const PHOTO_STUDIO = {
   /** VRM_FEET_Y_OFFSET(0.06) 分沈めて影受け面に接地 */
   modelGroundY: -0.055,
   /** Jump ポーズ時に少し浮かせる（着地に見えないよう） */
-  jumpLiftY: 0.28,
+  jumpLiftY: 0.14,
 
   /**
    * PFP 映えする単色背景。
@@ -81,16 +81,50 @@ export const PHOTO_STUDIO = {
       id: 'high',
       label: { en: 'High angle', ja: '上から' },
       setups: {
-        // 3/4 をわずかに上げる程度。lookAt は胴〜頭の中間で中央寄せ
+        // 3/4 をわずかに上げる。lookAt を下げて枠の中央に寄せる
         full: {
           fov: 32,
           cameraPosition: [-1.45, 1.95, 4.45] as const,
-          cameraLookAt: [0, 1.0, 0] as const,
+          cameraLookAt: [0, 0.82, 0] as const,
         },
         bust: {
           fov: 28,
           cameraPosition: [-0.8, 1.85, 2.25] as const,
-          cameraLookAt: [0, 1.38, 0] as const,
+          cameraLookAt: [0, 1.28, 0] as const,
+        },
+      },
+    },
+    {
+      id: 'higher',
+      label: { en: 'Higher', ja: 'もっと上から' },
+      setups: {
+        // High より少しだけ高い（極端なあおりにはしない）
+        full: {
+          fov: 32,
+          cameraPosition: [-1.4, 2.4, 4.35] as const,
+          cameraLookAt: [0, 0.95, 0] as const,
+        },
+        bust: {
+          fov: 28,
+          cameraPosition: [-0.78, 2.15, 2.2] as const,
+          cameraLookAt: [0, 1.35, 0] as const,
+        },
+      },
+    },
+    {
+      id: 'low',
+      label: { en: 'Low angle', ja: '少し下から' },
+      setups: {
+        // 少し見上げつつ、lookAt を胴寄りにして枠の中央に収める
+        full: {
+          fov: 32,
+          cameraPosition: [-1.5, 0.65, 4.3] as const,
+          cameraLookAt: [0, 0.88, 0] as const,
+        },
+        bust: {
+          fov: 28,
+          cameraPosition: [-0.85, 1.12, 2.25] as const,
+          cameraLookAt: [0, 1.28, 0] as const,
         },
       },
     },
