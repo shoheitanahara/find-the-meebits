@@ -5,6 +5,7 @@ import { VRMHumanBoneName } from '@pixiv/three-vrm'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { applyVRMShootingPose } from '../../avatar/VRMLocomotion'
 import { useVRMModel } from '../../avatar/useVRMModel'
+import { applyHandPropFit } from '../../avatar/vrmHandPropFit'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { usePlayerStore } from '../../stores/playerStore'
 import { ShootingPistol } from '../../shootingGallery/world/ShootingPistol'
@@ -65,9 +66,12 @@ export function StarlightRushPlayer() {
     }
     hand.getWorldPosition(handWorld)
     root.worldToLocal(handWorld)
-    pistol.position.copy(handWorld)
-    pistol.position.y += STARLIGHT_RUSH.pistolHandOffsetY
-    pistol.position.z += STARLIGHT_RUSH.pistolHandOffsetZ
+    applyHandPropFit(vrm, root, {
+      handLocal: handWorld,
+      target: pistol.position,
+      handOffsetY: STARLIGHT_RUSH.pistolHandOffsetY,
+      handOffsetZ: STARLIGHT_RUSH.pistolHandOffsetZ,
+    })
 
     const { aimY } = useStarlightRushStore.getState()
     pistol.rotation.set(-aimY * STARLIGHT_RUSH.cameraAimPitchMax, 0, 0)

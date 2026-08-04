@@ -64,9 +64,15 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | ピストル | `shootPistol` | `handOffsetZ` で前方へ（手首持ちに見えないように） |
 | マグ | `gmMug` | `handOffsetX/Y/Z` で掌に載せる。`scale`・`colorVariants`（白／黒） |
 
+**体型フィット**（mesh 基準）: `src/avatar/vrmHandPropFit.ts`  
+細い mesh を bind 幅で検出。補正は root local の **素直な X/Y/Z**:  
+`offsetXPerDeficit` / `offsetYPerDeficit` / `offsetZPerDeficit`（不足 1.0 あたりの移動量）。  
+通常の `handOffset*` にも scale（下限 `minScale`）が掛かる。#11143 幅以上は補正なし。
+
 マグ形状・GM ラベル: `world/StudioGmMug.tsx`  
 - 取っ手は体側（-X）、本体に食い込ませて隙間なし  
-- GM 文字: CanvasTexture。縦長は `ctx.scale(横, 縦)`、枠位置は label mesh の `position`
+- 本体は中空シェル（中実だとコーヒー液面が縁より下で消える）  
+- GM 文字: 円弧シリンダー + CanvasTexture。角度は `LABEL_THETA_START` / `LABEL_ARC`
 
 ---
 

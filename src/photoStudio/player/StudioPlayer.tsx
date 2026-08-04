@@ -4,6 +4,7 @@ import { Group, Mesh, Object3D, Vector3 } from 'three'
 import { VRM, VRMHumanBoneName } from '@pixiv/three-vrm'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { useVRMModel } from '../../avatar/useVRMModel'
+import { applyHandPropFit, clearHandPropArmFitCache } from '../../avatar/vrmHandPropFit'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { ShootingPistol } from '../../shootingGallery/world/ShootingPistol'
 import { getBackground, PHOTO_STUDIO } from '../config'
@@ -33,7 +34,7 @@ type HandPropOffsets = {
   fallbackPosition: readonly [number, number, number]
 }
 
-/** 右手ボーンへ小道具を追従（ピストル／マグ共通）。 */
+/** 右手ボーンへ小道具を追従（ピストル／マグ共通）。細い mesh は肩方向へ引き戻す。 */
 function followRightHandProp(
   vrm: VRM | null,
   prop: Group | null,
@@ -52,10 +53,13 @@ function followRightHandProp(
   }
   hand.getWorldPosition(handWorld)
   root.worldToLocal(handWorld)
-  prop.position.copy(handWorld)
-  prop.position.x += handOffsetX
-  prop.position.y += handOffsetY
-  prop.position.z += handOffsetZ
+  applyHandPropFit(vrm, root, {
+    handLocal: handWorld,
+    target: prop.position,
+    handOffsetX,
+    handOffsetY,
+    handOffsetZ,
+  })
   prop.rotation.set(0, 0, 0)
 }
 
@@ -79,6 +83,7 @@ export function StudioPlayer() {
 
   useEffect(() => {
     if (status !== 'ready' || !vrmRef.current) return
+    clearHandPropArmFitCache(vrmRef.current)
     applyStudioVrmShading(vrmRef.current)
     enableStudioShadows(vrmRef.current.scene)
   }, [status, meebitNumber, vrmRef, vrmScene])

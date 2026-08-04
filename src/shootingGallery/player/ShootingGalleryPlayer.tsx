@@ -5,6 +5,7 @@ import { VRMHumanBoneName } from '@pixiv/three-vrm'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { applyVRMShootingPose } from '../../avatar/VRMLocomotion'
 import { useVRMModel } from '../../avatar/useVRMModel'
+import { applyHandPropFit } from '../../avatar/vrmHandPropFit'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { usePlayerStore } from '../../stores/playerStore'
 import { SHOOTING_GALLERY } from '../config'
@@ -68,9 +69,12 @@ export function ShootingGalleryPlayer() {
     }
     hand.getWorldPosition(handWorld)
     root.worldToLocal(handWorld)
-    pistol.position.copy(handWorld)
-    pistol.position.y += SHOOTING_GALLERY.pistolHandOffsetY
-    pistol.position.z += SHOOTING_GALLERY.pistolHandOffsetZ
+    applyHandPropFit(vrm, root, {
+      handLocal: handWorld,
+      target: pistol.position,
+      handOffsetY: SHOOTING_GALLERY.pistolHandOffsetY,
+      handOffsetZ: SHOOTING_GALLERY.pistolHandOffsetZ,
+    })
 
     const { aimY } = useShootingGalleryStore.getState()
     pistol.rotation.set(
