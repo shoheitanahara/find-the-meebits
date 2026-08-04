@@ -105,6 +105,43 @@ export const PHOTO_STUDIO = {
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
   ] as const,
 
+  /**
+   * Sit 用ボクセル長椅子（1 人用・Runway ベンチの短縮版）。
+   * StudioPlayer の rotYaw group 内に置き、Meebit と一緒に回す。
+   * 背もたれは local -Z（Runway と同じ）。
+   */
+  sitChair: {
+    /** group 内オフセット（わずかに奥へ） */
+    offset: [0, 0, -0.2] as const,
+    seat: {
+      size: [1.28, 0.12, 0.62] as const,
+      /** 座面中心 Y（着席ヒップ下に合わせる） */
+      y: 0.53,
+    },
+    back: {
+      size: [1.28, 0.5, 0.1] as const,
+      /** 背もたれ中心（座面より上・後ろ） */
+      position: [0, 0.8, -0.26] as const,
+    },
+    leg: {
+      size: [0.1, 0.6, 0.1] as const,
+      /** 脚中心 Y（地面寄り） */
+      y: 0.21,
+      /** local [x, z] 四隅 */
+      positions: [
+        [-0.52, 0.2],
+        [0.52, 0.2],
+        [-0.52, -0.2],
+        [0.52, -0.2],
+      ] as const,
+    },
+    colors: {
+      seat: '#6b5344',
+      back: '#5a4538',
+      leg: '#4a3a30',
+    },
+  },
+
   lighting: {
     /**
      * 公式 Meebit 寄りソフトボックス。

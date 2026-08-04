@@ -8,6 +8,7 @@ import { PHOTO_STUDIO } from '../config'
 import { applyStudioPose } from '../poses'
 import { applyStudioVrmShading } from '../studioVrmShading'
 import { usePhotoStudioStore } from '../store'
+import { StudioSitChair } from '../world/StudioSitChair'
 
 function enableStudioShadows(root: Object3D) {
   root.traverse((obj) => {
@@ -37,6 +38,7 @@ export function StudioPlayer() {
 
   return (
     <group position={[0, PHOTO_STUDIO.modelGroundY, 0]} rotation={[0, rotYaw, 0]}>
+      {poseId === 'sit' ? <StudioSitChair /> : null}
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE * PHOTO_STUDIO.modelScale} />
       ) : (
