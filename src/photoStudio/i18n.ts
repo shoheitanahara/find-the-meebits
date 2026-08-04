@@ -12,6 +12,7 @@ type PhotoStudioCopy = {
   applyId: string
   background: string
   pose: string
+  mugColor: string
   framing: string
   cameraAngle: string
   brightness: string
@@ -36,6 +37,7 @@ const en: PhotoStudioCopy = {
   applyId: 'Use this ID',
   background: 'Background',
   pose: 'Pose',
+  mugColor: 'Mug',
   framing: 'Framing',
   cameraAngle: 'Camera',
   brightness: 'Brightness',
@@ -60,6 +62,7 @@ const ja: PhotoStudioCopy = {
   applyId: 'このIDを使う',
   background: '背景',
   pose: 'ポーズ',
+  mugColor: 'マグ',
   framing: '構図',
   cameraAngle: 'カメラ',
   brightness: '明るさ',

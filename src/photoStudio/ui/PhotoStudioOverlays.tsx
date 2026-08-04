@@ -6,10 +6,12 @@ import { TargetPreview } from '../../ui/TargetPreview'
 import {
   clampMeebitId,
   getBackground,
+  getGmMugColorVariant,
   PHOTO_STUDIO,
   type PhotoStudioBackgroundId,
   type PhotoStudioCameraAngleId,
   type PhotoStudioFramingId,
+  type PhotoStudioGmMugColorId,
   type PhotoStudioPoseId,
 } from '../config'
 import { captureSquarePfp, downloadDataUrl } from '../capture/captureSquare'
@@ -146,6 +148,7 @@ export function PhotoStudioControls() {
   const poseId = usePhotoStudioStore((state) => state.poseId)
   const framingId = usePhotoStudioStore((state) => state.framingId)
   const cameraAngleId = usePhotoStudioStore((state) => state.cameraAngleId)
+  const gmMugColorId = usePhotoStudioStore((state) => state.gmMugColorId)
   const brightness = usePhotoStudioStore((state) => state.brightness)
   const rotYaw = usePhotoStudioStore((state) => state.rotYaw)
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
@@ -153,6 +156,7 @@ export function PhotoStudioControls() {
   const setPoseId = usePhotoStudioStore((state) => state.setPoseId)
   const setFramingId = usePhotoStudioStore((state) => state.setFramingId)
   const setCameraAngleId = usePhotoStudioStore((state) => state.setCameraAngleId)
+  const setGmMugColorId = usePhotoStudioStore((state) => state.setGmMugColorId)
   const setBrightness = usePhotoStudioStore((state) => state.setBrightness)
   const resetRotation = usePhotoStudioStore((state) => state.resetRotation)
   const exitToIdle = usePhotoStudioStore((state) => state.exitToIdle)
@@ -248,6 +252,35 @@ export function PhotoStudioControls() {
             ))}
           </div>
         </div>
+
+        {poseId === 'gm' ? (
+          <div>
+            <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-white/45">
+              {t.mugColor}
+            </p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {PHOTO_STUDIO.gmMug.colorVariants.map((variant) => (
+                <button
+                  key={variant.id}
+                  type="button"
+                  title={variant.label[locale]}
+                  aria-label={variant.label[locale]}
+                  className={`h-8 w-8 shrink-0 rounded-full border-2 transition ${
+                    gmMugColorId === variant.id ? 'scale-110 border-white' : 'border-white/20'
+                  }`}
+                  style={{ backgroundColor: variant.swatch }}
+                  onClick={() => {
+                    setGmMugColorId(variant.id as PhotoStudioGmMugColorId)
+                    playSfx('uiClick')
+                  }}
+                />
+              ))}
+            </div>
+            <p className="mt-1.5 text-[0.6rem] text-white/35">
+              {getGmMugColorVariant(gmMugColorId).label[locale]}
+            </p>
+          </div>
+        ) : null}
 
         <div>
           <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-white/45">{t.framing}</p>

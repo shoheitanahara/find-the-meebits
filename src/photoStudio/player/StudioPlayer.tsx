@@ -68,6 +68,7 @@ export function StudioPlayer() {
   const poseId = usePhotoStudioStore((state) => state.poseId)
   const rotYaw = usePhotoStudioStore((state) => state.rotYaw)
   const backgroundId = usePhotoStudioStore((state) => state.backgroundId)
+  const gmMugColorId = usePhotoStudioStore((state) => state.gmMugColorId)
   const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
   const isShoot = poseId === 'shoot'
   const isGm = poseId === 'gm'
@@ -135,7 +136,7 @@ export function StudioPlayer() {
             PHOTO_STUDIO.gmMug.fallbackPosition[2],
           ]}
         >
-          <StudioGmMug letterColor={letterColor} />
+          <StudioGmMug letterColor={letterColor} colorId={gmMugColorId} />
         </group>
       ) : null}
     </group>

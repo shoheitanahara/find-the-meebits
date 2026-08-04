@@ -122,7 +122,7 @@ export const PHOTO_STUDIO = {
 
   /**
    * GM ポーズのマグカップ（右手追従・射撃と同じ前方持ち）。
-   * GM 文字色はスタジオ背景色に連動。
+   * GM 文字色はスタジオ背景色に連動。本体色は白／黒を選択可。
    */
   gmMug: {
     /** マグ全体スケール（見た目の大きさ） */
@@ -134,12 +134,30 @@ export const PHOTO_STUDIO = {
     fallbackPosition: [0.26, 1.02, 0.3] as const,
     /** マグ直立（取っ手はメッシュ側で -X＝体側） */
     rotation: [0, 0, 0] as const,
-    colors: {
-      body: '#f4eee6',
-      rim: '#ebe3d8',
-      handle: '#ddd4c8',
-      inside: '#3a322c',
-    },
+    colorVariants: [
+      {
+        id: 'white',
+        label: { en: 'White', ja: '白' },
+        swatch: '#f4eee6',
+        colors: {
+          body: '#f4eee6',
+          rim: '#ebe3d8',
+          handle: '#ddd4c8',
+          inside: '#3a322c',
+        },
+      },
+      {
+        id: 'black',
+        label: { en: 'Black', ja: '黒' },
+        swatch: '#1a1a1a',
+        colors: {
+          body: '#1c1c1c',
+          rim: '#2a2a2a',
+          handle: '#141414',
+          inside: '#0a0a0a',
+        },
+      },
+    ] as const,
   },
 
   /**
@@ -161,9 +179,9 @@ export const PHOTO_STUDIO = {
       position: [0, 0.8, -0.26] as const,
     },
     leg: {
-      size: [0.1, 0.6, 0.1] as const,
+      size: [0.1, 0.45, 0.1] as const,
       /** 脚中心 Y（地面寄り） */
-      y: 0.21,
+      y: 0.285,
       /** local [x, z] 四隅 */
       positions: [
         [-0.52, 0.2],
@@ -245,6 +263,8 @@ export type PhotoStudioBackgroundId = (typeof PHOTO_STUDIO.backgrounds)[number][
 export type PhotoStudioPoseId = (typeof PHOTO_STUDIO.poses)[number]['id']
 export type PhotoStudioFramingId = (typeof PHOTO_STUDIO.framings)[number]['id']
 export type PhotoStudioCameraAngleId = (typeof PHOTO_STUDIO.cameraAngles)[number]['id']
+export type PhotoStudioGmMugColorId =
+  (typeof PHOTO_STUDIO.gmMug.colorVariants)[number]['id']
 
 export function clampMeebitId(value: number): number {
   if (!Number.isFinite(value)) return PHOTO_STUDIO.meebitIdMin
@@ -268,6 +288,13 @@ export function getFraming(id: PhotoStudioFramingId) {
 
 export function getCameraAngle(id: PhotoStudioCameraAngleId) {
   return PHOTO_STUDIO.cameraAngles.find((a) => a.id === id) ?? PHOTO_STUDIO.cameraAngles[0]
+}
+
+export function getGmMugColorVariant(id: PhotoStudioGmMugColorId) {
+  return (
+    PHOTO_STUDIO.gmMug.colorVariants.find((v) => v.id === id) ??
+    PHOTO_STUDIO.gmMug.colorVariants[0]
+  )
 }
 
 export type PhotoStudioCameraSetup = {

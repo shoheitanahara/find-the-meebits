@@ -5,6 +5,7 @@ import {
   type PhotoStudioBackgroundId,
   type PhotoStudioCameraAngleId,
   type PhotoStudioFramingId,
+  type PhotoStudioGmMugColorId,
   type PhotoStudioPoseId,
 } from './config'
 
@@ -38,6 +39,7 @@ type PhotoStudioState = {
   poseId: PhotoStudioPoseId
   framingId: PhotoStudioFramingId
   cameraAngleId: PhotoStudioCameraAngleId
+  gmMugColorId: PhotoStudioGmMugColorId
   /** toneMappingExposure（明るさスライダー） */
   brightness: number
   /** 左右回転のみ（Y 軸, rad） */
@@ -50,6 +52,7 @@ type PhotoStudioState = {
   setPoseId: (id: PhotoStudioPoseId) => void
   setFramingId: (id: PhotoStudioFramingId) => void
   setCameraAngleId: (id: PhotoStudioCameraAngleId) => void
+  setGmMugColorId: (id: PhotoStudioGmMugColorId) => void
   setBrightness: (value: number) => void
   nudgeYaw: (dYaw: number) => void
   resetRotation: () => void
@@ -65,6 +68,7 @@ export const usePhotoStudioStore = create<PhotoStudioState>((set, get) => ({
   poseId: PHOTO_STUDIO.poses[0].id,
   framingId: 'full',
   cameraAngleId: 'default',
+  gmMugColorId: PHOTO_STUDIO.gmMug.colorVariants[0].id,
   brightness: PHOTO_STUDIO.lighting.exposureDefault,
   rotYaw: PHOTO_STUDIO.orbit.defaultYaw,
   capturing: false,
@@ -92,6 +96,7 @@ export const usePhotoStudioStore = create<PhotoStudioState>((set, get) => ({
   setPoseId: (poseId) => set({ poseId }),
   setFramingId: (framingId) => set({ framingId }),
   setCameraAngleId: (cameraAngleId) => set({ cameraAngleId }),
+  setGmMugColorId: (gmMugColorId) => set({ gmMugColorId }),
   setBrightness: (value) => set({ brightness: clampBrightness(value) }),
   nudgeYaw: (dYaw) => set({ rotYaw: wrapYaw(get().rotYaw + dYaw) }),
   resetRotation: () => set({ rotYaw: PHOTO_STUDIO.orbit.defaultYaw }),

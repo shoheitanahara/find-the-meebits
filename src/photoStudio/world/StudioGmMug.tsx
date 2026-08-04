@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from 'react'
 import { CanvasTexture, SRGBColorSpace } from 'three'
-import { PHOTO_STUDIO } from '../config'
+import { PHOTO_STUDIO, getGmMugColorVariant, type PhotoStudioGmMugColorId } from '../config'
 
 type StudioGmMugProps = {
   /** スタジオ背景色。GM 文字に使う */
   letterColor: string
+  colorId: PhotoStudioGmMugColorId
 }
 
 /** 縦長に伸ばした太字 GM（マグ面にフィットさせる） */
@@ -40,8 +41,9 @@ function createGmLabelTexture(letterColor: string) {
  * GM ポーズ用マグカップ。
  * 取っ手は本体に食い込ませて隙間なし。前面に縦長 GM ラベル。
  */
-export function StudioGmMug({ letterColor }: StudioGmMugProps) {
-  const { scale, rotation, colors } = PHOTO_STUDIO.gmMug
+export function StudioGmMug({ letterColor, colorId }: StudioGmMugProps) {
+  const { scale, rotation } = PHOTO_STUDIO.gmMug
+  const { colors } = getGmMugColorVariant(colorId)
   const labelTexture = useMemo(
     () => createGmLabelTexture(letterColor),
     [letterColor],
