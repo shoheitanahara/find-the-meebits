@@ -374,8 +374,7 @@ export const useShoreFishingStore = create<ShoreState>((set, get) => ({
   finishGame: () => {
     const { score, bestScore } = get()
     const ratingId = getRatingId(score)
-    const nextBest = Math.max(bestScore, score)
-    if (nextBest > bestScore) writeBestScore(nextBest)
+    const nextBest = score > 0 ? writeBestScore(score) : Math.max(bestScore, score)
     set({
       phase: 'result',
       remainingSec: 0,

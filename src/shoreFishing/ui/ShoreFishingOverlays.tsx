@@ -93,6 +93,7 @@ export function ShoreFishingResult() {
   const ratingId = useShoreFishingStore((s) => s.ratingId)
   const catches = useShoreFishingStore((s) => s.catches)
   const replay = useShoreFishingStore((s) => s.replay)
+  const exitToIdle = useShoreFishingStore((s) => s.exitToIdle)
   const t = shoreFishingUi()
 
   if (phase !== 'result') return null
@@ -147,16 +148,28 @@ export function ShoreFishingResult() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="mt-6 w-full rounded-2xl border border-cyan-200/40 bg-cyan-400/15 py-3.5 text-sm font-bold uppercase tracking-[0.18em] text-cyan-50 transition hover:bg-cyan-400/25"
-            onClick={() => {
-              void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
-              replay()
-            }}
-          >
-            {t.playAgain}
-          </button>
+          <div className="mt-6 grid gap-2">
+            <button
+              type="button"
+              className="w-full rounded-2xl border border-cyan-200/40 bg-cyan-400/15 py-3.5 text-sm font-bold uppercase tracking-[0.18em] text-cyan-50 transition hover:bg-cyan-400/25"
+              onClick={() => {
+                void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+                replay()
+              }}
+            >
+              {t.playAgain}
+            </button>
+            <button
+              type="button"
+              className="w-full rounded-2xl border border-white/20 bg-white/5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white/80 transition hover:bg-white/10"
+              onClick={() => {
+                void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
+                exitToIdle()
+              }}
+            >
+              {t.backToTitle}
+            </button>
+          </div>
         </section>
       </div>
     </div>

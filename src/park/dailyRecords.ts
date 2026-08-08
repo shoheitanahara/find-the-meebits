@@ -19,6 +19,7 @@ const KEYS = {
   sergito: 'meebits-sergito-daily-v1',
   starlight: 'meebits-starlight-best-daily',
   shooting: 'meebits-shooting-best-daily',
+  fishing: 'meebits-shore-fishing-best',
   mountain: 'meebits-mountain-progress-v3',
   neon: 'meebits-jerry-mountain-progress-v1',
 } as const
@@ -146,6 +147,7 @@ export function collectVisitPassLines(): VisitPassLine[] {
 
   const starlight = readDailyJson<ScorePayload>(KEYS.starlight)
   const shooting = readDailyJson<ScorePayload>(KEYS.shooting)
+  const fishing = readDailyJson<ScorePayload>(KEYS.fishing)
   const mountain = readDailyJson<HeightPayload>(KEYS.mountain)
   const neon = readDailyJson<HeightPayload>(KEYS.neon)
   const street = readDailyJson<StreetPayload>(KEYS.street)
@@ -176,6 +178,11 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'shooting',
       locale === 'ja' ? 'シューティングギャラリー' : 'Shooting Gallery',
       shooting && shooting.score > 0 ? scoreDetail(shooting.score, locale) : null,
+    ),
+    line(
+      'fishing',
+      locale === 'ja' ? 'ショアフィッシング' : 'Shore Fishing',
+      fishing && fishing.score > 0 ? scoreDetail(fishing.score, locale) : null,
     ),
     line(
       'mountain',

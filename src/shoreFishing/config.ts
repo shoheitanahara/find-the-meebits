@@ -223,25 +223,50 @@ export function castLandingFrom(x: number, z: number, rotationY: number) {
   return { x: lx, y: SHORE_FISHING.castBobberY, z: lz }
 }
 
+type DailyBestPayload = { dateKey: string; score: number }
+
 export function readBestScore() {
   if (typeof window === 'undefined') return 0
+  const today = getUtcDateKey()
   try {
-    const raw = localStorage.getItem(`${SHORE_FISHING.bestScoreKey}:${getUtcDateKey()}`)
-    const n = raw ? Number(raw) : 0
-    return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0
+    // 来場証と同じ JSON（dateKey + score）
+    const raw = localStorage.getItem(SHORE_FISHING.bestScoreKey)
+    if (raw) {
+      const parsed = JSON.parse(raw) as DailyBestPayload
+      if (parsed?.dateKey === today && Number.isFinite(parsed.score)) {
+        return Math.max(0, Math.floor(parsed.score))
+      }
+    }
+    // 旧形式 `key:date` の数値のみ → 新形式へ寄せる
+    const legacy = localStorage.getItem(`${SHORE_FISHING.bestScoreKey}:${today}`)
+    const n = legacy ? Number(legacy) : 0
+    if (Number.isFinite(n) && n > 0) {
+      const score = Math.max(0, Math.floor(n))
+      try {
+        localStorage.setItem(
+          SHORE_FISHING.bestScoreKey,
+          JSON.stringify({ dateKey: today, score } satisfies DailyBestPayload),
+        )
+      } catch {
+        /* ignore */
+      }
+      return score
+    }
+    return 0
   } catch {
     return 0
   }
 }
 
 export function writeBestScore(score: number) {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') return 0
+  const today = getUtcDateKey()
+  const next = Math.max(readBestScore(), Math.floor(score))
   try {
-    localStorage.setItem(
-      `${SHORE_FISHING.bestScoreKey}:${getUtcDateKey()}`,
-      String(Math.max(0, Math.floor(score))),
-    )
+    const payload: DailyBestPayload = { dateKey: today, score: next }
+    localStorage.setItem(SHORE_FISHING.bestScoreKey, JSON.stringify(payload))
   } catch {
     // ignore
   }
+  return next
 }
