@@ -8,6 +8,7 @@ import {
   getVisitTimezoneLabel,
 } from '../visitPassRecords'
 import type { VisitPassLine } from '../../park/dailyRecords'
+import { getDailyVisitPassTheme, type VisitPassTheme } from './visitPassTheme'
 
 /** レイアウト基準サイズ（見た目の座標） */
 const CARD_W = 1024
@@ -20,14 +21,6 @@ const PHOTO = 268
 const PHOTO_X = MARGIN + 8
 const PHOTO_Y = 152
 
-const INK = '#1a2438'
-const INK_MUTED = 'rgba(26, 36, 56, 0.55)'
-const INK_FAINT = 'rgba(26, 36, 56, 0.32)'
-const RULE = 'rgba(26, 36, 56, 0.18)'
-const ACCENT = '#3d5a80'
-const PAPER = '#f4f0e8'
-const PAPER_EDGE = '#e6e0d4'
-
 const SERIF = 'Georgia, "Times New Roman", Times, serif'
 const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
@@ -36,11 +29,14 @@ export type VisitPassOptions = {
   meebitNumber: number
   issuedAt?: Date
   records?: VisitPassLine[]
+  /** 省略時は UTC 日替わりテーマ */
+  theme?: VisitPassTheme
 }
 
 /**
  * スタジオ Canvas から来場証明書 PNG を合成する。
  * ミュージアム会員証寄りの紙質・ヘアライン・セリフ見出し。
+ * 色味だけ日替わり（`visitPassTheme`）。
  */
 export function composeVisitPass(
   gl: WebGLRenderer,
@@ -57,7 +53,6 @@ export function composeVisitPass(
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
 
-  // レイアウト座標のまま描き、端末ピクセルは EXPORT_SCALE 倍
   ctx.setTransform(EXPORT_SCALE, 0, 0, EXPORT_SCALE, 0, 0)
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
@@ -69,80 +64,74 @@ export function composeVisitPass(
   const timezoneLabel = getVisitTimezoneLabel(issuedAt)
   const dateKey = getUtcDateKey(issuedAt)
   const serial = buildSerial(options.meebitNumber, dateKey)
+  const theme = options.theme ?? getDailyVisitPassTheme(dateKey)
 
-  paintPaper(ctx)
-  paintOuterFrame(ctx)
-  paintHeader(ctx, locale)
-  paintPhoto(ctx, source, sw, sh)
-  paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel)
-  paintRecords(ctx, locale, records)
-  paintFooter(ctx, serial)
+  paintPaper(ctx, theme)
+  paintOuterFrame(ctx, theme)
+  paintHeader(ctx, locale, theme)
+  paintPhoto(ctx, source, sw, sh, theme)
+  paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel, theme)
+  paintRecords(ctx, locale, records, theme)
+  paintFooter(ctx, serial, theme)
 
   return canvas.toDataURL('image/png')
 }
 
-function paintPaper(ctx: CanvasRenderingContext2D) {
-  // 外側のごく薄い影（カードの厚み）
+function paintPaper(ctx: CanvasRenderingContext2D, theme: VisitPassTheme) {
   ctx.fillStyle = 'rgba(26, 36, 56, 0.08)'
   roundRect(ctx, 10, 12, CARD_W - 16, CARD_H - 16, 10)
   ctx.fill()
 
   const paper = ctx.createLinearGradient(0, 0, CARD_W, CARD_H)
-  paper.addColorStop(0, '#f7f3ec')
-  paper.addColorStop(0.45, PAPER)
-  paper.addColorStop(1, '#efe9df')
+  paper.addColorStop(0, theme.paper[0])
+  paper.addColorStop(0.45, theme.paper[1])
+  paper.addColorStop(1, theme.paper[2])
   ctx.fillStyle = paper
   roundRect(ctx, 0, 0, CARD_W, CARD_H, 12)
   ctx.fill()
 
-  // ごく弱い紙の粒感
+  // ごく弱い紙の粒感（テーマ ink を薄く）
   ctx.save()
   ctx.globalAlpha = 0.035
   for (let i = 0; i < 900; i += 1) {
     const x = (i * 97) % CARD_W
     const y = (i * 53) % CARD_H
-    ctx.fillStyle = i % 3 === 0 ? '#1a2438' : '#ffffff'
+    ctx.fillStyle = i % 3 === 0 ? theme.ink : '#ffffff'
     ctx.fillRect(x, y, 1.2, 1.2)
   }
   ctx.restore()
 }
 
-function paintOuterFrame(ctx: CanvasRenderingContext2D) {
-  // 二重枠
-  ctx.strokeStyle = INK
+function paintOuterFrame(ctx: CanvasRenderingContext2D, theme: VisitPassTheme) {
+  ctx.strokeStyle = theme.ink
   ctx.lineWidth = 1.25
   roundRect(ctx, 18, 18, CARD_W - 36, CARD_H - 36, 8)
   ctx.stroke()
 
-  ctx.strokeStyle = RULE
+  ctx.strokeStyle = theme.rule
   ctx.lineWidth = 0.75
   roundRect(ctx, 24, 24, CARD_W - 48, CARD_H - 48, 6)
   ctx.stroke()
 
-  // 四隅のレジストレーション風マーク
   const mark = 14
   const inset = 32
-  ctx.strokeStyle = INK_FAINT
+  ctx.strokeStyle = theme.inkFaint
   ctx.lineWidth = 1
-  // TL
   ctx.beginPath()
   ctx.moveTo(inset, inset + mark)
   ctx.lineTo(inset, inset)
   ctx.lineTo(inset + mark, inset)
   ctx.stroke()
-  // TR
   ctx.beginPath()
   ctx.moveTo(CARD_W - inset - mark, inset)
   ctx.lineTo(CARD_W - inset, inset)
   ctx.lineTo(CARD_W - inset, inset + mark)
   ctx.stroke()
-  // BL
   ctx.beginPath()
   ctx.moveTo(inset, CARD_H - inset - mark)
   ctx.lineTo(inset, CARD_H - inset)
   ctx.lineTo(inset + mark, CARD_H - inset)
   ctx.stroke()
-  // BR
   ctx.beginPath()
   ctx.moveTo(CARD_W - inset - mark, CARD_H - inset)
   ctx.lineTo(CARD_W - inset, CARD_H - inset)
@@ -150,35 +139,36 @@ function paintOuterFrame(ctx: CanvasRenderingContext2D) {
   ctx.stroke()
 }
 
-function paintHeader(ctx: CanvasRenderingContext2D, locale: 'en' | 'ja') {
+function paintHeader(
+  ctx: CanvasRenderingContext2D,
+  locale: 'en' | 'ja',
+  theme: VisitPassTheme,
+) {
   const brand = 'Meebits Park'
   const pass = 'Visitor Pass'
   const district =
     locale === 'ja' ? 'カルチャーエリア · フォトブース' : 'Culture District · Photo Booth'
 
-  // ブランドは小さく上に
-  ctx.fillStyle = ACCENT
+  ctx.fillStyle = theme.accent
   ctx.font = `600 11px ${SANS}`
   ctx.fillText(brand.toUpperCase(), MARGIN + 4, 52)
 
-  // 書類名は常に英語表記
-  ctx.fillStyle = INK
+  ctx.fillStyle = theme.ink
   ctx.font = `italic 40px ${SERIF}`
   ctx.fillText(pass, MARGIN + 4, 92)
 
-  // アクセントの短いアンダーライン
   const passWidth = ctx.measureText(pass).width
-  ctx.fillStyle = ACCENT
+  ctx.fillStyle = theme.accent
   ctx.fillRect(MARGIN + 4, 100, Math.min(72, passWidth * 0.35), 3)
 
-  ctx.strokeStyle = RULE
+  ctx.strokeStyle = theme.rule
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(MARGIN + 4, 116)
   ctx.lineTo(CARD_W - MARGIN - 4, 116)
   ctx.stroke()
 
-  ctx.fillStyle = INK_MUTED
+  ctx.fillStyle = theme.inkMuted
   ctx.font = `500 12px ${SANS}`
   ctx.fillText(district, MARGIN + 4, 136)
 }
@@ -188,12 +178,12 @@ function paintPhoto(
   source: HTMLCanvasElement,
   sw: number,
   sh: number,
+  theme: VisitPassTheme,
 ) {
   const side = Math.min(sw, sh)
   const sx = Math.floor((sw - side) / 2)
   const sy = Math.floor((sh - side) / 2)
 
-  // PFP と同じ解像度で一度正方形に切り出し、スロットへ（直引きだと 268px に潰れる）
   const hiSize = Math.max(PHOTO_STUDIO.exportSize, PHOTO * EXPORT_SCALE)
   const hi = document.createElement('canvas')
   hi.width = hiSize
@@ -205,8 +195,7 @@ function paintPhoto(
   hiCtx.imageSmoothingQuality = 'high'
   hiCtx.drawImage(source, sx, sy, side, side, 0, 0, hiSize, hiSize)
 
-  // 写真マット
-  ctx.fillStyle = PAPER_EDGE
+  ctx.fillStyle = theme.paperEdge
   ctx.fillRect(PHOTO_X - 10, PHOTO_Y - 10, PHOTO + 20, PHOTO + 20)
 
   ctx.fillStyle = '#0a0e14'
@@ -216,8 +205,7 @@ function paintPhoto(
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(hi, PHOTO_X, PHOTO_Y, PHOTO, PHOTO)
 
-  // 細い内側ライン
-  ctx.strokeStyle = 'rgba(244, 240, 232, 0.35)'
+  ctx.strokeStyle = theme.photoInnerLine
   ctx.lineWidth = 1
   ctx.strokeRect(PHOTO_X + 0.5, PHOTO_Y + 0.5, PHOTO - 1, PHOTO - 1)
 }
@@ -228,6 +216,7 @@ function paintIdentity(
   meebitNumber: number,
   timestamp: string,
   timezoneLabel: string,
+  theme: VisitPassTheme,
 ) {
   const textX = PHOTO_X + PHOTO + 48
   const colW = CARD_W - textX - MARGIN - 8
@@ -236,17 +225,21 @@ function paintIdentity(
   const zoneLabel = locale === 'ja' ? 'タイムゾーン' : 'Timezone'
   const idValue = String(meebitNumber).padStart(5, '0')
 
-  drawField(ctx, textX, PHOTO_Y + 8, colW, idLabel, `#${idValue}`, 36)
-  drawField(ctx, textX, PHOTO_Y + 108, colW, issuedLabel, timestamp, 22)
-  drawField(ctx, textX, PHOTO_Y + 188, colW * 0.72, zoneLabel, timezoneLabel, 18)
+  drawField(ctx, textX, PHOTO_Y + 8, colW, idLabel, `#${idValue}`, 36, theme)
+  drawField(ctx, textX, PHOTO_Y + 108, colW, issuedLabel, timestamp, 22, theme)
+  drawField(ctx, textX, PHOTO_Y + 188, colW * 0.72, zoneLabel, timezoneLabel, 18, theme)
 
-  paintVerifiedSeal(ctx, CARD_W - MARGIN - 78, PHOTO_Y + PHOTO - 36)
+  paintVerifiedSeal(ctx, CARD_W - MARGIN - 78, PHOTO_Y + PHOTO - 36, theme)
 }
 
-/** 公証印／ラバースタンプ風の Verified 印章 */
-function paintVerifiedSeal(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
-  const ink = 'rgba(132, 42, 48, 0.78)'
-  const inkSoft = 'rgba(132, 42, 48, 0.55)'
+function paintVerifiedSeal(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  theme: VisitPassTheme,
+) {
+  const ink = theme.seal
+  const inkSoft = theme.sealSoft
   const outerR = 46
   const midR = 40
   const innerR = 28
@@ -254,13 +247,11 @@ function paintVerifiedSeal(ctx: CanvasRenderingContext2D, cx: number, cy: number
 
   ctx.save()
   ctx.translate(cx, cy)
-  // 少し斜めに押した公証印らしい傾き
   ctx.rotate(-0.16)
 
-  // 押印のにじみ（下地）
   ctx.beginPath()
   ctx.arc(1.2, 0.8, outerR + 1.5, 0, Math.PI * 2)
-  ctx.strokeStyle = 'rgba(132, 42, 48, 0.12)'
+  ctx.strokeStyle = withAlpha(theme.seal, 0.12)
   ctx.lineWidth = 3
   ctx.stroke()
 
@@ -280,7 +271,6 @@ function paintVerifiedSeal(ctx: CanvasRenderingContext2D, cx: number, cy: number
   ctx.arc(0, 0, innerR, 0, Math.PI * 2)
   ctx.stroke()
 
-  // 外〜中環の放射状ギザ
   ctx.strokeStyle = inkSoft
   ctx.lineWidth = 1
   for (let i = 0; i < 36; i += 1) {
@@ -291,12 +281,9 @@ function paintVerifiedSeal(ctx: CanvasRenderingContext2D, cx: number, cy: number
     ctx.stroke()
   }
 
-  // 上弧: 左→右、足元は中心向き
   paintSealArcText(ctx, 'MEEBITS PARK', arcR, -Math.PI * 0.86, -Math.PI * 0.14, ink, 7.4, false)
-  // 下弧: 正立で左→右に読める（文字もカード基準で正立）
   paintSealArcText(ctx, 'VISITOR PASS', arcR, Math.PI * 0.86, Math.PI * 0.14, ink, 7.1, true)
 
-  // 中央の小さな五芒星 + VERIFIED
   ctx.fillStyle = inkSoft
   paintSealStar(ctx, 0, -10, 4.2)
 
@@ -330,7 +317,6 @@ function paintSealStar(ctx: CanvasRenderingContext2D, x: number, y: number, r: n
   ctx.fill()
 }
 
-/** 円弧上に1文字ずつ配置。upright=true でカード正立のまま読める下弧向け */
 function paintSealArcText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -357,7 +343,6 @@ function paintSealArcText(
     const y = Math.sin(angle) * radius
     ctx.save()
     ctx.translate(x, y)
-    // 上弧: 足元→中心 / 下弧: カード正立で LTR に読める向き
     ctx.rotate(upright ? angle - Math.PI / 2 : angle + Math.PI / 2)
     ctx.fillText(char, 0, 0)
     ctx.restore()
@@ -374,19 +359,20 @@ function drawField(
   label: string,
   value: string,
   valueSize: number,
+  theme: VisitPassTheme,
 ) {
-  ctx.fillStyle = INK_MUTED
+  ctx.fillStyle = theme.inkMuted
   ctx.font = `600 10px ${SANS}`
   ctx.fillText(label.toUpperCase(), x, y)
 
-  ctx.strokeStyle = RULE
+  ctx.strokeStyle = theme.rule
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(x, y + 8)
   ctx.lineTo(x + width, y + 8)
   ctx.stroke()
 
-  ctx.fillStyle = INK
+  ctx.fillStyle = theme.ink
   ctx.font =
     valueSize >= 30
       ? `600 ${valueSize}px ${MONO}`
@@ -398,12 +384,12 @@ function paintRecords(
   ctx: CanvasRenderingContext2D,
   locale: 'en' | 'ja',
   records: VisitPassLine[],
+  theme: VisitPassTheme,
 ) {
   const count = records.length
   if (count === 0) return
 
   const footerTop = CARD_H - 52
-  /** 写真マット下端より下に収める */
   const photoBottom = PHOTO_Y + PHOTO + 18
   const maxBandH = Math.max(80, footerTop - photoBottom - 6)
   const layout = planRecordsLayout(count, maxBandH)
@@ -414,14 +400,14 @@ function paintRecords(
   const bandX = MARGIN + 4
   const bandW = CARD_W - MARGIN * 2 - 8
 
-  ctx.strokeStyle = RULE
+  ctx.strokeStyle = theme.rule
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(bandX, bandY)
   ctx.lineTo(bandX + bandW, bandY)
   ctx.stroke()
 
-  ctx.fillStyle = INK_MUTED
+  ctx.fillStyle = theme.inkMuted
   ctx.font = `600 9px ${SANS}`
   const heading = locale === 'ja' ? '本日のパーク記録' : "Today's park records"
   ctx.fillText(heading.toUpperCase(), bandX, bandY + 16)
@@ -441,18 +427,18 @@ function paintRecords(
     const x = bandX + col * (colW + colGap)
     const y = gridTop + row * layout.rowH + layout.fontSize
 
-    ctx.fillStyle = record.filled ? INK_MUTED : INK_FAINT
+    ctx.fillStyle = record.filled ? theme.inkMuted : theme.inkFaint
     ctx.font = labelFont
     ctx.fillText(record.label, x, y)
     const labelWidth = ctx.measureText(record.label).width
 
-    ctx.fillStyle = record.filled ? INK : INK_FAINT
+    ctx.fillStyle = record.filled ? theme.ink : theme.inkFaint
     ctx.font = record.filled ? detailFontFilled : detailFontEmpty
     const detailW = ctx.measureText(record.detail).width
     ctx.fillText(record.detail, x + colW - detailW, y)
 
     if (record.filled && colW - detailW - labelWidth > 24) {
-      ctx.strokeStyle = 'rgba(26, 36, 56, 0.1)'
+      ctx.strokeStyle = withAlpha(theme.rule, 0.1)
       ctx.lineWidth = 1
       ctx.setLineDash([1, 3])
       ctx.beginPath()
@@ -464,10 +450,6 @@ function paintRecords(
   })
 }
 
-/**
- * 件数に応じて列数を増やし、写真〜フッター間に収まる行高・文字サイズを決める。
- * 正式名称を省略しない前提で、まず 2 列 → 足りなければ 3 → 4 列。
- */
 function planRecordsLayout(count: number, maxBandH: number) {
   const headingH = 28
   const padding = 6
@@ -500,17 +482,17 @@ function planRecordsLayout(count: number, maxBandH: number) {
   }
 }
 
-function paintFooter(ctx: CanvasRenderingContext2D, serial: string) {
+function paintFooter(ctx: CanvasRenderingContext2D, serial: string, theme: VisitPassTheme) {
   const y = CARD_H - 28
 
-  ctx.strokeStyle = RULE
+  ctx.strokeStyle = theme.rule
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(MARGIN + 4, y - 14)
   ctx.lineTo(CARD_W - MARGIN - 4, y - 14)
   ctx.stroke()
 
-  ctx.fillStyle = INK_FAINT
+  ctx.fillStyle = theme.inkFaint
   ctx.font = `500 9px ${MONO}`
   ctx.fillText(serial, MARGIN + 4, y)
 
@@ -524,6 +506,11 @@ function buildSerial(meebitNumber: number, dateKey: string): string {
   const compact = dateKey.replaceAll('-', '')
   const id = String(meebitNumber).padStart(5, '0')
   return `MP-${compact}-${id}`
+}
+
+/** rgba(..., a) のアルファだけ差し替え */
+function withAlpha(rgba: string, alpha: number): string {
+  return rgba.replace(/[\d.]+\)$/, `${alpha})`)
 }
 
 function roundRect(
