@@ -26,6 +26,8 @@
     { "source": "/shooting-gallery/(.*)", "destination": "/index.html" },
     { "source": "/starlight-rush", "destination": "/index.html" },
     { "source": "/starlight-rush/(.*)", "destination": "/index.html" },
+    { "source": "/shore-fishing", "destination": "/index.html" },
+    { "source": "/shore-fishing/(.*)", "destination": "/index.html" },
     { "source": "/photo-booth", "destination": "/index.html" },
     { "source": "/photo-booth/(.*)", "destination": "/index.html" },
     { "source": "/find-the-meebit", "destination": "/index.html" },

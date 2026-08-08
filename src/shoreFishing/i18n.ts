@@ -1,0 +1,110 @@
+import { getLocale } from '../i18n/locale'
+import { SHORE_FISHING, type FishKindId, type ShoreFishingRatingId } from './config'
+
+const fishNames: Record<FishKindId, { en: string; ja: string }> = {
+  minnow: { en: 'Minnow', ja: 'メダカ' },
+  sardine: { en: 'Sardine', ja: 'イワシ' },
+  horseMackerel: { en: 'Horse Mackerel', ja: 'アジ' },
+  seaBass: { en: 'Sea Bass', ja: 'スズキ' },
+  snapper: { en: 'Snapper', ja: 'タイ' },
+  flounder: { en: 'Flounder', ja: 'カレイ' },
+  tuna: { en: 'Tuna', ja: 'マグロ' },
+  ray: { en: 'Ray', ja: 'エイ' },
+  hammerhead: { en: 'Hammerhead', ja: 'シュモクザメ' },
+  greatWhite: { en: 'Great White', ja: 'ホオジロザメ' },
+}
+
+const ratingNames: Record<ShoreFishingRatingId, { en: string; ja: string }> = {
+  legend: { en: 'LEGEND', ja: 'レジェンド' },
+  captain: { en: 'CAPTAIN', ja: 'キャプテン' },
+  angler: { en: 'ANGLER', ja: 'アングラー' },
+  castaway: { en: 'CASTAWAY', ja: 'カースタウェイ' },
+  tidewalker: { en: 'TIDE WALKER', ja: 'タイドウォーカー' },
+}
+
+const copy = {
+  en: {
+    title: 'Shore Fishing',
+    subtitle: 'Walk the islet, find fish shadows in the sea, cast from the shore.',
+    rulesTitle: 'How to fish',
+    controls:
+      'Move like the Park. Cast near a fish shadow — the closest one bites. Rare shadows vanish faster. Reel on the big bite.',
+    scoreGuideTitle: 'Fish scores',
+    ratingGuideTitle: 'Ratings',
+    start: 'Start fishing',
+    playAgain: 'Fish again',
+    best: 'Best today',
+    score: 'Score',
+    time: 'Time',
+    caught: 'Caught',
+    cast: 'Cast',
+    hook: 'Reel!',
+    cancel: 'Cancel',
+    wait: 'Waiting…',
+    waitFish: 'Waiting for a bite… (Reel to cancel)',
+    nibble: 'Nibble…',
+    bite: 'Bite!',
+    miss: 'Got away…',
+    empty: 'No fish nearby…',
+    catch: 'Caught!',
+    nearShore: 'Shoreline — ready to cast',
+    walkHint: 'Walk to the edge of the island',
+    sessionTitle: 'This session',
+    emptySession: 'No fish yet.',
+    resultTitle: 'Time’s up',
+    countdown: 'Get ready',
+  },
+  ja: {
+    title: 'ショアフィッシング',
+    subtitle: '孤島を歩いて海の魚影を見つけ、岸辺からキャストしよう。',
+    rulesTitle: '遊び方',
+    controls:
+      'パークと同じ移動。魚影の近くでキャスト（一番近い影が食いつく）。レア影はすぐ消える。本食いでアワセ',
+    scoreGuideTitle: '魚の得点',
+    ratingGuideTitle: '評価',
+    start: '釣りをはじめる',
+    playAgain: 'もう一度釣る',
+    best: '本日ベスト',
+    score: 'スコア',
+    time: '残り',
+    caught: '釣果',
+    cast: 'キャスト',
+    hook: 'アワセ！',
+    cancel: 'やめる',
+    wait: '待ち中…',
+    waitFish: '魚を待ってる…（引くとキャンセル）',
+    nibble: 'つついてる…',
+    bite: '食った！',
+    miss: '逃げられた…',
+    empty: '近くに魚影がない…',
+    catch: '釣れた！',
+    nearShore: '岸辺 — キャストできます',
+    walkHint: '島のふちまで歩いてね',
+    sessionTitle: 'この回の釣果',
+    emptySession: 'まだ釣れていない',
+    resultTitle: 'タイムアップ',
+    countdown: '準備して',
+  },
+} as const
+
+export function shoreFishingUi() {
+  return copy[getLocale()]
+}
+
+export function fishLabel(id: FishKindId) {
+  return fishNames[id][getLocale()]
+}
+
+export function ratingLabel(id: ShoreFishingRatingId) {
+  return ratingNames[id][getLocale()]
+}
+
+export function fishScoreRows() {
+  return SHORE_FISHING.fishKinds.map((f) => ({
+    id: f.id,
+    color: f.color,
+    score: f.score,
+    rare: Boolean(f.rare),
+    label: fishLabel(f.id),
+  }))
+}

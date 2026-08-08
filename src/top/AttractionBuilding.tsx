@@ -15,6 +15,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - runway: 暗いパビリオン＋発光ランウェイ
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  * - sergito: シーエリアの工房（Meet Sergito）
+ * - fishing: シーエリア西のショアフィッシング
  * - shooting: マウンテンエリアの木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
  * - pfp: カルチャー東のフォトブース
@@ -41,13 +42,15 @@ export function AttractionBuilding({
                 ? '#8eb4e8'
                 : attraction.id === 'sergito'
                   ? '#d4a060'
+                  : attraction.id === 'fishing'
+                    ? '#7ec8e8'
                   : attraction.id === 'shooting'
                     ? '#e8b060'
                     : attraction.id === 'starlight'
                       ? '#5ce0ff'
                       : attraction.id === 'pfp'
                         ? '#8eb4e8'
-                      : '#c4a060'
+                        : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -70,6 +73,8 @@ export function AttractionBuilding({
         <TraitMuseumLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'sergito' ? (
         <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : attraction.id === 'fishing' ? (
+        <ShoreFishingLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'shooting' ? (
         <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'starlight' ? (
@@ -440,6 +445,52 @@ function MeetSergitoLandmark({
         <meshStandardMaterial color="#806850" roughness={0.88} />
       </mesh>
       <pointLight position={[0, 2.6, 1.2]} intensity={9} distance={10} color={accent} />
+    </group>
+  )
+}
+
+/** Sea 西棟: 波打ち際の釣り小屋 */
+function ShoreFishingLandmark({
+  color,
+  roofColor,
+  accent,
+}: {
+  color: string
+  roofColor: string
+  accent: string
+}) {
+  return (
+    <group>
+      <mesh position={[0, 0.12, 0]} receiveShadow>
+        <boxGeometry args={[6.8, 0.24, 6.6]} />
+        <meshStandardMaterial color="#a89068" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 1.55, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[5.4, 2.9, 5.0]} />
+        <meshStandardMaterial color={color} roughness={0.88} />
+      </mesh>
+      {/* 片流れ屋根 */}
+      <mesh position={[0, 3.2, -0.15]} rotation={[0.12, 0, 0]} castShadow>
+        <boxGeometry args={[5.9, 0.22, 5.5]} />
+        <meshStandardMaterial color={roofColor} roughness={0.5} metalness={0.12} />
+      </mesh>
+      {/* 竿立て */}
+      {([-1.6, -0.9, -0.2] as const).map((x) => (
+        <mesh key={x} position={[x, 1.7, 2.55]} rotation={[0.35, 0, 0.08]} castShadow>
+          <cylinderGeometry args={[0.035, 0.04, 2.4, 6]} />
+          <meshStandardMaterial color="#5a4030" roughness={0.8} />
+        </mesh>
+      ))}
+      <mesh position={[2.0, 1.1, 2.4]} castShadow>
+        <boxGeometry args={[1.5, 0.7, 1.1]} />
+        <meshStandardMaterial color="#8a7058" roughness={0.85} />
+      </mesh>
+      {/* 浮きバケツ */}
+      <mesh position={[-2.2, 0.55, 2.7]} castShadow>
+        <cylinderGeometry args={[0.35, 0.3, 0.55, 10]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.2} roughness={0.55} />
+      </mesh>
+      <pointLight position={[0, 2.5, 1.4]} intensity={8} distance={10} color={accent} />
     </group>
   )
 }
@@ -929,7 +980,17 @@ function TitleBanner({
   y: number
   z: number
 }) {
-  const subtitle = attraction.subtitle
+  const underConstruction = Boolean(attraction.underConstruction)
+  const title = underConstruction
+    ? locale === 'ja'
+      ? '工事中'
+      : 'UNDER CONSTRUCTION'
+    : attraction.title
+  const subtitle = underConstruction
+    ? locale === 'ja'
+      ? 'COMING SOON'
+      : 'COMING SOON'
+    : attraction.subtitle
 
   return (
     <group position={[0, y, z]}>
@@ -945,13 +1006,13 @@ function TitleBanner({
       </mesh>
       <Text
         position={[0, 0.14, 0.15]}
-        fontSize={0.44}
+        fontSize={underConstruction ? 0.4 : 0.44}
         color="#f6df9d"
         anchorX="center"
         anchorY="middle"
         maxWidth={5.4}
       >
-        {attraction.title}
+        {title}
       </Text>
       <Text
         position={[0, -0.38, 0.13]}

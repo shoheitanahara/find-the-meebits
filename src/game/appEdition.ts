@@ -11,6 +11,7 @@ export type AppEdition =
   | 'sergito'
   | 'shooting'
   | 'starlight'
+  | 'fishing'
   | 'pfp'
   | 'top'
 
@@ -20,6 +21,9 @@ export function getPathSegments(pathname = typeof window !== 'undefined' ? windo
 
 export function getAppEdition(pathname = typeof window !== 'undefined' ? window.location.pathname : '/'): AppEdition {
   const segments = getPathSegments(pathname)
+  if (segments.includes('shore-fishing')) {
+    return 'fishing'
+  }
   if (segments.includes('starlight-rush')) {
     return 'starlight'
   }

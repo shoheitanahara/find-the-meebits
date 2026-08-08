@@ -47,6 +47,10 @@ const metadata = {
       title: 'Starlight Rush | Meebits Park',
       description: 'Ride a cosmic coaster and shoot colorful stars racing toward you. Ninety seconds of Starlight Rush.',
     },
+    fishing: {
+      title: 'Shore Fishing | Meebits Park',
+      description: 'Cast from the shoreline, wait for the big bite, and reel in as many fish as you can in 90 seconds.',
+    },
     pfp: {
       title: 'Photo Booth | Meebits Park',
       description: 'Shoot a clean square Meebit PFP and issue today’s visit pass with your park records.',
@@ -96,6 +100,10 @@ const metadata = {
     starlight: {
       title: 'スターライト・ラッシュ | Meebits Park',
       description: '宇宙ジェットコースターに乗り、奥から流れてくる星を撃て。90秒のスコアアタック。',
+    },
+    fishing: {
+      title: 'ショアフィッシング | Meebits Park',
+      description: '波打ち際でキャストし、本食いの瞬間にアワセよう。90秒で釣果を競う。',
     },
     pfp: {
       title: 'フォトブース | Meebits Park',

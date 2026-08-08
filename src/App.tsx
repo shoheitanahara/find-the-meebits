@@ -12,6 +12,7 @@ import { ClosetApp } from './closet/ClosetApp'
 import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
 import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
 import { StarlightRushApp } from './starlightRush/StarlightRushApp'
+import { ShoreFishingApp } from './shoreFishing/ShoreFishingApp'
 import { PhotoStudioApp } from './photoStudio/PhotoStudioApp'
 import { TopApp } from './top/TopApp'
 import { TabPauseSystem } from './systems/TabPauseSystem'
@@ -180,6 +181,15 @@ export default function App() {
     return (
       <>
         <StarlightRushApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'fishing') {
+    return (
+      <>
+        <ShoreFishingApp />
         <Analytics />
       </>
     )

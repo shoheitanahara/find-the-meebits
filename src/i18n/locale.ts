@@ -63,6 +63,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/starlight-rush' : '/starlight-rush'
   }
 
+  if (segments.includes('shore-fishing')) {
+    return locale === 'ja' ? '/jp/shore-fishing' : '/shore-fishing'
+  }
+
   if (segments.includes('photo-booth') || segments.includes('pfp-studio')) {
     return locale === 'ja' ? '/jp/photo-booth' : '/photo-booth'
   }

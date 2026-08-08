@@ -358,7 +358,154 @@ type ShootingPoseOptions = {
   recoil: number
 }
 
+export type FishingAction = 'carry' | 'cast' | 'wait' | 'reel' | 'catch'
+
+type FishingPoseOptions = {
+  elapsedTime: number
+  isMoving: boolean
+  isRunning?: boolean
+  idleOffset?: number
+  walkPhaseOffset?: number
+  action: FishingAction
+  /** cast / reel の 0..1 */
+  actionT: number
+  /** cast のうち振りかぶりの割合（ルアー飛行開始と揃える） */
+  castWindupRatio?: number
+}
+
 const HALF_PI = Math.PI / 2
+
+/**
+ * 釣り用。下半身は歩行、右腕で竿を持ち、キャスト／待ち／引き上げを表現する。
+ */
+export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions) {
+  if (!vrm) return
+
+  const hips = getBone(vrm, VRMHumanBoneName.Hips)
+  const spine = getBone(vrm, VRMHumanBoneName.Spine)
+  const chest = getBone(vrm, VRMHumanBoneName.Chest)
+  const head = getBone(vrm, VRMHumanBoneName.Head)
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  const speed = options.isRunning ? 12 : 7
+  const phase = options.walkPhaseOffset ?? 0
+  const stride = Math.sin(options.elapsedTime * speed + phase)
+  const counterStride = Math.sin(options.elapsedTime * speed + phase + Math.PI)
+  const idle = Math.sin(options.elapsedTime * 1.8 + (options.idleOffset ?? 0))
+  const movementWeight = options.isMoving ? 1 : 0
+  const idleWeight = 1 - movementWeight
+  const actionT = MathUtils.clamp(options.actionT, 0, 1)
+
+  setRotation(hips, {
+    x: idle * 0.015 * idleWeight,
+    y: stride * 0.035 * movementWeight,
+    z: counterStride * 0.025 * movementWeight,
+  })
+  setRotation(spine, {
+    x: -0.05 * movementWeight + idle * 0.012 * idleWeight,
+    y: counterStride * 0.03 * movementWeight,
+  })
+  setRotation(chest, {
+    x: idle * 0.018 * idleWeight,
+    y: counterStride * 0.04 * movementWeight,
+    z: stride * 0.018 * movementWeight,
+  })
+  setRotation(head, {
+    x: idle * 0.018 * idleWeight,
+    y: stride * 0.018 * movementWeight,
+  })
+
+  setRotation(leftUpperLeg, { x: stride * 0.34 * movementWeight })
+  setRotation(rightUpperLeg, { x: counterStride * 0.34 * movementWeight })
+  setRotation(leftLowerLeg, {
+    x: kneeBaseBend - Math.max(0, -stride) * 0.62 * movementWeight,
+  })
+  setRotation(rightLowerLeg, {
+    x: kneeBaseBend - Math.max(0, -counterStride) * 0.62 * movementWeight,
+  })
+  setRotation(leftFoot, { x: 0.08 + Math.max(0, stride) * 0.22 * movementWeight })
+  setRotation(rightFoot, { x: 0.08 + Math.max(0, counterStride) * 0.22 * movementWeight })
+
+  // 左腕：歩行時は振る。釣り動作中は支え／引き上げ
+  if (options.action === 'carry') {
+    setRotation(leftUpperArm, {
+      x: counterStride * 0.28 * movementWeight,
+      z: armRestZ.left,
+    })
+    setRotation(leftLowerArm, { x: elbowBaseBend, z: 0 })
+  } else if (options.action === 'cast') {
+    setRotation(leftUpperArm, { x: 0.15, z: armRestZ.left * 0.9 })
+    setRotation(leftLowerArm, { x: 0.2, z: 0 })
+  } else if (options.action === 'wait') {
+    setRotation(leftUpperArm, { x: 0.25 + idle * 0.03, z: armRestZ.left * 0.92 })
+    setRotation(leftLowerArm, { x: 0.35, z: 0 })
+  } else {
+    // reel / catch：両手で引き上げ
+    setRotation(leftUpperArm, {
+      x: 0.85 + actionT * 0.35,
+      z: armRestZ.left * 0.55,
+    })
+    setRotation(leftLowerArm, { x: 0.55, z: 0 })
+  }
+
+  // 右腕：竿持ち
+  if (options.action === 'carry') {
+    setRotation(rightUpperArm, {
+      x: 0.62 + stride * 0.06 * movementWeight,
+      y: 0,
+      z: armRestZ.right * 0.88,
+    })
+    setRotation(rightLowerArm, { x: 0.42, y: 0, z: 0 })
+  } else if (options.action === 'cast') {
+    // actionT は振りかぶり＋フライトの全体比。前半で後ろへ、後半で前へ（ルアー飛行と同期）
+    const split = MathUtils.clamp(options.castWindupRatio ?? 0.37, 0.15, 0.6)
+    const wind = MathUtils.clamp(actionT / split, 0, 1)
+    const whip = MathUtils.clamp((actionT - split) / Math.max(1 - split, 0.01), 0, 1)
+    const armX =
+      actionT < split
+        ? MathUtils.lerp(0.55, -0.95, wind)
+        : MathUtils.lerp(-0.95, 1.5, whip * whip * (3 - 2 * whip))
+    setRotation(rightUpperArm, {
+      x: armX,
+      y: 0,
+      z: armRestZ.right * 0.75,
+    })
+    setRotation(rightLowerArm, {
+      x: actionT < split ? MathUtils.lerp(0.42, 0.7, wind) : MathUtils.lerp(0.7, 0.08, whip),
+      y: 0,
+      z: 0,
+    })
+    setRotation(spine, {
+      x: actionT < split ? -0.06 - wind * 0.14 : -0.04 + whip * 0.12,
+      y: counterStride * 0.02 * movementWeight,
+    })
+  } else if (options.action === 'wait') {
+    setRotation(rightUpperArm, {
+      x: 0.95 + idle * 0.04,
+      y: 0,
+      z: armRestZ.right * 0.8,
+    })
+    setRotation(rightLowerArm, { x: 0.28, y: 0, z: 0 })
+    setRotation(head, { x: 0.12 + idle * 0.02, y: 0 })
+  } else {
+    setRotation(rightUpperArm, {
+      x: 1.05 + actionT * 0.4,
+      y: 0,
+      z: armRestZ.right * 0.5,
+    })
+    setRotation(rightLowerArm, { x: 0.45, y: 0, z: 0 })
+    setRotation(chest, { x: -0.06 + actionT * 0.08, y: 0, z: 0 })
+  }
+}
 
 /**
  * 射的用の構え。下半身を固定し、右腕だけを前方へ真っ直ぐ伸ばす。左腕は体側へ下ろす。
