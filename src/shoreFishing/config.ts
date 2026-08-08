@@ -6,14 +6,14 @@ import { CAMERA_FOLLOW_OFFSET_XZ } from '../game/gameConfig'
 export type FishShadowSize = 'tiny' | 'small' | 'medium' | 'large' | 'huge'
 
 export type FishKindId =
-  | 'minnow'
   | 'sardine'
   | 'horseMackerel'
   | 'seaBass'
   | 'snapper'
   | 'flounder'
-  | 'tuna'
   | 'ray'
+  | 'tuna'
+  | 'seahorse'
   | 'hammerhead'
   | 'greatWhite'
 
@@ -116,14 +116,14 @@ export const SHORE_FISHING = {
   ],
 
   fishKinds: [
-    { id: 'minnow', score: 100, weight: 13, shadow: 'tiny', color: '#9ec4d8' },
-    { id: 'sardine', score: 140, weight: 12, shadow: 'small', color: '#c5d8e8' },
-    { id: 'horseMackerel', score: 190, weight: 11, shadow: 'small', color: '#6a9a78' },
+    { id: 'sardine', score: 100, weight: 14, shadow: 'small', color: '#c5d8e8' },
+    { id: 'horseMackerel', score: 150, weight: 12, shadow: 'small', color: '#6a9a78' },
+    { id: 'ray', score: 220, weight: 11, shadow: 'large', color: '#5a4a68' },
     { id: 'seaBass', score: 280, weight: 11, shadow: 'medium', color: '#4a6070' },
     { id: 'snapper', score: 380, weight: 10, shadow: 'medium', color: '#e07060' },
     { id: 'flounder', score: 480, weight: 10, shadow: 'medium', color: '#c8b070' },
-    { id: 'tuna', score: 650, weight: 9, shadow: 'large', color: '#3a5880' },
-    { id: 'ray', score: 850, weight: 8, shadow: 'large', color: '#5a4a68' },
+    { id: 'tuna', score: 900, weight: 9, shadow: 'large', color: '#3a5880' },
+    { id: 'seahorse', score: 1000, weight: 5, shadow: 'tiny', color: '#e8a060', rare: true },
     { id: 'hammerhead', score: 1200, weight: 9, shadow: 'huge', color: '#6a7888', rare: true },
     { id: 'greatWhite', score: 1500, weight: 8, shadow: 'huge', color: '#d8e0e8', rare: true },
   ] as const satisfies readonly FishKind[],

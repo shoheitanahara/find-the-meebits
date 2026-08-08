@@ -2,14 +2,14 @@ import { getLocale } from '../i18n/locale'
 import { SHORE_FISHING, type FishKindId, type ShoreFishingRatingId } from './config'
 
 const fishNames: Record<FishKindId, { en: string; ja: string }> = {
-  minnow: { en: 'Minnow', ja: 'メダカ' },
   sardine: { en: 'Sardine', ja: 'イワシ' },
   horseMackerel: { en: 'Horse Mackerel', ja: 'アジ' },
+  ray: { en: 'Ray', ja: 'エイ' },
   seaBass: { en: 'Sea Bass', ja: 'スズキ' },
   snapper: { en: 'Snapper', ja: 'タイ' },
   flounder: { en: 'Flounder', ja: 'カレイ' },
   tuna: { en: 'Tuna', ja: 'マグロ' },
-  ray: { en: 'Ray', ja: 'エイ' },
+  seahorse: { en: 'Seahorse', ja: 'タツノオトシゴ' },
   hammerhead: { en: 'Hammerhead', ja: 'シュモクザメ' },
   greatWhite: { en: 'Great White', ja: 'ホオジロザメ' },
 }

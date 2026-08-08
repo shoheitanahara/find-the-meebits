@@ -35,6 +35,19 @@ function rayVoxels(body: string): Voxel[] {
   ]
 }
 
+/** タツノオトシゴ（縦長） */
+function seahorseVoxels(body: string): Voxel[] {
+  return [
+    { x: 0, y: 1.2, z: 0.2, sx: 1.1, sy: 2.4, sz: 1.3, color: body },
+    { x: 0, y: 2.8, z: -0.2, sx: 1.4, sy: 1.3, sz: 1.5, color: body },
+    { x: 0, y: 3.5, z: -0.9, sx: 0.7, sy: 0.7, sz: 1.1, color: body },
+    { x: 0, y: 0, z: 0.6, sx: 0.9, sy: 1.6, sz: 1.1, color: body },
+    { x: 0, y: -1.4, z: 0.2, sx: 0.7, sy: 1.8, sz: 0.9, color: '#c88848' },
+    { x: 0.7, y: 2.9, z: -0.1, sx: 0.3, sy: 0.3, sz: 0.3, color: '#101820' },
+    { x: -0.7, y: 2.9, z: -0.1, sx: 0.3, sy: 0.3, sz: 0.3, color: '#101820' },
+  ]
+}
+
 /** シュモク */
 function hammerVoxels(body: string): Voxel[] {
   return [
@@ -61,6 +74,7 @@ function whiteVoxels(body: string): Voxel[] {
 
 function voxelsFor(id: FishKindId, color: string): Voxel[] {
   if (id === 'ray') return rayVoxels(color)
+  if (id === 'seahorse') return seahorseVoxels(color)
   if (id === 'hammerhead') return hammerVoxels(color)
   if (id === 'greatWhite') return whiteVoxels(color)
   const fin = '#2a3848'
