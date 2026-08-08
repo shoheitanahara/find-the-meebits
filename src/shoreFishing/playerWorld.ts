@@ -1,12 +1,22 @@
 import { SHORE_FISHING } from './config'
 
-export const shorePlayerWorld = {
+type ShorePlayerWorld = {
+  x: number
+  z: number
+  rotationY: number
+  isMoving: boolean
+  ready: boolean
+  tipX: number
+  tipY: number
+  tipZ: number
+}
+
+export const shorePlayerWorld: ShorePlayerWorld = {
   x: SHORE_FISHING.playerStart.x,
   z: SHORE_FISHING.playerStart.z,
   rotationY: SHORE_FISHING.playerStart.rotationY,
   isMoving: false,
   ready: false,
-  /** 竿の穂先ワールド座標（ライン用） */
   tipX: 0,
   tipY: 1.8,
   tipZ: 0,

@@ -51,7 +51,7 @@ export const SHORE_FISHING = {
     shoreNormMax: 1.08,
   },
 
-  playerStart: { x: 0, z: 2.2, rotationY: Math.PI },
+  playerStart: { x: 0 as number, z: 2.2 as number, rotationY: Math.PI as number },
 
   /** パークと同じ固定オフセット追従 */
   cameraFollow: {

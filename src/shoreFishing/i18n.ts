@@ -1,5 +1,10 @@
 import { getLocale } from '../i18n/locale'
-import { SHORE_FISHING, type FishKindId, type ShoreFishingRatingId } from './config'
+import {
+  getFishKind,
+  SHORE_FISHING,
+  type FishKindId,
+  type ShoreFishingRatingId,
+} from './config'
 
 const fishNames: Record<FishKindId, { en: string; ja: string }> = {
   sardine: { en: 'Sardine', ja: 'イワシ' },
@@ -100,11 +105,14 @@ export function ratingLabel(id: ShoreFishingRatingId) {
 }
 
 export function fishScoreRows() {
-  return SHORE_FISHING.fishKinds.map((f) => ({
-    id: f.id,
-    color: f.color,
-    score: f.score,
-    rare: Boolean(f.rare),
-    label: fishLabel(f.id),
-  }))
+  return SHORE_FISHING.fishKinds.map((f) => {
+    const kind = getFishKind(f.id)
+    return {
+      id: kind.id,
+      color: kind.color,
+      score: kind.score,
+      rare: Boolean(kind.rare),
+      label: fishLabel(kind.id),
+    }
+  })
 }
