@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Group, MathUtils, Vector3 } from 'three'
 import { VRMHumanBoneName } from '@pixiv/three-vrm'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
-import { applyVRMShootingPose } from '../../avatar/VRMLocomotion'
+import { applyVRMSeatedShootingPose } from '../../avatar/VRMLocomotion'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { applyHandPropFit } from '../../avatar/vrmHandPropFit'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
@@ -14,7 +14,7 @@ import { useStarlightRushStore } from '../store'
 
 const handWorld = new Vector3()
 
-/** 宇宙船に乗った Meebit。照準に合わせて上半身と銃が連動。 */
+/** 宇宙船に着席した Meebit。照準に合わせて上半身と銃が連動。 */
 export function StarlightRushPlayer() {
   const rootRef = useRef<Group>(null)
   const pistolAnchorRef = useRef<Group>(null)
@@ -43,7 +43,7 @@ export function StarlightRushPlayer() {
       1 - Math.exp(-dt * 18),
     )
 
-    applyVRMShootingPose(vrmRef.current, {
+    applyVRMSeatedShootingPose(vrmRef.current, {
       aimPitch: aimPitchRadians + Math.sin(localTimeRef.current * 1.4) * 0.003,
       recoil: recoilAmountRef.current,
     })

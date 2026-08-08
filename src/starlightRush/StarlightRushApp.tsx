@@ -20,6 +20,7 @@ import { StarlightRushMobileControls } from './ui/StarlightRushMobileControls'
 import { StarlightRushPlayPrompt, StarlightRushResult } from './ui/StarlightRushOverlays'
 import { StarlightSpace } from './world/StarlightSpace'
 import { StarlightStars } from './world/StarlightStars'
+import { StarlightFlybyNpcs } from './world/StarlightFlybyNpcs'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -43,6 +44,7 @@ function StarlightRushScene() {
       <PerspectiveCamera makeDefault fov={STARLIGHT_RUSH.cameraFov} near={0.1} far={240} />
       <StarlightSpace>
         <StarlightRushPlayer />
+        <StarlightFlybyNpcs />
         <StarlightStars />
         <StarlightRushFloatingScores />
       </StarlightSpace>

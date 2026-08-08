@@ -421,6 +421,53 @@ export function applyVRMShootingPose(vrm: VRM | null, options: ShootingPoseOptio
   setRotation(rightFoot, { x: 0.05, y: 0, z: 0 })
 }
 
+/**
+ * ライド着席 + 射撃構え。下半身はシット、上半身・腕は射撃と同じ。
+ * 宇宙船など座席に乗ったまま撃つ演出向け。
+ */
+export function applyVRMSeatedShootingPose(vrm: VRM | null, options: ShootingPoseOptions) {
+  if (!vrm) return
+
+  const pitch = MathUtils.clamp(options.aimPitch, -0.4, 0.4)
+  const recoil = MathUtils.clamp(options.recoil, 0, 1)
+
+  const hips = getBone(vrm, VRMHumanBoneName.Hips)
+  const spine = getBone(vrm, VRMHumanBoneName.Spine)
+  const chest = getBone(vrm, VRMHumanBoneName.Chest)
+  const head = getBone(vrm, VRMHumanBoneName.Head)
+  const leftUpperArm = getBone(vrm, VRMHumanBoneName.LeftUpperArm)
+  const rightUpperArm = getBone(vrm, VRMHumanBoneName.RightUpperArm)
+  const leftLowerArm = getBone(vrm, VRMHumanBoneName.LeftLowerArm)
+  const rightLowerArm = getBone(vrm, VRMHumanBoneName.RightLowerArm)
+  const leftUpperLeg = getBone(vrm, VRMHumanBoneName.LeftUpperLeg)
+  const rightUpperLeg = getBone(vrm, VRMHumanBoneName.RightUpperLeg)
+  const leftLowerLeg = getBone(vrm, VRMHumanBoneName.LeftLowerLeg)
+  const rightLowerLeg = getBone(vrm, VRMHumanBoneName.RightLowerLeg)
+  const leftFoot = getBone(vrm, VRMHumanBoneName.LeftFoot)
+  const rightFoot = getBone(vrm, VRMHumanBoneName.RightFoot)
+
+  setRotation(hips, { x: 0.12, y: 0, z: 0 })
+  setRotation(spine, { x: -0.06 + pitch * 0.15, y: 0, z: 0 })
+  setRotation(chest, { x: -0.03 + pitch * 0.25 - recoil * 0.04, y: 0, z: 0 })
+  setRotation(head, { x: 0.04 + pitch * 0.65, y: 0, z: 0 })
+
+  setRotation(rightUpperArm, {
+    x: HALF_PI + pitch + recoil * 0.16,
+    y: 0,
+    z: attentionArmZ.right,
+  })
+  setRotation(rightLowerArm, { x: 0, y: 0, z: 0 })
+  setRotation(leftUpperArm, { x: 0, y: 0, z: attentionArmZ.left })
+  setRotation(leftLowerArm, { x: 0, y: 0, z: 0 })
+
+  setRotation(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
+  setRotation(rightUpperLeg, { x: 1.15, y: -0.04, z: 0 })
+  setRotation(leftLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setRotation(rightLowerLeg, { x: -1.35, y: 0, z: 0 })
+  setRotation(leftFoot, { x: -0.12, y: 0, z: 0 })
+  setRotation(rightFoot, { x: -0.12, y: 0, z: 0 })
+}
+
 function getBone(vrm: VRM, boneName: VRMHumanBoneName) {
   return vrm.humanoid.getNormalizedBoneNode(boneName)
 }

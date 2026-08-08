@@ -18,8 +18,13 @@ export const STARLIGHT_RUSH = {
 
   /** ライド内ローカル: 船は原点、進行方向は -Z */
   shipLocal: { x: 0, y: 0.15, z: 0 },
-  /** Meebit は船の座席やや後ろ */
-  playerLocal: { x: 0, y: 0.35, z: 0.55, rotationY: Math.PI },
+  /**
+   * 一人掛けシート（船ローカル）。座面上面 ≈ y+0.16。
+   * プレイヤー着席位置はこの座面に合わせる。
+   */
+  seatLocal: { x: 0, y: 0.1, z: 0.38 },
+  /** Meebit はシートに着席（シット射撃ポーズ） */
+  playerLocal: { x: 0, y: 0.16, z: 0.36, rotationY: Math.PI },
   pistolHandOffsetY: 0.11,
   /** 手首持ちに見えないよう、銃を腕の前方（バレル方向＝local +Z）へ出す */
   pistolHandOffsetZ: 0.14,
@@ -113,6 +118,42 @@ export const STARLIGHT_RUSH = {
   ],
 
   bestScoreKey: 'meebits-starlight-best-daily',
+
+  /**
+   * 日替わり僚機（すれ違い NPC）。星と同じ +Z 進行。
+   * 星 X はだいたい -1.7〜+3.5 → レーンはその端付近（見える距離）。
+   * craftRotationY=PI でノーズ・顔をカメラ側（+Z）へ。
+   */
+  flyby: {
+    count: 3,
+    spawnZ: -42,
+    passZ: 10,
+    /** 星帯の端付近（左・右・やや左） */
+    laneX: [-2.5, 3.3, -2.0] as const,
+    baseY: [1.2, 1.85, 0.95] as const,
+    /** 本編 90s 内の通過開始目安（秒）。日替わりで jitter */
+    spawnAtSec: [14, 42, 68] as const,
+    spawnJitterSec: 4,
+    /** 星 mid に近い速度 */
+    approachSpeed: 10.5,
+    speedJitter: 1.2,
+    /** 船ごとカメラ向き（プレイヤー船はノーズ -Z のまま） */
+    craftRotationY: Math.PI,
+    /** 船ローカル: プレイヤーと同型（着席） */
+    pilotLocal: { x: 0, y: 0.16, z: 0.36, rotationY: Math.PI },
+    shipLocal: { x: 0, y: 0.15, z: 0 },
+    /**
+     * 顔用フィル（パイロット local）。rotationY=PI のため +Z が顔の前。
+     */
+    faceLight: {
+      position: [0, 1.22, 0.55] as const,
+      intensity: 3.4,
+      distance: 3.4,
+      color: '#eaf6ff',
+    },
+    /** VRM ロード優先度（プレイヤー 0 より低く） */
+    vrmLoadPriority: 220,
+  },
 
   /**
    * 星の色＝得点帯（5種）。
