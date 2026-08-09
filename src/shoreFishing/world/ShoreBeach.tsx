@@ -1,15 +1,7 @@
-import { SHORE_FISHING } from '../config'
-import { isIslandTile, worldToTile } from '../islandTiles'
 import { FishingWorldFx } from './FishingTackle'
+import { IslandVoxelRocks } from './IslandVoxelRocks'
 import { SeaFishShadows } from './SeaFishShadows'
 import { VoxelIslandGround } from './VoxelIslandGround'
-
-const PALM_SPOTS = [
-  [-5, 3],
-  [5, 2],
-  [-4, -3],
-  [4, -4],
-] as const
 
 /** 朝の孤島ビーチ：ボクセル砂浜＋海。 */
 export function ShoreBeach() {
@@ -41,37 +33,7 @@ export function ShoreBeach() {
       </mesh>
 
       <VoxelIslandGround />
-
-      {/* ヤシ（島タイル上にスナップ） */}
-      {PALM_SPOTS.map(([x, z]) => {
-        const { tx, tz } = worldToTile(x, z)
-        if (!isIslandTile(tx, tz)) return null
-        const px = tx + 0.5
-        const pz = tz + 0.5
-        return (
-          <group key={`${tx}-${tz}`} position={[px, SHORE_FISHING.islandTileTopY, pz]}>
-            <mesh position={[0, 1.35, 0]} castShadow>
-              <cylinderGeometry args={[0.11, 0.16, 2.7, 8]} />
-              <meshStandardMaterial color="#7a5a40" roughness={0.9} />
-            </mesh>
-            {([0, 1, 2, 3, 4] as const).map((i) => (
-              <mesh
-                key={i}
-                position={[
-                  Math.sin((i / 5) * Math.PI * 2) * 0.5,
-                  2.65,
-                  Math.cos((i / 5) * Math.PI * 2) * 0.5,
-                ]}
-                rotation={[0.4, (i / 5) * Math.PI * 2, 0.2]}
-                castShadow
-              >
-                <boxGeometry args={[0.11, 0.04, 1.2]} />
-                <meshStandardMaterial color="#4a8a58" roughness={0.85} />
-              </mesh>
-            ))}
-          </group>
-        )
-      })}
+      <IslandVoxelRocks />
 
       <SeaFishShadows />
       <FishingWorldFx />

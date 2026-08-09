@@ -1,4 +1,5 @@
 import { islandNormRadius, SHORE_FISHING } from './config'
+import { hitsIslandRock } from './islandRocks'
 
 /** 島ボクセルのタイル辺長（ワールドメートル） */
 export const ISLAND_TILE = 1
@@ -113,6 +114,7 @@ export function canStandOnIsland(x: number, z: number, radius = SHORE_FISHING.pl
     const { tx, tz } = worldToTile(x + dx, z + dz)
     if (!isIslandTile(tx, tz)) return false
   }
+  if (hitsIslandRock(x, z, radius)) return false
   return true
 }
 

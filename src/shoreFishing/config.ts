@@ -36,7 +36,7 @@ export const SHORE_FISHING = {
   /** ボクセル床上面に合わせる（VoxelIslandGround TILE_H） */
   playerGroundY: 0.16,
   playerCollisionRadius: 0.45,
-  /** ヤシなど小物の足元 Y */
+  /** 島オブジェクト（岩など）の足元 Y */
   islandTileTopY: 0.16,
 
   /**
