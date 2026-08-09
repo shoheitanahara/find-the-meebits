@@ -78,12 +78,15 @@ export const SHORE_FISHING = {
   catchHoldDistance: 0.85,
   catchHoldY: 1.4,
 
-  /** 右手の釣り竿フィット（プレイヤーローカル） */
+  /** 右手の釣り竿フィット（プレイヤーローカル）。掌に食い込ませる */
   rodHand: {
-    handOffsetX: 0.03,
-    handOffsetY: 0.05,
-    handOffsetZ: 0.08,
-    fallbackPosition: [0.28, 1.05, 0.22] as const,
+    /** 正＝右へ。わずかに負で掌側へ */
+    handOffsetX: -0.02,
+    /** 正＝上。負で掌に沈める */
+    handOffsetY: -0.05,
+    /** 正＝root +Z。小さめで手首浮きを防ぐ */
+    handOffsetZ: 0.01,
+    fallbackPosition: [0.26, 1.0, 0.18] as const,
     /** 竿の長さ（グリップ→穂先）。ライン先端にも使う */
     length: 1.55,
   },

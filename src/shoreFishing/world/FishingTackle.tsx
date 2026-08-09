@@ -151,17 +151,17 @@ export function FishingRod({
   return (
     <group ref={rodRef} visible={false}>
       <group ref={shaftRef}>
-        {/* グリップ */}
-        <mesh position={[0, 0.08, 0]} castShadow>
-          <cylinderGeometry args={[0.028, 0.032, 0.16, 8]} />
+        {/* グリップ：原点＝手。掌に少し食い込ませる */}
+        <mesh position={[-0.015, 0.02, 0.01]} castShadow>
+          <cylinderGeometry args={[0.03, 0.034, 0.18, 8]} />
           <meshStandardMaterial color="#3a2818" roughness={0.75} />
         </mesh>
         {/* 竿本体（+Y = 穂先） */}
-        <mesh position={[0, 0.72, 0]} castShadow>
+        <mesh position={[0, 0.68, 0]} castShadow>
           <cylinderGeometry args={[0.014, 0.028, 1.2, 6]} />
           <meshStandardMaterial color="#8a6238" roughness={0.65} />
         </mesh>
-        <mesh position={[0, 1.42, 0]} castShadow>
+        <mesh position={[0, 1.38, 0]} castShadow>
           <cylinderGeometry args={[0.008, 0.014, 0.45, 6]} />
           <meshStandardMaterial color="#d2b896" roughness={0.4} metalness={0.15} />
         </mesh>
