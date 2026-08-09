@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Group, MathUtils, type MeshBasicMaterial } from 'three'
+import { Group, MathUtils, Shape, ShapeGeometry, type MeshBasicMaterial } from 'three'
 import {
   getFishKind,
   islandNormRadius,
@@ -59,6 +59,34 @@ const SIZE_SCALE: Record<FishShadowSize, number> = {
 
 const SHADOW_Y = 0.055
 
+/**
+ * 丸い頭・すぼむ胴・ギザ尾の魚影（XY 平面）。
+ * rotation.x = -π/2 で水平置きすると頭が +Z（法線は上向き）。
+ */
+function createFishShadowGeometry() {
+  const shape = new Shape()
+  // Shape の -Y がワールド +Z（頭）。CCW で法線 +Z → 水平置き後は上向き
+  shape.moveTo(0, -0.62)
+  shape.quadraticCurveTo(-0.34, -0.55, -0.38, -0.32)
+  shape.lineTo(-0.36, -0.12)
+  shape.lineTo(-0.31, 0.08)
+  shape.lineTo(-0.26, 0.28)
+  shape.lineTo(-0.18, 0.48)
+  // 尾は1本にすぼめる（わずかに非対称で水面っぽさだけ残す）
+  shape.lineTo(-0.08, 0.62)
+  shape.lineTo(0, 0.78)
+  shape.lineTo(0.07, 0.6)
+  shape.lineTo(0.18, 0.48)
+  shape.lineTo(0.26, 0.28)
+  shape.lineTo(0.31, 0.08)
+  shape.lineTo(0.36, -0.12)
+  shape.lineTo(0.38, -0.32)
+  shape.quadraticCurveTo(0.34, -0.55, 0, -0.62)
+  return new ShapeGeometry(shape)
+}
+
+const fishShadowGeometry = createFishShadowGeometry()
+
 const HUNT_PHASES: ReadonlySet<CastPhase> = new Set([
   'approach',
   'nibble',
@@ -78,6 +106,9 @@ function spawnShadow(
     avoidFishId?: FishKindId
     avoidX?: number
     avoidZ?: number
+    /** 既存影のホーム位置（重なり回避） */
+    others?: readonly ShadowRuntime[]
+    skipIndex?: number
   },
 ): ShadowRuntime {
   let fishId = pickFishKindId()
@@ -89,16 +120,38 @@ function spawnShadow(
         })
       : randomShadowSpot()
 
-  // 釣った直後など、同じ魚・同じ場所を避ける
-  for (let attempt = 0; attempt < 10; attempt++) {
+  const sizeHint = () => getFishKind(fishId).shadow
+
+  for (let attempt = 0; attempt < 28; attempt++) {
     const sameFish = opts?.avoidFishId != null && fishId === opts.avoidFishId
-    const near =
+    const nearAvoid =
       opts?.avoidX != null &&
       opts?.avoidZ != null &&
       Math.hypot(spot.x - opts.avoidX, spot.z - opts.avoidZ) < 4.5
-    if (!sameFish && !near) break
+    let overlapsOther = false
+    if (opts?.others) {
+      const myR = shadowFootprint(sizeHint())
+      for (let i = 0; i < opts.others.length; i++) {
+        if (i === opts.skipIndex) continue
+        const o = opts.others[i]
+        if (!o || (!o.alive && o.fade < 0.15)) continue
+        const need =
+          myR + shadowFootprint(o.size) + SHORE_FISHING.shadowMinSeparation
+        if (Math.hypot(spot.x - o.homeX, spot.z - o.homeZ) < need) {
+          overlapsOther = true
+          break
+        }
+      }
+    }
+    if (!sameFish && !nearAvoid && !overlapsOther) break
     fishId = pickFishKindId()
-    spot = randomShadowSpot()
+    spot =
+      opts?.slotIndex !== undefined
+        ? randomShadowSpot(Math.random, {
+            slotIndex: opts.slotIndex,
+            slotCount: SHORE_FISHING.shadowCount,
+          })
+        : randomShadowSpot()
   }
 
   const fish = getFishKind(fishId)
@@ -108,7 +161,7 @@ function spawnShadow(
     homeX: spot.x,
     homeZ: spot.z,
     yaw: spot.yaw,
-    wobbleAmp: 0.14 + Math.random() * 0.1,
+    wobbleAmp: 0.22 + Math.random() * 0.18,
     speedX: 0.28 + Math.random() * 0.3,
     speedZ: 0.22 + Math.random() * 0.28,
     phase: Math.random() * Math.PI * 2,
@@ -119,6 +172,49 @@ function spawnShadow(
     expireAt: bornAt + life * 1000,
     respawnAt: 0,
     fade: 0,
+  }
+}
+
+function shadowFootprint(size: FishShadowSize) {
+  // シルエット半長くらい（親 scale 込み）
+  return 0.72 * SIZE_SCALE[size]
+}
+
+function pushOutOfIsland(x: number, z: number): { x: number; z: number } {
+  const norm = islandNormRadius(x, z)
+  if (norm >= 1.22) return { x, z }
+  const push = 1.26 / Math.max(norm, 0.01)
+  return { x: x * push, z: z * push }
+}
+
+/** ホーム同士が近すぎたらゆっくり押し離す（ハンター担当は動かさない） */
+function separateShadowHomes(shadows: ShadowRuntime[], skipIndex: number | null) {
+  for (let i = 0; i < shadows.length; i++) {
+    if (i === skipIndex) continue
+    const a = shadows[i]
+    if (!a?.alive || a.fade < 0.12) continue
+    for (let j = i + 1; j < shadows.length; j++) {
+      if (j === skipIndex) continue
+      const b = shadows[j]
+      if (!b?.alive || b.fade < 0.12) continue
+      const dx = a.homeX - b.homeX
+      const dz = a.homeZ - b.homeZ
+      const dist = Math.hypot(dx, dz) || 0.001
+      const need =
+        shadowFootprint(a.size) +
+        shadowFootprint(b.size) +
+        SHORE_FISHING.shadowMinSeparation
+      if (dist >= need) continue
+      const push = (need - dist) * 0.08
+      const nx = dx / dist
+      const nz = dz / dist
+      const aPos = pushOutOfIsland(a.homeX + nx * push, a.homeZ + nz * push)
+      const bPos = pushOutOfIsland(b.homeX - nx * push, b.homeZ - nz * push)
+      a.homeX = aPos.x
+      a.homeZ = aPos.z
+      b.homeX = bPos.x
+      b.homeZ = bPos.z
+    }
   }
 }
 
@@ -135,18 +231,25 @@ function retireHunterShadow(
     avoidX: old.homeX,
     avoidZ: old.homeZ,
     stagger: 400,
+    others: shadows,
+    skipIndex: index,
   })
   shadows[index]!.fade = 0
 }
 
 /** ゲーム開始用：全方位にばらけつつ種類も引き直す */
 function createShadowPopulation(now: number): ShadowRuntime[] {
-  return Array.from({ length: SHORE_FISHING.shadowCount }, (_, i) =>
-    spawnShadow(now, {
-      slotIndex: i,
-      stagger: (i / SHORE_FISHING.shadowCount) * 1800,
-    }),
-  )
+  const shadows: ShadowRuntime[] = []
+  for (let i = 0; i < SHORE_FISHING.shadowCount; i++) {
+    shadows.push(
+      spawnShadow(now, {
+        slotIndex: i,
+        stagger: (i / SHORE_FISHING.shadowCount) * 1800,
+        others: shadows,
+      }),
+    )
+  }
+  return shadows
 }
 
 function ambientXZ(s: ShadowRuntime, t: number): { x: number; z: number; yaw: number } {
@@ -178,31 +281,16 @@ function setGroupFade(g: Group, fade: number, size: FishShadowSize) {
   })
 }
 
-/** 丸影と縦長の中間くらいの魚影シルエット */
+/** 頭が重く尾がほつれた魚影シルエット（全種共通・サイズは親 scale） */
 function FishShadowSilhouette() {
   return (
-    <group>
-      {/* 胴体：やや縦長の楕円 */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0.04]}
-        scale={[0.48, 0.95, 1]}
-        renderOrder={4}
-      >
-        <circleGeometry args={[0.52, 20]} />
-        <meshBasicMaterial color="#021018" transparent opacity={0.72} depthWrite={false} />
-      </mesh>
-      {/* 尾を少しだけ足す */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.001, -0.52]}
-        scale={[0.34, 0.3, 1]}
-        renderOrder={4}
-      >
-        <circleGeometry args={[0.36, 12]} />
-        <meshBasicMaterial color="#021018" transparent opacity={0.55} depthWrite={false} />
-      </mesh>
-    </group>
+    <mesh
+      geometry={fishShadowGeometry}
+      rotation={[-Math.PI / 2, 0, 0]}
+      renderOrder={4}
+    >
+      <meshBasicMaterial color="#021018" transparent opacity={0.7} depthWrite={false} />
+    </mesh>
   )
 }
 
@@ -274,8 +362,11 @@ export function SeaFishShadows() {
           s.expireAt = now + 2500
         }
       } else if (now >= s.respawnAt) {
-        // 位置・魚種ともランダムに再抽選（固定スロットに戻さない）
-        shadows[i] = spawnShadow(now)
+        // 位置・魚種ともランダムに再抽選（既存影と被らないよう）
+        shadows[i] = spawnShadow(now, {
+          others: shadows,
+          skipIndex: i,
+        })
       }
 
       const cur = shadows[i]!
@@ -290,6 +381,9 @@ export function SeaFishShadows() {
         cur.fade = Math.max(0, cur.fade - delta / fadeSec)
       }
     }
+
+    // ホームが寄りすぎていたら押し離す（食いつき中の影は固定）
+    separateShadowHomes(shadows, wantHunt ? hunter.index : null)
 
     // 着水待機中：近くに影が現れたら反応（影なしでは終わらない）
     if (

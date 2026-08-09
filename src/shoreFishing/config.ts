@@ -94,6 +94,8 @@ export const SHORE_FISHING = {
 
   /** 同時に出せる魚影スロット数（手前・奥・左右） */
   shadowCount: 16,
+  /** 魚影同士の最低間隔（メートル）。サイズに応じて実行時に加算 */
+  shadowMinSeparation: 1.15,
   /** キャスト地点からこの距離以内の影だけが食いつく（メートル） */
   shadowReactRadius: 4.2,
   /** 影の寿命（秒）。シュモク／ホオジロ（huge+rare）は短め */
@@ -123,7 +125,7 @@ export const SHORE_FISHING = {
     { id: 'horseMackerel', score: 150, weight: 12, shadow: 'small', color: '#6a9a78' },
     { id: 'ray', score: 220, weight: 11, shadow: 'large', color: '#5a4a68' },
     { id: 'seaBass', score: 280, weight: 11, shadow: 'medium', color: '#4a6070' },
-    { id: 'snapper', score: 380, weight: 10, shadow: 'medium', color: '#e07060' },
+    { id: 'snapper', score: 750, weight: 10, shadow: 'medium', color: '#e07060' },
     { id: 'flounder', score: 480, weight: 10, shadow: 'medium', color: '#c8b070' },
     { id: 'tuna', score: 900, weight: 9, shadow: 'large', color: '#3a5880' },
     { id: 'seahorse', score: 1000, weight: 5, shadow: 'tiny', color: '#e8a060', rare: true },
@@ -165,16 +167,24 @@ export function randomShadowSpot(
   opts?: { slotIndex?: number; slotCount?: number },
 ): { x: number; z: number; yaw: number } {
   const { halfX, halfZ } = SHORE_FISHING.island
-  // スロット指定時は全方位を均等カバー（奥 -Z を落とさない）
+  // スロット指定時は角度＋近／遠リングで被りにくくする
   let a: number
   if (opts?.slotIndex !== undefined && opts.slotCount && opts.slotCount > 0) {
     const step = (Math.PI * 2) / opts.slotCount
-    a = opts.slotIndex * step + step * 0.5 + (rng() - 0.5) * step * 0.55
+    a = opts.slotIndex * step + step * 0.5 + (rng() - 0.5) * step * 0.32
   } else {
     a = rng() * Math.PI * 2
   }
-  // 岸からもう少し沖側にスポーン
-  const rNorm = 1.28 + rng() * 0.38
+  // 岸から沖側。スロットは交互に近／遠リング
+  let rNorm: number
+  if (opts?.slotIndex !== undefined) {
+    rNorm =
+      opts.slotIndex % 2 === 0
+        ? 1.26 + rng() * 0.16
+        : 1.48 + rng() * 0.22
+  } else {
+    rNorm = 1.28 + rng() * 0.38
+  }
   let x = Math.cos(a) * rNorm * halfX
   let z = Math.sin(a) * rNorm * halfZ
   const norm = islandNormRadius(x, z)

@@ -361,9 +361,14 @@ type VoxelFishProps = {
 export function VoxelFish({ fishId, scale = 1 }: VoxelFishProps) {
   const kind = getFishKind(fishId)
   const voxels = useMemo(() => voxelsFor(fishId, kind.color), [fishId, kind.color])
-  const sizeMul = fishId === 'tuna' || fishId === 'ray' ? 2 : 1
+  const sizeMul =
+    fishId === 'tuna' || fishId === 'ray'
+      ? 2
+      : fishId === 'hammerhead' || fishId === 'greatWhite'
+        ? 1.5
+        : 1
   const s = UNIT * scaleFor(kind.shadow) * scale * sizeMul
-  // サメは全長（Z）だけ伸ばす
+  // サメは全長（Z）だけ追加で伸ばす
   const lengthMul =
     fishId === 'hammerhead' || fishId === 'greatWhite' ? 1.98 : 1
 
