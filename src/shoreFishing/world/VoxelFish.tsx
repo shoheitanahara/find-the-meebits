@@ -248,7 +248,7 @@ function tunaVoxels(body: string) {
   return list
 }
 
-/** シュモクザメ */
+/** シュモクザメ：頭（ハンマー）を大きく、尾は短くコンパクト */
 function hammerVoxels(body: string) {
   const list: Voxel[] = []
   const belly = mix(body, '#eef2f4', 0.4)
@@ -256,27 +256,33 @@ function hammerVoxels(body: string) {
   const fin = mix(body, '#2a343c', 0.35)
   const gloss = { roughness: 0.4, metalness: 0.1 }
 
-  vox(list, 0, 0.1, 0.2, body, [2.4, 2.3, 5.4], gloss)
-  vox(list, 0, -0.55, 0.3, belly, [1.9, 1.2, 4.6], { roughness: 0.55 })
-  vox(list, 0, 0, 3.4, dark, [1.5, 1.6, 1.6], gloss)
-  // ハンマー頭
-  vox(list, 0, 0.35, -3.3, body, [5.6, 1.15, 1.5], gloss)
-  vox(list, 0, 0.1, -3.3, dark, [5.2, 0.7, 1.1], gloss)
-  vox(list, 2.4, 0.35, -3.5, body, [1.2, 1.0, 1.2], gloss)
-  vox(list, -2.4, 0.35, -3.5, body, [1.2, 1.0, 1.2], gloss)
-  // ヒレ
-  vox(list, 0, 1.85, 0.2, fin, [0.4, 1.7, 2.4], { roughness: 0.45 })
-  vox(list, 1.55, -0.2, -0.2, fin, [1.4, 0.3, 1.6], { roughness: 0.48 })
-  vox(list, -1.55, -0.2, -0.2, fin, [1.4, 0.3, 1.6], { roughness: 0.48 })
-  vox(list, 0, 1.1, 4.5, fin, [0.4, 1.7, 1.4], { roughness: 0.45 })
-  vox(list, 0, -0.9, 4.5, fin, [0.35, 1.3, 1.2], { roughness: 0.45 })
+  // 胴（やや後ろ寄りにして頭のボリュームを確保）
+  vox(list, 0, 0.1, 0.6, body, [2.5, 2.4, 4.6], gloss)
+  vox(list, 0, -0.55, 0.7, belly, [2.0, 1.25, 4.0], { roughness: 0.55 })
+  vox(list, 0, 0.05, 3.15, dark, [1.6, 1.7, 1.3], gloss)
+  // 太い首〜頭基部
+  vox(list, 0, 0.2, -2.0, body, [2.8, 2.5, 2.0], gloss)
+  vox(list, 0, -0.4, -1.9, belly, [2.2, 1.3, 1.7], { roughness: 0.55 })
+  // ハンマー頭（大きく・厚め）
+  vox(list, 0, 0.45, -3.55, body, [6.4, 1.45, 2.0], gloss)
+  vox(list, 0, 0.1, -3.55, dark, [6.0, 0.85, 1.5], gloss)
+  vox(list, 2.85, 0.5, -3.75, body, [1.5, 1.25, 1.5], gloss)
+  vox(list, -2.85, 0.5, -3.75, body, [1.5, 1.25, 1.5], gloss)
+  // 背・胸
+  vox(list, 0, 1.95, 0.4, fin, [0.4, 1.8, 2.2], { roughness: 0.45 })
+  vox(list, 1.65, -0.15, 0.1, fin, [1.5, 0.3, 1.5], { roughness: 0.48 })
+  vox(list, -1.65, -0.15, 0.1, fin, [1.5, 0.3, 1.5], { roughness: 0.48 })
+  // 尾（短い異尾：上葉が主、前後は短く）
+  vox(list, 0, 1.05, 3.95, fin, [0.4, 1.85, 0.85], { roughness: 0.45 })
+  vox(list, 0, -0.75, 3.85, fin, [0.35, 1.15, 0.7], { roughness: 0.45 })
+  vox(list, 0, 0.15, 3.7, fin, [0.4, 0.55, 0.55], { roughness: 0.45 })
   // 口
-  vox(list, 0, -0.35, -2.5, '#2a1820', [1.0, 0.35, 0.5], { roughness: 0.7 })
-  eyes(list, -3.55, 0.45, 2.35, 0.4)
+  vox(list, 0, -0.45, -2.55, '#2a1820', [1.2, 0.4, 0.55], { roughness: 0.7 })
+  eyes(list, -3.85, 0.55, 2.75, 0.45)
   return list
 }
 
-/** ホオジロザメ */
+/** ホオジロザメ：顔を大きく、尾は短くサメらしい異尾 */
 function whiteVoxels(body: string) {
   const list: Voxel[] = []
   const top = mix(body, '#9aa8b4', 0.35)
@@ -284,28 +290,35 @@ function whiteVoxels(body: string) {
   const fin = mix(top, '#3a4550', 0.45)
   const gloss = { roughness: 0.36, metalness: 0.12 }
 
-  vox(list, 0, 0.35, -0.2, top, [3.0, 2.4, 6.4], gloss)
-  vox(list, 0, -0.55, -0.1, belly, [2.5, 1.5, 5.6], { roughness: 0.5 })
-  vox(list, 0, 0.2, -3.5, top, [2.4, 2.0, 1.8], gloss)
-  vox(list, 0, -0.3, -3.3, belly, [1.9, 1.2, 1.5], { roughness: 0.5 })
-  vox(list, 0, 0.15, 3.4, shade(top, -20), [1.8, 1.8, 1.8], gloss)
+  // 胴
+  vox(list, 0, 0.3, 0.4, top, [3.1, 2.5, 5.2], gloss)
+  vox(list, 0, -0.55, 0.5, belly, [2.6, 1.55, 4.6], { roughness: 0.5 })
+  // 大きな頭部（丸みのある顔）
+  vox(list, 0, 0.35, -2.9, top, [3.2, 2.6, 2.6], gloss)
+  vox(list, 0, -0.35, -2.8, belly, [2.6, 1.5, 2.2], { roughness: 0.5 })
+  vox(list, 0, 0.25, -4.2, top, [2.6, 2.2, 1.5], gloss)
+  vox(list, 0, -0.25, -4.1, belly, [2.1, 1.3, 1.3], { roughness: 0.5 })
+  // 尾柄は短く
+  vox(list, 0, 0.15, 3.2, shade(top, -20), [1.7, 1.7, 1.2], gloss)
   // 大口
-  vox(list, 0, -0.55, -3.9, '#2a1018', [1.6, 0.7, 0.7], { roughness: 0.75 })
-  vox(list, 0.45, -0.35, -4.05, '#f0ece4', [0.25, 0.25, 0.2], { roughness: 0.4 })
-  vox(list, -0.45, -0.35, -4.05, '#f0ece4', [0.25, 0.25, 0.2], { roughness: 0.4 })
-  // ヒレ
-  vox(list, 0, 2.15, 0.4, fin, [0.45, 2.0, 2.8], { roughness: 0.42 })
-  vox(list, 1.8, -0.15, -0.6, fin, [1.6, 0.3, 1.8], { roughness: 0.45 })
-  vox(list, -1.8, -0.15, -0.6, fin, [1.6, 0.3, 1.8], { roughness: 0.45 })
-  vox(list, 0, 1.3, 4.7, fin, [0.4, 2.0, 1.6], { roughness: 0.42 })
-  vox(list, 0, -1.0, 4.55, fin, [0.35, 1.4, 1.3], { roughness: 0.42 })
-  // 鰓裂
+  vox(list, 0, -0.65, -4.55, '#2a1018', [1.9, 0.85, 0.85], { roughness: 0.75 })
+  vox(list, 0.55, -0.4, -4.75, '#f0ece4', [0.3, 0.28, 0.22], { roughness: 0.4 })
+  vox(list, -0.55, -0.4, -4.75, '#f0ece4', [0.3, 0.28, 0.22], { roughness: 0.4 })
+  // 背・胸
+  vox(list, 0, 2.2, 0.5, fin, [0.45, 2.1, 2.4], { roughness: 0.42 })
+  vox(list, 1.9, -0.1, -0.3, fin, [1.7, 0.3, 1.7], { roughness: 0.45 })
+  vox(list, -1.9, -0.1, -0.3, fin, [1.7, 0.3, 1.7], { roughness: 0.45 })
+  // 尾ヒレ：前後に伸ばさず、上葉を高く短く（サメの三日月に近い異尾）
+  vox(list, 0, 1.25, 3.85, fin, [0.4, 2.15, 0.9], { roughness: 0.42 })
+  vox(list, 0, -0.85, 3.75, fin, [0.35, 1.35, 0.75], { roughness: 0.42 })
+  vox(list, 0, 0.2, 3.6, fin, [0.4, 0.55, 0.55], { roughness: 0.42 })
+  // 鰓裂（頭の直後）
   for (let i = 0; i < 4; i++) {
-    const z = -2.2 + i * 0.45
-    vox(list, 1.4, 0.1, z, shade(top, -35), [0.15, 1.3, 0.2], { roughness: 0.6 })
-    vox(list, -1.4, 0.1, z, shade(top, -35), [0.15, 1.3, 0.2], { roughness: 0.6 })
+    const z = -1.7 + i * 0.4
+    vox(list, 1.5, 0.15, z, shade(top, -35), [0.15, 1.4, 0.2], { roughness: 0.6 })
+    vox(list, -1.5, 0.15, z, shade(top, -35), [0.15, 1.4, 0.2], { roughness: 0.6 })
   }
-  eyes(list, -3.7, 0.55, 1.05, 0.42)
+  eyes(list, -4.35, 0.65, 1.2, 0.48)
   return list
 }
 
