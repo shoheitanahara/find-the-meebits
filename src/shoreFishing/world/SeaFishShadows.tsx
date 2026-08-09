@@ -3,7 +3,6 @@ import { useFrame } from '@react-three/fiber'
 import { Group, MathUtils, Shape, ShapeGeometry, type MeshBasicMaterial } from 'three'
 import {
   getFishKind,
-  islandNormRadius,
   pickFishKindId,
   randomShadowSpot,
   shadowLifetimeSecFor,
@@ -11,6 +10,7 @@ import {
   type FishKindId,
   type FishShadowSize,
 } from '../config'
+import { isOnIslandFootprint, pushOutsideIsland } from '../islandTiles'
 import { useShoreFishingStore, type CastPhase } from '../store'
 
 type ShadowRuntime = {
@@ -58,6 +58,8 @@ const SIZE_SCALE: Record<FishShadowSize, number> = {
 }
 
 const SHADOW_Y = 0.055
+/** シルエット鼻先のローカル +Z（形状の -Y=0.62 が回転後に +Z） */
+const FISH_SHADOW_NOSE_Z = 0.62
 
 /**
  * 丸い頭・すぼむ胴・ギザ尾の魚影（XY 平面）。
@@ -181,10 +183,8 @@ function shadowFootprint(size: FishShadowSize) {
 }
 
 function pushOutOfIsland(x: number, z: number): { x: number; z: number } {
-  const norm = islandNormRadius(x, z)
-  if (norm >= 1.22) return { x, z }
-  const push = 1.26 / Math.max(norm, 0.01)
-  return { x: x * push, z: z * push }
+  if (!isOnIslandFootprint(x, z)) return { x, z }
+  return pushOutsideIsland(x, z, 0.4)
 }
 
 /** ホーム同士が近すぎたらゆっくり押し離す（ハンター担当は動かさない） */
@@ -281,12 +281,13 @@ function setGroupFade(g: Group, fade: number, size: FishShadowSize) {
   })
 }
 
-/** 頭が重く尾がほつれた魚影シルエット（全種共通・サイズは親 scale） */
+/** 頭が重く尾がほつれた魚影。鼻先が group 原点＝食いつき位置になる */
 function FishShadowSilhouette() {
   return (
     <mesh
       geometry={fishShadowGeometry}
       rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0, -FISH_SHADOW_NOSE_Z]}
       renderOrder={4}
     >
       <meshBasicMaterial color="#021018" transparent opacity={0.7} depthWrite={false} />
@@ -537,11 +538,10 @@ export function SeaFishShadows() {
 
       let hx = hunter.x
       let hz = hunter.z
-      const norm = islandNormRadius(hx, hz)
-      if (norm < 1.05) {
-        const push = 1.08 / Math.max(norm, 0.01)
-        hx *= push
-        hz *= push
+      if (isOnIslandFootprint(hx, hz)) {
+        const pushed = pushOutsideIsland(hx, hz, 0.35)
+        hx = pushed.x
+        hz = pushed.z
         hunter.x = hx
         hunter.z = hz
       }

@@ -33,20 +33,26 @@ export const SHORE_FISHING = {
 
   /** パークと同じ移動速度 */
   moveSpeed: 7,
-  playerGroundY: 0.06,
+  /** ボクセル床上面に合わせる（VoxelIslandGround TILE_H） */
+  playerGroundY: 0.16,
   playerCollisionRadius: 0.45,
+  /** ヤシなど小物の足元 Y */
+  islandTileTopY: 0.16,
 
   /**
-   * 楕円の孤島（砂）。歩行可は少し内側。
-   * 外側は海（魚影が泳ぐ）。
+   * 楕円 footprint をボクセル化した孤島。
+   * 見た目・歩行・岸判定は同じタイル海岸線を共有する。
    */
   island: {
     halfX: 9.5,
     halfZ: 7.2,
-    /** 水際近くまで歩ける（砂の見た目エッジまで） */
+    /** タイル配置の正規化半径上限（楕円内） */
+    voxelNormMax: 1.0,
+    /** 岸辺：海までのタイル距離がこの値以下ならキャスト可 */
+    shoreDistMax: 2,
+    /** @deprecated 楕円歩行用。歩行はタイル判定へ移行 */
     walkHalfX: 9.2,
     walkHalfZ: 6.95,
-    /** 岸辺判定：島の外側帯ならキャスト可（エッジ含む） */
     shoreNormMin: 0.62,
     shoreNormMax: 1.08,
   },
@@ -210,31 +216,11 @@ export function islandNormRadius(x: number, z: number) {
   return Math.hypot(x / halfX, z / halfZ)
 }
 
-/** 岸辺（キャスト可能帯） */
-export function isNearShore(x: number, z: number) {
-  const r = islandNormRadius(x, z)
-  const { shoreNormMin, shoreNormMax } = SHORE_FISHING.island
-  return r >= shoreNormMin && r <= shoreNormMax
-}
-
-/** 海面（島の外側） */
-export function isInWater(x: number, z: number) {
-  return islandNormRadius(x, z) > 1.02
-}
-
-export function castLandingFrom(x: number, z: number, rotationY: number) {
-  const d = SHORE_FISHING.castDistance
-  let lx = x + Math.sin(rotationY) * d
-  let lz = z + Math.cos(rotationY) * d
-  // 着水が島の上なら、外側へ少し押し出す
-  if (!isInWater(lx, lz)) {
-    const r = islandNormRadius(lx, lz) || 0.001
-    const scale = 1.28 / r
-    lx *= scale
-    lz *= scale
-  }
-  return { x: lx, y: SHORE_FISHING.castBobberY, z: lz }
-}
+export {
+  isNearShore,
+  isInWater,
+  castLandingFrom,
+} from './islandTiles'
 
 type DailyBestPayload = { dateKey: string; score: number }
 

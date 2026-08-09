@@ -27,6 +27,10 @@ const armRestZ = {
   right: -1.35,
 }
 
+/** 竿持ち右腕の脇。立ち／釣りはガッツリ閉め、歩行は従来値のまま */
+const rodArmZClosed = armRestZ.right * 1.15
+const rodArmZWalk = armRestZ.right * 0.88
+
 const attentionArmZ = {
   left: 1.56,
   right: -1.56,
@@ -478,12 +482,12 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
     setRotation(leftLowerArm, { x: 0.55, z: 0 })
   }
 
-  // 右腕：竿持ち
+  // 右腕：竿持ち。歩行は従来どおり、立ち／釣りだけ脇を閉める
   if (options.action === 'carry') {
     setRotation(rightUpperArm, {
       x: 0.62 + stride * 0.06 * movementWeight,
       y: 0,
-      z: armRestZ.right * 0.88,
+      z: MathUtils.lerp(rodArmZClosed, rodArmZWalk, movementWeight),
     })
     setRotation(rightLowerArm, { x: 0.42, y: 0, z: 0 })
   } else if (options.action === 'cast') {
@@ -497,7 +501,7 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
       setRotation(rightUpperArm, {
         x: MathUtils.lerp(0.7, 1.45, wind),
         y: 0,
-        z: MathUtils.lerp(armRestZ.right * 0.8, armRestZ.right * 0.5, wind),
+        z: rodArmZClosed,
       })
       setRotation(rightLowerArm, {
         x: MathUtils.lerp(0.35, 0.45, wind),
@@ -517,7 +521,7 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
       setRotation(rightUpperArm, {
         x: MathUtils.lerp(1.45, 0.95, throwT),
         y: 0,
-        z: MathUtils.lerp(armRestZ.right * 0.5, armRestZ.right * 0.8, throwT),
+        z: rodArmZClosed,
       })
       setRotation(rightLowerArm, {
         x: MathUtils.lerp(0.45, 0.28, throwT),
@@ -542,7 +546,7 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
     setRotation(rightUpperArm, {
       x: 0.95 + idle * 0.04,
       y: 0,
-      z: armRestZ.right * 0.8,
+      z: rodArmZClosed,
     })
     setRotation(rightLowerArm, { x: 0.28, y: 0, z: 0 })
     setRotation(head, { x: 0.12 + idle * 0.02, y: 0 })
@@ -550,7 +554,7 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
     setRotation(rightUpperArm, {
       x: 1.05 + actionT * 0.4,
       y: 0,
-      z: armRestZ.right * 0.5,
+      z: rodArmZClosed,
     })
     setRotation(rightLowerArm, { x: 0.45, y: 0, z: 0 })
     setRotation(chest, { x: -0.06 + actionT * 0.08, y: 0, z: 0 })
