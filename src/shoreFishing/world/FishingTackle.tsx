@@ -5,7 +5,12 @@ import { VRMHumanBoneName, type VRM } from '@pixiv/three-vrm'
 import { applyHandPropFit } from '../../avatar/vrmHandPropFit'
 import type { FishingAction } from '../../avatar/VRMLocomotion'
 import { SHORE_FISHING } from '../config'
-import { setShoreRodTip, shorePlayerWorld } from '../playerWorld'
+import {
+  clearShoreBobberWorld,
+  setShoreBobberWorld,
+  setShoreRodTip,
+  shorePlayerWorld,
+} from '../playerWorld'
 import { useShoreFishingStore, type CastPhase } from '../store'
 import { VoxelFish } from './VoxelFish'
 
@@ -187,6 +192,7 @@ export function FishingWorldFx() {
       bobber.visible = false
       if (fish) fish.visible = false
       if (line) line.visible = false
+      clearShoreBobberWorld()
       return
     }
 
@@ -241,16 +247,20 @@ export function FishingWorldFx() {
         1,
       )
       const ease = 1 - (1 - t) * (1 - t)
+      const arc = pendingFishId ? 1.55 : 1.1
       tmp.set(
         MathUtils.lerp(land.x, hold.x, ease),
-        MathUtils.lerp(land.y, hold.y, ease) + Math.sin(ease * Math.PI) * 1.55,
+        MathUtils.lerp(land.y, hold.y, ease) + Math.sin(ease * Math.PI) * arc,
         MathUtils.lerp(land.z, hold.z, ease),
       )
       bobber.position.copy(tmp)
       if (fish) {
-        fish.visible = true
-        fish.position.copy(tmp)
-        fish.rotation.set(ease * 0.9, ease * Math.PI * 1.6, ease * 0.35)
+        // 空の引き上げでは前回釣果メッシュを出さない
+        fish.visible = Boolean(pendingFishId)
+        if (fish.visible) {
+          fish.position.copy(tmp)
+          fish.rotation.set(ease * 0.9, ease * Math.PI * 1.6, ease * 0.35)
+        }
       }
     } else if (castPhase === 'caught') {
       bobber.visible = false
@@ -262,6 +272,14 @@ export function FishingWorldFx() {
     } else {
       bobber.visible = false
       if (fish) fish.visible = false
+    }
+
+    if (bobber.visible) {
+      setShoreBobberWorld(bobber.position.x, bobber.position.y, bobber.position.z)
+    } else if (fish?.visible) {
+      setShoreBobberWorld(fish.position.x, fish.position.y, fish.position.z)
+    } else {
+      clearShoreBobberWorld()
     }
 
     if (line) {
@@ -287,7 +305,7 @@ export function FishingWorldFx() {
     }
   })
 
-  const fishId = pendingFishId ?? lastCatch?.fishId ?? null
+  const fishId = pendingFishId ?? (castPhase === 'caught' ? lastCatch?.fishId : null) ?? null
 
   return (
     <group>

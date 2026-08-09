@@ -62,8 +62,8 @@ export const SHORE_FISHING = {
   cameraLookY: 1.4,
   cameraFov: 50,
 
-  /** 正面へ投げる距離（ワールド）。沖の影まで届くようやや長め */
-  castDistance: 6.4,
+  /** 正面へ投げる距離（ワールド） */
+  castDistance: 3.2,
   castBobberY: 0.05,
   catchHoldDistance: 0.85,
   catchHoldY: 1.4,
@@ -92,7 +92,7 @@ export const SHORE_FISHING = {
   /** 同時に出せる魚影スロット数（手前・奥・左右） */
   shadowCount: 16,
   /** キャスト地点からこの距離以内の影だけが食いつく（メートル） */
-  shadowReactRadius: 6.8,
+  shadowReactRadius: 4.2,
   /** 影の寿命（秒）。シュモク／ホオジロ（huge+rare）は短め */
   shadowLifetimeSec: {
     tiny: { min: 18, max: 28 },

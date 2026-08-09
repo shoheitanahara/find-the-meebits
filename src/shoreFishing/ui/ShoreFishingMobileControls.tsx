@@ -63,8 +63,12 @@ function CastHookButton() {
           if (store.tryCast()) playSfx('uiClick')
           return
         }
-        if (store.tryHook()) playSfx(waitingFish ? 'uiClick' : 'targetFound')
-        else playSfx('uiClick')
+        if (store.tryHook()) {
+          const after = useShoreFishingStore.getState()
+          playSfx(after.lastCatch ? 'targetFound' : 'uiClick')
+        } else {
+          playSfx('uiClick')
+        }
       }}
     >
       <span className="text-[0.65rem] font-black uppercase tracking-[0.12em]">{label}</span>

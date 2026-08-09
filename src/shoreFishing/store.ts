@@ -100,6 +100,35 @@ const idleCast = {
   castOrigin: null as { x: number; z: number; rotationY: number } | null,
 }
 
+/** 空の引き上げ（キャンセル／早合わせ／逃し）。見た目は共通。 */
+function emptyReelPatch(
+  state: Pick<ShoreState, 'bobberLand' | 'castOrigin'>,
+  now: number,
+  flash: 'miss' | 'empty' | 'none' = 'miss',
+) {
+  let bobberLand = state.bobberLand
+  if (shorePlayerWorld.bobberActive) {
+    bobberLand = {
+      x: shorePlayerWorld.bobberX,
+      y: shorePlayerWorld.bobberY,
+      z: shorePlayerWorld.bobberZ,
+    }
+  }
+  return {
+    castPhase: 'reeling' as const,
+    pendingFishId: null,
+    lastCatch: null,
+    nibbleTotal: 0,
+    nibbleIndex: 0,
+    biteUntil: null,
+    animStartedAt: now,
+    nextEventAt: now + SHORE_FISHING.reelSec * 1000,
+    promptFlash: flash,
+    bobberLand,
+    castOrigin: state.castOrigin,
+  }
+}
+
 /** 竿を出している間は歩けない */
 export function isShoreFishingBusy(castPhase: CastPhase) {
   return castPhase !== 'ready'
@@ -238,24 +267,25 @@ export const useShoreFishingStore = create<ShoreState>((set, get) => ({
     }
 
     if (castPhase === 'bite' && biteUntil !== null && now >= biteUntil) {
-      set({
-        castPhase: 'miss',
-        biteUntil: null,
-        nextEventAt: now + SHORE_FISHING.missCooldownSec * 1000,
-        pendingFishId: null,
-        animStartedAt: null,
-        promptFlash: 'miss',
-      })
+      set(emptyReelPatch(state, now, 'miss'))
       return
     }
 
     if (castPhase === 'reeling' && nextEventAt !== null && now >= nextEventAt) {
-      set({
-        castPhase: 'caught',
-        nextEventAt: now + SHORE_FISHING.catchShowSec * 1000,
-        animStartedAt: null,
-        promptFlash: 'catch',
-      })
+      // 釣果あり → 見せる／空の引き上げ → すぐ待機へ
+      if (state.lastCatch && state.pendingFishId) {
+        set({
+          castPhase: 'caught',
+          nextEventAt: now + SHORE_FISHING.catchShowSec * 1000,
+          animStartedAt: null,
+          promptFlash: 'catch',
+        })
+      } else {
+        set({
+          ...idleCast,
+          lastCatch: null,
+        })
+      }
       return
     }
 
@@ -319,56 +349,54 @@ export const useShoreFishingStore = create<ShoreState>((set, get) => ({
     if (state.phase !== 'playing') return false
     const now = performance.now()
 
-    // 魚が来る前：自分で引けばキャスト取りやめ（自動では終わらない）
-    if (state.castPhase === 'approach' && !state.pendingFishId) {
-      set({ ...idleCast, lastCatch: null })
+    // 本食い成功
+    if (
+      state.castPhase === 'bite' &&
+      state.biteUntil !== null &&
+      now <= state.biteUntil
+    ) {
+      const fishId = state.pendingFishId ?? pickFishKindId()
+      const fish = getFishKind(fishId)
+      const atSec =
+        state.startedAt === null
+          ? 0
+          : (now - state.startedAt - getTabPausedMs()) / 1000
+      const entry: SessionCatch = {
+        id: ++catchSeq,
+        fishId,
+        score: fish.score,
+        atSec,
+      }
+      set({
+        castPhase: 'reeling',
+        score: state.score + fish.score,
+        catches: [...state.catches, entry],
+        lastCatch: entry,
+        pendingFishId: fishId,
+        biteUntil: null,
+        animStartedAt: now,
+        nextEventAt: now + SHORE_FISHING.reelSec * 1000,
+        promptFlash: 'catch',
+      })
       return true
     }
 
+    // それ以外（影なし待機／食いつき前／早合わせ／遅れ）はすべて同じ空の引き上げ
     if (
-      state.castPhase === 'nibble' ||
+      state.castPhase === 'casting' ||
       state.castPhase === 'approach' ||
-      state.castPhase === 'casting'
+      state.castPhase === 'nibble' ||
+      state.castPhase === 'bite'
     ) {
-      set({
-        castPhase: 'miss',
-        biteUntil: null,
-        nextEventAt: now + SHORE_FISHING.missCooldownSec * 1000,
-        pendingFishId: null,
-        animStartedAt: null,
-        promptFlash: 'miss',
-      })
-      return false
+      if (!state.bobberLand && !shorePlayerWorld.bobberActive) return false
+      // HUD 用。sfx は入力側で鳴らす（timeout の miss と二重にしない）
+      const flash =
+        state.castPhase === 'approach' && !state.pendingFishId ? 'none' : 'empty'
+      set(emptyReelPatch(state, now, flash))
+      return true
     }
 
-    if (state.castPhase !== 'bite' || state.biteUntil === null || now > state.biteUntil) {
-      return false
-    }
-
-    const fishId = state.pendingFishId ?? pickFishKindId()
-    const fish = getFishKind(fishId)
-    const atSec =
-      state.startedAt === null
-        ? 0
-        : (now - state.startedAt - getTabPausedMs()) / 1000
-    const entry: SessionCatch = {
-      id: ++catchSeq,
-      fishId,
-      score: fish.score,
-      atSec,
-    }
-    set({
-      castPhase: 'reeling',
-      score: state.score + fish.score,
-      catches: [...state.catches, entry],
-      lastCatch: entry,
-      pendingFishId: fishId,
-      biteUntil: null,
-      animStartedAt: now,
-      nextEventAt: now + SHORE_FISHING.reelSec * 1000,
-      promptFlash: 'catch',
-    })
-    return true
+    return false
   },
 
   finishGame: () => {

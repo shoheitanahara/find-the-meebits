@@ -323,9 +323,10 @@ export function SeaFishShadows() {
         hunter.lastNibble = 0
         hunter.tap = 0
         hunter.claimed = true
-        const ang = Math.atan2(bobberLand.x - amb.x, bobberLand.z - amb.z)
-        hunter.holdOx = Math.sin(ang + 0.9) * 0.5
-        hunter.holdOz = Math.cos(ang + 0.9) * 0.5
+        // 浮きより沖（外側）で待機し、島側（内側）へ向かってつつく
+        const br = Math.hypot(bobberLand.x, bobberLand.z) || 1
+        hunter.holdOx = (bobberLand.x / br) * 0.62
+        hunter.holdOz = (bobberLand.z / br) * 0.62
         store.claimShadowBite(s.fishId)
         // claim 後の nextEventAt を寄せ時間に使う
         const claimed = useShoreFishingStore.getState()
@@ -412,20 +413,25 @@ export function SeaFishShadows() {
         const ease = u * u * (3 - 2 * u)
         hunter.x = MathUtils.lerp(hunter.fromX, bx + hunter.holdOx, ease)
         hunter.z = MathUtils.lerp(hunter.fromZ, bz + hunter.holdOz, ease)
+        // 内側（浮き／島）を向く
         hunter.yaw = Math.atan2(bx - hunter.x, bz - hunter.z)
       } else if (castPhase === 'nibble') {
-        const wobbleX = Math.sin(t * 2.1 + i) * 0.07
-        const wobbleZ = Math.cos(t * 1.7 + i) * 0.06
-        const baseX = bx + hunter.holdOx + wobbleX
-        const baseZ = bz + hunter.holdOz + wobbleZ
+        // 外側でゆらゆら → タップで内側（浮き）へちょんっと寄る
+        const side = Math.sin(t * 2.1 + i) * 0.05
+        const perpX = -hunter.holdOz
+        const perpZ = hunter.holdOx
+        const plen = Math.hypot(perpX, perpZ) || 1
+        const baseX = bx + hunter.holdOx + (perpX / plen) * side
+        const baseZ = bz + hunter.holdOz + (perpZ / plen) * side
         const tapPull = hunter.tap * hunter.tap
-        hunter.x = MathUtils.lerp(baseX, bx, tapPull * 0.75)
-        hunter.z = MathUtils.lerp(baseZ, bz, tapPull * 0.75)
+        hunter.x = MathUtils.lerp(baseX, bx, tapPull * 0.82)
+        hunter.z = MathUtils.lerp(baseZ, bz, tapPull * 0.82)
         hunter.yaw = Math.atan2(bx - hunter.x, bz - hunter.z)
       } else if (castPhase === 'bite') {
-        const thrash = 0.1 + Math.sin(t * 16) * 0.05
-        hunter.x = bx + Math.cos(t * 11) * thrash
-        hunter.z = bz + Math.sin(t * 13) * thrash
+        // 沖側に寄りつつ暴れる
+        const thrash = 0.08 + Math.sin(t * 16) * 0.05
+        hunter.x = bx + hunter.holdOx * 0.35 + Math.cos(t * 11) * thrash
+        hunter.z = bz + hunter.holdOz * 0.35 + Math.sin(t * 13) * thrash
         hunter.yaw = Math.atan2(bx - hunter.x, bz - hunter.z)
       } else if (castPhase === 'miss') {
         const fleeT = MathUtils.clamp(1 - (hunter.fleeUntil - now) / 700, 0, 1)

@@ -9,6 +9,11 @@ type ShorePlayerWorld = {
   tipX: number
   tipY: number
   tipZ: number
+  /** 浮きが出ているときカメラ用 */
+  bobberActive: boolean
+  bobberX: number
+  bobberY: number
+  bobberZ: number
 }
 
 export const shorePlayerWorld: ShorePlayerWorld = {
@@ -20,6 +25,10 @@ export const shorePlayerWorld: ShorePlayerWorld = {
   tipX: 0,
   tipY: 1.8,
   tipZ: 0,
+  bobberActive: false,
+  bobberX: 0,
+  bobberY: 0,
+  bobberZ: 0,
 }
 
 export function resetShorePlayerWorld() {
@@ -31,6 +40,7 @@ export function resetShorePlayerWorld() {
   shorePlayerWorld.tipX = SHORE_FISHING.playerStart.x
   shorePlayerWorld.tipY = 1.8
   shorePlayerWorld.tipZ = SHORE_FISHING.playerStart.z
+  shorePlayerWorld.bobberActive = false
 }
 
 export function setShorePlayerWorld(
@@ -50,4 +60,15 @@ export function setShoreRodTip(x: number, y: number, z: number) {
   shorePlayerWorld.tipX = x
   shorePlayerWorld.tipY = y
   shorePlayerWorld.tipZ = z
+}
+
+export function setShoreBobberWorld(x: number, y: number, z: number) {
+  shorePlayerWorld.bobberActive = true
+  shorePlayerWorld.bobberX = x
+  shorePlayerWorld.bobberY = y
+  shorePlayerWorld.bobberZ = z
+}
+
+export function clearShoreBobberWorld() {
+  shorePlayerWorld.bobberActive = false
 }

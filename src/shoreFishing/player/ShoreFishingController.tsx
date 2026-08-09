@@ -22,14 +22,9 @@ export function ShoreFishingController() {
         if (store.tryCast()) playSfx('uiClick')
         return
       }
-      const cancelWait = store.castPhase === 'approach' && !store.pendingFishId
-      if (store.tryHook()) playSfx(cancelWait ? 'uiClick' : 'targetFound')
-      else if (
-        store.castPhase === 'nibble' ||
-        store.castPhase === 'approach' ||
-        store.castPhase === 'casting'
-      ) {
-        playSfx('uiClick')
+      if (store.tryHook()) {
+        const after = useShoreFishingStore.getState()
+        playSfx(after.lastCatch ? 'targetFound' : 'uiClick')
       }
     }
     window.addEventListener('keydown', onKey)

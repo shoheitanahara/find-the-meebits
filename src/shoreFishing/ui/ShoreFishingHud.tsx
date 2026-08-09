@@ -30,11 +30,16 @@ export function ShoreFishingHud() {
             ? t.bite
             : castPhase === 'nibble'
               ? t.nibble
-              : castPhase === 'reeling' || castPhase === 'caught'
+              : castPhase === 'caught' || (castPhase === 'reeling' && pendingFishId)
                 ? t.catch
-                : castPhase === 'miss'
+                : castPhase === 'reeling' &&
+                    (promptFlash === 'miss' || promptFlash === 'empty')
                   ? t.miss
-                  : t.wait
+                  : castPhase === 'reeling'
+                    ? t.wait
+                    : castPhase === 'miss'
+                      ? t.miss
+                      : t.wait
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-30 flex flex-col items-center gap-2 px-3">
@@ -66,7 +71,7 @@ export function ShoreFishingHud() {
               ? 'animate-pulse border-red-300/70 bg-red-900/70 text-red-100'
               : promptFlash === 'catch'
                 ? 'border-emerald-300/50 bg-emerald-900/60 text-emerald-100'
-                : promptFlash === 'miss'
+                : promptFlash === 'miss' || promptFlash === 'empty'
                   ? 'border-white/20 bg-black/50 text-white/70'
                   : 'border-white/20 bg-black/45 text-white/80'
           }`}
