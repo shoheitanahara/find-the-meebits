@@ -63,7 +63,7 @@ export const SHORE_FISHING = {
   cameraFov: 50,
 
   /** 正面へ投げる距離（ワールド） */
-  castDistance: 3.2,
+  castDistance: 4.16,
   castBobberY: 0.05,
   catchHoldDistance: 0.85,
   catchHoldY: 1.4,
