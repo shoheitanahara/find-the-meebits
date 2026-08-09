@@ -369,11 +369,15 @@ type FishingPoseOptions = {
   action: FishingAction
   /** cast / reel の 0..1 */
   actionT: number
-  /** cast のうち振りかぶりの割合（ルアー飛行開始と揃える） */
+  /** cast のうち振りかぶり（竿上げ）の割合。以降は引き上げの逆で振り下ろし */
   castWindupRatio?: number
 }
 
 const HALF_PI = Math.PI / 2
+
+function smooth01(t: number) {
+  return t * t * (3 - 2 * t)
+}
 
 /**
  * 釣り用。下半身は歩行、右腕で竿を持ち、キャスト／待ち／引き上げを表現する。
@@ -443,8 +447,25 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
     })
     setRotation(leftLowerArm, { x: elbowBaseBend, z: 0 })
   } else if (options.action === 'cast') {
-    setRotation(leftUpperArm, { x: 0.15, z: armRestZ.left * 0.9 })
-    setRotation(leftLowerArm, { x: 0.2, z: 0 })
+    // 引き上げ終端 ← 振りかぶり／ 引き上げの逆 → wait
+    const split = MathUtils.clamp(options.castWindupRatio ?? 0.27, 0.12, 0.45)
+    const wind = smooth01(MathUtils.clamp(actionT / split, 0, 1))
+    const throwT = smooth01(
+      MathUtils.clamp((actionT - split) / Math.max(1 - split, 0.01), 0, 1),
+    )
+    if (actionT < split) {
+      setRotation(leftUpperArm, {
+        x: MathUtils.lerp(0.25, 1.2, wind),
+        z: MathUtils.lerp(armRestZ.left * 0.92, armRestZ.left * 0.55, wind),
+      })
+      setRotation(leftLowerArm, { x: MathUtils.lerp(0.35, 0.55, wind), z: 0 })
+    } else {
+      setRotation(leftUpperArm, {
+        x: MathUtils.lerp(1.2, 0.25, throwT),
+        z: MathUtils.lerp(armRestZ.left * 0.55, armRestZ.left * 0.92, throwT),
+      })
+      setRotation(leftLowerArm, { x: MathUtils.lerp(0.55, 0.35, throwT), z: 0 })
+    }
   } else if (options.action === 'wait') {
     setRotation(leftUpperArm, { x: 0.25 + idle * 0.03, z: armRestZ.left * 0.92 })
     setRotation(leftLowerArm, { x: 0.35, z: 0 })
@@ -466,28 +487,57 @@ export function applyVRMFishingPose(vrm: VRM | null, options: FishingPoseOptions
     })
     setRotation(rightLowerArm, { x: 0.42, y: 0, z: 0 })
   } else if (options.action === 'cast') {
-    // actionT は振りかぶり＋フライトの全体比。前半で後ろへ、後半で前へ（ルアー飛行と同期）
-    const split = MathUtils.clamp(options.castWindupRatio ?? 0.37, 0.15, 0.6)
-    const wind = MathUtils.clamp(actionT / split, 0, 1)
-    const whip = MathUtils.clamp((actionT - split) / Math.max(1 - split, 0.01), 0, 1)
-    const armX =
-      actionT < split
-        ? MathUtils.lerp(0.55, -0.95, wind)
-        : MathUtils.lerp(-0.95, 1.5, whip * whip * (3 - 2 * whip))
-    setRotation(rightUpperArm, {
-      x: armX,
-      y: 0,
-      z: armRestZ.right * 0.75,
-    })
-    setRotation(rightLowerArm, {
-      x: actionT < split ? MathUtils.lerp(0.42, 0.7, wind) : MathUtils.lerp(0.7, 0.08, whip),
-      y: 0,
-      z: 0,
-    })
-    setRotation(spine, {
-      x: actionT < split ? -0.06 - wind * 0.14 : -0.04 + whip * 0.12,
-      y: counterStride * 0.02 * movementWeight,
-    })
+    // 前半：wait 付近から引き上げ終端へ。後半：その逆で wait へ振り下ろす
+    const split = MathUtils.clamp(options.castWindupRatio ?? 0.27, 0.12, 0.45)
+    const wind = smooth01(MathUtils.clamp(actionT / split, 0, 1))
+    const throwT = smooth01(
+      MathUtils.clamp((actionT - split) / Math.max(1 - split, 0.01), 0, 1),
+    )
+    if (actionT < split) {
+      setRotation(rightUpperArm, {
+        x: MathUtils.lerp(0.7, 1.45, wind),
+        y: 0,
+        z: MathUtils.lerp(armRestZ.right * 0.8, armRestZ.right * 0.5, wind),
+      })
+      setRotation(rightLowerArm, {
+        x: MathUtils.lerp(0.35, 0.45, wind),
+        y: 0,
+        z: 0,
+      })
+      setRotation(chest, {
+        x: MathUtils.lerp(-0.02, 0.02, wind),
+        y: 0,
+        z: 0,
+      })
+      setRotation(spine, {
+        x: MathUtils.lerp(-0.04, 0.02, wind),
+        y: counterStride * 0.02 * movementWeight,
+      })
+    } else {
+      setRotation(rightUpperArm, {
+        x: MathUtils.lerp(1.45, 0.95, throwT),
+        y: 0,
+        z: MathUtils.lerp(armRestZ.right * 0.5, armRestZ.right * 0.8, throwT),
+      })
+      setRotation(rightLowerArm, {
+        x: MathUtils.lerp(0.45, 0.28, throwT),
+        y: 0,
+        z: 0,
+      })
+      setRotation(chest, {
+        x: MathUtils.lerp(0.02, idle * 0.018 * idleWeight, throwT),
+        y: 0,
+        z: 0,
+      })
+      setRotation(spine, {
+        x: MathUtils.lerp(0.02, -0.05 * movementWeight, throwT),
+        y: counterStride * 0.02 * movementWeight,
+      })
+      setRotation(head, {
+        x: MathUtils.lerp(0.04, 0.12, throwT),
+        y: 0,
+      })
+    }
   } else if (options.action === 'wait') {
     setRotation(rightUpperArm, {
       x: 0.95 + idle * 0.04,

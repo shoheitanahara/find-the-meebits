@@ -1,6 +1,6 @@
-import { useMemo, useRef, type MutableRefObject, type RefObject } from 'react'
+import { useRef, type MutableRefObject, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { CatmullRomCurve3, Group, MathUtils, Quaternion, Vector3 } from 'three'
+import { Group, MathUtils, Quaternion, Vector3 } from 'three'
 import { VRMHumanBoneName, type VRM } from '@pixiv/three-vrm'
 import { applyHandPropFit } from '../../avatar/vrmHandPropFit'
 import type { FishingAction } from '../../avatar/VRMLocomotion'
@@ -53,14 +53,16 @@ export function fishingActionT(castPhase: CastPhase, animStartedAt: number | nul
   return 0
 }
 
-/** 竿のピッチ。+X = 穂先が前方。振りかぶり中は後ろ、リリースで前へ。 */
+/** 竿のピッチ。+X = 穂先が前方。キャストは引き上げ（0.95→0.35）の逆。 */
 function rodPitchFor(action: FishingAction, actionT: number): number {
   if (action === 'cast') {
     const split = castWindupRatio()
     const wind = MathUtils.clamp(actionT / split, 0, 1)
-    const whip = MathUtils.clamp((actionT - split) / (1 - split), 0, 1)
-    if (actionT < split) return MathUtils.lerp(0.55, -0.55, wind)
-    return MathUtils.lerp(-0.55, 1.2, whip * whip * (3 - 2 * whip))
+    const throwT = MathUtils.clamp((actionT - split) / Math.max(1 - split, 0.01), 0, 1)
+    const easeWind = wind * wind * (3 - 2 * wind)
+    const easeThrow = throwT * throwT * (3 - 2 * throwT)
+    if (actionT < split) return MathUtils.lerp(0.7, 0.35, easeWind)
+    return MathUtils.lerp(0.35, 0.95, easeThrow)
   }
   if (action === 'wait') return 0.95
   if (action === 'reel') return MathUtils.lerp(0.95, 0.35, actionT)
@@ -156,6 +158,9 @@ export function FishingWorldFx() {
   const lineRef = useRef<Group>(null)
   const dipRef = useRef(0)
   const lastNibbleRef = useRef(0)
+  /** キャスト飛行開始時の穂先位置（引き上げの着点＝投げの始点） */
+  const castStartRef = useRef(new Vector3())
+  const castFlightStartedRef = useRef(false)
 
   const castPhase = useShoreFishingStore((s) => s.castPhase)
   const nibbleIndex = useShoreFishingStore((s) => s.nibbleIndex)
@@ -166,64 +171,74 @@ export function FishingWorldFx() {
   const castOrigin = useShoreFishingStore((s) => s.castOrigin)
   const phase = useShoreFishingStore((s) => s.phase)
 
-  const castCurve = useMemo(() => {
-    if (!bobberLand || !castOrigin) return null
-    const start = new Vector3(
-      castOrigin.x + Math.sin(castOrigin.rotationY) * 0.4,
-      1.85,
-      castOrigin.z + Math.cos(castOrigin.rotationY) * 0.4,
-    )
-    const mid = new Vector3(
-      (start.x + bobberLand.x) * 0.5,
-      3.2,
-      (start.z + bobberLand.z) * 0.5,
-    )
-    const end = new Vector3(bobberLand.x, bobberLand.y, bobberLand.z)
-    return new CatmullRomCurve3([start, mid, end])
-  }, [bobberLand, castOrigin])
-
   useFrame((_, delta) => {
     const bobber = bobberRef.current
     const fish = fishRef.current
     const line = lineRef.current
     if (!bobber) return
 
-    if (phase !== 'playing' || !bobberLand || !castOrigin) {
+    const showTackle = phase === 'playing' || phase === 'countdown'
+    if (!showTackle) {
       bobber.visible = false
       if (fish) fish.visible = false
       if (line) line.visible = false
+      castFlightStartedRef.current = false
       clearShoreBobberWorld()
       return
     }
 
     tipWorld.set(shorePlayerWorld.tipX, shorePlayerWorld.tipY, shorePlayerWorld.tipZ)
 
-    land.set(bobberLand.x, bobberLand.y, bobberLand.z)
-    hold.set(
-      castOrigin.x + Math.sin(castOrigin.rotationY) * SHORE_FISHING.catchHoldDistance,
-      SHORE_FISHING.catchHoldY,
-      castOrigin.z + Math.cos(castOrigin.rotationY) * SHORE_FISHING.catchHoldDistance,
-    )
+    /** カメラ追従する「投げ出し中」か。持ち歩中の穂先ウキは false */
+    let castOut = false
 
-    if (castPhase === 'casting' && animStartedAt && castCurve) {
+    if (bobberLand && castOrigin) {
+      land.set(bobberLand.x, bobberLand.y, bobberLand.z)
+      hold.set(
+        castOrigin.x + Math.sin(castOrigin.rotationY) * SHORE_FISHING.catchHoldDistance,
+        SHORE_FISHING.catchHoldY,
+        castOrigin.z + Math.cos(castOrigin.rotationY) * SHORE_FISHING.catchHoldDistance,
+      )
+    }
+
+    if (castPhase === 'casting' && animStartedAt && bobberLand && castOrigin) {
+      castOut = true
       bobber.visible = true
       if (fish) fish.visible = false
       const elapsed = performance.now() - animStartedAt
       const windupMs = SHORE_FISHING.castWindupSec * 1000
-      // 振りかぶり中は穂先に留め、リリース後にだけ飛ばす
+      // 振りかぶり中は穂先に留め、リリース後は引き上げの逆弧で着水へ
       if (elapsed < windupMs) {
         bobber.position.copy(tipWorld)
+        castFlightStartedRef.current = false
       } else {
+        if (!castFlightStartedRef.current) {
+          castStartRef.current.copy(tipWorld)
+          castFlightStartedRef.current = true
+        }
         const t = MathUtils.clamp(
           (elapsed - windupMs) / (SHORE_FISHING.castFlightSec * 1000),
           0,
           1,
         )
-        castCurve.getPoint(t, tmp)
+        const ease = 1 - (1 - t) * (1 - t)
+        const start = castStartRef.current
+        const arc = 1.1
+        tmp.set(
+          MathUtils.lerp(start.x, land.x, ease),
+          MathUtils.lerp(start.y, land.y, ease) + Math.sin(ease * Math.PI) * arc,
+          MathUtils.lerp(start.z, land.z, ease),
+        )
         bobber.position.copy(tmp)
       }
       dipRef.current = 0
-    } else if (castPhase === 'approach' || castPhase === 'nibble' || castPhase === 'bite') {
+    } else if (
+      (castPhase === 'approach' || castPhase === 'nibble' || castPhase === 'bite') &&
+      bobberLand &&
+      castOrigin
+    ) {
+      castOut = true
+      castFlightStartedRef.current = false
       bobber.visible = true
       if (fish) fish.visible = false
       if (castPhase === 'nibble' && nibbleIndex !== lastNibbleRef.current) {
@@ -239,7 +254,8 @@ export function FishingWorldFx() {
       }
       const bob = castPhase === 'bite' ? 0 : Math.sin(performance.now() * 0.004) * 0.03
       bobber.position.set(land.x, land.y - dipRef.current + bob, land.z)
-    } else if (castPhase === 'reeling' && animStartedAt) {
+    } else if (castPhase === 'reeling' && animStartedAt && bobberLand && castOrigin) {
+      castOut = true
       bobber.visible = true
       const t = MathUtils.clamp(
         (performance.now() - animStartedAt) / (SHORE_FISHING.reelSec * 1000),
@@ -262,7 +278,8 @@ export function FishingWorldFx() {
           fish.rotation.set(ease * 0.9, ease * Math.PI * 1.6, ease * 0.35)
         }
       }
-    } else if (castPhase === 'caught') {
+    } else if (castPhase === 'caught' && bobberLand && castOrigin) {
+      castOut = true
       bobber.visible = false
       if (fish) {
         fish.visible = true
@@ -270,32 +287,33 @@ export function FishingWorldFx() {
         fish.rotation.set(0.35, 0.4, 0.1)
       }
     } else {
-      bobber.visible = false
+      // ready / 待機：持ち歩中も穂先にウキを付けたまま
+      castFlightStartedRef.current = false
+      bobber.visible = true
       if (fish) fish.visible = false
+      bobber.position.copy(tipWorld)
+      dipRef.current = 0
     }
 
-    if (bobber.visible) {
+    // カメラは投げ出し中だけ餌側へ寄る（持ち歩中の穂先ウキでは動かさない）
+    if (castOut && bobber.visible) {
       setShoreBobberWorld(bobber.position.x, bobber.position.y, bobber.position.z)
-    } else if (fish?.visible) {
+    } else if (castOut && fish?.visible) {
       setShoreBobberWorld(fish.position.x, fish.position.y, fish.position.z)
     } else {
       clearShoreBobberWorld()
     }
 
     if (line) {
-      const draw =
-        castPhase === 'casting' ||
-        castPhase === 'approach' ||
-        castPhase === 'nibble' ||
-        castPhase === 'bite' ||
-        castPhase === 'reeling' ||
-        castPhase === 'caught'
-      line.visible = draw && (bobber.visible || Boolean(fish?.visible))
-      if (line.visible) {
-        const to = bobber.visible ? bobber.position : fish!.position
+      const to = bobber.visible ? bobber.position : fish?.visible ? fish.position : null
+      if (!to) {
+        line.visible = false
+      } else {
         lineDir.copy(to).sub(tipWorld)
         const len = lineDir.length()
-        if (len > 0.05) {
+        // 穂先密着時はラインを隠す。投げ出し中だけ見せる
+        line.visible = castOut && len > 0.08
+        if (line.visible) {
           line.position.copy(tipWorld).addScaledVector(lineDir, 0.5)
           lineQuat.setFromUnitVectors(yUp, tmp.copy(lineDir).normalize())
           line.quaternion.copy(lineQuat)

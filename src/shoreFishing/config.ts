@@ -81,9 +81,12 @@ export const SHORE_FISHING = {
   maxNibbles: 5,
   nibbleGapSec: { min: 0.55, max: 1.15 },
   biteWindowSec: 0.95,
-  /** キャスト：振りかぶり → ルアー飛行 */
-  castWindupSec: 0.32,
-  castFlightSec: 0.55,
+  /**
+   * キャスト＝引き上げの逆。
+   * 振りかぶり（竿を上げる）→ 振り下ろし＋浮き飛行。合計は reelSec と同尺。
+   */
+  castWindupSec: 0.28,
+  castFlightSec: 0.77,
   approachSec: { min: 0.8, max: 2.2 },
   reelSec: 1.05,
   catchShowSec: 1.1,
