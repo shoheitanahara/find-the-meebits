@@ -1,8 +1,16 @@
 # Active Context
 
-最終更新: 2026-08-05
+最終更新: 2026-08-09
 
 ## 直近の作業サマリー
+
+### Shore Fishing（`/shore-fishing`）— 島・竿・TS
+
+- **島**: ボクセル床。ヤシ廃止 → コケ付きの小さな岩／小山（`islandRocks` / `IslandVoxelRocks`）
+- **アバター**: `applyVRMFishingPose` — 歩行は脇やや開き、立ち／釣りは脇クローズ。キャスト＝リール逆
+- **NPC**: 対岸を歩いて釣るだけ（プレイヤー無反応）
+- **ホオジロ**: 頭を一番太く（胴より頭が太い紡錘）
+- **ノウハウ正本**: `memory-bank/shoreFishing.md` + `meebitVrmArms.md`（釣り）+ `techContext.md`（TS リテラル型）
 
 ### Photo Booth（`/photo-booth`）— アバター操作の仕上がり
 
@@ -148,7 +156,9 @@
 9. **Runway 座標**: +Z=手前（入口）、−Z=奥。ベンチ mesh は local X=長辺 / local Z=奥行。詳細は `.cursor/rules/threejs-coordinates.mdc`
 10. **Runway タッチ視点**: pitch は `-lookDeltaY`（マウスの `+movementY` とは逆）。変えるときは両方確認
 11. **Photo Booth**: ポーズ・カメラ・マグは `photoStudio.md`。顎は Head **正 X＝上げ**。カメラ下寄りは lookAt Y を下げる
-12. commit はユーザー依頼時のみ
+12. **Shore Fishing**: 竿・島は `shoreFishing.md`。腕は捻らず、立ちは脇クローズ／歩きは開。config 数値のデフォルト引数は `param: number = ...`
+13. **TS2345 `0.38` not assignable to `0.45`**: config リテラルがデフォルト引数型になるやつ → `techContext.md` TypeScript 落とし穴
+14. commit はユーザー依頼時のみ
 
 ## デプロイチェックリスト
 

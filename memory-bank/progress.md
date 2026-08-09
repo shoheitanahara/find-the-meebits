@@ -2,6 +2,17 @@
 
 ## 完了済み
 
+### Shore Fishing（`/shore-fishing`）
+
+- [x] Sea 西スロットから入場。ボクセル孤島 + 岸釣りスコアアタック
+- [x] `applyVRMFishingPose`（歩行脇開き／立ち脇クローズ、キャスト＝リール逆）
+- [x] 竿フィット（`rodHand` + `vrmHandPropFit`）
+- [x] NPC 釣り人（プレイヤー無反応・対岸ループ）
+- [x] ヤシ廃止 → コケ付きボクセル岩
+- [x] ホオジロ頭太めシルエット
+- [x] `canStandOnIsland(radius: number = ...)` で TS2345 回避
+- [x] ノウハウ: `memory-bank/shoreFishing.md` / `meebitVrmArms.md` / `techContext.md`（TS 落とし穴）
+
 ### Photo Booth（`/photo-booth`）
 
 - [x] 正方形 PFP 撮影 + 来場証明書発行

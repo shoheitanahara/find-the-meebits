@@ -38,6 +38,56 @@ npm run vrm-worker:deploy
 npm run vrm:seed         # 彫刻9体+デフォルトプレイヤーを R2 に事前アップロード
 ```
 
+## TypeScript 落とし穴（頻出・ビルド落ち）
+
+`npm run build` は `tsc -b` を通す。次のパターンは **繰り返し Vercel / ローカルで TS2345 を出す**。
+
+### 1. 設定オブジェクトの数値リテラルがデフォルト引数の型になる
+
+```ts
+// config
+export const SHORE_FISHING = {
+  playerCollisionRadius: 0.45, // ← 型は literal `0.45`
+}
+
+// ❌ radius の型が `0.45` になり、0.38 などを渡せない
+export function canStandOnIsland(x: number, z: number, radius = SHORE_FISHING.playerCollisionRadius) {}
+
+// ✅ 引数に number を明示
+export function canStandOnIsland(
+  x: number,
+  z: number,
+  radius: number = SHORE_FISHING.playerCollisionRadius,
+) {}
+```
+
+**症状:** `Argument of type '0.38' is not assignable to parameter of type '0.45'.`
+
+**なぜ:** オブジェクトリテラルの数値プロパティは拡大されず、デフォルト引数の推論がそのまま literal になる。`as const` オブジェクトでも同様（より厳格）。
+
+**ルール:**
+- config 由来の数値をデフォルト引数にするときは **必ず `param: number = CONFIG.foo`**
+- 複数箇所で共有する半径・秒数・距離も、関数シグネチャは `number` / `string` など widened 型にする
+- 「プレイヤー専用定数」でも NPC 半径など別値を渡すなら、最初から `number` にする
+
+### 2. 関連して起きやすいもの
+
+| パターン | 対処 |
+|----------|------|
+| `foo?: 0.45` のような optional literal | `foo?: number` |
+| `ReadonlyArray<0.45>` 的な推論 | 要素型を `number` にする／`as number` で widen |
+| `as const` 全体に閉じた config から関数へ値を渡す | 受け側の型を widened にする（config 側を緩めない方が安全なことが多い） |
+
+### 3. 確認コマンド
+
+```bash
+npx tsc --noEmit -p .
+# または
+npm run build
+```
+
+エディタ上は通っても CI / Vercel の `tsc -b` で落ちることがあるので、半径・秒・距離を「デフォルト引数 = config 定数」にしたら型を疑う。
+
 ## VRM 配信（Cloudflare R2 + Worker）
 
 ### なぜ Vercel 外か

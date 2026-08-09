@@ -101,7 +101,7 @@ export function getIslandTiles(): IslandTile[] {
  * プレイヤー半径を考慮して立てるか。
  * 中心＋十字サンプルがすべて島タイル上であること。
  */
-export function canStandOnIsland(x: number, z: number, radius = SHORE_FISHING.playerCollisionRadius) {
+export function canStandOnIsland(x: number, z: number, radius: number = SHORE_FISHING.playerCollisionRadius) {
   const r = Math.max(0.2, radius * 0.72)
   const samples: Array<[number, number]> = [
     [0, 0],

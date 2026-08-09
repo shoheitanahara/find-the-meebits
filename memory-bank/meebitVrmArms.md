@@ -36,6 +36,46 @@ PFP Studio / 射的 / 歩行などで使う**落とし所**。Meebit のボク�
 | 前方に出す（Shoot / GM） | `applyVRMShootingPose`（`x≈π/2` + attention `z`、**y は使わない**） |
 | 歩行アーム | `applyVRMLocomotion` の stride（スタジオは位相固定） |
 | 着席 | 脚中心。腕は rest（`applyVRMSitPose`） |
+| 釣り竿持ち | `applyVRMFishingPose`（右腕 `y=0`、脇は z のみ。詳細下） |
+
+## 釣り（Shore Fishing）— 今回も苦労した点
+
+正本: `applyVRMFishingPose`（`VRMLocomotion.ts`）+ `FishingRod`（`shoreFishing/world/FishingTackle.tsx`）+ `vrmHandPropFit.ts`  
+アトラクション全体: **[shoreFishing.md](./shoreFishing.md)**
+
+### 竿持ち右腕の脇（z）
+
+| 定数 | 値の意味 | いつ使う |
+|------|----------|----------|
+| `rodArmZWalk` = `armRestZ.right * 0.88` | 歩行時は**やや開いた**従来寄り | `carry` かつ移動中 |
+| `rodArmZClosed` = `armRestZ.right * 1.15` | 立ち／釣りは**ガッツリ脇を閉める** | idle・wait・cast・reel・catch |
+
+```ts
+// carry: 移動量で脇の開きを lerp（歩＝開、止＝閉）
+z: MathUtils.lerp(rodArmZClosed, rodArmZWalk, movementWeight)
+```
+
+**やってはいけない:** 歩行も閉じて「棒立ちで歩く」、立ちも開いたまま「脇が空いて竿が浮く」。  
+**調整順:** まず `rodArmZClosed` / `rodArmZWalk` の係数だけ。UpperArm **y は触らない**（捻れ＝即崩れ）。
+
+### キャスト＝リールの逆再生
+
+- キャスト前半（`castWindupRatio`）: 竿を上げる（リール終端へ）
+- 後半: 振り下ろし（リールの逆で wait へ）
+- 浮き飛行時間は `castFlightSec`、合計尺は `reelSec` に揃える方針
+
+腕の `x`（前後）は射撃と同様「前に出す」用途。掌を回す `y` は禁止のまま。
+
+### 右手の竿フィット
+
+- オフセット定数は `SHORE_FISHING.rodHand`（`config.ts`）
+- 体型差は `HAND_PROP_ARM_FIT`（`vrmHandPropFit.ts`）— deficit に応じて root local **素直な X/Y/Z**
+- 細い Meebit で竿が体に食い込む／離れるときは、まず `handOffset*` と `offset*PerDeficit`。回転で誤魔化さない
+
+### 小道具の親子付け
+
+射的ピストルと同じく、React の `attach` でボーン直下に入れると衝突しやすい。  
+ワールド行列コピー／毎フレーム追従（手ワールド → root local）を優先。NPC 竿は `publishTip: false` でプレイヤー線と分離。
 
 ## やってはいけないこと
 
@@ -49,6 +89,7 @@ PFP Studio / 射的 / 歩行などで使う**落とし所**。Meebit のボク�
 - 完全な腕組み・腰に手・力こぶは、肘曲げ近似でも掌／肩が崩れる → **採用しない**
 - Photo Booth 採用ポーズ: Stand / Wave / Cheer / Shoot / GM / Walk / Jump / Sit（詳細は `photoStudio.md`）
 - 射的・GM の前方銃／マグ構えは意図的に `x` を使う例外（掌より道具の向き優先）
+- 釣りの前方出しも `x` を使うが、**y は常に 0**。脇の調整は **z 係数だけ**（`rodArmZClosed` / `rodArmZWalk`）
 
 ## 頭（スタジオ）
 
@@ -60,3 +101,4 @@ Photo Booth では Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**�
 - 旧メモの「`|z|<0.7` 禁止」は **x と併用したとき**の肩割れ。`x=0` の純 `z` 上げなら高くしてよい
 - GM: 射撃腕 + 前傾リセット + 顎上げ（正 X）が安定
 - Walk: locomotion の左手前・右足前位相が自然
+- Fishing（2026-08）: 立ちは `rodArmZClosed`、歩きは `rodArmZWalk`。脇を歩くときまで閉じると棒、立ちで開けると竿が浮く

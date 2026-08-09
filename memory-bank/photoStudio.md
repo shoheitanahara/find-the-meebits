@@ -135,5 +135,6 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | プレイヤー・小道具追従 | `src/photoStudio/player/StudioPlayer.tsx` |
 | マグ | `src/photoStudio/world/StudioGmMug.tsx` |
 | Sit 椅子 | `src/photoStudio/world/StudioSitChair.tsx` |
-| ロコモーション（Walk/Jump/Shoot/Sit） | `src/avatar/VRMLocomotion.ts` |
+| ロコモーション（Walk/Jump/Shoot/Sit/**Fishing**） | `src/avatar/VRMLocomotion.ts` |
 | 腕規約メモ | `memory-bank/meebitVrmArms.md` |
+| Shore Fishing | `memory-bank/shoreFishing.md` |
