@@ -282,43 +282,76 @@ function hammerVoxels(body: string) {
   return list
 }
 
-/** ホオジロザメ：顔を大きく、尾は短くサメらしい異尾 */
+/** ホオジロザメ：大きい頭・すぼむ胴・尖った鼻・三角背ビレ・短い異尾 */
 function whiteVoxels(body: string) {
   const list: Voxel[] = []
-  const top = mix(body, '#9aa8b4', 0.35)
-  const belly = '#f7f4ee'
-  const fin = mix(top, '#3a4550', 0.45)
-  const gloss = { roughness: 0.36, metalness: 0.12 }
+  const top = mix(body, '#8a9aa8', 0.28)
+  const mid = shade(top, -12)
+  const belly = '#f4f0e8'
+  const fin = mix(top, '#2c3844', 0.4)
+  const gloss = { roughness: 0.34, metalness: 0.14 }
+  const bellyMat = { roughness: 0.52, metalness: 0.04 }
 
-  // 胴
-  vox(list, 0, 0.3, 0.4, top, [3.1, 2.5, 5.2], gloss)
-  vox(list, 0, -0.55, 0.5, belly, [2.6, 1.55, 4.6], { roughness: 0.5 })
-  // 大きな頭部（丸みのある顔）
-  vox(list, 0, 0.35, -2.9, top, [3.2, 2.6, 2.6], gloss)
-  vox(list, 0, -0.35, -2.8, belly, [2.6, 1.5, 2.2], { roughness: 0.5 })
-  vox(list, 0, 0.25, -4.2, top, [2.6, 2.2, 1.5], gloss)
-  vox(list, 0, -0.25, -4.1, belly, [2.1, 1.3, 1.3], { roughness: 0.5 })
-  // 尾柄は短く
-  vox(list, 0, 0.15, 3.2, shade(top, -20), [1.7, 1.7, 1.2], gloss)
-  // 大口
-  vox(list, 0, -0.65, -4.55, '#2a1018', [1.9, 0.85, 0.85], { roughness: 0.75 })
-  vox(list, 0.55, -0.4, -4.75, '#f0ece4', [0.3, 0.28, 0.22], { roughness: 0.4 })
-  vox(list, -0.55, -0.4, -4.75, '#f0ece4', [0.3, 0.28, 0.22], { roughness: 0.4 })
-  // 背・胸
-  vox(list, 0, 2.2, 0.5, fin, [0.45, 2.1, 2.4], { roughness: 0.42 })
-  vox(list, 1.9, -0.1, -0.3, fin, [1.7, 0.3, 1.7], { roughness: 0.45 })
-  vox(list, -1.9, -0.1, -0.3, fin, [1.7, 0.3, 1.7], { roughness: 0.45 })
-  // 尾ヒレ：前後に伸ばさず、上葉を高く短く（サメの三日月に近い異尾）
-  vox(list, 0, 1.25, 3.85, fin, [0.4, 2.15, 0.9], { roughness: 0.42 })
-  vox(list, 0, -0.85, 3.75, fin, [0.35, 1.35, 0.75], { roughness: 0.42 })
-  vox(list, 0, 0.2, 3.6, fin, [0.4, 0.55, 0.55], { roughness: 0.42 })
-  // 鰓裂（頭の直後）
-  for (let i = 0; i < 4; i++) {
-    const z = -1.7 + i * 0.4
-    vox(list, 1.5, 0.15, z, shade(top, -35), [0.15, 1.4, 0.2], { roughness: 0.6 })
-    vox(list, -1.5, 0.15, z, shade(top, -35), [0.15, 1.4, 0.2], { roughness: 0.6 })
+  // --- 鼻〜頭（頭が一番太い：動画寄り） ---
+  vox(list, 0, 0.08, -4.55, top, [1.55, 1.4, 0.95], gloss)
+  vox(list, 0, -0.2, -4.5, belly, [1.2, 0.95, 0.8], bellyMat)
+  vox(list, 0, 0.2, -3.85, top, [2.55, 2.2, 1.2], gloss)
+  vox(list, 0, -0.4, -3.8, belly, [2.15, 1.4, 1.1], bellyMat)
+  vox(list, 0, 0.28, -2.95, top, [3.15, 2.7, 1.55], gloss)
+  vox(list, 0, -0.55, -2.9, belly, [2.7, 1.7, 1.4], bellyMat)
+
+  // 大口（下顎・腹側）
+  vox(list, 0, -1.0, -3.5, '#1a0c10', [2.0, 0.65, 1.15], { roughness: 0.78 })
+  vox(list, 0.55, -0.85, -3.85, '#efe8dc', [0.28, 0.28, 0.2], { roughness: 0.4 })
+  vox(list, -0.55, -0.85, -3.85, '#efe8dc', [0.28, 0.28, 0.2], { roughness: 0.4 })
+  vox(list, 0.2, -0.85, -3.5, '#efe8dc', [0.22, 0.22, 0.18], { roughness: 0.4 })
+  vox(list, -0.2, -0.85, -3.5, '#efe8dc', [0.22, 0.22, 0.18], { roughness: 0.4 })
+
+  // --- 前胴〜中胴（頭よりやや細い） ---
+  vox(list, 0, 0.22, -1.55, top, [2.85, 2.35, 1.85], gloss)
+  vox(list, 0, -0.5, -1.5, belly, [2.4, 1.45, 1.7], bellyMat)
+  vox(list, 0, 0.22, -0.05, top, [2.7, 2.25, 2.0], gloss)
+  vox(list, 0, -0.5, 0, belly, [2.25, 1.4, 1.85], bellyMat)
+  vox(list, 0, 0.18, 1.55, mid, [2.35, 2.0, 1.75], gloss)
+  vox(list, 0, -0.4, 1.55, belly, [1.95, 1.2, 1.6], bellyMat)
+
+  // --- 後胴〜尾柄（すぼむ） ---
+  vox(list, 0, 0.12, 2.7, mid, [1.7, 1.5, 1.15], gloss)
+  vox(list, 0, -0.28, 2.7, belly, [1.3, 0.9, 1.05], bellyMat)
+  vox(list, 0, 0.08, 3.4, shade(mid, -15), [1.05, 1.05, 0.7], gloss)
+
+  // --- 背ビレ（三角形に近い段差） ---
+  vox(list, 0, 1.7, 0.25, fin, [0.4, 1.25, 1.8], { roughness: 0.4 })
+  vox(list, 0, 2.35, 0.15, fin, [0.32, 0.85, 1.1], { roughness: 0.4 })
+  vox(list, 0, 2.85, 0.05, fin, [0.26, 0.5, 0.5], { roughness: 0.4 })
+
+  // --- 胸ビレ（頭のすぐ後ろから流す） ---
+  vox(list, 2.05, -0.3, -1.0, fin, [1.55, 0.28, 1.35], { roughness: 0.44 })
+  vox(list, -2.05, -0.3, -1.0, fin, [1.55, 0.28, 1.35], { roughness: 0.44 })
+  vox(list, 2.75, -0.25, -0.5, fin, [0.9, 0.22, 0.85], { roughness: 0.44 })
+  vox(list, -2.75, -0.25, -0.5, fin, [0.9, 0.22, 0.85], { roughness: 0.44 })
+
+  // --- 腹ビレ・尻ビレ ---
+  vox(list, 0.65, -1.05, 1.4, fin, [0.65, 0.25, 0.8], { roughness: 0.48 })
+  vox(list, -0.65, -1.05, 1.4, fin, [0.65, 0.25, 0.8], { roughness: 0.48 })
+  vox(list, 0, -0.95, 2.35, fin, [0.28, 0.5, 0.65], { roughness: 0.48 })
+
+  // --- 尾ヒレ（上葉が長い異尾／三日月） ---
+  vox(list, 0, 0.15, 3.75, fin, [0.38, 0.55, 0.55], { roughness: 0.4 })
+  vox(list, 0, 1.15, 3.95, fin, [0.36, 1.55, 0.85], { roughness: 0.4 })
+  vox(list, 0, 2.0, 4.05, fin, [0.3, 0.7, 0.55], { roughness: 0.4 })
+  vox(list, 0, -0.75, 3.9, fin, [0.32, 1.05, 0.7], { roughness: 0.4 })
+  vox(list, 0, -1.35, 3.95, fin, [0.28, 0.45, 0.45], { roughness: 0.4 })
+
+  // 鰓裂（太い頭の側面）
+  for (let i = 0; i < 5; i++) {
+    const z = -2.45 + i * 0.32
+    vox(list, 1.7, 0.15, z, shade(top, -40), [0.14, 1.45, 0.16], { roughness: 0.62 })
+    vox(list, -1.7, 0.15, z, shade(top, -40), [0.14, 1.45, 0.16], { roughness: 0.62 })
   }
-  eyes(list, -4.35, 0.65, 1.2, 0.48)
+
+  // 目（鼻の少し後ろ・側面）
+  eyes(list, -3.55, 0.55, 1.45, 0.48)
   return list
 }
 

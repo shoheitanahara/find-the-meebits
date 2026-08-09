@@ -73,10 +73,24 @@ function rodPitchFor(action: FishingAction, actionT: number): number {
 type FishingRodProps = {
   vrmRef: MutableRefObject<VRM | null>
   rootRef: RefObject<Group | null>
+  /** true ならストア phase に関係なく常時表示（NPC 用） */
+  alwaysShow?: boolean
+  /** ポーズ上書き（毎フレーム読む。NPC 用） */
+  actionOverrideRef?: MutableRefObject<FishingAction>
+  actionTOverride?: number
+  /** プレイヤー穂先をワールドへ公開するか（NPC は false） */
+  publishTip?: boolean
 }
 
 /** 右手に追従する釣り竿。歩行中も常に持つ。 */
-export function FishingRod({ vrmRef, rootRef }: FishingRodProps) {
+export function FishingRod({
+  vrmRef,
+  rootRef,
+  alwaysShow = false,
+  actionOverrideRef,
+  actionTOverride,
+  publishTip = true,
+}: FishingRodProps) {
   const rodRef = useRef<Group>(null)
   const shaftRef = useRef<Group>(null)
 
@@ -88,12 +102,16 @@ export function FishingRod({ vrmRef, rootRef }: FishingRodProps) {
     if (!rod || !shaft || !root) return
 
     const store = useShoreFishingStore.getState()
-    const show = store.phase === 'playing' || store.phase === 'countdown'
+    const show =
+      alwaysShow || store.phase === 'playing' || store.phase === 'countdown'
     rod.visible = show
     if (!show) return
 
-    const action = fishingActionFromCast(store.castPhase)
-    const actionT = fishingActionT(store.castPhase, store.animStartedAt)
+    const action =
+      actionOverrideRef?.current ?? fishingActionFromCast(store.castPhase)
+    const actionT =
+      actionTOverride ??
+      fishingActionT(store.castPhase, store.animStartedAt)
 
     // 右手ボーンへ追従
     if (vrm) {
@@ -123,10 +141,11 @@ export function FishingRod({ vrmRef, rootRef }: FishingRodProps) {
     shaft.rotation.x = rodPitchFor(action, actionT)
     shaft.rotation.z = action === 'carry' ? -0.08 : -0.04
 
-    // 穂先ワールド座標をライン用に公開
-    tipLocal.set(0, SHORE_FISHING.rodHand.length, 0)
-    shaft.localToWorld(tipLocal)
-    setShoreRodTip(tipLocal.x, tipLocal.y, tipLocal.z)
+    if (publishTip) {
+      tipLocal.set(0, SHORE_FISHING.rodHand.length, 0)
+      shaft.localToWorld(tipLocal)
+      setShoreRodTip(tipLocal.x, tipLocal.y, tipLocal.z)
+    }
   })
 
   return (

@@ -59,6 +59,10 @@ export const SHORE_FISHING = {
 
   playerStart: { x: 0 as number, z: 2.2 as number, rotationY: Math.PI as number },
 
+  /** 島に出る釣り人 NPC 数（シーと同じビーチ服から選定） */
+  npcCount: 3,
+  npcWalkSpeed: 1.35,
+
   /** パークと同じ固定オフセット追従 */
   cameraFollow: {
     x: CAMERA_FOLLOW_OFFSET_XZ[0],

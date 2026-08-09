@@ -21,6 +21,7 @@ import { ShoreFishingHud } from './ui/ShoreFishingHud'
 import { ShoreFishingMobileControls } from './ui/ShoreFishingMobileControls'
 import { ShoreFishingPlayPrompt, ShoreFishingResult } from './ui/ShoreFishingOverlays'
 import { ShoreBeach } from './world/ShoreBeach'
+import { ShoreFishingNpcs } from './world/ShoreFishingNpcs'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -43,6 +44,7 @@ function ShoreFishingScene() {
     <>
       <PerspectiveCamera makeDefault fov={SHORE_FISHING.cameraFov} near={0.1} far={140} />
       <ShoreBeach />
+      <ShoreFishingNpcs />
       <ShoreFishingPlayer />
       <ShoreFishingCamera />
       <ShoreFishingController />
