@@ -7,7 +7,7 @@ import { useVRMModel } from '../../avatar/useVRMModel'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import type { ListedMeebit } from '../../opensea/types'
-import { isMarketPositionWalkable } from '../collisions'
+import { isMarketWalkerPositionWalkable } from '../collisions'
 import { OPEN_SEA_MARKET } from '../config'
 import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
@@ -83,7 +83,7 @@ function createWalkerSpawns(listings: readonly ListedMeebit[]): WalkerSpawn[] {
       -OPEN_SEA_MARKET.walkerSpawnHalfZ,
       OPEN_SEA_MARKET.walkerSpawnHalfZ,
     )
-    if (!isMarketPositionWalkable(x, z, WALKER_RADIUS)) continue
+    if (!isMarketWalkerPositionWalkable(x, z, WALKER_RADIUS)) continue
     if (spawns.some((s) => Math.hypot(s.x - x, s.z - z) < 2.0)) continue
     if (Math.hypot(x - OPEN_SEA_MARKET.playerStart.x, z - OPEN_SEA_MARKET.playerStart.z) < 2.4) {
       continue
@@ -239,7 +239,7 @@ function MarketWalker({
       const step = OPEN_SEA_MARKET.npcWalkSpeed * safeDelta
       const nextX = group.position.x + Math.sin(rotationYRef.current) * step
       const nextZ = group.position.z + Math.cos(rotationYRef.current) * step
-      if (isMarketPositionWalkable(nextX, nextZ, WALKER_RADIUS)) {
+      if (isMarketWalkerPositionWalkable(nextX, nextZ, WALKER_RADIUS)) {
         group.position.x = nextX
         group.position.z = nextZ
       } else {

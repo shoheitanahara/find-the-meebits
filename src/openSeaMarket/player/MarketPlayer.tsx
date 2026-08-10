@@ -212,6 +212,21 @@ export function MarketPlayer() {
       const cameraDistance = isMobile ? 5.8 : 4.6
       const camHeight = isMobile ? mobileDialogueCameraHeight : dialogueCameraHeight
       const lookHeight = isMobile ? mobileDialogueLookAtHeight : dialogueLookAtHeight
+      const {
+        roomHalfX,
+        roomMinZ,
+        roomMaxZ,
+        cameraRoomMarginX,
+        cameraRoomMarginZNear,
+        cameraRoomMarginZFar,
+      } = OPEN_SEA_MARKET
+      const camMinX = -roomHalfX + cameraRoomMarginX
+      const camMaxX = roomHalfX - cameraRoomMarginX
+      const camMinZ = roomMinZ + cameraRoomMarginZNear
+      const camMaxZ = roomMaxZ - cameraRoomMarginZFar
+
+      const isCameraInside = (pos: Vector3) =>
+        pos.x >= camMinX && pos.x <= camMaxX && pos.z >= camMinZ && pos.z <= camMaxZ
 
       let bestScore = Number.POSITIVE_INFINITY
 
@@ -222,15 +237,38 @@ export function MarketPlayer() {
           .addScaledVector(dialogueDirection, forwardScale)
           .normalize()
 
-        dialogueCandidatePosition
-          .copy(midpoint)
-          .addScaledVector(dialogueCameraDirectionAlt, cameraDistance)
-          .add(camHeight)
+        let dist = cameraDistance
+        let placedInside = false
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+          dialogueCandidatePosition
+            .copy(midpoint)
+            .addScaledVector(dialogueCameraDirectionAlt, dist)
+            .add(camHeight)
+          if (isCameraInside(dialogueCandidatePosition)) {
+            placedInside = true
+            break
+          }
+          dist *= 0.72
+        }
+
+        if (!placedInside) {
+          dialogueCandidatePosition.x = MathUtils.clamp(
+            dialogueCandidatePosition.x,
+            camMinX,
+            camMaxX,
+          )
+          dialogueCandidatePosition.z = MathUtils.clamp(
+            dialogueCandidatePosition.z,
+            camMinZ,
+            camMaxZ,
+          )
+        }
 
         const travelCost = dialogueCandidatePosition.distanceToSquared(state.camera.position)
         const cameraSideBias =
           dialogueCandidatePosition.z < midpoint.z ? 18 : dialogueCandidatePosition.z > midpoint.z ? -2 : 0
-        const score = travelCost + cameraSideBias
+        const shrinkPenalty = (cameraDistance - dist) * 14
+        const score = travelCost + cameraSideBias + shrinkPenalty
 
         if (score < bestScore) {
           bestScore = score
@@ -253,13 +291,13 @@ export function MarketPlayer() {
 
     const camX = MathUtils.clamp(
       xRef.current + offsetX,
-      -OPEN_SEA_MARKET.roomHalfX + 1.0,
-      OPEN_SEA_MARKET.roomHalfX - 1.0,
+      -OPEN_SEA_MARKET.roomHalfX + OPEN_SEA_MARKET.cameraRoomMarginX,
+      OPEN_SEA_MARKET.roomHalfX - OPEN_SEA_MARKET.cameraRoomMarginX,
     )
     const camZ = MathUtils.clamp(
       zRef.current + offsetZ,
-      OPEN_SEA_MARKET.roomMinZ + 2.5,
-      OPEN_SEA_MARKET.roomMaxZ - 1.0,
+      OPEN_SEA_MARKET.roomMinZ + OPEN_SEA_MARKET.cameraRoomMarginZNear,
+      OPEN_SEA_MARKET.roomMaxZ - OPEN_SEA_MARKET.cameraRoomMarginZFar,
     )
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, OPEN_SEA_MARKET.cameraLookY, zRef.current)

@@ -36,9 +36,15 @@ export const OPEN_SEA_MARKET = {
   maxNpcsDesktop: 30,
   maxNpcsMobile: 30,
 
-  /** 徘徊スポーン範囲（壁インセット） */
-  walkerSpawnHalfX: 7.2 * ROOM_SCALE,
-  walkerSpawnHalfZ: 6.5 * ROOM_SCALE,
+  /** 徘徊スポーン／歩行の壁からの余白（対話カメラが壁抜けしないよう広め） */
+  walkerSpawnHalfX: 6.4 * ROOM_SCALE,
+  walkerSpawnHalfZ: 5.8 * ROOM_SCALE,
+  walkerWallMargin: 2.4,
+
+  /** 通常追従／対話カメラの室内クランプ余白 */
+  cameraRoomMarginX: 1.15,
+  cameraRoomMarginZNear: 1.4,
+  cameraRoomMarginZFar: 1.15,
 
   colors: {
     floor: '#1e3350',

@@ -71,6 +71,18 @@ export function isMarketPositionWalkable(
   return true
 }
 
+/** NPC 用 — 壁から離して対話カメラの壁抜けを減らす */
+export function isMarketWalkerPositionWalkable(
+  x: number,
+  z: number,
+  radius: number = 0.36,
+) {
+  const { roomHalfX, roomMinZ, roomMaxZ, walkerWallMargin } = OPEN_SEA_MARKET
+  if (Math.abs(x) > roomHalfX - walkerWallMargin) return false
+  if (z < roomMinZ + walkerWallMargin || z > roomMaxZ - walkerWallMargin) return false
+  return isMarketPositionWalkable(x, z, radius)
+}
+
 export function resolveMarketMovement(fromX: number, fromZ: number, toX: number, toZ: number) {
   const radius = OPEN_SEA_MARKET.playerRadius
   if (isMarketPositionWalkable(toX, toZ, radius)) return { x: toX, z: toZ }
