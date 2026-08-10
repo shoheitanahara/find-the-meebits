@@ -14,18 +14,27 @@ export function MarketDialogueBox() {
   const currentIndex = useDialogueStore((state) => state.currentIndex)
   const t = ui()
   const locale = getLocale()
-  const sessionListings = useOpenSeaMarketStore((s) => s.sessionListings)
+  const sessionPedestalListings = useOpenSeaMarketStore((s) => s.sessionPedestalListings)
+  const nearestTalkKind = useOpenSeaMarketStore((s) => s.nearestTalkKind)
+  const sessionWalkerIds = useOpenSeaMarketStore((s) => s.sessionWalkerIds)
 
   if (!isOpen || !activeNpcId?.startsWith('opensea-')) return null
 
   const tokenId = Number(activeNpcId.replace('opensea-', ''))
-  const listing = sessionListings.find((l) => l.tokenId === tokenId)
+  const listing = sessionPedestalListings.find((l) => l.tokenId === tokenId)
+  const isGuide =
+    !listing &&
+    (nearestTalkKind === 'guide' || sessionWalkerIds.includes(tokenId))
   const currentLine = lines[currentIndex]
   if (!currentLine || !Number.isFinite(tokenId)) return null
 
   const isLastLine = currentIndex >= lines.length - 1
   const name = `Meebit #${tokenId}`
-  const role = locale === 'ja' ? '出品中' : 'Listed'
+  const role = isGuide
+    ? locale === 'ja'
+      ? '案内係'
+      : 'Guide'
+    : 'Digital Sculpture'
   const viewLabel = locale === 'ja' ? 'OpenSeaで見る' : 'View on OpenSea'
 
   return (
@@ -48,7 +57,7 @@ export function MarketDialogueBox() {
             closeLabel={t.close}
             nextLabel={isLastLine ? t.done : t.nextLine}
             viewLabel={viewLabel}
-            viewHref={openseaAssetUrl(tokenId)}
+            viewHref={isGuide ? null : openseaAssetUrl(tokenId)}
             priceEth={listing?.priceEth ?? null}
           />
         </div>
@@ -64,7 +73,7 @@ export function MarketDialogueBox() {
             closeLabel={t.close}
             nextLabel={isLastLine ? t.done : t.nextLine}
             viewLabel={viewLabel}
-            viewHref={openseaAssetUrl(tokenId)}
+            viewHref={isGuide ? null : openseaAssetUrl(tokenId)}
             priceEth={listing?.priceEth ?? null}
             compact
           />
@@ -114,7 +123,7 @@ function MarketDialogueContent({
   closeLabel: string
   nextLabel: string
   viewLabel: string
-  viewHref: string
+  viewHref: string | null
   priceEth: number | null
   compact?: boolean
 }) {
@@ -158,14 +167,16 @@ function MarketDialogueContent({
       </p>
 
       <div className={`flex flex-wrap items-center gap-2 ${compact ? 'mt-3' : 'mt-4'}`}>
-        <a
-          href={viewHref}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1.5 text-xs font-semibold text-sky-100 transition hover:bg-sky-400/20"
-        >
-          {viewLabel}
-        </a>
+        {viewHref ? (
+          <a
+            href={viewHref}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1.5 text-xs font-semibold text-sky-100 transition hover:bg-sky-400/20"
+          >
+            {viewLabel}
+          </a>
+        ) : null}
         <p className="text-[0.65rem] text-white/40">
           {currentIndex + 1}/{linesLength}
         </p>

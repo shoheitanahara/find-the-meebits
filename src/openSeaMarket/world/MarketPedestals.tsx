@@ -1,0 +1,253 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Text } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { Group, MeshStandardMaterial } from 'three'
+import { VRMUtils } from '@pixiv/three-vrm'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
+import type { ListedMeebit } from '../../opensea/types'
+import {
+  acquireVrmColorExhibitScene,
+  releaseVrmColorExhibitScene,
+} from '../../world/vrmSculptureCache'
+import { OPEN_SEA_MARKET } from '../config'
+import { MARKET_PEDESTAL_PLACEMENTS } from '../marketLandmarks'
+import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
+import { useOpenSeaMarketStore } from '../store'
+
+const pedestalMaterial = new MeshStandardMaterial({
+  color: OPEN_SEA_MARKET.colors.pedestal,
+  roughness: 0.88,
+  metalness: 0.05,
+})
+
+function formatPrice(price: number) {
+  if (Number.isInteger(price)) return String(price)
+  return String(Math.round(price * 1000) / 1000)
+}
+
+/** Digital Sculpture 台座群（出品 listing） */
+export function MarketPedestals() {
+  const listings = useOpenSeaMarketStore((s) => s.sessionPedestalListings)
+  const walkerIds = useOpenSeaMarketStore((s) => s.sessionWalkerIds)
+  const setNearestTalkTarget = useOpenSeaMarketStore((s) => s.setNearestTalkTarget)
+  const slots = useMemo(() => {
+    const n = Math.min(listings.length, MARKET_PEDESTAL_PLACEMENTS.length)
+    return Array.from({ length: n }, (_, i) => ({
+      listing: listings[i]!,
+      placement: MARKET_PEDESTAL_PLACEMENTS[i]!,
+      index: i,
+    }))
+  }, [listings])
+
+  const listingIdSet = useMemo(
+    () => new Set(slots.map((s) => s.listing.tokenId)),
+    [slots],
+  )
+  const walkerIdSet = useMemo(() => new Set(walkerIds), [walkerIds])
+
+  useFrame(() => {
+    if (!openSeaMarketPlayerWorld.ready) {
+      setNearestTalkTarget(null)
+      return
+    }
+    const talkRadius = OPEN_SEA_MARKET.talkRadius
+    let bestId: number | null = null
+    let bestKind: 'listing' | 'guide' | null = null
+    let bestDist: number = talkRadius
+    for (const slot of slots) {
+      const pos = marketNpcPositions.get(slot.listing.tokenId)
+      if (!pos) continue
+      const d = Math.hypot(pos.x - openSeaMarketPlayerWorld.x, pos.z - openSeaMarketPlayerWorld.z)
+      if (d < bestDist) {
+        bestDist = d
+        bestId = slot.listing.tokenId
+        bestKind = 'listing'
+      }
+    }
+    for (const walkerId of walkerIdSet) {
+      if (listingIdSet.has(walkerId)) continue
+      const pos = marketNpcPositions.get(walkerId)
+      if (!pos) continue
+      const d = Math.hypot(pos.x - openSeaMarketPlayerWorld.x, pos.z - openSeaMarketPlayerWorld.z)
+      if (d < bestDist) {
+        bestDist = d
+        bestId = walkerId
+        bestKind = 'guide'
+      }
+    }
+    const state = useOpenSeaMarketStore.getState()
+    if (state.nearestTalkTokenId !== bestId || state.nearestTalkKind !== bestKind) {
+      setNearestTalkTarget(bestId, bestKind)
+    }
+  })
+
+  return (
+    <group>
+      {slots.map((slot) => (
+        <MarketPedestalSlot
+          key={slot.listing.tokenId}
+          listing={slot.listing}
+          x={slot.placement.x}
+          z={slot.placement.z}
+          rotationY={slot.placement.rotationY}
+          index={slot.index}
+        />
+      ))}
+    </group>
+  )
+}
+
+function MarketPedestalSlot({
+  listing,
+  x,
+  z,
+  rotationY,
+  index,
+}: {
+  listing: ListedMeebit
+  x: number
+  z: number
+  rotationY: number
+  index: number
+}) {
+  const nearestTalkTokenId = useOpenSeaMarketStore((s) => s.nearestTalkTokenId)
+  const nearestTalkKind = useOpenSeaMarketStore((s) => s.nearestTalkKind)
+  const isDialogueOpen = useDialogueStore((s) => s.isOpen)
+  const showPin =
+    nearestTalkTokenId === listing.tokenId &&
+    nearestTalkKind === 'listing' &&
+    !isDialogueOpen
+  const { pedestal, sculptureVrmScale, colors } = OPEN_SEA_MARKET
+
+  useEffect(() => {
+    marketNpcPositions.set(listing.tokenId, { x, z })
+    return () => {
+      marketNpcPositions.delete(listing.tokenId)
+    }
+  }, [listing.tokenId, x, z])
+
+  const priceLabel =
+    listing.priceEth == null ? 'Listed' : `${formatPrice(listing.priceEth)} ETH`
+
+  return (
+    <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
+      <mesh
+        position={[0, pedestal.sizeY / 2, 0]}
+        castShadow
+        receiveShadow
+        material={pedestalMaterial}
+      >
+        <boxGeometry args={[pedestal.sizeX, pedestal.sizeY, pedestal.sizeZ]} />
+      </mesh>
+
+      <MarketSculptureFigure
+        meebitId={listing.tokenId}
+        index={index}
+        y={pedestal.topY}
+        scale={sculptureVrmScale}
+      />
+
+      {/* 値札: 板と文字を同じ傾きのグループに載せ、ETH の下に #ID を明示 */}
+      <group position={[0, pedestal.sizeY + 0.28, pedestal.sizeZ * 0.48]}>
+        <group rotation={[-0.18, 0, 0]}>
+          <mesh position={[0, 0, 0]} castShadow>
+            <boxGeometry args={[1.85, 0.72, 0.05]} />
+            <meshStandardMaterial color="#0b1220" roughness={0.75} metalness={0.08} />
+          </mesh>
+          <Text
+            position={[0, 0.14, 0.04]}
+            fontSize={0.2}
+            color={colors.priceTag}
+            anchorX="center"
+            anchorY="middle"
+            renderOrder={2}
+            depthOffset={-2}
+          >
+            {priceLabel}
+          </Text>
+          <Text
+            position={[0, -0.16, 0.04]}
+            fontSize={0.15}
+            color="#f0f9ff"
+            anchorX="center"
+            anchorY="middle"
+            renderOrder={2}
+            depthOffset={-2}
+          >
+            {`#${listing.tokenId}`}
+          </Text>
+        </group>
+      </group>
+
+      {showPin ? <MarketExhibitPin /> : null}
+    </group>
+  )
+}
+
+function MarketSculptureFigure({
+  meebitId,
+  index,
+  y,
+  scale,
+}: {
+  meebitId: number
+  index: number
+  y: number
+  scale: number
+}) {
+  const [scene, setScene] = useState<Group | null>(null)
+  const setPedestalVrmReady = useOpenSeaMarketStore((s) => s.setPedestalVrmReady)
+
+  useEffect(() => {
+    let active: Group | null = null
+    let ownsPoolRef = false
+    let cancelled = false
+
+    acquireVrmColorExhibitScene(meebitId)
+      .then((acquired) => {
+        if (cancelled) {
+          releaseVrmColorExhibitScene(meebitId, acquired)
+          return
+        }
+        active = acquired
+        ownsPoolRef = true
+        setScene(acquired)
+        setPedestalVrmReady(index)
+      })
+      .catch(() => {
+        if (!cancelled) setPedestalVrmReady(index)
+      })
+
+    return () => {
+      cancelled = true
+      if (!active) return
+      if (ownsPoolRef) {
+        releaseVrmColorExhibitScene(meebitId, active)
+      } else {
+        VRMUtils.deepDispose(active)
+      }
+      setScene(null)
+    }
+  }, [meebitId, index, setPedestalVrmReady])
+
+  if (!scene) return null
+  return (
+    <group position={[0, y, 0]}>
+      <primitive object={scene} scale={scale} />
+    </group>
+  )
+}
+
+function MarketExhibitPin() {
+  return (
+    <mesh position={[0, 3.6, 0]}>
+      <sphereGeometry args={[0.14, 14, 14]} />
+      <meshStandardMaterial
+        color="#dc2626"
+        emissive="#b91c1c"
+        emissiveIntensity={0.85}
+        toneMapped={false}
+      />
+    </mesh>
+  )
+}

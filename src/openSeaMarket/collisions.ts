@@ -1,4 +1,5 @@
 import { MARKET_OBSTACLES, OPEN_SEA_MARKET } from './config'
+import { MARKET_PEDESTAL_PLACEMENTS } from './marketLandmarks'
 
 type ObstacleBox = {
   minX: number
@@ -19,7 +20,7 @@ function boxFromCenter(x: number, z: number, halfX: number, halfZ: number): Obst
 }
 
 function buildObstacles(): ObstacleBox[] {
-  const { roomHalfX, roomMinZ, roomMaxZ, entranceHalf } = OPEN_SEA_MARKET
+  const { roomHalfX, roomMinZ, roomMaxZ, entranceHalf, pedestal } = OPEN_SEA_MARKET
   const wallT = 0.35
   const inset = WALL_COLLISION_INSET
   const roomDepth = roomMaxZ - roomMinZ
@@ -47,6 +48,11 @@ function buildObstacles(): ObstacleBox[] {
     boxes.push(boxFromCenter(o.x, o.z, o.halfX, o.halfZ))
   }
 
+  const half = pedestal.collisionHalf
+  for (const p of MARKET_PEDESTAL_PLACEMENTS) {
+    boxes.push(boxFromCenter(p.x, p.z, half, half))
+  }
+
   return boxes
 }
 
@@ -66,7 +72,6 @@ export function isMarketPositionWalkable(
   radius: number = OPEN_SEA_MARKET.playerRadius,
 ) {
   const { roomHalfX, roomMinZ, roomMaxZ } = OPEN_SEA_MARKET
-  // 入口の隙間から虚無へ出ないよう、部屋 AABB でも止める
   const margin = radius + WALL_COLLISION_INSET
   if (x < -roomHalfX + margin || x > roomHalfX - margin) return false
   if (z < roomMinZ + margin || z > roomMaxZ - margin) return false
@@ -77,7 +82,6 @@ export function isMarketPositionWalkable(
   return true
 }
 
-/** NPC 用 — 壁から離して対話カメラの壁抜けを減らす */
 export function isMarketWalkerPositionWalkable(
   x: number,
   z: number,

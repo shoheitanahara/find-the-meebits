@@ -14,11 +14,19 @@ export function MarketDialogueSystem() {
 
 export function MarketInteractionPrompt() {
   const nearestTalkTokenId = useOpenSeaMarketStore((s) => s.nearestTalkTokenId)
+  const nearestTalkKind = useOpenSeaMarketStore((s) => s.nearestTalkKind)
   const isOpen = useDialogueStore((s) => s.isOpen)
   const locale = getLocale()
 
   if (nearestTalkTokenId == null || isOpen) return null
-  const label = locale === 'ja' ? 'E · 話す' : 'E · Talk'
+  const label =
+    nearestTalkKind === 'guide'
+      ? locale === 'ja'
+        ? 'E · 話す'
+        : 'E · Talk'
+      : locale === 'ja'
+        ? 'E · 見る'
+        : 'E · View'
 
   return (
     <div className="pointer-events-none absolute bottom-28 left-1/2 z-20 -translate-x-1/2 max-lg:bottom-36">
@@ -29,3 +37,4 @@ export function MarketInteractionPrompt() {
     </div>
   )
 }
+

@@ -4,16 +4,15 @@ import { Group, MathUtils } from 'three'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../../avatar/VRMLocomotion'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { useVRMModel } from '../../avatar/useVRMModel'
-import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
-import type { ListedMeebit } from '../../opensea/types'
 import { isMarketWalkerPositionWalkable } from '../collisions'
 import { OPEN_SEA_MARKET } from '../config'
 import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
 
 const WALKER_RADIUS = 0.36
-const PLAYER_STOP_DISTANCE = OPEN_SEA_MARKET.talkRadius + 0.35
+const PLAYER_STOP_DISTANCE = 2.7
 const MIN_PLAYER_PAUSE_SECONDS = 2.2
 const MAX_PLAYER_PAUSE_SECONDS = 4.2
 
@@ -24,56 +23,40 @@ const WALKER_PATTERNS = [
 ] as const
 
 type WalkerSpawn = {
-  listing: ListedMeebit
+  meebitId: number
   x: number
   z: number
   rotationY: number
   walkPattern: 0 | 1 | 2
 }
 
-function seededNoise(seed: number) {
-  const value = Math.sin(seed * 12.9898) * 43758.5453
-  return value - Math.floor(value)
-}
-
-/** 近づくと一時停止 → 数秒後にまた歩き出す（パーク / Workshop と同じ） */
-function getWalkerStoppedForPlayer({
-  distance,
-  elapsedTime,
-  isDialogueActive,
-  pauseSeed,
-  playerPauseUntilRef,
-}: {
+function getWalkerStoppedForPlayer(options: {
   distance: number
-  elapsedTime: number
-  isDialogueActive: boolean
+  nowSec: number
+  pauseUntilRef: { current: number }
   pauseSeed: number
-  playerPauseUntilRef: { current: number }
 }) {
-  if (isDialogueActive) return true
-
+  const { distance, nowSec, pauseUntilRef, pauseSeed } = options
   if (distance > PLAYER_STOP_DISTANCE) {
-    playerPauseUntilRef.current = 0
+    pauseUntilRef.current = 0
     return false
   }
-
-  if (playerPauseUntilRef.current === 0) {
-    const pauseNoise = seededNoise(pauseSeed * 4.17 + elapsedTime * 0.41)
-    playerPauseUntilRef.current =
-      elapsedTime +
+  if (pauseUntilRef.current <= 0) {
+    const pauseNoise = ((Math.imul(pauseSeed, 2654435761) >>> 0) % 1000) / 1000
+    pauseUntilRef.current =
+      nowSec +
       MIN_PLAYER_PAUSE_SECONDS +
       pauseNoise * (MAX_PLAYER_PAUSE_SECONDS - MIN_PLAYER_PAUSE_SECONDS)
   }
-
-  return elapsedTime < playerPauseUntilRef.current
+  return nowSec < pauseUntilRef.current
 }
 
-function createWalkerSpawns(listings: readonly ListedMeebit[]): WalkerSpawn[] {
+function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
   const spawns: WalkerSpawn[] = []
   let attempts = 0
-  const maxAttempts = Math.max(40, listings.length * 80)
+  const maxAttempts = Math.max(40, meebitIds.length * 80)
 
-  while (spawns.length < listings.length && attempts < maxAttempts) {
+  while (spawns.length < meebitIds.length && attempts < maxAttempts) {
     attempts += 1
     const x = MathUtils.randFloat(
       -OPEN_SEA_MARKET.walkerSpawnHalfX,
@@ -85,13 +68,10 @@ function createWalkerSpawns(listings: readonly ListedMeebit[]): WalkerSpawn[] {
     )
     if (!isMarketWalkerPositionWalkable(x, z, WALKER_RADIUS)) continue
     if (spawns.some((s) => Math.hypot(s.x - x, s.z - z) < 2.0)) continue
-    if (Math.hypot(x - OPEN_SEA_MARKET.playerStart.x, z - OPEN_SEA_MARKET.playerStart.z) < 2.4) {
-      continue
-    }
-    const listing = listings[spawns.length]
-    if (!listing) break
+    const meebitId = meebitIds[spawns.length]
+    if (meebitId == null) break
     spawns.push({
-      listing,
+      meebitId,
       x,
       z,
       rotationY: Math.random() * Math.PI * 2,
@@ -99,68 +79,52 @@ function createWalkerSpawns(listings: readonly ListedMeebit[]): WalkerSpawn[] {
     })
   }
 
-  while (spawns.length < listings.length) {
-    const listing = listings[spawns.length]
-    if (!listing) break
+  while (spawns.length < meebitIds.length) {
+    const meebitId = meebitIds[spawns.length]
+    if (meebitId == null) break
     const index = spawns.length
-    const angle = (index / Math.max(listings.length, 1)) * Math.PI * 2
+    const angle = (index / Math.max(meebitIds.length, 1)) * Math.PI * 2
     spawns.push({
-      listing,
+      meebitId,
       x: Math.cos(angle) * (OPEN_SEA_MARKET.walkerSpawnHalfX * 0.45),
       z: Math.sin(angle) * (OPEN_SEA_MARKET.walkerSpawnHalfZ * 0.45),
       rotationY: angle + Math.PI,
       walkPattern: (index % WALKER_PATTERNS.length) as 0 | 1 | 2,
     })
   }
-
   return spawns
 }
 
 function MarketWalker({
   spawn,
   index,
-  onPosition,
 }: {
   spawn: WalkerSpawn
   index: number
-  onPosition: (index: number, tokenId: number, x: number, z: number) => void
 }) {
   const groupRef = useRef<Group>(null)
-  const walkPattern = WALKER_PATTERNS[spawn.walkPattern]
-  const isWalkingRef = useRef((index * 17) % 10 > 3)
-  const behaviorTimerRef = useRef(
-    isWalkingRef.current
-      ? walkPattern.walkSeconds[0] +
-          ((index * 0.37) % 1) * (walkPattern.walkSeconds[1] - walkPattern.walkSeconds[0])
-      : walkPattern.idleSeconds[0] +
-          ((index * 0.53) % 1) * (walkPattern.idleSeconds[1] - walkPattern.idleSeconds[0]),
-  )
-  const playerPauseUntilRef = useRef(0)
+  const localTimeRef = useRef(index * 0.37)
+  const isWalkingRef = useRef(true)
+  const behaviorTimerRef = useRef(MathUtils.randFloat(2, 5))
   const rotationYRef = useRef(spawn.rotationY)
   const targetRotationYRef = useRef(spawn.rotationY)
-  const localTimeRef = useRef(index * 0.37)
+  const playerPauseUntilRef = useRef(0)
+  const walkPattern = WALKER_PATTERNS[spawn.walkPattern]
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
-  const groundY = OPEN_SEA_MARKET.playerGroundY
-  const npcId = `opensea-${spawn.listing.tokenId}`
+  const setWalkerVrmReady = useOpenSeaMarketStore((s) => s.setWalkerVrmReady)
   const { vrmRef, vrmScene, status, update } = useVRMModel(
-    spawn.listing.tokenId,
+    spawn.meebitId,
     true,
     120 + index,
     true,
     true,
   )
-  const setWalkerVrmReady = useOpenSeaMarketStore((s) => s.setWalkerVrmReady)
-  const nearestTalkTokenId = useOpenSeaMarketStore((s) => s.nearestTalkTokenId)
-  const isDialogueOpen = useDialogueStore((s) => s.isOpen)
-  const isTalkTarget =
-    nearestTalkTokenId === spawn.listing.tokenId && !isDialogueOpen
 
   useEffect(() => {
     if (status === 'error' || (status === 'ready' && vrmScene)) {
       setWalkerVrmReady(index)
     }
     if (vrmScene) {
-      // VRM は cast のみ。receive するとスキン自己影で斜線（shadow acne）が出る
       vrmScene.traverse((obj) => {
         if ('isMesh' in obj && obj.isMesh) {
           obj.castShadow = true
@@ -170,34 +134,54 @@ function MarketWalker({
     }
   }, [index, setWalkerVrmReady, status, vrmScene])
 
-  useFrame((state, delta) => {
+  useEffect(() => {
+    marketNpcPositions.set(spawn.meebitId, { x: spawn.x, z: spawn.z })
+    return () => {
+      marketNpcPositions.delete(spawn.meebitId)
+    }
+  }, [spawn.meebitId, spawn.x, spawn.z])
+
+  const nearestTalkTokenId = useOpenSeaMarketStore((s) => s.nearestTalkTokenId)
+  const nearestTalkKind = useOpenSeaMarketStore((s) => s.nearestTalkKind)
+  const isDialogueOpen = useDialogueStore((s) => s.isOpen)
+  const showPin =
+    nearestTalkTokenId === spawn.meebitId &&
+    nearestTalkKind === 'guide' &&
+    !isDialogueOpen
+
+  useFrame((_, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)
     const group = groupRef.current
     if (!group) return
     localTimeRef.current += safeDelta
-    onPosition(index, spawn.listing.tokenId, group.position.x, group.position.z)
-    marketNpcPositions.set(spawn.listing.tokenId, {
+    const groundY = OPEN_SEA_MARKET.playerGroundY
+
+    marketNpcPositions.set(spawn.meebitId, {
       x: group.position.x,
       z: group.position.z,
     })
 
     const dialogue = useDialogueStore.getState()
-    const talkingToMe = dialogue.isOpen && dialogue.activeNpcId === npcId
-    const playerReady = openSeaMarketPlayerWorld.ready
-    const dx = playerReady ? openSeaMarketPlayerWorld.x - group.position.x : 0
-    const dz = playerReady ? openSeaMarketPlayerWorld.z - group.position.z : 0
+    const isTalkingWithThis =
+      dialogue.isOpen && dialogue.activeNpcId === `opensea-${spawn.meebitId}`
+
+    const dx = openSeaMarketPlayerWorld.x - group.position.x
+    const dz = openSeaMarketPlayerWorld.z - group.position.z
     const distance = Math.hypot(dx, dz)
     const isStoppedForPlayer =
-      playerReady &&
+      isTalkingWithThis ||
       getWalkerStoppedForPlayer({
         distance,
-        elapsedTime: state.clock.elapsedTime,
-        isDialogueActive: talkingToMe,
-        pauseSeed: spawn.listing.tokenId,
-        playerPauseUntilRef,
+        nowSec: localTimeRef.current,
+        pauseUntilRef: playerPauseUntilRef,
+        pauseSeed: spawn.meebitId,
       })
 
     if (isStoppedForPlayer) {
+      if (isTalkingWithThis) {
+        // 会話中は一時停止タイマーを延長し、閉じた直後に歩き出さない
+        playerPauseUntilRef.current = localTimeRef.current + 1.5
+      }
       if (distance > 0.001) {
         const faceY = Math.atan2(dx, dz)
         rotationYRef.current = faceY
@@ -227,15 +211,14 @@ function MarketWalker({
       }
     }
 
-    const angleDelta = Math.atan2(
-      Math.sin(targetRotationYRef.current - rotationYRef.current),
-      Math.cos(targetRotationYRef.current - rotationYRef.current),
-    )
-    rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 3.2))
-    group.rotation.y = rotationYRef.current
-
     const walking = isWalkingRef.current
     if (walking) {
+      const angleDelta = Math.atan2(
+        Math.sin(targetRotationYRef.current - rotationYRef.current),
+        Math.cos(targetRotationYRef.current - rotationYRef.current),
+      )
+      rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 2.4))
+      group.rotation.y = rotationYRef.current
       const step = OPEN_SEA_MARKET.npcWalkSpeed * safeDelta
       const nextX = group.position.x + Math.sin(rotationYRef.current) * step
       const nextZ = group.position.z + Math.cos(rotationYRef.current) * step
@@ -263,7 +246,7 @@ function MarketWalker({
   return (
     <group
       ref={groupRef}
-      position={[spawn.x, groundY, spawn.z]}
+      position={[spawn.x, OPEN_SEA_MARKET.playerGroundY, spawn.z]}
       rotation={[0, spawn.rotationY, 0]}
     >
       {vrmScene ? (
@@ -271,79 +254,30 @@ function MarketWalker({
       ) : (
         <MeebitSilhouette />
       )}
-      {isTalkTarget ? <MarketInteractionPin /> : null}
-    </group>
-  )
-}
-
-/** パーク / Meet Sergito と同じ赤い近接マーカー */
-function MarketInteractionPin() {
-  const pinRef = useRef<Group>(null)
-
-  useFrame((state) => {
-    if (!pinRef.current) return
-    pinRef.current.position.y = 2.35 + Math.sin(state.clock.elapsedTime * 4) * 0.025
-  })
-
-  return (
-    <group ref={pinRef} position={[0, 2.35, 0]}>
-      <mesh>
-        <sphereGeometry args={[0.16, 16, 16]} />
-        <meshStandardMaterial
-          color="#b91c1c"
-          roughness={0.92}
-          metalness={0}
-          transparent
-          opacity={0.82}
-        />
-      </mesh>
+      {showPin ? (
+        <mesh position={[0, 2.35, 0]}>
+          <sphereGeometry args={[0.11, 12, 12]} />
+          <meshStandardMaterial
+            color="#dc2626"
+            emissive="#b91c1c"
+            emissiveIntensity={0.85}
+            toneMapped={false}
+          />
+        </mesh>
+      ) : null}
     </group>
   )
 }
 
 export function MarketWalkers() {
-  const sessionListings = useOpenSeaMarketStore((s) => s.sessionListings)
-  const setNearestTalkTokenId = useOpenSeaMarketStore((s) => s.setNearestTalkTokenId)
-  const spawns = useMemo(() => createWalkerSpawns(sessionListings), [sessionListings])
-  const positionsRef = useRef<Array<{ tokenId: number; x: number; z: number } | undefined>>([])
-
-  useFrame(() => {
-    if (!openSeaMarketPlayerWorld.ready || useDialogueStore.getState().isOpen) {
-      if (useOpenSeaMarketStore.getState().nearestTalkTokenId != null) {
-        setNearestTalkTokenId(null)
-      }
-      return
-    }
-    let bestId: number | null = null
-    let bestDist: number = OPEN_SEA_MARKET.talkRadius
-    for (const p of positionsRef.current) {
-      if (!p) continue
-      const d = Math.hypot(
-        openSeaMarketPlayerWorld.x - p.x,
-        openSeaMarketPlayerWorld.z - p.z,
-      )
-      if (d <= bestDist) {
-        bestDist = d
-        bestId = p.tokenId
-      }
-    }
-    if (useOpenSeaMarketStore.getState().nearestTalkTokenId !== bestId) {
-      setNearestTalkTokenId(bestId)
-    }
-  })
+  const walkerIds = useOpenSeaMarketStore((s) => s.sessionWalkerIds)
+  const spawns = useMemo(() => createWalkerSpawns(walkerIds), [walkerIds])
 
   return (
-    <>
+    <group>
       {spawns.map((spawn, index) => (
-        <MarketWalker
-          key={spawn.listing.tokenId}
-          spawn={spawn}
-          index={index}
-          onPosition={(i, tokenId, x, z) => {
-            positionsRef.current[i] = { tokenId, x, z }
-          }}
-        />
+        <MarketWalker key={spawn.meebitId} spawn={spawn} index={index} />
       ))}
-    </>
+    </group>
   )
 }

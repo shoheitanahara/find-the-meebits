@@ -29,8 +29,6 @@ const dialogueCameraDirectionAlt = new Vector3()
 const dialogueCandidatePosition = new Vector3()
 const dialogueCameraHeight = new Vector3(0, 2.35, 0)
 const dialogueLookAtHeight = new Vector3(0, 1.55, 0)
-const mobileDialogueCameraHeight = new Vector3(0, 2.1, 0)
-const mobileDialogueLookAtHeight = new Vector3(0, 1.15, 0)
 const WALK_STEP_INTERVAL_SEC = 0.25
 const WALK_BOB_FREQUENCY = 10.5
 
@@ -195,9 +193,18 @@ export function MarketPlayer() {
         : undefined
 
     if (talkNpcPos) {
+      const isSculptureView = useOpenSeaMarketStore
+        .getState()
+        .sessionPedestalListings.some((l) => l.tokenId === talkingTokenId)
+      const cam = isSculptureView
+        ? OPEN_SEA_MARKET.sculptureDialogueCamera
+        : OPEN_SEA_MARKET.guideDialogueCamera
+
       playerPosition.set(xRef.current, groundY, zRef.current)
       npcPosition.set(talkNpcPos.x, groundY, talkNpcPos.z)
-      midpoint.copy(playerPosition).add(npcPosition).multiplyScalar(0.5)
+      midpoint
+        .copy(playerPosition)
+        .lerp(npcPosition, cam.orbitBiasTowardNpc)
       dialogueDirection.copy(playerPosition).sub(npcPosition)
 
       if (dialogueDirection.lengthSq() < 0.001) {
@@ -207,11 +214,11 @@ export function MarketPlayer() {
       dialogueDirection.normalize()
       dialogueSide.set(-dialogueDirection.z, 0, dialogueDirection.x).normalize()
 
-      const sideScale = isMobile ? 0.55 : 0.72
-      const forwardScale = isMobile ? 0.35 : 0.48
-      const cameraDistance = isMobile ? 5.8 : 4.6
-      const camHeight = isMobile ? mobileDialogueCameraHeight : dialogueCameraHeight
-      const lookHeight = isMobile ? mobileDialogueLookAtHeight : dialogueLookAtHeight
+      const sideScale = isMobile ? cam.sideScaleMobile : cam.sideScale
+      const forwardScale = isMobile ? cam.forwardScaleMobile : cam.forwardScale
+      const cameraDistance = isMobile ? cam.distanceMobile : cam.distance
+      dialogueCameraHeight.set(0, isMobile ? cam.heightYMobile : cam.heightY, 0)
+      dialogueLookAtHeight.set(0, isMobile ? cam.lookYMobile : cam.lookY, 0)
       const {
         roomHalfX,
         roomMinZ,
@@ -243,7 +250,7 @@ export function MarketPlayer() {
           dialogueCandidatePosition
             .copy(midpoint)
             .addScaledVector(dialogueCameraDirectionAlt, dist)
-            .add(camHeight)
+            .add(dialogueCameraHeight)
           if (isCameraInside(dialogueCandidatePosition)) {
             placedInside = true
             break
@@ -276,7 +283,10 @@ export function MarketPlayer() {
         }
       }
 
-      cameraTarget.copy(midpoint).add(lookHeight)
+      cameraTarget
+        .copy(playerPosition)
+        .lerp(npcPosition, cam.lookBiasTowardNpc)
+        .add(dialogueLookAtHeight)
       state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))
       state.camera.lookAt(cameraTarget)
       return

@@ -13,7 +13,7 @@ import { recordOpenSeaVisit } from '../park/dailyRecords'
 import { OPEN_SEA_MARKET } from './config'
 import { MarketDialogueBox } from './dialogue/MarketDialogueBox'
 import { MarketDialogueSystem, MarketInteractionPrompt } from './dialogue/MarketDialogueSystem'
-import { pickSessionListings } from './pickSessionListings'
+import { pickSessionPedestals, pickSessionWalkerIds } from './pickSessionListings'
 import { MarketPlayer } from './player/MarketPlayer'
 import { MarketMobileControls } from './player/MarketMobileControls'
 import { MarketTouchLookPad } from './player/MarketTouchLookPad'
@@ -47,7 +47,7 @@ function MarketScene() {
         makeDefault
         fov={50}
         near={0.1}
-        far={120}
+        far={160}
         position={[
           OPEN_SEA_MARKET.playerStart.x + OPEN_SEA_MARKET.cameraFollow.x,
           OPEN_SEA_MARKET.cameraFollow.y,
@@ -84,17 +84,21 @@ export function OpenSeaMarketApp() {
       if (payload.error) {
         console.warn('[OpenSeaMarket] listings error:', payload.error)
       }
-      const session = pickSessionListings(payload.listings)
+      const pedestals = pickSessionPedestals(payload.listings)
+      const walkerIds = pickSessionWalkerIds(
+        pedestals.map((p) => p.tokenId),
+        OPEN_SEA_MARKET.maxWalkers,
+      )
       useOpenSeaMarketStore
         .getState()
-        .setListings(payload.listings, session, payload.error ?? null)
+        .setSession(payload.listings, pedestals, walkerIds, payload.error ?? null)
     })
     return () => {
       cancelled = true
     }
   }, [])
 
-  // walker VRM 待ちでオーバーレイが固まらないようにする
+  // 彫刻＋walker 待ちでオーバーレイが固まらないようにする
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const state = useOpenSeaMarketStore.getState()
@@ -102,7 +106,7 @@ export function OpenSeaMarketApp() {
         console.warn('[OpenSeaMarket] boot timeout — forcing ready')
         state.forceReady()
       }
-    }, 35_000)
+    }, 50_000)
     return () => window.clearTimeout(timer)
   }, [])
 

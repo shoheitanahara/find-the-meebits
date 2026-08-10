@@ -5,14 +5,14 @@ const copy = {
   en: {
     eyebrow: 'Sea District',
     title: 'OpenSea Market',
-    loading: 'Checking live listings…',
+    loading: 'Preparing Digital Sculptures…',
     finishing: 'Almost ready…',
     empty: 'No live listings right now — you can still look around.',
   },
   ja: {
     eyebrow: 'シーエリア',
     title: 'OpenSea Market',
-    loading: '出品情報を取得中…',
+    loading: 'Digital Sculpture を準備中…',
     finishing: '表示を仕上げています…',
     empty: 'いま出品が見つかりません。室内の探索はできます。',
   },
@@ -22,12 +22,13 @@ export function MarketLoadingOverlay() {
   const bootPhase = useOpenSeaMarketStore((state) => state.bootPhase)
   const listingsLoaded = useOpenSeaMarketStore((state) => state.listingsLoaded)
   const listingsError = useOpenSeaMarketStore((state) => state.listingsError)
-  const sessionCount = useOpenSeaMarketStore((state) => state.sessionListings.length)
+  const sessionCount = useOpenSeaMarketStore((state) => state.sessionPedestalListings.length)
   const progressReady = useOpenSeaMarketStore(
-    (state) => (state.playerVrmReady ? 1 : 0) + state.walkersReadyCount,
+    (state) =>
+      (state.playerVrmReady ? 1 : 0) + state.pedestalsReadyCount + state.walkersReadyCount,
   )
   const progressExpected = useOpenSeaMarketStore((state) =>
-    Math.max(1, 1 + state.walkersExpected),
+    Math.max(1, 1 + state.pedestalsExpected + state.walkersExpected),
   )
   const locale = getLocale()
   const t = copy[locale]

@@ -41,6 +41,13 @@ function freezeVrmAsSculpture(vrm: VRM): Group {
   return vrm.scene as Group
 }
 
+/** グレー化せずポーズのみ固定（OpenSea Market 等） */
+function freezeVrmAsColorExhibit(vrm: VRM): Group {
+  applyVRMAttentionPose(vrm)
+  vrm.update(0)
+  return vrm.scene as Group
+}
+
 async function ensureMasterScene(
   meebitId: number,
   priority = MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY,
@@ -61,6 +68,31 @@ async function ensureMasterScene(
     inflight.set(meebitId, pending)
   }
 
+  return pending
+}
+
+/** カラー展示用マスター（博物館グレー彫刻とは別キャッシュ） */
+const colorMasterScenes = new Map<number, Group>()
+const colorInflight = new Map<number, Promise<Group>>()
+const colorMasterRefCounts = new Map<number, number>()
+
+async function ensureColorMasterScene(
+  meebitId: number,
+  priority = MUSEUM_SCULPTURE_VRM_LOAD_PRIORITY,
+): Promise<Group> {
+  const cached = colorMasterScenes.get(meebitId)
+  if (cached) return cached
+
+  let pending = colorInflight.get(meebitId)
+  if (!pending) {
+    pending = enqueueVrmLoad(() => loadVRM(getMeebitVrmUrl(meebitId)), priority).then((vrm) => {
+      colorInflight.delete(meebitId)
+      const master = freezeVrmAsColorExhibit(vrm)
+      colorMasterScenes.set(meebitId, master)
+      return master
+    })
+    colorInflight.set(meebitId, pending)
+  }
   return pending
 }
 
@@ -86,6 +118,35 @@ export function releaseVrmSculptureScene(meebitId: number, scene: Group) {
     masterRefCounts.delete(meebitId)
   } else {
     masterRefCounts.set(meebitId, refs)
+  }
+
+  if (master && scene !== master) {
+    VRMUtils.deepDispose(scene)
+  }
+}
+
+/** OpenSea Market 等 — 元カラーのまま静止ポーズ */
+export async function acquireVrmColorExhibitScene(meebitId: number): Promise<Group> {
+  const master = await ensureColorMasterScene(meebitId)
+  const refs = colorMasterRefCounts.get(meebitId) ?? 0
+
+  if (refs === 0) {
+    colorMasterRefCounts.set(meebitId, 1)
+    return master
+  }
+
+  colorMasterRefCounts.set(meebitId, refs + 1)
+  return cloneSkeleton(master) as Group
+}
+
+export function releaseVrmColorExhibitScene(meebitId: number, scene: Group) {
+  const master = colorMasterScenes.get(meebitId)
+  const refs = (colorMasterRefCounts.get(meebitId) ?? 1) - 1
+
+  if (refs <= 0) {
+    colorMasterRefCounts.delete(meebitId)
+  } else {
+    colorMasterRefCounts.set(meebitId, refs)
   }
 
   if (master && scene !== master) {
