@@ -104,6 +104,7 @@ function VirtualJoystick() {
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault()
+    void unlockAudioIfNeeded()
     pointerIdRef.current = event.pointerId
     event.currentTarget.setPointerCapture(event.pointerId)
     updateJoystick(event.clientX, event.clientY)

@@ -1,4 +1,5 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
+import { unlockAudioIfNeeded } from '../../ui/sfx'
 import { useOpenSeaMarketControlsStore } from '../controlsStore'
 
 export function MarketTouchLookPad() {
@@ -8,6 +9,7 @@ export function MarketTouchLookPad() {
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (pointerIdRef.current !== null) return
+    void unlockAudioIfNeeded()
     pointerIdRef.current = event.pointerId
     lastRef.current = { x: event.clientX, y: event.clientY }
     event.currentTarget.setPointerCapture(event.pointerId)

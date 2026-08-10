@@ -18,6 +18,7 @@ import { MarketMobileControls } from './player/MarketMobileControls'
 import { MarketTouchLookPad } from './player/MarketTouchLookPad'
 import { resetOpenSeaMarketPlayerWorld } from './playerWorld'
 import { useOpenSeaMarketStore } from './store'
+import { MarketBgmSystem } from './MarketBgmSystem'
 import { MarketLoadingOverlay } from './ui/MarketLoadingOverlay'
 import { MarketExitPad } from './world/MarketExitPad'
 import { MarketRoom } from './world/MarketRoom'
@@ -119,6 +120,7 @@ export function OpenSeaMarketApp() {
       <ParkReturnButton />
       <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
       <TargetPreviewCapture />
+      <MarketBgmSystem />
       <MarketLoadingOverlay />
       {bootPhase === 'ready' ? (
         <>
