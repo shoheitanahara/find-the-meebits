@@ -49,7 +49,7 @@ const metadata = {
     },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
-      description: 'Cast from the shoreline, wait for the big bite, and reel in as many fish as you can in 90 seconds.',
+      description: 'Spot fish shadows, cast from the shore, and reel in your catch in 90 seconds.',
     },
     pfp: {
       title: 'Photo Booth | Meebits Park',
@@ -103,7 +103,7 @@ const metadata = {
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',
-      description: '波打ち際でキャストし、本食いの瞬間にアワセよう。90秒で釣果を競う。',
+      description: '水面の影を見つけてキャスト。大きく沈んだらすぐ引け。90秒勝負。',
     },
     pfp: {
       title: 'フォトブース | Meebits Park',

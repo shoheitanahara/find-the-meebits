@@ -4,12 +4,16 @@
 
 ## 直近の作業サマリー
 
-### Shore Fishing（`/shore-fishing`）— 島・竿・TS
+### Shore Fishing（`/shore-fishing`）— Open
 
+- **状態**: Sea 西棟 Open（`underConstruction` 解除）
+- **看板**: `FISH ON!` / `魚影を探せ` + 短い本文
+- **入口**: `entranceZ: -7.85`（ドア手前で発火）。小屋前のヤシを削除
 - **島**: ボクセル床。ヤシ廃止 → コケ付きの小さな岩／小山（`islandRocks` / `IslandVoxelRocks`）
 - **アバター**: `applyVRMFishingPose` — 歩行は脇やや開き、立ち／釣りは脇クローズ。キャスト＝リール逆
 - **NPC**: 対岸を歩いて釣るだけ（プレイヤー無反応）
 - **ホオジロ**: 頭を一番太く（胴より頭が太い紡錘）
+- **BGM**: `Meebits Shore Fishing.mp3`
 - **ノウハウ正本**: `memory-bank/shoreFishing.md` + `meebitVrmArms.md`（釣り）+ `techContext.md`（TS リテラル型）
 
 ### Photo Booth（`/photo-booth`）— アバター操作の仕上がり

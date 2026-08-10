@@ -5,11 +5,14 @@
 ### Shore Fishing（`/shore-fishing`）
 
 - [x] Sea 西スロットから入場。ボクセル孤島 + 岸釣りスコアアタック
+- [x] **Open**（工事中解除）。看板・スタート文言をキャッチーに
+- [x] 入口 `entranceZ` 調整 + 西棟に被るヤシ削除
 - [x] `applyVRMFishingPose`（歩行脇開き／立ち脇クローズ、キャスト＝リール逆）
 - [x] 竿フィット（`rodHand` + `vrmHandPropFit`）
 - [x] NPC 釣り人（プレイヤー無反応・対岸ループ）
-- [x] ヤシ廃止 → コケ付きボクセル岩
+- [x] 島内ヤシ廃止 → コケ付きボクセル岩
 - [x] ホオジロ頭太めシルエット
+- [x] BGM `Meebits Shore Fishing.mp3`
 - [x] `canStandOnIsland(radius: number = ...)` で TS2345 回避
 - [x] ノウハウ: `memory-bank/shoreFishing.md` / `meebitVrmArms.md` / `techContext.md`（TS 落とし穴）
 

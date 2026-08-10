@@ -311,20 +311,21 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'fishing',
     zoneId: 'sea',
     title: 'SHORE FISHING',
-    subtitle: 'The Shoreline',
+    subtitle: 'Cast & Catch',
     description: {
-      en: 'Cast from the shoreline.\nWait for the big bite.\n90 seconds to fill your bucket.',
-      ja: '波打ち際でキャスト。\n本食いの瞬間にアワセ。\n90秒で釣果を競おう。',
+      en: 'Spot a shadow. Cast.\n90 seconds of glory.',
+      ja: '影を見つけてキャスト。\n90秒勝負。',
     },
     storyTitle: {
-      en: 'SHORE FISHING',
-      ja: 'ショアフィッシング',
+      en: 'FISH ON!',
+      ja: '魚影を探せ',
     },
     color: '#b89870',
     roofColor: '#3a6a88',
     x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
     z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
-    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.west.entranceZ,
+    // 正面ドア (z + halfDepth = -8.0) のすぐ手前 — アルコーブ奥まで入らなくても発火
+    entranceZ: -7.85,
     footprint: {
       halfWidth: 3.2,
       halfDepth: 3.5,
@@ -336,7 +337,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       ],
     },
     infoBoardLocal: [5.2, 4.0],
-    underConstruction: true,
   },
   {
     id: 'sergito',

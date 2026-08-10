@@ -215,6 +215,7 @@ NPC は「アップデート」と言わない。変化は現実の出来事と�
 | Mountain / Shooting Gallery | 入場可。45秒の射的 | 外した一発、動く的、赤／金の的、腕の疲れ | 点数表の読み上げ、操作説明 |
 | Culture / Look Locker | 入場可。見た目の試着・比較 | 試した帽子、髪型、別Typeの見え方 | UI操作、内部候補数 |
 | Sea / Meet Sergito | 入場可。Traitに応じた工房内会話 | Sergitoに見られた特徴、棚、フィギュア | Trait抽出処理、会話生成ロジック |
+| Sea / Shore Fishing | 入場可。90秒ショア釣りのスコアアタック | 魚影、本食い、大物、潮のタイミング | 操作マニュアル調、得点表の読み上げ |
 | Astro District | エリアは入場可。3棟は工事中 | 金属床、資材、門、Robot / Visitor、建物の変化 | NPC比率、座標、完成日 |
 | 建設中エリア | Coming Soon 棟 | 屋根、壁、作業音、完成予想 | リリース日、開発進捗率 |
 | エリアの空気 | Plaza / Mountain / Culture / Sea / Astro | 光、風、音、砂、木、金属床、混雑 | zoneId、座標、ロード方式 |

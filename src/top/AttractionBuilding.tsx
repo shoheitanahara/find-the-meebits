@@ -474,19 +474,19 @@ function ShoreFishingLandmark({
         <boxGeometry args={[5.9, 0.22, 5.5]} />
         <meshStandardMaterial color={roofColor} roughness={0.5} metalness={0.12} />
       </mesh>
-      {/* 竿立て */}
-      {([-1.6, -0.9, -0.2] as const).map((x) => (
-        <mesh key={x} position={[x, 1.7, 2.55]} rotation={[0.35, 0, 0.08]} castShadow>
+      {/* 竿立て（入口中央を空けて左右へ） */}
+      {([-2.35, -1.75] as const).map((x) => (
+        <mesh key={x} position={[x, 1.7, 2.15]} rotation={[0.35, 0, 0.08]} castShadow>
           <cylinderGeometry args={[0.035, 0.04, 2.4, 6]} />
           <meshStandardMaterial color="#5a4030" roughness={0.8} />
         </mesh>
       ))}
-      <mesh position={[2.0, 1.1, 2.4]} castShadow>
+      <mesh position={[2.15, 1.1, 2.1]} castShadow>
         <boxGeometry args={[1.5, 0.7, 1.1]} />
         <meshStandardMaterial color="#8a7058" roughness={0.85} />
       </mesh>
       {/* 浮きバケツ */}
-      <mesh position={[-2.2, 0.55, 2.7]} castShadow>
+      <mesh position={[-2.45, 0.55, 2.35]} castShadow>
         <cylinderGeometry args={[0.35, 0.3, 0.55, 10]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.2} roughness={0.55} />
       </mesh>
