@@ -65,6 +65,12 @@ export function isMarketPositionWalkable(
   z: number,
   radius: number = OPEN_SEA_MARKET.playerRadius,
 ) {
+  const { roomHalfX, roomMinZ, roomMaxZ } = OPEN_SEA_MARKET
+  // 入口の隙間から虚無へ出ないよう、部屋 AABB でも止める
+  const margin = radius + WALL_COLLISION_INSET
+  if (x < -roomHalfX + margin || x > roomHalfX - margin) return false
+  if (z < roomMinZ + margin || z > roomMaxZ - margin) return false
+
   for (const box of OBSTACLES) {
     if (circleHitsBox(x, z, radius, box)) return false
   }
