@@ -17,6 +17,7 @@ const KEYS = {
   runway: 'meebits-runway-daily-v1',
   closet: 'meebits-closet-daily-v1',
   sergito: 'meebits-sergito-daily-v1',
+  opensea: 'meebits-opensea-daily-v1',
   starlight: 'meebits-starlight-best-daily',
   shooting: 'meebits-shooting-best-daily',
   fishing: 'meebits-shore-fishing-best',
@@ -33,6 +34,7 @@ type HuntPayload = DailyEnvelope & { stageNumber: number; clearTimeSeconds: numb
 type RunwayPayload = DailyEnvelope & { visited: true; themeLabel?: string }
 type ClosetPayload = DailyEnvelope & { meebitNumber: number }
 type SergitoPayload = DailyEnvelope & { talked: true }
+type OpenSeaPayload = DailyEnvelope & { visited: true }
 
 export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
   if (typeof window === 'undefined') return null
@@ -132,6 +134,11 @@ export function recordSergitoTalk() {
   writeDailyJson(KEYS.sergito, { dateKey: getUtcDateKey(), talked: true })
 }
 
+/** OpenSea Market: 入場。 */
+export function recordOpenSeaVisit() {
+  writeDailyJson(KEYS.opensea, { dateKey: getUtcDateKey(), visited: true })
+}
+
 function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
@@ -156,6 +163,7 @@ export function collectVisitPassLines(): VisitPassLine[] {
   const runway = readDailyJson<RunwayPayload>(KEYS.runway)
   const closet = readDailyJson<ClosetPayload>(KEYS.closet)
   const sergito = readDailyJson<SergitoPayload>(KEYS.sergito)
+  const opensea = readDailyJson<OpenSeaPayload>(KEYS.opensea)
 
   const line = (
     id: string,
@@ -244,6 +252,11 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'sergito',
       'Meet Sergito',
       sergito?.talked ? 'Visited' : null,
+    ),
+    line(
+      'opensea',
+      'OpenSea Market',
+      opensea?.visited ? 'Visited' : null,
     ),
   ]
 }

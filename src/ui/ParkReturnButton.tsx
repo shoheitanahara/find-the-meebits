@@ -4,14 +4,14 @@ import { playSfx } from './sfx'
 
 const copy = {
   en: {
-    trigger: 'Back to Top',
+    trigger: 'Back to Park',
     title: 'Leave this attraction?',
     description: 'Your current game will end and you will return to Meebits Park.',
     cancel: 'Keep playing',
     confirm: 'Return to Park',
   },
   ja: {
-    trigger: 'トップへ戻る',
+    trigger: 'パークへ戻る',
     title: 'アトラクションを終了しますか？',
     description: '現在のゲームを終了して、ミービッツ・パークへ戻ります。',
     cancel: 'ゲームを続ける',

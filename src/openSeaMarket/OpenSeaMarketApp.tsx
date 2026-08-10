@@ -9,6 +9,7 @@ import {
 } from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { loadMeebitsListings } from '../opensea/loadMeebitsListings'
+import { recordOpenSeaVisit } from '../park/dailyRecords'
 import { OPEN_SEA_MARKET } from './config'
 import { MarketDialogueBox } from './dialogue/MarketDialogueBox'
 import { MarketDialogueSystem, MarketInteractionPrompt } from './dialogue/MarketDialogueSystem'
@@ -104,6 +105,11 @@ export function OpenSeaMarketApp() {
     }, 35_000)
     return () => window.clearTimeout(timer)
   }, [])
+
+  useEffect(() => {
+    if (bootPhase !== 'ready') return
+    recordOpenSeaVisit()
+  }, [bootPhase])
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#0c1522] text-[#e8f4ff]">
