@@ -147,7 +147,7 @@ function MarketPedestalSlot({
         scale={sculptureVrmScale}
       />
 
-      {/* 値札: 板と文字を同じ傾きのグループに載せ、ETH の下に #ID を明示 */}
+      {/* 値札: 上に大きな #ID／下に少し小さめの値段（黒地） */}
       <group position={[0, pedestal.sizeY + 0.28, pedestal.sizeZ * 0.48]}>
         <group rotation={[-0.18, 0, 0]}>
           <mesh position={[0, 0, 0]} castShadow>
@@ -156,18 +156,7 @@ function MarketPedestalSlot({
           </mesh>
           <Text
             position={[0, 0.14, 0.04]}
-            fontSize={0.2}
-            color={colors.priceTag}
-            anchorX="center"
-            anchorY="middle"
-            renderOrder={2}
-            depthOffset={-2}
-          >
-            {priceLabel}
-          </Text>
-          <Text
-            position={[0, -0.16, 0.04]}
-            fontSize={0.15}
+            fontSize={0.22}
             color="#f0f9ff"
             anchorX="center"
             anchorY="middle"
@@ -175,6 +164,17 @@ function MarketPedestalSlot({
             depthOffset={-2}
           >
             {`#${listing.tokenId}`}
+          </Text>
+          <Text
+            position={[0, -0.16, 0.04]}
+            fontSize={0.14}
+            color={colors.priceTag}
+            anchorX="center"
+            anchorY="middle"
+            renderOrder={2}
+            depthOffset={-2}
+          >
+            {priceLabel}
           </Text>
         </group>
       </group>

@@ -1,6 +1,7 @@
 import { VRM, VRMHumanBoneName } from '@pixiv/three-vrm'
 import { Object3D } from 'three'
 import {
+  applyVRMAttentionPose,
   applyVRMLocomotion,
   applyVRMSitPose,
   applyVRMShootingPose,
@@ -120,16 +121,8 @@ function resetLegs(vrm: VRM) {
 }
 
 function applyStudioAttentionPose(vrm: VRM) {
-  resetTorso(vrm)
-  resetShoulders(vrm)
-  setArm(vrm, 'left', { upperZ: attentionArmZ.left, lowerX: 0.03 })
-  setArm(vrm, 'right', { upperZ: attentionArmZ.right, lowerX: 0.03 })
-  set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 0, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: 0, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.RightLowerLeg), { x: 0, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.LeftFoot), { x: 0, y: 0, z: 0 })
-  set(bone(vrm, VRMHumanBoneName.RightFoot), { x: 0, y: 0, z: 0 })
+  // OpenSea Market 彫刻・TargetPreview と同じ直立
+  applyVRMAttentionPose(vrm)
 }
 
 /** 右手を顔横へ上げる。 */

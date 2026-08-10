@@ -39,7 +39,7 @@ const attentionArmZ = {
 const elbowBaseBend = 0.08
 const kneeBaseBend = -0.16
 
-/** プレビュー用の立正ポーズ（両腕を体の横に下ろす） */
+/** プレビュー／展示用の直立ポーズ（Photo Booth「直立」と同一） */
 export function applyVRMAttentionPose(vrm: VRM | null) {
   if (!vrm) {
     return
@@ -60,16 +60,21 @@ export function applyVRMAttentionPose(vrm: VRM | null) {
   setRotationImmediate(getBone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0, z: 0 })
   setRotationImmediate(getBone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0, z: 0 })
   setRotationImmediate(getBone(vrm, VRMHumanBoneName.Head), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.LeftShoulder), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.RightShoulder), { x: 0, y: 0, z: 0 })
   setRotationImmediate(leftUpperArm, { x: 0, y: 0, z: attentionArmZ.left })
   setRotationImmediate(rightUpperArm, { x: 0, y: 0, z: attentionArmZ.right })
   setRotationImmediate(leftLowerArm, { x: 0.03, y: 0, z: 0 })
   setRotationImmediate(rightLowerArm, { x: 0.03, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.LeftHand), { x: 0, y: 0, z: 0 })
+  setRotationImmediate(getBone(vrm, VRMHumanBoneName.RightHand), { x: 0, y: 0, z: 0 })
+  // Photo Booth 直立と同じく膝・足首は伸ばす（kneeBaseBend は歩行／他ポーズ用）
   setRotationImmediate(leftUpperLeg, { x: 0, y: 0, z: 0 })
   setRotationImmediate(rightUpperLeg, { x: 0, y: 0, z: 0 })
-  setRotationImmediate(leftLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
-  setRotationImmediate(rightLowerLeg, { x: kneeBaseBend, y: 0, z: 0 })
-  setRotationImmediate(leftFoot, { x: 0.04, y: 0, z: 0 })
-  setRotationImmediate(rightFoot, { x: 0.04, y: 0, z: 0 })
+  setRotationImmediate(leftLowerLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(rightLowerLeg, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(leftFoot, { x: 0, y: 0, z: 0 })
+  setRotationImmediate(rightFoot, { x: 0, y: 0, z: 0 })
 }
 
 /** フィギュア用 — 上腕を体側へ（脇の空きを減らす） */
