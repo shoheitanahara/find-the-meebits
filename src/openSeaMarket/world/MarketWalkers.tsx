@@ -204,7 +204,7 @@ function MarketWalker({
         targetRotationYRef.current = faceY
         group.rotation.y = faceY
       }
-      group.position.y = groundY + 0.06
+      group.position.y = groundY
       applyVRMLocomotion(vrmRef.current, {
         elapsedTime: localTimeRef.current,
         isMoving: false,
@@ -249,7 +249,7 @@ function MarketWalker({
       }
     }
 
-    group.position.y = groundY + 0.06
+    group.position.y = groundY
     applyVRMLocomotion(vrmRef.current, {
       elapsedTime: localTimeRef.current,
       isMoving: walking,
@@ -263,7 +263,7 @@ function MarketWalker({
   return (
     <group
       ref={groupRef}
-      position={[spawn.x, groundY + 0.06, spawn.z]}
+      position={[spawn.x, groundY, spawn.z]}
       rotation={[0, spawn.rotationY, 0]}
     >
       {vrmScene ? (

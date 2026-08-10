@@ -13,7 +13,7 @@ export const OPEN_SEA_MARKET = {
   playerStart: { x: 0, z: 5.8 * ROOM_SCALE, rotationY: Math.PI },
   moveSpeed: 7.5,
   playerRadius: 0.42,
-  playerGroundY: -0.02,
+  playerGroundY: -0.05,
 
   playerExit: {
     x: 0,
