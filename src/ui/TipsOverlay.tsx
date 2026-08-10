@@ -46,7 +46,7 @@ export function TipsOverlay() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-[48] grid place-items-center bg-neutral-950/70 p-4 backdrop-blur-sm max-lg:px-3 max-lg:py-[max(1rem,env(safe-area-inset-top))]">
+    <div className="pointer-events-auto absolute inset-0 z-[48] grid place-items-center bg-neutral-950/70 p-4 backdrop-blur-sm max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)]">
       <section className="w-full max-w-lg rounded-[2rem] border border-white/15 bg-neutral-50 p-5 text-neutral-950 shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:rounded-3xl max-lg:p-4 lg:p-7">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">{t.tips}</p>
         <h2 className="mt-2 text-2xl font-black tracking-tight lg:text-3xl">{t.beforeStart}</h2>

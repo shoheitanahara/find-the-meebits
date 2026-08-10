@@ -83,7 +83,7 @@ export function ClearOverlay() {
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-0 z-50 overflow-y-auto p-4 backdrop-blur-sm max-lg:py-[max(1rem,env(safe-area-inset-top))] lg:grid lg:place-items-center lg:p-6 ${
+      className={`pointer-events-auto absolute inset-0 z-50 overflow-y-auto backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)] lg:grid lg:place-items-center lg:p-6 ${
         clubClearTheme ? 'bg-violet-950/85' : 'bg-neutral-950/75'
       }`}
     >
