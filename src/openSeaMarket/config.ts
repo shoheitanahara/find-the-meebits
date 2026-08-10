@@ -34,7 +34,7 @@ export const OPEN_SEA_MARKET = {
 
   /** 同時表示上限 */
   maxNpcsDesktop: 30,
-  maxNpcsMobile: 18,
+  maxNpcsMobile: 30,
 
   /** 徘徊スポーン範囲（壁インセット） */
   walkerSpawnHalfX: 7.2 * ROOM_SCALE,

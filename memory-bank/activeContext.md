@@ -9,7 +9,7 @@
 - **状態**: Sea 中央棟 Open（旧 TIDE POOL `comingSoon` を置換）
 - **体験**: OpenSea 公開 Listing の Meebit が室内を歩き、会話で価格を教える（Meet Sergito 同型室内）
 - **API**: `/api/opensea/meebits-listings`（Vercel Serverless + Vite dev middleware）。キーは永続 `OPENSEA_API_KEY` のみ（Instant Key なし）
-- **NPC**: セッション固定で PC 12 / SP 8。失敗時は 0 体でも入場可
+- **NPC**: セッション固定で PC/SP とも 30。失敗時は 0 体でも入場可
 - **ノウハウ正本**: `memory-bank/openSeaMarket.md`
 
 ### Shore Fishing（`/shore-fishing`）— Open

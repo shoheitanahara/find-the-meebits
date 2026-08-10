@@ -28,7 +28,7 @@ Meet Sergito 同型の別ルート室内。
 | ファイル | 役割 |
 |----------|------|
 | `OpenSeaMarketApp.tsx` | Canvas + HUD + 会話 |
-| `config.ts` | 部屋寸法・NPC 上限（PC 12 / SP 8） |
+| `config.ts` | 部屋寸法・NPC 上限（PC/SP とも 30） |
 | `store.ts` | listings / session 固定選抜 / boot |
 | `world/MarketRoom.tsx` | 青系軽量室内 |
 | `world/MarketWalkers.tsx` | Listing メンバーの徘徊 |
