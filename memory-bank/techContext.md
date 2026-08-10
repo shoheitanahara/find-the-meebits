@@ -163,6 +163,7 @@ npm run build
 - `public/favicon.jpg`
 - `public/audio/museum-bgm.mp3`, `public/audio/club-bgm.mp3`
 - `public/audio/runway/Meebits Runway.mp3`
+- `public/audio/fishing/Meebits Shore Fishing.mp3`
 - `public/audio/park/`（Park BGM）
 
 ## パフォーマンス設計（ブラウザ側がボトルネック）

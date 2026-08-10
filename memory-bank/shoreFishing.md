@@ -91,3 +91,5 @@ canStandOnIsland(x, z, radius: number = SHORE_FISHING.playerCollisionRadius)
 | 魚ボクセル | `world/VoxelFish.tsx`（ホオジロは頭を一番太く） |
 | 影 | `world/SeaFishShadows.tsx` |
 | 釣りポーズ | `src/avatar/VRMLocomotion.ts` → `applyVRMFishingPose` |
+| BGM | `src/audio/shoreFishingAudioConfig.ts` → `/audio/fishing/Meebits Shore Fishing.mp3` |
+| BGM 再生 | `src/shoreFishing/ShoreFishingBgmSystem.tsx` |

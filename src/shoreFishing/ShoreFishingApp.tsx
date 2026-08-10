@@ -22,6 +22,7 @@ import { ShoreFishingMobileControls } from './ui/ShoreFishingMobileControls'
 import { ShoreFishingPlayPrompt, ShoreFishingResult } from './ui/ShoreFishingOverlays'
 import { ShoreBeach } from './world/ShoreBeach'
 import { ShoreFishingNpcs } from './world/ShoreFishingNpcs'
+import { ShoreFishingBgmSystem } from './ShoreFishingBgmSystem'
 
 function useTabFrameloop() {
   const [frameloop, setFrameloop] = useState<'always' | 'never'>(() =>
@@ -100,6 +101,7 @@ export function ShoreFishingApp() {
       <ShoreFishingMobileControls />
       <ShoreFishingPlayPrompt />
       <ShoreFishingResult />
+      <ShoreFishingBgmSystem />
     </main>
   )
 }
