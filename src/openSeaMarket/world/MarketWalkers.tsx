@@ -160,10 +160,11 @@ function MarketWalker({
       setWalkerVrmReady(index)
     }
     if (vrmScene) {
+      // VRM は cast のみ。receive するとスキン自己影で斜線（shadow acne）が出る
       vrmScene.traverse((obj) => {
         if ('isMesh' in obj && obj.isMesh) {
           obj.castShadow = true
-          obj.receiveShadow = true
+          obj.receiveShadow = false
         }
       })
     }

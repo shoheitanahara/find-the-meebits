@@ -30,6 +30,7 @@ export function MarketRoom() {
         shadow-camera-near={0.5}
         shadow-camera-far={70}
         shadow-bias={-0.00015}
+        shadow-normalBias={0.04}
       />
       <pointLight position={[0, 4.2, 0]} intensity={28} distance={40} color={colors.glow} />
       <pointLight position={[-roomHalfX * 0.55, 3.8, centerZ]} intensity={16} distance={28} color="#9ad0ff" />
