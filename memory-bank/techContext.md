@@ -23,7 +23,7 @@
 - 新ルート追加時は 2 箇所に登録:
   - `vite.config.ts` の `SPA_FALLBACK_PATHS`（ローカル dev/preview 用）
   - `vercel.json` の `rewrites`（本番用）
-- OpenSea Listing API: `api/opensea/meebits-listings.ts` + Vite `openseaListingsDevApi`。環境変数 `OPENSEA_API_KEY`（Portal 永続キー、`VITE_` なし）。詳細は `memory-bank/openSeaMarket.md`
+- OpenSea Listing API: `api/opensea/meebits-listings.ts`（依存ゼロの単一 Serverless）+ Vite `openseaListingsDevApi`。環境変数 `OPENSEA_API_KEY`（Portal 永続キー、`VITE_` なし）。詳細は `memory-bank/openSeaMarket.md`
 - 旧 `/`（本編）→ `/find-the-meebit` に移設。**互換リダイレクトなし**
 - ページメタ（title/OGP/canonical）は `src/game/pageMetadata.ts` の `applyPageMetadata` が edition 別に適用
 

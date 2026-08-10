@@ -15,7 +15,7 @@ Sea 中央の室内アトラクション。OpenSea の **公開 Listing** から
 
 - **本番**: Vercel Serverless `api/opensea/meebits-listings.ts` → `GET /api/opensea/meebits-listings`
 - **ローカル**: Vite middleware（`vite.config.ts` の `openseaListingsDevApi`）が同パスを処理
-- **共有ロジック**: `src/opensea/fetchMeebitsListings.ts`
+- **共有ロジック**: `api/opensea/meebits-listings.ts`（単一ファイル。ESM 相対 import 事故回避）
 - **キー**: Developer Portal の永続キー `OPENSEA_API_KEY`（`VITE_` 禁止）。Instant Key は使わない
 - **取得**: `listings/collection/meebits/best`（最大数ページ）。契約一致で tokenId 正規化
 - **キャッシュ**: Listing メモリ 15分 + `Cache-Control: s-maxage=900, stale-while-revalidate=3600`

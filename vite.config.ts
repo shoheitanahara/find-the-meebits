@@ -111,7 +111,7 @@ function openseaListingsDevApi(): Plugin {
         }
         try {
           const { fetchMeebitsListings, LISTINGS_CACHE_CONTROL } = await import(
-            './src/opensea/fetchMeebitsListings'
+            './api/opensea/meebits-listings'
           )
           const payload = await fetchMeebitsListings({
             apiKey: env.OPENSEA_API_KEY || process.env.OPENSEA_API_KEY || '',
