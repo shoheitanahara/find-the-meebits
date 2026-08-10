@@ -9,15 +9,12 @@ import { StarlightFlybyPilotView } from './StarlightFlybyPilot'
 
 /**
  * 日替わり僚機のすれ違い。
- * playing 中のみ、星と同じ +Z 方向・外側レーンで通過。
+ * idle 中から VRM を先読みし、出現時のヒッチを抑える。
+ * 表示・移動は playing 中のみ。
  */
 export function StarlightFlybyNpcs() {
-  const phase = useStarlightRushStore((state) => state.phase)
   const sessionKey = useStarlightRushStore((state) => state.sessionKey)
   const lineup = useMemo(() => getDailyStarlightFlyby(), [sessionKey])
-
-  // idle / result では VRM を載せない（プレイ〜ドック中のみ）
-  if (phase === 'idle' || phase === 'result') return null
 
   return (
     <group>
@@ -73,7 +70,6 @@ function StarlightFlybySlot({ pilot }: { pilot: StarlightFlybyPilot }) {
 
   return (
     <group ref={groupRef} visible={false} userData={{ flyby: true }}>
-      {/* 位置は親 group。PilotView は相対 0 */}
       <StarlightFlybyPilotView pilot={pilot} />
     </group>
   )

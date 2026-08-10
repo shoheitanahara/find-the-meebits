@@ -179,26 +179,27 @@ function MarsBody() {
 
   const R = 3.8
 
+  // ティール系氷惑星 — collectible の orange/gold 星と色相が被らない
   return (
     <group ref={ref} position={[-18, -3, -28]}>
       <mesh>
         <sphereGeometry args={[R, 32, 32]} />
         <meshStandardMaterial
-          color="#c45a38"
-          emissive="#4a1810"
-          emissiveIntensity={0.2}
-          roughness={0.9}
-          metalness={0.05}
+          color="#2f7f8c"
+          emissive="#0a2e38"
+          emissiveIntensity={0.28}
+          roughness={0.82}
+          metalness={0.08}
         />
       </mesh>
       {/* 暗い高原 */}
       <mesh position={[0.3 * R, 0.2 * R, 0.85 * R]} scale={[1.8, 1.2, 0.5]}>
         <sphereGeometry args={[1.1, 12, 10]} />
-        <meshStandardMaterial color="#8a3828" roughness={0.95} />
+        <meshStandardMaterial color="#1a5560" roughness={0.95} />
       </mesh>
       <mesh position={[-0.5 * R, -0.35 * R, 0.75 * R]} scale={[1.5, 1.4, 0.45]}>
         <sphereGeometry args={[1.0, 12, 10]} />
-        <meshStandardMaterial color="#a04830" roughness={0.95} />
+        <meshStandardMaterial color="#246870" roughness={0.95} />
       </mesh>
       {/* クレーター */}
       {craters.map((c, i) => (
@@ -208,18 +209,18 @@ function MarsBody() {
           scale={[c.r, c.r * 0.35, c.r]}
         >
           <sphereGeometry args={[1, 10, 8]} />
-          <meshStandardMaterial color="#6a3020" roughness={1} />
+          <meshStandardMaterial color="#143848" roughness={1} />
         </mesh>
       ))}
       {/* 北極冠 */}
       <mesh position={[0, R * 0.88, 0]} scale={[1.1, 0.35, 1.1]}>
         <sphereGeometry args={[1.15, 12, 8]} />
-        <meshStandardMaterial color="#f0e8e0" roughness={0.7} />
+        <meshStandardMaterial color="#e8f6fa" roughness={0.65} />
       </mesh>
       {/* 薄い大気 */}
       <mesh scale={1.06}>
         <sphereGeometry args={[R, 20, 20]} />
-        <meshBasicMaterial color="#e08060" transparent opacity={0.1} depthWrite={false} />
+        <meshBasicMaterial color="#7ecad8" transparent opacity={0.12} depthWrite={false} />
       </mesh>
     </group>
   )

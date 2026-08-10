@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Group, Vector3 } from 'three'
 import { VRMHumanBoneName } from '@pixiv/three-vrm'
@@ -10,6 +10,7 @@ import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { ShootingPistol } from '../../shootingGallery/world/ShootingPistol'
 import { STARLIGHT_RUSH } from '../config'
 import type { StarlightFlybyPilot } from '../dailyStarlightFlyby'
+import { useStarlightRushStore } from '../store'
 import { StarlightShip } from './StarlightShip'
 
 const handWorld = new Vector3()
@@ -26,6 +27,7 @@ type StarlightFlybyPilotViewProps = {
 export function StarlightFlybyPilotView({ pilot }: StarlightFlybyPilotViewProps) {
   const rootRef = useRef<Group>(null)
   const pistolAnchorRef = useRef<Group>(null)
+  const seatedReadyRef = useRef(false)
   const { flyby } = STARLIGHT_RUSH
   // exclusive: プール clone だと humanoid 姿勢が効かず T ポーズになる
   const { vrmRef, vrmScene, update } = useVRMModel(
@@ -36,7 +38,27 @@ export function StarlightFlybyPilotView({ pilot }: StarlightFlybyPilotViewProps)
     true,
   )
 
+  useEffect(() => {
+    seatedReadyRef.current = false
+  }, [vrmScene, pilot.meebitNumber])
+
   useFrame((_, delta) => {
+    const phase = useStarlightRushStore.getState().phase
+    const active = phase === 'countdown' || phase === 'playing' || phase === 'docking'
+
+    // idle 中は先読みのみ。姿勢は VRM 到着時に一度決めておく
+    if (!active) {
+      if (vrmRef.current && !seatedReadyRef.current) {
+        applyVRMSeatedShootingPose(vrmRef.current, {
+          aimPitch: pilot.aimPitch,
+          recoil: 0,
+        })
+        followRightHand()
+        seatedReadyRef.current = true
+      }
+      return
+    }
+
     const dt = Math.min(delta, 0.05)
     applyVRMSeatedShootingPose(vrmRef.current, {
       aimPitch: pilot.aimPitch,
@@ -44,6 +66,7 @@ export function StarlightFlybyPilotView({ pilot }: StarlightFlybyPilotViewProps)
     })
     followRightHand()
     update(dt)
+    seatedReadyRef.current = true
   })
 
   const followRightHand = () => {
