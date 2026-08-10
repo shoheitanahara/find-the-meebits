@@ -4,6 +4,8 @@ export type ListedMeebit = {
   tokenId: number
   priceEth: number | null
   orderHash?: string
+  /** Unix 秒。出品作成時刻（order_created_at / startTime） */
+  listedAt?: number
 }
 
 export type MeebitsListingsPayload = {

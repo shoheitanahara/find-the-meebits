@@ -10,6 +10,7 @@ type ListedMeebit = {
   tokenId: number
   priceEth: number | null
   orderHash?: string
+  listedAt?: number
 }
 
 type MeebitsListingsPayload = {
@@ -56,6 +57,7 @@ type OpenSeaOfferItem = {
 type OpenSeaProtocolParameters = {
   offer?: OpenSeaOfferItem[]
   consideration?: OpenSeaOfferItem[]
+  startTime?: string | number
 }
 
 type OpenSeaListing = {
@@ -63,7 +65,10 @@ type OpenSeaListing = {
   orderHash?: string
   chain?: string
   status?: string
+  order_created_at?: number
+  orderCreatedAt?: number
   price?: OpenSeaPrice
+  asset?: { identifier?: string | number; contract?: string }
   protocol_data?: { parameters?: OpenSeaProtocolParameters }
   protocolData?: { parameters?: OpenSeaProtocolParameters }
 }
@@ -104,6 +109,12 @@ function parametersOf(listing: OpenSeaListing): OpenSeaProtocolParameters | unde
 }
 
 function tokenIdFromListing(listing: OpenSeaListing): number | null {
+  const assetId = Number(listing.asset?.identifier)
+  if (Number.isInteger(assetId) && assetId >= 1 && assetId <= 20000) {
+    const contract = normalizeAddress(listing.asset?.contract)
+    if (!contract || contract === MEEBITS_CONTRACT) return assetId
+  }
+
   const params = parametersOf(listing)
   const candidates = [...(params?.offer ?? []), ...(params?.consideration ?? [])]
   for (const item of candidates) {
@@ -120,6 +131,14 @@ function tokenIdFromListing(listing: OpenSeaListing): number | null {
   return null
 }
 
+function listedAtFromListing(listing: OpenSeaListing): number | undefined {
+  const raw = listing.order_created_at ?? listing.orderCreatedAt ?? parametersOf(listing)?.startTime
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n <= 0) return undefined
+  // ミリ秒で来る場合に備える
+  return n > 1e12 ? Math.floor(n / 1000) : Math.floor(n)
+}
+
 function mergeCheapest(map: Map<number, ListedMeebit>, next: ListedMeebit) {
   const prev = map.get(next.tokenId)
   if (!prev) {
@@ -128,6 +147,14 @@ function mergeCheapest(map: Map<number, ListedMeebit>, next: ListedMeebit) {
   }
   if (next.priceEth == null) return
   if (prev.priceEth == null || next.priceEth < prev.priceEth) {
+    map.set(next.tokenId, next)
+    return
+  }
+  // 同額なら新しい出品を残す
+  if (
+    prev.priceEth === next.priceEth &&
+    (next.listedAt ?? 0) > (prev.listedAt ?? 0)
+  ) {
     map.set(next.tokenId, next)
   }
 }
@@ -173,6 +200,7 @@ async function fetchAllListingsFromOpenSea(apiKey: string): Promise<ListedMeebit
         tokenId,
         priceEth: parsePriceEth(listing.price),
         orderHash: listing.order_hash ?? listing.orderHash,
+        listedAt: listedAtFromListing(listing),
       })
     }
     if (!page.next || listings.length === 0) break
@@ -185,7 +213,8 @@ async function fetchAllListingsFromOpenSea(apiKey: string): Promise<ListedMeebit
     )
   }
 
-  return [...byToken.values()].sort((a, b) => a.tokenId - b.tokenId)
+  // 新しい出品を先頭に（クライアント選抜の母集団順としても使う）
+  return [...byToken.values()].sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0))
 }
 
 export type FetchMeebitsListingsOptions = {
