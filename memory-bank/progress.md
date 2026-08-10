@@ -2,6 +2,15 @@
 
 ## 完了済み
 
+### OpenSea Market（`/opensea-market`）
+
+- [x] Sea 中央 TIDE POOL 工事中枠を `opensea` アトラクションに置換
+- [x] Listing API（`fetchMeebitsListings` + Vercel/Vite `/api/opensea/meebits-listings`）
+- [x] 室内 walkers・価格会話・OpenSea リンク・Exit
+- [x] `OPENSEA_API_KEY`（Portal 永続キーのみ。Instant Key 機構は削除）
+- [x] 失敗時 listings=[] で入場継続
+- [x] ノウハウ: `memory-bank/openSeaMarket.md`
+
 ### Shore Fishing（`/shore-fishing`）
 
 - [x] Sea 西スロットから入場。ボクセル孤島 + 岸釣りスコアアタック

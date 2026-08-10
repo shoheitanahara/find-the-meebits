@@ -405,7 +405,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   sea: {
     id: 'sea',
     title: { en: 'Sea District', ja: 'シーエリア' },
-    attractionIds: ['fishing', 'sergito'],
+    attractionIds: ['fishing', 'opensea', 'sergito'],
     layout: SEA_LAYOUT,
     perimeter: {
       theme: 'sea',
@@ -436,15 +436,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [9, -5.5],
     ],
     trees: SEA_PALM_TREE_XZ,
-    comingSoonSlots: [
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
-        theme: 'sea',
-        title: { en: 'TIDE POOL', ja: 'タイドプール' },
-        subtitle: { en: 'Shoreline stroll', ja: '潮だまりウォーク' },
-      },
-    ],
     gates: [
       {
         id: 'sea-to-plaza',

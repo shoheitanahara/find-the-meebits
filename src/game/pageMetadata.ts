@@ -39,6 +39,10 @@ const metadata = {
       title: 'Meet Sergito | Meebits Park',
       description: 'Visit Sergito’s workshop. He’ll look at your Meebit and share a short, personal comment.',
     },
+    opensea: {
+      title: 'OpenSea Market | Meebits Park',
+      description: 'Step inside a live listings floor. Talk to walking Meebits and hear their OpenSea price.',
+    },
     shooting: {
       title: 'Shooting Gallery | Meebits Park',
       description: 'Aim at moving fairground targets from the mountain booth. Forty-five seconds to chase a high score.',
@@ -92,6 +96,10 @@ const metadata = {
     sergito: {
       title: 'Meet Sergito | Meebits Park',
       description: 'Sergitoの工房を訪れ、あなたのMeebitを見てもらおう。traitに合わせた短いコメントが返ってくる。',
+    },
+    opensea: {
+      title: 'OpenSea Market | Meebits Park',
+      description: '出品中のMeebitが歩くマーケットへ。話しかけてOpenSeaの価格を聞こう。',
     },
     shooting: {
       title: 'シューティングギャラリー | Meebits Park',

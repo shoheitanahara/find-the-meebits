@@ -19,10 +19,11 @@
 ## ルーティング / SPA fallback
 
 - URL パスで edition を判定（`src/game/appEdition.ts`）。`/` `/jp` = Park（`top`）
-- ルート一覧: `/`(`top`), `/find-the-meebit`(`v1`), `/v2`(`v2`), `/8th-street`, `/runway`, `/mountain`, `/neon-stack`、各 `/jp` 版
+- ルート一覧: `/`(`top`), `/find-the-meebit`(`v1`), `/v2`(`v2`), `/8th-street`, `/runway`, `/mountain`, `/neon-stack`, `/opensea-market`(`opensea`)、各 `/jp` 版
 - 新ルート追加時は 2 箇所に登録:
   - `vite.config.ts` の `SPA_FALLBACK_PATHS`（ローカル dev/preview 用）
   - `vercel.json` の `rewrites`（本番用）
+- OpenSea Listing API: `api/opensea/meebits-listings.ts` + Vite `openseaListingsDevApi`。環境変数 `OPENSEA_API_KEY`（Portal 永続キー、`VITE_` なし）。詳細は `memory-bank/openSeaMarket.md`
 - 旧 `/`（本編）→ `/find-the-meebit` に移設。**互換リダイレクトなし**
 - ページメタ（title/OGP/canonical）は `src/game/pageMetadata.ts` の `applyPageMetadata` が edition 別に適用
 

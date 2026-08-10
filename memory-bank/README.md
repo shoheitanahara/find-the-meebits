@@ -17,7 +17,9 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
 | `/shooting-gallery` `/jp/shooting-gallery` | `shooting` | Shooting Gallery |
 | `/photo-booth` `/jp/photo-booth` | `pfp`（互換 `/pfp-studio`） | Photo Booth（PFP・来場証明書） |
-| `/shore-fishing` `/jp/shore-fishing` | `shore-fishing` | Shore Fishing（孤島釣り） |
+| `/shore-fishing` `/jp/shore-fishing` | `fishing` | Shore Fishing（孤島釣り） |
+| `/opensea-market` `/jp/opensea-market` | `opensea` | OpenSea Market（出品 Meebit 室内） |
+| `/meet-sergito` `/jp/meet-sergito` | `sergito` | Meet Sergito |
 
 - ルート判定: `src/game/appEdition.ts`（`getAppEdition`）
 - Park 設計: **[parkDesigner.md](./parkDesigner.md)**（共通骨格・橋ゲート・カージナル導線）
@@ -26,6 +28,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - Meebit VRM 腕ボーン: **[meebitVrmArms.md](./meebitVrmArms.md)**（捻れ禁止・attention z・肘 x・**釣り竿脇**）
 - Photo Booth（ポーズ・カメラ・小道具）: **[photoStudio.md](./photoStudio.md)**
 - Shore Fishing（島・竿・NPC）: **[shoreFishing.md](./shoreFishing.md)**
+- OpenSea Market（Listing API・室内）: **[openSeaMarket.md](./openSeaMarket.md)**
 - `/` `/jp` は Park（`top`）。`find-the-meebit` セグメントで v1。
 
 ## 読む順序（推奨）

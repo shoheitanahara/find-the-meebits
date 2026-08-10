@@ -47,6 +47,8 @@ export function ParkReturnButton() {
       ? 'closet'
       : pathSegments.includes('meet-sergito')
         ? 'sergito'
+        : pathSegments.includes('opensea-market')
+          ? 'opensea'
         : pathSegments.includes('shore-fishing')
           ? 'fishing'
         : pathSegments.includes('shooting-gallery')

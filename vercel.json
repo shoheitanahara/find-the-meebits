@@ -22,6 +22,8 @@
     { "source": "/look-locker/(.*)", "destination": "/index.html" },
     { "source": "/meet-sergito", "destination": "/index.html" },
     { "source": "/meet-sergito/(.*)", "destination": "/index.html" },
+    { "source": "/opensea-market", "destination": "/index.html" },
+    { "source": "/opensea-market/(.*)", "destination": "/index.html" },
     { "source": "/shooting-gallery", "destination": "/index.html" },
     { "source": "/shooting-gallery/(.*)", "destination": "/index.html" },
     { "source": "/starlight-rush", "destination": "/index.html" },

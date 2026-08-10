@@ -9,6 +9,7 @@ export type AppEdition =
   | 'runway'
   | 'closet'
   | 'sergito'
+  | 'opensea'
   | 'shooting'
   | 'starlight'
   | 'fishing'
@@ -38,6 +39,9 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   }
   if (segments.includes('meet-sergito')) {
     return 'sergito'
+  }
+  if (segments.includes('opensea-market')) {
+    return 'opensea'
   }
   if (segments.includes('runway')) {
     return 'runway'

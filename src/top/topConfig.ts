@@ -339,6 +339,37 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     infoBoardLocal: [5.2, 4.0],
   },
   {
+    id: 'opensea',
+    zoneId: 'sea',
+    title: 'OPENSEA MARKET',
+    subtitle: 'Live Listings',
+    description: {
+      en: 'Listed Meebits walk inside.\nAsk them their price.',
+      ja: '出品中のMeebitが歩いている。\n話しかけて値段を聞こう。',
+    },
+    storyTitle: {
+      en: 'FOR SALE NOW',
+      ja: 'いま売り出されてるよ',
+    },
+    color: '#1b4f8a',
+    roofColor: '#2081e2',
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+    // 正面ドア (z + halfDepth = -3.5) のすぐ手前
+    entranceZ: -3.35,
+    footprint: {
+      halfWidth: 3.4,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.25,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.7, z: -1.1, halfX: 1.0, halfZ: 1.35 },
+        { x: 2.7, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: [5.4, 4.0],
+  },
+  {
     id: 'sergito',
     zoneId: 'sea',
     title: 'MEET SERGITO',

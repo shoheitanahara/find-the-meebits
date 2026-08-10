@@ -59,6 +59,10 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/meet-sergito' : '/meet-sergito'
   }
 
+  if (segments.includes('opensea-market')) {
+    return locale === 'ja' ? '/jp/opensea-market' : '/opensea-market'
+  }
+
   if (segments.includes('starlight-rush')) {
     return locale === 'ja' ? '/jp/starlight-rush' : '/starlight-rush'
   }

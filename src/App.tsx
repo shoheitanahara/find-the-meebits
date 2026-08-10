@@ -10,6 +10,7 @@ import { MountainApp } from './mountain/MountainApp'
 import { RunwayApp } from './runway/RunwayApp'
 import { ClosetApp } from './closet/ClosetApp'
 import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
+import { OpenSeaMarketApp } from './openSeaMarket/OpenSeaMarketApp'
 import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
 import { StarlightRushApp } from './starlightRush/StarlightRushApp'
 import { ShoreFishingApp } from './shoreFishing/ShoreFishingApp'
@@ -163,6 +164,15 @@ export default function App() {
     return (
       <>
         <MeetSergitoApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'opensea') {
+    return (
+      <>
+        <OpenSeaMarketApp />
         <Analytics />
       </>
     )

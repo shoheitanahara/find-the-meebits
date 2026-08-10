@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text, useTexture } from '@react-three/drei'
 import type { Attraction } from './topConfig'
 import { VisitPassPromoBoard } from './VisitPassPromoBoard'
 import { VoxelBlockMat } from './VoxelBlockMat'
@@ -16,6 +16,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - closet: カルチャー調のルックロッカー（きせかえ試着室）
  * - sergito: シーエリアの工房（Meet Sergito）
  * - fishing: シーエリア西のショアフィッシング
+ * - opensea: シーエリア中央の OpenSea Market
  * - shooting: マウンテンエリアの木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
  * - pfp: カルチャー東のフォトブース
@@ -44,13 +45,15 @@ export function AttractionBuilding({
                   ? '#d4a060'
                   : attraction.id === 'fishing'
                     ? '#7ec8e8'
-                  : attraction.id === 'shooting'
-                    ? '#e8b060'
-                    : attraction.id === 'starlight'
-                      ? '#5ce0ff'
-                      : attraction.id === 'pfp'
-                        ? '#8eb4e8'
-                        : '#c4a060'
+                    : attraction.id === 'opensea'
+                      ? '#2081e2'
+                      : attraction.id === 'shooting'
+                        ? '#e8b060'
+                        : attraction.id === 'starlight'
+                          ? '#5ce0ff'
+                          : attraction.id === 'pfp'
+                            ? '#8eb4e8'
+                            : '#c4a060'
   const frontZ = attraction.footprint.halfDepth
 
   return (
@@ -75,6 +78,8 @@ export function AttractionBuilding({
         <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'fishing' ? (
         <ShoreFishingLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+      ) : attraction.id === 'opensea' ? (
+        <OpenSeaMarketLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'shooting' ? (
         <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'starlight' ? (
@@ -446,6 +451,67 @@ function MeetSergitoLandmark({
       </mesh>
       <pointLight position={[0, 2.6, 1.2]} intensity={9} distance={10} color={accent} />
     </group>
+  )
+}
+
+/** Sea 中央: OpenSea Market（青系・帆船ロゴ） */
+function OpenSeaMarketLandmark({
+  color,
+  roofColor,
+  accent,
+}: {
+  color: string
+  roofColor: string
+  accent: string
+}) {
+  return (
+    <group>
+      <mesh position={[0, 0.12, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.24, 6.8]} />
+        <meshStandardMaterial color="#2a4058" roughness={0.88} />
+      </mesh>
+      <mesh position={[0, 1.65, -0.15]} castShadow receiveShadow>
+        <boxGeometry args={[5.8, 3.1, 5.2]} />
+        <meshStandardMaterial color={color} roughness={0.72} metalness={0.12} />
+      </mesh>
+      <mesh position={[0, 3.35, -0.15]} castShadow>
+        <boxGeometry args={[6.2, 0.28, 5.5]} />
+        <meshStandardMaterial color={roofColor} roughness={0.4} metalness={0.22} />
+      </mesh>
+      {/* 入口サイン帯 */}
+      <mesh position={[0, 2.85, 2.55]} castShadow>
+        <boxGeometry args={[4.2, 0.55, 0.12]} />
+        <meshStandardMaterial color="#0b1a2e" roughness={0.55} metalness={0.2} />
+      </mesh>
+      <Text
+        position={[0, 2.85, 2.64]}
+        fontSize={0.28}
+        color="#e8f2ff"
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={4}
+      >
+        OpenSea Market
+      </Text>
+      {/* 円形ロゴ板 + OpenSea ブランド画像 */}
+      <mesh position={[0, 1.55, 2.52]} castShadow>
+        <cylinderGeometry args={[0.72, 0.72, 0.1, 24]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} roughness={0.4} />
+      </mesh>
+      <OpenSeaLogoBillboard />
+      <pointLight position={[0, 2.8, 2.2]} intensity={10} distance={12} color={accent} />
+      <pointLight position={[-2.2, 2.4, 1.2]} intensity={4} distance={8} color="#9ad0ff" />
+    </group>
+  )
+}
+
+function OpenSeaLogoBillboard() {
+  const map = useTexture('/brand-opensea.png')
+  return (
+    <mesh position={[0, 1.55, 2.585]}>
+      <planeGeometry args={[1.28, 0.45]} />
+      <meshBasicMaterial map={map} transparent toneMapped={false} />
+    </mesh>
   )
 }
 

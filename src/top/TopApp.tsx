@@ -46,6 +46,7 @@ const copy = {
       runway: 'Meebits Runway',
       closet: 'Look Locker',
       sergito: 'Meet Sergito',
+      opensea: 'OpenSea Market',
       fishing: 'Shore Fishing',
       shooting: 'Shooting Gallery',
       starlight: 'Starlight Rush',
@@ -70,6 +71,7 @@ const copy = {
       runway: 'Meebits Runway',
       closet: 'ルックロッカー',
       sergito: 'Meet Sergito',
+      opensea: 'OpenSea Market',
       fishing: 'ショアフィッシング',
       shooting: 'シューティングギャラリー',
       starlight: 'スターライト・ラッシュ',
@@ -87,6 +89,7 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'runway') return `${localePrefix}/runway`
   if (id === 'closet') return `${localePrefix}/look-locker`
   if (id === 'sergito') return `${localePrefix}/meet-sergito`
+  if (id === 'opensea') return `${localePrefix}/opensea-market`
   if (id === 'fishing') return `${localePrefix}/shore-fishing`
   if (id === 'shooting') return `${localePrefix}/shooting-gallery`
   if (id === 'starlight') return `${localePrefix}/starlight-rush`
@@ -106,6 +109,7 @@ function getReturningAttractionId(): AttractionId | null {
     from === 'runway' ||
     from === 'closet' ||
     from === 'sergito' ||
+    from === 'opensea' ||
     from === 'fishing' ||
     from === 'shooting' ||
     from === 'starlight' ||
