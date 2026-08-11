@@ -41,7 +41,7 @@ const metadata = {
     },
     opensea: {
       title: 'OpenSea Market | Meebits Park',
-      description: 'Step inside a live listings floor. Talk to walking Meebits and hear their OpenSea price.',
+      description: 'Step inside a live listings gallery. Listed Meebits are displayed as sculptures — view details on OpenSea.',
     },
     shooting: {
       title: 'Shooting Gallery | Meebits Park',
@@ -99,7 +99,7 @@ const metadata = {
     },
     opensea: {
       title: 'OpenSea Market | Meebits Park',
-      description: '出品中のMeebitが歩くマーケットへ。話しかけてOpenSeaの価格を聞こう。',
+      description: '出品中のMeebitが彫刻として並ぶギャラリーへ。近づいてOpenSeaの詳細を見よう。',
     },
     shooting: {
       title: 'シューティングギャラリー | Meebits Park',
