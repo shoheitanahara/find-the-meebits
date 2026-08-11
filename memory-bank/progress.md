@@ -6,9 +6,13 @@
 
 - [x] Sea 中央 TIDE POOL 工事中枠を `opensea` アトラクションに置換
 - [x] Listing API（`fetchMeebitsListings` + Vercel/Vite `/api/opensea/meebits-listings`）
-- [x] 室内 walkers・価格会話・OpenSea リンク・Exit
+- [x] 出品を Digital Sculpture 台座展示（カラー静止・約2倍）。案内歩行10体は値段を話さない
+- [x] 3ギャラリー WEST / MAIN / EAST（MAIN=最新30、空洞ゲート＋フェード、EXIT は MAIN のみ）
+- [x] 48時間以内の売却を最大10体混ぜる（`status: sold`）。値札 SOLD リボン
+- [x] 彫刻カメラは正面斜め固定（プレイヤー位置非依存）
+- [x] 会話中ミニマップ薄化・ゲート印・Park 看板を彫刻ギャラリー文言へ
 - [x] `OPENSEA_API_KEY`（Portal 永続キーのみ。Instant Key 機構は削除）
-- [x] 失敗時 listings=[] で入場継続
+- [x] 失敗時 listings=[] で入場継続（売却失敗は出品のみ）
 - [x] ノウハウ: `memory-bank/openSeaMarket.md`
 
 ### Shore Fishing（`/shore-fishing`）

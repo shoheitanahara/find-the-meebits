@@ -11,6 +11,7 @@
 | `/runway` | `runway` | Meebits Runway |
 | `/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
+| `/opensea-market` | `opensea` | OpenSea Market（出品／直近売却の彫刻ギャラリー） |
 
 ## Meebits Park（`top`）
 
@@ -42,6 +43,7 @@
 | Find the Meebit | 群衆が常にランダムで新鮮 |
 | Plaza | 噴水 Featured・テーマトレイトが日付で変わる |
 | Meebits Runway | 日替わり衣装カラーテーマ・観客顔ぶれ・空席位置 |
+| OpenSea Market | ライブ出品＋48時間以内の売却を彫刻として展示（顔ぶれは API 依存） |
 
 NPC はこの魅力を **来場者の生活・失敗・寄り道** としてにじませる（仕様説明・広告口調にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)（Dialogue Bible）。
 
@@ -50,6 +52,14 @@ NPC はこの魅力を **来場者の生活・失敗・寄り道** としてに�
 - 必ず **[parkDesigner.md](./parkDesigner.md)** に従う
 - カージナル導線を塞がない。エリア追加はテーマ差し替えが主
 - 海・砂浜を外周に戻さない。見た目と `topCollisions` をセットで更新する
+
+## OpenSea Market（`opensea`）
+
+- Sea 中央の Digital Sculpture ギャラリー。**出品個体は歩かない**（案内 NPC のみ徘徊）
+- WEST / MAIN / EAST の3室。MAIN に最新30。左右ゲートで切替。EXIT は MAIN のみ
+- 48時間以内の売却を最大10体混ぜる。値札に赤い SOLD リボン
+- 彫刻会話は価格または「直近で売れた」。リンクで OpenSea へ
+- 正本: [openSeaMarket.md](./openSeaMarket.md)
 
 ## Meebits Runway（`runway`）
 

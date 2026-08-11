@@ -13,6 +13,7 @@
 | `/runway` | `runway` | Meebits Runway |
 | `/mountain` | `mountain` | Mt. Meeb |
 | `/neon-stack` | `neon` | Jerry Mountain（互換） |
+| `/opensea-market` | `opensea` | OpenSea Market（彫刻ギャラリー） |
 
 ルート判定は `src/game/appEdition.ts`。`/` `/jp` は Park。
 

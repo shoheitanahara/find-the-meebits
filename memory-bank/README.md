@@ -18,7 +18,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/shooting-gallery` `/jp/shooting-gallery` | `shooting` | Shooting Gallery |
 | `/photo-booth` `/jp/photo-booth` | `pfp`（互換 `/pfp-studio`） | Photo Booth（PFP・来場証明書） |
 | `/shore-fishing` `/jp/shore-fishing` | `fishing` | Shore Fishing（孤島釣り） |
-| `/opensea-market` `/jp/opensea-market` | `opensea` | OpenSea Market（出品 Meebit 室内） |
+| `/opensea-market` `/jp/opensea-market` | `opensea` | OpenSea Market（出品／直近売却を彫刻展示） |
 | `/meet-sergito` `/jp/meet-sergito` | `sergito` | Meet Sergito |
 
 - ルート判定: `src/game/appEdition.ts`（`getAppEdition`）
@@ -28,7 +28,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - Meebit VRM 腕ボーン: **[meebitVrmArms.md](./meebitVrmArms.md)**（捻れ禁止・attention z・肘 x・**釣り竿脇**）
 - Photo Booth（ポーズ・カメラ・小道具）: **[photoStudio.md](./photoStudio.md)**
 - Shore Fishing（島・竿・NPC）: **[shoreFishing.md](./shoreFishing.md)**
-- OpenSea Market（Listing API・室内）: **[openSeaMarket.md](./openSeaMarket.md)**
+- OpenSea Market（Listing / 直近売却・3ギャラリー彫刻）: **[openSeaMarket.md](./openSeaMarket.md)**
 - `/` `/jp` は Park（`top`）。`find-the-meebit` セグメントで v1。
 
 ## 読む順序（推奨）
@@ -51,6 +51,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - **NPC の魅力トーン・日替わり伝え方**が変わったら **parkNpcDialogue.md** と `parkDialogueExpand.ts` をセットで更新する
 - **Photo Booth のポーズ／カメラ／小道具**が変わったら **photoStudio.md**（と必要なら **meebitVrmArms.md**）を更新する
 - **Shore Fishing の竿・島・NPC**が変わったら **shoreFishing.md** / **meebitVrmArms.md** を更新する
+- **OpenSea Market**（API・ギャラリー・彫刻／売却リボン・カメラ）が変わったら **openSeaMarket.md** を更新する
 - ファイルパス・定数・インフラ・**頻出 TS エラー**が変わったら **techContext.md** も更新する
 
 ## インフラ早見（2026-07）

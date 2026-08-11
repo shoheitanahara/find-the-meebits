@@ -1,17 +1,17 @@
 # Active Context
 
-最終更新: 2026-08-10
+最終更新: 2026-08-11
 
 ## 直近の作業サマリー
 
 ### OpenSea Market（`/opensea-market`）— Open
 
-- **状態**: Sea 中央棟 Open（旧 TIDE POOL `comingSoon` を置換）
-- **体験**: 出品 Meebit を Digital Sculpture として台座展示。案内歩行 NPC は値段を話さない
-- **API**: `/api/opensea/meebits-listings`（Vercel Serverless + Vite dev middleware）。キーは永続 `OPENSEA_API_KEY` のみ（Instant Key なし）
-- **選抜**: 台座30（新着優先）+ 歩行案内10（日替わりランダム ID）
-- **BGM**: Runway と同じ `Meebits Runway.mp3`（`MarketBgmSystem` → `runwayAudioConfig`）
-- **NPC**: 歩行は案内のみ。Visitor Pass は入場で Visited
+- **状態**: Sea 中央棟 Open。Digital Sculpture ギャラリー（出品は歩かない）
+- **3室**: WEST / MAIN / EAST。MAIN=最新30。左右ゲート＋フェード。EXIT は MAIN のみ
+- **売却**: 48時間以内の sale を最大10体混ぜる（出品中 token は除外）。値札左上に SOLD リボン
+- **カメラ**: 彫刻はプレイヤー非依存の正面斜め固定。案内だけプレイヤー基準
+- **API**: listings/best + events/sale。キーは永続 `OPENSEA_API_KEY` のみ
+- **看板**: 「美しいMeebitsの彫刻が並ぶギャラリー。」
 - **ノウハウ正本**: `memory-bank/openSeaMarket.md`
 
 ### Shore Fishing（`/shore-fishing`）— Open
