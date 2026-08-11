@@ -1,4 +1,4 @@
-import type { ListedMeebit } from '../opensea/types'
+import { isSoldMeebit, type ListedMeebit } from '../opensea/types'
 import { OPEN_SEA_MARKET } from './config'
 
 function shuffleInPlace<T>(items: T[], seed: number) {
@@ -15,6 +15,7 @@ function shuffleInPlace<T>(items: T[], seed: number) {
 
 /**
  * 3ギャラリー分 — MAIN に最新30件を固定、残りを WEST/EAST へ。
+ * 48時間以内の売却は最大 maxRecentSales 件を各室へ散らす。
  * 部屋間・部屋内とも tokenId 重複なし。
  */
 export function pickSessionGalleries(
@@ -27,7 +28,9 @@ export function pickSessionGalleries(
   const galleries = Array.from({ length: roomCount }, () => [] as ListedMeebit[])
   if (listings.length === 0) return galleries
 
-  const newestFirst = [...listings].sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0))
+  const active = listings.filter((item) => !isSoldMeebit(item))
+  const listedIds = new Set(active.map((item) => item.tokenId))
+  const newestFirst = [...active].sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0))
   const unique: ListedMeebit[] = []
   const seen = new Set<number>()
   for (const listing of newestFirst) {
@@ -37,14 +40,9 @@ export function pickSessionGalleries(
     if (unique.length >= maxTotal) break
   }
 
-  // MAIN = 最新 maxPedestals 件（台座配置だけ軽くシャッフル）
-  const mainPool = unique.slice(0, perRoom)
-  shuffleInPlace(mainPool, Math.floor(Date.now() / 60_000) ^ 0x0aea11)
-  galleries[mainIndex] = mainPool
+  galleries[mainIndex] = unique.slice(0, perRoom)
 
-  // 残り → WEST / EAST に均等割り当て（シャッフル後）
   const sidePool = unique.slice(perRoom)
-  shuffleInPlace(sidePool, Math.floor(Date.now() / 60_000) ^ 0x0ea57)
   const sideRoomIndices = Array.from({ length: roomCount }, (_, i) => i).filter(
     (i) => i !== mainIndex,
   )
@@ -53,7 +51,6 @@ export function pickSessionGalleries(
     if (room == null) break
     const bucket = galleries[room]!
     if (bucket.length >= perRoom) {
-      // 片方が満杯ならもう片方へ
       const other = sideRoomIndices.find((r) => (galleries[r]?.length ?? 0) < perRoom)
       if (other == null) break
       galleries[other]!.push(sidePool[i]!)
@@ -62,7 +59,55 @@ export function pickSessionGalleries(
     }
   }
 
+  mixRecentSales(galleries, listings, listedIds, perRoom, mainIndex, sideRoomIndices)
+
+  const minuteSeed = Math.floor(Date.now() / 60_000)
+  for (let room = 0; room < galleries.length; room += 1) {
+    shuffleInPlace(galleries[room]!, minuteSeed ^ (0x0aea11 + room * 97))
+  }
+
   return galleries
+}
+
+/** 出品と重複しない直近売却を MAIN → 左右へ順に混ぜる */
+function mixRecentSales(
+  galleries: ListedMeebit[][],
+  listings: readonly ListedMeebit[],
+  listedIds: ReadonlySet<number>,
+  perRoom: number,
+  mainIndex: number,
+  sideRoomIndices: number[],
+) {
+  const soldNewest = [...listings]
+    .filter(isSoldMeebit)
+    .sort((a, b) => (b.soldAt ?? b.listedAt ?? 0) - (a.soldAt ?? a.listedAt ?? 0))
+
+  const sold: ListedMeebit[] = []
+  const soldSeen = new Set<number>()
+  for (const item of soldNewest) {
+    if (listedIds.has(item.tokenId) || soldSeen.has(item.tokenId)) continue
+    soldSeen.add(item.tokenId)
+    sold.push(item)
+    if (sold.length >= OPEN_SEA_MARKET.maxRecentSales) break
+  }
+  if (sold.length === 0) return
+
+  const roomCycle = [mainIndex, ...sideRoomIndices]
+  const replaced = galleries.map(() => 0)
+  for (let i = 0; i < sold.length; i += 1) {
+    const room = roomCycle[i % roomCycle.length]
+    if (room == null) break
+    const bucket = galleries[room]
+    if (!bucket) continue
+    if (bucket.length < perRoom) {
+      bucket.push(sold[i]!)
+      continue
+    }
+    const replaceAt = bucket.length - 1 - replaced[room]!
+    if (replaceAt < 0) continue
+    bucket[replaceAt] = sold[i]!
+    replaced[room] += 1
+  }
 }
 
 /**

@@ -36,6 +36,8 @@ export const OPEN_SEA_MARKET = {
 
   maxPedestals: 30,
   maxWalkers: 10,
+  /** 48時間以内の売却をギャラリーへ混ぜる上限 */
+  maxRecentSales: 10,
   /** 西・MAIN・東の同一レイアウトギャラリー数 */
   roomCount: 3,
   /** 初期ギャラリー（MAIN） */

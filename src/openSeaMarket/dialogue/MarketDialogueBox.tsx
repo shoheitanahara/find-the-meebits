@@ -2,8 +2,9 @@ import { type ReactNode } from 'react'
 import { ui } from '../../i18n/ui'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
+import { SoldCornerRibbon } from '../ui/SoldCornerRibbon'
 import { getLocale } from '../../i18n/locale'
-import { openseaAssetUrl } from '../../opensea/types'
+import { isSoldMeebit, openseaAssetUrl } from '../../opensea/types'
 import { useOpenSeaMarketStore } from '../store'
 import { advanceMarketDialogue, closeMarketDialogue } from './interactWithListing'
 
@@ -30,22 +31,30 @@ export function MarketDialogueBox() {
 
   const isLastLine = currentIndex >= lines.length - 1
   const name = `Meebit #${tokenId}`
+  const sold = listing != null && isSoldMeebit(listing)
   const role = isGuide
     ? locale === 'ja'
       ? '案内係'
       : 'Guide'
-    : 'Digital Sculpture'
+    : sold
+      ? locale === 'ja'
+        ? '最近の売却'
+        : 'Recently Sold'
+      : 'Digital Sculpture'
   const viewLabel = locale === 'ja' ? 'OpenSeaで見る' : 'View on OpenSea'
 
   return (
     <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)]">
       <div className="rounded-3xl border border-sky-400/30 bg-[#0c1828]/92 px-5 py-4 text-[#e8f4ff] shadow-2xl backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
         <div className="hidden sm:grid sm:grid-cols-[auto_1fr] sm:gap-4">
-          <TargetPreview
-            meebitNumber={tokenId}
-            modelScale={1.1}
-            sizeClassName="h-40 w-40 rounded-2xl border border-sky-400/30 bg-[#081018]"
-          />
+          <div className="relative h-40 w-40 overflow-hidden rounded-2xl">
+            <TargetPreview
+              meebitNumber={tokenId}
+              modelScale={1.1}
+              sizeClassName="h-40 w-40 rounded-2xl border border-sky-400/30 bg-[#081018]"
+            />
+            {sold ? <SoldCornerRibbon /> : null}
+          </div>
           <MarketDialogueContent
             role={role}
             name={name}

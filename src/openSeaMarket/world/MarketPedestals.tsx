@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Group, MeshStandardMaterial } from 'three'
+import { Group, MeshBasicMaterial, MeshStandardMaterial } from 'three'
 import { VRMUtils } from '@pixiv/three-vrm'
-import type { ListedMeebit } from '../../opensea/types'
+import { isSoldMeebit, type ListedMeebit } from '../../opensea/types'
 import {
   acquireVrmColorExhibitScene,
   releaseVrmColorExhibitScene,
@@ -12,12 +12,31 @@ import { OPEN_SEA_MARKET } from '../config'
 import { MARKET_PEDESTAL_PLACEMENTS } from '../marketLandmarks'
 import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
+import { getSoldRibbonTexture } from './soldRibbonTexture'
 
 const pedestalMaterial = new MeshStandardMaterial({
   color: OPEN_SEA_MARKET.colors.pedestal,
   roughness: 0.88,
   metalness: 0.05,
 })
+
+const TAG_WIDTH = 1.85
+const TAG_HEIGHT = 0.72
+const RIBBON_SIZE = 0.7
+
+let soldRibbonMaterial: MeshBasicMaterial | null = null
+
+function getSoldRibbonMaterial() {
+  if (!soldRibbonMaterial) {
+    soldRibbonMaterial = new MeshBasicMaterial({
+      map: getSoldRibbonTexture(),
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+    })
+  }
+  return soldRibbonMaterial
+}
 
 function formatPrice(price: number) {
   if (Number.isInteger(price)) return String(price)
@@ -118,8 +137,9 @@ function MarketPedestalSlot({
     }
   }, [listing.tokenId, x, z, rotationY])
 
+  const sold = isSoldMeebit(listing)
   const priceLabel =
-    listing.priceEth == null ? 'Listed' : `${formatPrice(listing.priceEth)} ETH`
+    listing.priceEth == null ? (sold ? '—' : 'Listed') : `${formatPrice(listing.priceEth)} ETH`
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
@@ -143,7 +163,7 @@ function MarketPedestalSlot({
       <group position={[0, pedestal.sizeY + 0.28, pedestal.sizeZ * 0.48]}>
         <group rotation={[-0.18, 0, 0]}>
           <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[1.85, 0.72, 0.04]} />
+            <boxGeometry args={[TAG_WIDTH, TAG_HEIGHT, 0.04]} />
             <meshStandardMaterial
               color="#dbeafe"
               transparent
@@ -179,6 +199,19 @@ function MarketPedestalSlot({
           >
             {priceLabel}
           </Text>
+          {sold ? (
+            <mesh
+              position={[
+                -(TAG_WIDTH / 2) + RIBBON_SIZE / 2 - 0.01,
+                TAG_HEIGHT / 2 - RIBBON_SIZE / 2 + 0.01,
+                0.035,
+              ]}
+              renderOrder={3}
+              material={getSoldRibbonMaterial()}
+            >
+              <planeGeometry args={[RIBBON_SIZE, RIBBON_SIZE]} />
+            </mesh>
+          ) : null}
         </group>
       </group>
     </group>

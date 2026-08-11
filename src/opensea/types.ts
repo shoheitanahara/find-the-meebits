@@ -1,11 +1,21 @@
 /** OpenSea Meebits listing — クライアント／サーバ共通の型のみ */
 
+export type ListedMeebitStatus = 'listed' | 'sold'
+
 export type ListedMeebit = {
   tokenId: number
   priceEth: number | null
   orderHash?: string
   /** Unix 秒。出品作成時刻（order_created_at / startTime） */
   listedAt?: number
+  /** Unix 秒。売却時刻（sale event） */
+  soldAt?: number
+  /** 省略時は出品中。sold = 直近の売却展示 */
+  status?: ListedMeebitStatus
+}
+
+export function isSoldMeebit(item: Pick<ListedMeebit, 'status'>): boolean {
+  return item.status === 'sold'
 }
 
 export type MeebitsListingsPayload = {
