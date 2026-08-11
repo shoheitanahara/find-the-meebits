@@ -1,4 +1,4 @@
-import type { MarketRoomIndex } from '../store'
+import type { MarketRoomIndex } from './store'
 
 export const MARKET_GALLERY_IDS = ['west', 'main', 'east'] as const
 
