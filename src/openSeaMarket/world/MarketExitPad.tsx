@@ -5,12 +5,20 @@ import { getLocale } from '../../i18n/locale'
 import { playSfx } from '../../ui/sfx'
 import { OPEN_SEA_MARKET } from '../config'
 import { openSeaMarketPlayerWorld } from '../playerWorld'
+import { useOpenSeaMarketStore } from '../store'
 
+/** 公園への EXIT — MAIN ギャラリーのみ */
 export function MarketExitPad() {
+  const activeRoomIndex = useOpenSeaMarketStore((s) => s.activeRoomIndex)
   const triggeredRef = useRef(false)
-  const { playerExit, colors } = OPEN_SEA_MARKET
+  const { playerExit, colors, defaultRoomIndex } = OPEN_SEA_MARKET
+  const isMain = activeRoomIndex === defaultRoomIndex
 
   useFrame(() => {
+    if (!isMain) {
+      triggeredRef.current = false
+      return
+    }
     if (triggeredRef.current || !openSeaMarketPlayerWorld.ready) return
     const dx = Math.abs(openSeaMarketPlayerWorld.x - playerExit.x)
     const dz = Math.abs(openSeaMarketPlayerWorld.z - playerExit.z)
@@ -22,6 +30,8 @@ export function MarketExitPad() {
       window.location.assign(`${parkPath}?from=opensea`)
     }
   })
+
+  if (!isMain) return null
 
   return (
     <group position={[playerExit.x, 0.04, playerExit.z]}>

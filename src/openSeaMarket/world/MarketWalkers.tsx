@@ -4,17 +4,25 @@ import { Group, MathUtils } from 'three'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../../avatar/VRMLocomotion'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { useVRMModel } from '../../avatar/useVRMModel'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
-import { isMarketWalkerPositionWalkable } from '../collisions'
+import {
+  findMarketWalkerClearYaw,
+  isMarketWalkerPositionWalkable,
+  pickMarketWalkerClearPoint,
+  resolveMarketWalkerStep,
+} from '../collisions'
 import { OPEN_SEA_MARKET } from '../config'
 import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
-import { useDialogueStore } from '../../dialogue/dialogueStore'
 
-const WALKER_RADIUS = 0.36
+const WALKER_RADIUS = 0.4
 const PLAYER_STOP_DISTANCE = 2.7
 const MIN_PLAYER_PAUSE_SECONDS = 2.2
 const MAX_PLAYER_PAUSE_SECONDS = 4.2
+const LOOK_AHEAD = 1.35
+/** 通路方向（±Z / ±X）を優先して曲がる */
+const AISLE_YAWS = [0, Math.PI, Math.PI / 2, -Math.PI / 2] as const
 
 const WALKER_PATTERNS = [
   { walkSeconds: [4.5, 8] as const, idleSeconds: [0.8, 1.8] as const, turnSpread: Math.PI * 0.35 },
@@ -51,30 +59,35 @@ function getWalkerStoppedForPlayer(options: {
   return nowSec < pauseUntilRef.current
 }
 
+function pickAisleBiasedYaw(currentYaw: number, turnSpread: number) {
+  if (Math.random() < 0.55) {
+    const base = AISLE_YAWS[Math.floor(Math.random() * AISLE_YAWS.length)]!
+    return base + MathUtils.randFloatSpread(0.28)
+  }
+  return currentYaw + MathUtils.randFloatSpread(turnSpread)
+}
+
 function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
   const spawns: WalkerSpawn[] = []
   let attempts = 0
-  const maxAttempts = Math.max(40, meebitIds.length * 80)
+  const maxAttempts = Math.max(80, meebitIds.length * 120)
 
   while (spawns.length < meebitIds.length && attempts < maxAttempts) {
     attempts += 1
-    const x = MathUtils.randFloat(
-      -OPEN_SEA_MARKET.walkerSpawnHalfX,
-      OPEN_SEA_MARKET.walkerSpawnHalfX,
+    const point = pickMarketWalkerClearPoint(
+      (attempts * 2654435761) ^ (meebitIds[spawns.length] ?? 1) * 97,
+      WALKER_RADIUS,
     )
-    const z = MathUtils.randFloat(
-      -OPEN_SEA_MARKET.walkerSpawnHalfZ,
-      OPEN_SEA_MARKET.walkerSpawnHalfZ,
-    )
-    if (!isMarketWalkerPositionWalkable(x, z, WALKER_RADIUS)) continue
-    if (spawns.some((s) => Math.hypot(s.x - x, s.z - z) < 2.0)) continue
+    if (!point) continue
+    if (spawns.some((s) => Math.hypot(s.x - point.x, s.z - point.z) < 2.4)) continue
     const meebitId = meebitIds[spawns.length]
     if (meebitId == null) break
+    const yaw = AISLE_YAWS[spawns.length % AISLE_YAWS.length]!
     spawns.push({
       meebitId,
-      x,
-      z,
-      rotationY: Math.random() * Math.PI * 2,
+      x: point.x,
+      z: point.z,
+      rotationY: yaw + MathUtils.randFloatSpread(0.2),
       walkPattern: (spawns.length % WALKER_PATTERNS.length) as 0 | 1 | 2,
     })
   }
@@ -83,12 +96,16 @@ function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
     const meebitId = meebitIds[spawns.length]
     if (meebitId == null) break
     const index = spawns.length
-    const angle = (index / Math.max(meebitIds.length, 1)) * Math.PI * 2
+    const point =
+      pickMarketWalkerClearPoint(0x0ea11d ^ meebitId * 13, WALKER_RADIUS) ?? {
+        x: 0,
+        z: (index - meebitIds.length / 2) * 2.2,
+      }
     spawns.push({
       meebitId,
-      x: Math.cos(angle) * (OPEN_SEA_MARKET.walkerSpawnHalfX * 0.45),
-      z: Math.sin(angle) * (OPEN_SEA_MARKET.walkerSpawnHalfZ * 0.45),
-      rotationY: angle + Math.PI,
+      x: point.x,
+      z: point.z,
+      rotationY: AISLE_YAWS[index % AISLE_YAWS.length]!,
       walkPattern: (index % WALKER_PATTERNS.length) as 0 | 1 | 2,
     })
   }
@@ -109,6 +126,7 @@ function MarketWalker({
   const rotationYRef = useRef(spawn.rotationY)
   const targetRotationYRef = useRef(spawn.rotationY)
   const playerPauseUntilRef = useRef(0)
+  const blockedFramesRef = useRef(0)
   const walkPattern = WALKER_PATTERNS[spawn.walkPattern]
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
   const setWalkerVrmReady = useOpenSeaMarketStore((s) => s.setWalkerVrmReady)
@@ -156,6 +174,19 @@ function MarketWalker({
     localTimeRef.current += safeDelta
     const groundY = OPEN_SEA_MARKET.playerGroundY
 
+    // 万一台座内に埋まっていたら通路へ逃がす
+    if (!isMarketWalkerPositionWalkable(group.position.x, group.position.z, WALKER_RADIUS)) {
+      const clear = pickMarketWalkerClearPoint(
+        spawn.meebitId ^ Math.floor(localTimeRef.current * 10),
+        WALKER_RADIUS,
+      )
+      if (clear) {
+        group.position.x = clear.x
+        group.position.z = clear.z
+        blockedFramesRef.current = 0
+      }
+    }
+
     marketNpcPositions.set(spawn.meebitId, {
       x: group.position.x,
       z: group.position.z,
@@ -179,7 +210,6 @@ function MarketWalker({
 
     if (isStoppedForPlayer) {
       if (isTalkingWithThis) {
-        // 会話中は一時停止タイマーを延長し、閉じた直後に歩き出さない
         playerPauseUntilRef.current = localTimeRef.current + 1.5
       }
       if (distance > 0.001) {
@@ -207,35 +237,84 @@ function MarketWalker({
         ? MathUtils.randFloat(walkPattern.walkSeconds[0], walkPattern.walkSeconds[1])
         : MathUtils.randFloat(walkPattern.idleSeconds[0], walkPattern.idleSeconds[1])
       if (isWalkingRef.current) {
-        targetRotationYRef.current += (Math.random() * 2 - 1) * walkPattern.turnSpread
+        targetRotationYRef.current = pickAisleBiasedYaw(
+          rotationYRef.current,
+          walkPattern.turnSpread,
+        )
       }
     }
 
     const walking = isWalkingRef.current
     if (walking) {
+      // 少し先が塞がっていれば早めに曲げる
+      const aheadX = group.position.x + Math.sin(targetRotationYRef.current) * LOOK_AHEAD
+      const aheadZ = group.position.z + Math.cos(targetRotationYRef.current) * LOOK_AHEAD
+      if (!isMarketWalkerPositionWalkable(aheadX, aheadZ, WALKER_RADIUS)) {
+        const clearYaw = findMarketWalkerClearYaw(
+          group.position.x,
+          group.position.z,
+          targetRotationYRef.current,
+          LOOK_AHEAD,
+          WALKER_RADIUS,
+        )
+        if (clearYaw != null) targetRotationYRef.current = clearYaw
+      }
+
       const angleDelta = Math.atan2(
         Math.sin(targetRotationYRef.current - rotationYRef.current),
         Math.cos(targetRotationYRef.current - rotationYRef.current),
       )
-      rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 2.4))
+      rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 3.2))
       group.rotation.y = rotationYRef.current
+
       const step = OPEN_SEA_MARKET.npcWalkSpeed * safeDelta
-      const nextX = group.position.x + Math.sin(rotationYRef.current) * step
-      const nextZ = group.position.z + Math.cos(rotationYRef.current) * step
-      if (isMarketWalkerPositionWalkable(nextX, nextZ, WALKER_RADIUS)) {
-        group.position.x = nextX
-        group.position.z = nextZ
+      const moved = resolveMarketWalkerStep(
+        group.position.x,
+        group.position.z,
+        rotationYRef.current,
+        step,
+        WALKER_RADIUS,
+      )
+      group.position.x = moved.x
+      group.position.z = moved.z
+
+      if (moved.blocked) {
+        blockedFramesRef.current += 1
+        const clearYaw = findMarketWalkerClearYaw(
+          group.position.x,
+          group.position.z,
+          rotationYRef.current + Math.PI * 0.5,
+          LOOK_AHEAD,
+          WALKER_RADIUS,
+        )
+        if (clearYaw != null) {
+          targetRotationYRef.current = clearYaw
+          rotationYRef.current += Math.atan2(
+            Math.sin(clearYaw - rotationYRef.current),
+            Math.cos(clearYaw - rotationYRef.current),
+          ) * 0.45
+        } else if (blockedFramesRef.current > 45) {
+          const escape = pickMarketWalkerClearPoint(
+            spawn.meebitId ^ Math.floor(localTimeRef.current),
+            WALKER_RADIUS,
+          )
+          if (escape) {
+            group.position.x = escape.x
+            group.position.z = escape.z
+            targetRotationYRef.current = pickAisleBiasedYaw(0, 0.2)
+            rotationYRef.current = targetRotationYRef.current
+          }
+          blockedFramesRef.current = 0
+        }
       } else {
-        targetRotationYRef.current += Math.PI * (0.55 + Math.random() * 0.5)
-        isWalkingRef.current = false
-        behaviorTimerRef.current = MathUtils.randFloat(0.4, 1.1)
+        blockedFramesRef.current = 0
       }
     }
 
     group.position.y = groundY
     applyVRMLocomotion(vrmRef.current, {
       elapsedTime: localTimeRef.current,
-      isMoving: walking,
+      isMoving: walking && blockedFramesRef.current < 8,
       isRunning: false,
       idleOffset: index * 0.61,
       walkPhaseOffset,

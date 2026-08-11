@@ -1,12 +1,13 @@
 import { Text, useTexture } from '@react-three/drei'
 import { DoubleSide } from 'three'
 import { OPEN_SEA_MARKET } from '../config'
+import { useOpenSeaMarketStore } from '../store'
 import { MarketPedestals } from './MarketPedestals'
 import { MarketWalkers } from './MarketWalkers'
 
 /** 青系 Digital Sculpture 展示ホール */
 export function MarketRoom() {
-  const { roomHalfX, roomMinZ, roomMaxZ, wallHeight, colors, entranceHalf } = OPEN_SEA_MARKET
+  const { roomHalfX, roomMinZ, roomMaxZ, wallHeight, colors } = OPEN_SEA_MARKET
   const depth = roomMaxZ - roomMinZ
   const centerZ = (roomMinZ + roomMaxZ) / 2
   const shadowExtent = Math.max(roomHalfX, depth / 2) + 2
@@ -62,30 +63,11 @@ export function MarketRoom() {
         <boxGeometry args={[roomHalfX * 2 + 0.4, wallHeight, 0.35]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
-      <mesh
-        position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.35]} />
-        <meshStandardMaterial color={colors.wall} roughness={0.78} />
-      </mesh>
-      <mesh
-        position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
-        castShadow
-        receiveShadow
-      >
-        <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.35]} />
-        <meshStandardMaterial color={colors.wall} roughness={0.78} />
-      </mesh>
-      <mesh position={[-roomHalfX, wallHeight / 2, centerZ]} castShadow receiveShadow>
-        <boxGeometry args={[0.35, wallHeight, depth]} />
-        <meshStandardMaterial color={colors.wall} roughness={0.78} />
-      </mesh>
-      <mesh position={[roomHalfX, wallHeight / 2, centerZ]} castShadow receiveShadow>
-        <boxGeometry args={[0.35, wallHeight, depth]} />
-        <meshStandardMaterial color={colors.wall} roughness={0.78} />
-      </mesh>
+
+      <EntranceWall />
+
+      <SideWallWithGate side="west" />
+      <SideWallWithGate side="east" />
 
       <mesh position={[0, 3.8, roomMinZ + 0.22]}>
         <boxGeometry args={[roomHalfX * 1.2, 0.2, 0.08]} />
@@ -136,5 +118,97 @@ function OpenSeaFloorLogo() {
         side={DoubleSide}
       />
     </mesh>
+  )
+}
+
+/** 手前壁 — MAIN のみ EXIT 開口、WEST/EAST は完全に塞ぐ */
+function EntranceWall() {
+  const { roomHalfX, roomMaxZ, wallHeight, colors, entranceHalf, defaultRoomIndex } =
+    OPEN_SEA_MARKET
+  const activeRoomIndex = useOpenSeaMarketStore((s) => s.activeRoomIndex)
+  const isMain = activeRoomIndex === defaultRoomIndex
+
+  if (!isMain) {
+    return (
+      <mesh position={[0, wallHeight / 2, roomMaxZ]} castShadow receiveShadow>
+        <boxGeometry args={[roomHalfX * 2 + 0.4, wallHeight, 0.35]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+    )
+  }
+
+  return (
+    <group>
+      <mesh
+        position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.35]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+      <mesh
+        position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.35]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+    </group>
+  )
+}
+
+/** 左右壁 — 隣ギャラリーがあるとき入口付近に空洞ゲート */
+function SideWallWithGate({ side }: { side: 'west' | 'east' }) {
+  const { roomHalfX, roomMinZ, roomMaxZ, wallHeight, colors, galleryGate } = OPEN_SEA_MARKET
+  const activeRoomIndex = useOpenSeaMarketStore((s) => s.activeRoomIndex)
+  const sessionGalleries = useOpenSeaMarketStore((s) => s.sessionGalleries)
+  const wallX = side === 'west' ? -roomHalfX : roomHalfX
+  const neighborIndex = side === 'west' ? activeRoomIndex - 1 : activeRoomIndex + 1
+  const open =
+    neighborIndex >= 0 &&
+    neighborIndex < OPEN_SEA_MARKET.roomCount &&
+    (sessionGalleries[neighborIndex]?.length ?? 0) > 0
+
+  const depth = roomMaxZ - roomMinZ
+  const centerZ = (roomMinZ + roomMaxZ) / 2
+  const gateMin = galleryGate.z - galleryGate.halfWidth
+  const gateMax = galleryGate.z + galleryGate.halfWidth
+
+  if (!open) {
+    return (
+      <mesh position={[wallX, wallHeight / 2, centerZ]} castShadow receiveShadow>
+        <boxGeometry args={[0.35, wallHeight, depth]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+    )
+  }
+
+  const backLen = Math.max(0.2, gateMin - roomMinZ)
+  const frontLen = Math.max(0.2, roomMaxZ - gateMax)
+  const backCenter = roomMinZ + backLen / 2
+  const frontCenter = roomMaxZ - frontLen / 2
+
+  return (
+    <group>
+      <mesh position={[wallX, wallHeight / 2, backCenter]} castShadow receiveShadow>
+        <boxGeometry args={[0.35, wallHeight, backLen]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+      <mesh position={[wallX, wallHeight / 2, frontCenter]} castShadow receiveShadow>
+        <boxGeometry args={[0.35, wallHeight, frontLen]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+      {/* 開口上のまぐさ */}
+      <mesh
+        position={[wallX, wallHeight - 0.4, galleryGate.z]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[0.4, 0.8, galleryGate.halfWidth * 2]} />
+        <meshStandardMaterial color={colors.wall} roughness={0.78} />
+      </mesh>
+    </group>
   )
 }

@@ -46,10 +46,28 @@ export function MarketPlayer() {
   const keys = useKeyboardControls()
   const movementLocked = usePlayerStore((state) => state.movementLocked)
   const bootPhase = useOpenSeaMarketStore((state) => state.bootPhase)
+  const isSwitchingGallery = useOpenSeaMarketStore((state) => state.isSwitchingGallery)
+  const spawnRevision = useOpenSeaMarketStore((state) => state.spawnRevision)
   const setPlayerVrmReady = useOpenSeaMarketStore((state) => state.setPlayerVrmReady)
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
-  const controlsLocked = movementLocked || bootPhase !== 'ready'
+  const controlsLocked = movementLocked || bootPhase !== 'ready' || isSwitchingGallery
+
+  useEffect(() => {
+    if (spawnRevision <= 0) return
+    const spawn = useOpenSeaMarketStore.getState().pendingSpawn
+    xRef.current = spawn.x
+    zRef.current = spawn.z
+    rotationYRef.current = spawn.rotationY
+    lookYawRef.current = 0
+    lookPitchRef.current = 0
+    setOpenSeaMarketPlayerWorld(spawn.x, spawn.z, spawn.rotationY, false)
+    const group = groupRef.current
+    if (group) {
+      group.position.set(spawn.x, OPEN_SEA_MARKET.playerGroundY, spawn.z)
+      group.rotation.y = spawn.rotationY
+    }
+  }, [spawnRevision])
 
   useEffect(() => {
     if (status === 'error' || (status === 'ready' && vrmScene)) {

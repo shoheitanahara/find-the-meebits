@@ -13,15 +13,18 @@ import { recordOpenSeaVisit } from '../park/dailyRecords'
 import { OPEN_SEA_MARKET } from './config'
 import { MarketDialogueBox } from './dialogue/MarketDialogueBox'
 import { MarketDialogueSystem, MarketInteractionPrompt } from './dialogue/MarketDialogueSystem'
-import { pickSessionPedestals, pickSessionWalkerIds } from './pickSessionListings'
+import { pickSessionGalleries, pickSessionWalkerIds } from './pickSessionListings'
 import { MarketPlayer } from './player/MarketPlayer'
 import { MarketMobileControls } from './player/MarketMobileControls'
 import { MarketTouchLookPad } from './player/MarketTouchLookPad'
 import { resetOpenSeaMarketPlayerWorld } from './playerWorld'
 import { useOpenSeaMarketStore } from './store'
 import { MarketBgmSystem } from './MarketBgmSystem'
+import { MarketGalleryFade } from './ui/MarketGalleryFade'
 import { MarketLoadingOverlay } from './ui/MarketLoadingOverlay'
+import { MarketMinimap } from './ui/MarketMinimap'
 import { MarketExitPad } from './world/MarketExitPad'
+import { MarketGalleryPortals } from './world/MarketGalleryPortals'
 import { MarketRoom } from './world/MarketRoom'
 
 function useTabFrameloop() {
@@ -59,6 +62,7 @@ function MarketScene() {
       />
       <MarketRoom />
       <MarketExitPad />
+      <MarketGalleryPortals />
       <MarketPlayer />
     </>
   )
@@ -84,14 +88,12 @@ export function OpenSeaMarketApp() {
       if (payload.error) {
         console.warn('[OpenSeaMarket] listings error:', payload.error)
       }
-      const pedestals = pickSessionPedestals(payload.listings)
-      const walkerIds = pickSessionWalkerIds(
-        pedestals.map((p) => p.tokenId),
-        OPEN_SEA_MARKET.maxWalkers,
-      )
+      const galleries = pickSessionGalleries(payload.listings)
+      const excludeIds = galleries.flatMap((room) => room.map((p) => p.tokenId))
+      const walkerIds = pickSessionWalkerIds(excludeIds, OPEN_SEA_MARKET.maxWalkers)
       useOpenSeaMarketStore
         .getState()
-        .setSession(payload.listings, pedestals, walkerIds, payload.error ?? null)
+        .setSession(payload.listings, galleries, walkerIds, payload.error ?? null)
     })
     return () => {
       cancelled = true
@@ -109,6 +111,30 @@ export function OpenSeaMarketApp() {
     }, 50_000)
     return () => window.clearTimeout(timer)
   }, [])
+
+  // ギャラリー切替の台座ロードが長引いたときフェード解除
+  useEffect(() => {
+    if (bootPhase !== 'ready') return
+    const timer = window.setInterval(() => {
+      const state = useOpenSeaMarketStore.getState()
+      if (!state.isSwitchingGallery) return
+      if (state.pedestalsReadyCount >= state.pedestalsExpected) {
+        state.finishGallerySwitch()
+        return
+      }
+    }, 400)
+    const forceTimer = window.setTimeout(() => {
+      const state = useOpenSeaMarketStore.getState()
+      if (state.isSwitchingGallery) {
+        console.warn('[OpenSeaMarket] gallery switch timeout — revealing')
+        state.finishGallerySwitch()
+      }
+    }, 20_000)
+    return () => {
+      window.clearInterval(timer)
+      window.clearTimeout(forceTimer)
+    }
+  }, [bootPhase])
 
   useEffect(() => {
     if (bootPhase !== 'ready') return
@@ -132,11 +158,13 @@ export function OpenSeaMarketApp() {
       <TargetPreviewCapture />
       <MarketBgmSystem />
       <MarketLoadingOverlay />
+      <MarketGalleryFade />
       {bootPhase === 'ready' ? (
         <>
           <MarketDialogueSystem />
           <MarketDialogueBox />
           <MarketInteractionPrompt />
+          <MarketMinimap />
           <MarketTouchLookPad />
           <MarketMobileControls />
         </>

@@ -14,17 +14,63 @@ function shuffleInPlace<T>(items: T[], seed: number) {
 }
 
 /**
- * 台座展示用 — 新しい出品を優先し、上位プールから軽くシャッフル。
+ * 3ギャラリー分 — MAIN に最新30件を固定、残りを WEST/EAST へ。
+ * 部屋間・部屋内とも tokenId 重複なし。
  */
-export function pickSessionPedestals(listings: readonly ListedMeebit[]): ListedMeebit[] {
-  const max = OPEN_SEA_MARKET.maxPedestals
-  if (listings.length === 0) return []
+export function pickSessionGalleries(
+  listings: readonly ListedMeebit[],
+): ListedMeebit[][] {
+  const roomCount = OPEN_SEA_MARKET.roomCount
+  const perRoom = OPEN_SEA_MARKET.maxPedestals
+  const mainIndex = OPEN_SEA_MARKET.defaultRoomIndex
+  const maxTotal = perRoom * roomCount
+  const galleries = Array.from({ length: roomCount }, () => [] as ListedMeebit[])
+  if (listings.length === 0) return galleries
 
   const newestFirst = [...listings].sort((a, b) => (b.listedAt ?? 0) - (a.listedAt ?? 0))
-  const poolSize = Math.min(newestFirst.length, Math.max(max, max * 2))
-  const pool = newestFirst.slice(0, poolSize)
-  shuffleInPlace(pool, Math.floor(Date.now() / 60_000) ^ 0x0aea11)
-  return pool.slice(0, Math.min(max, pool.length))
+  const unique: ListedMeebit[] = []
+  const seen = new Set<number>()
+  for (const listing of newestFirst) {
+    if (seen.has(listing.tokenId)) continue
+    seen.add(listing.tokenId)
+    unique.push(listing)
+    if (unique.length >= maxTotal) break
+  }
+
+  // MAIN = 最新 maxPedestals 件（台座配置だけ軽くシャッフル）
+  const mainPool = unique.slice(0, perRoom)
+  shuffleInPlace(mainPool, Math.floor(Date.now() / 60_000) ^ 0x0aea11)
+  galleries[mainIndex] = mainPool
+
+  // 残り → WEST / EAST に均等割り当て（シャッフル後）
+  const sidePool = unique.slice(perRoom)
+  shuffleInPlace(sidePool, Math.floor(Date.now() / 60_000) ^ 0x0ea57)
+  const sideRoomIndices = Array.from({ length: roomCount }, (_, i) => i).filter(
+    (i) => i !== mainIndex,
+  )
+  for (let i = 0; i < sidePool.length; i += 1) {
+    const room = sideRoomIndices[i % sideRoomIndices.length]
+    if (room == null) break
+    const bucket = galleries[room]!
+    if (bucket.length >= perRoom) {
+      // 片方が満杯ならもう片方へ
+      const other = sideRoomIndices.find((r) => (galleries[r]?.length ?? 0) < perRoom)
+      if (other == null) break
+      galleries[other]!.push(sidePool[i]!)
+    } else {
+      bucket.push(sidePool[i]!)
+    }
+  }
+
+  return galleries
+}
+
+/**
+ * 台座展示用（単室） — MAIN ギャラリー相当。
+ * @deprecated 3ギャラリー時は pickSessionGalleries を使う
+ */
+export function pickSessionPedestals(listings: readonly ListedMeebit[]): ListedMeebit[] {
+  return pickSessionGalleries(listings)[OPEN_SEA_MARKET.defaultRoomIndex] ?? []
 }
 
 /** @deprecated 互換エイリアス */
@@ -54,4 +100,14 @@ export function pickSessionWalkerIds(
     ids.push(id)
   }
   return ids
+}
+
+/** 空でないギャラリーを優先し、できれば MAIN（defaultRoomIndex） */
+export function pickInitialRoomIndex(galleries: readonly ListedMeebit[][]): number {
+  const preferred = OPEN_SEA_MARKET.defaultRoomIndex
+  if ((galleries[preferred]?.length ?? 0) > 0) return preferred
+  for (let i = 0; i < galleries.length; i += 1) {
+    if ((galleries[i]?.length ?? 0) > 0) return i
+  }
+  return preferred
 }

@@ -36,6 +36,23 @@ export const OPEN_SEA_MARKET = {
 
   maxPedestals: 30,
   maxWalkers: 10,
+  /** 西・MAIN・東の同一レイアウトギャラリー数 */
+  roomCount: 3,
+  /** 初期ギャラリー（MAIN） */
+  defaultRoomIndex: 1,
+
+  /**
+   * 左右ギャラリー接続ゲート（入口付近で Y 字に分岐）。
+   * halfWidth = 開口の Z 半幅、triggerDepth = 壁際の入室判定深さ。
+   */
+  galleryGate: {
+    z: 6.2 * ROOM_SCALE,
+    halfWidth: 2.35,
+    triggerDepth: 1.15,
+    /** 到着スポーン: 壁から内側へ */
+    spawnInsetX: 3.4,
+    spawnZ: 6.2 * ROOM_SCALE,
+  },
 
   /** Digital Sculpture 本体スケール（通常アバターの約2倍） */
   sculptureVrmScale: VRM_WORLD_SCALE * 2,

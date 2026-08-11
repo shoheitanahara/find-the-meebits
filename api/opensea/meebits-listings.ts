@@ -22,8 +22,9 @@ type MeebitsListingsPayload = {
 const MEEBITS_CONTRACT = '0x7bd29408f11d2bfc23c34f18275bbf23bb716bc7'
 const COLLECTION_SLUG = 'meebits'
 const PAGE_LIMIT = 50
-const MAX_UNIQUE_LISTINGS = 80
-const MAX_PAGES = 4
+/** 3ギャラリー×30 + 余裕 */
+const MAX_UNIQUE_LISTINGS = 100
+const MAX_PAGES = 5
 const CACHE_TTL_MS = 15 * 60 * 1000
 const LISTINGS_URL = `https://api.opensea.io/api/v2/listings/collection/${COLLECTION_SLUG}/best`
 
