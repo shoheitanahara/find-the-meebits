@@ -43,6 +43,8 @@ export function MarketPlayer() {
   const lockedRef = useRef(false)
   const localTimeRef = useRef(0)
   const footstepTimerRef = useRef(0)
+  /** 彫刻閲覧中は左右だけ固定（ズーム角は変えない） */
+  const sculptureSideLockRef = useRef<{ tokenId: number; side: 1 | -1 } | null>(null)
   const keys = useKeyboardControls()
   const movementLocked = usePlayerStore((state) => state.movementLocked)
   const bootPhase = useOpenSeaMarketStore((state) => state.bootPhase)
@@ -220,9 +222,7 @@ export function MarketPlayer() {
 
       playerPosition.set(xRef.current, groundY, zRef.current)
       npcPosition.set(talkNpcPos.x, groundY, talkNpcPos.z)
-      midpoint
-        .copy(playerPosition)
-        .lerp(npcPosition, cam.orbitBiasTowardNpc)
+      midpoint.copy(playerPosition).lerp(npcPosition, cam.orbitBiasTowardNpc)
       dialogueDirection.copy(playerPosition).sub(npcPosition)
 
       if (dialogueDirection.lengthSq() < 0.001) {
@@ -249,6 +249,62 @@ export function MarketPlayer() {
       const camMaxX = roomHalfX - cameraRoomMarginX
       const camMinZ = roomMinZ + cameraRoomMarginZNear
       const camMaxZ = roomMaxZ - cameraRoomMarginZFar
+
+      if (isSculptureView && talkingTokenId != null) {
+        // 彫刻ローカルの正面斜め。プレイヤー位置は使わない
+        const yaw = talkNpcPos.rotationY ?? 0
+        const forwardX = Math.sin(yaw)
+        const forwardZ = Math.cos(yaw)
+        const rightX = Math.cos(yaw)
+        const rightZ = -Math.sin(yaw)
+        const sideAmt = sideScale
+        const frontAmt = forwardScale
+
+        if (sculptureSideLockRef.current?.tokenId !== talkingTokenId) {
+          let bestSide: 1 | -1 = 1
+          let bestClearance = -Infinity
+          for (const sideSign of [-1, 1] as const) {
+            const lx = forwardX * frontAmt + rightX * sideSign * sideAmt
+            const lz = forwardZ * frontAmt + rightZ * sideSign * sideAmt
+            const len = Math.hypot(lx, lz) || 1
+            const cx = talkNpcPos.x + (lx / len) * cameraDistance
+            const cz = talkNpcPos.z + (lz / len) * cameraDistance
+            const clearance = Math.min(
+              cx - camMinX,
+              camMaxX - cx,
+              cz - camMinZ,
+              camMaxZ - cz,
+            )
+            if (clearance > bestClearance) {
+              bestClearance = clearance
+              bestSide = sideSign
+            }
+          }
+          sculptureSideLockRef.current = { tokenId: talkingTokenId, side: bestSide }
+        }
+
+        const sideSign = sculptureSideLockRef.current.side
+        const lx = forwardX * frontAmt + rightX * sideSign * sideAmt
+        const lz = forwardZ * frontAmt + rightZ * sideSign * sideAmt
+        const len = Math.hypot(lx, lz) || 1
+        const ox = (lx / len) * cameraDistance
+        const oz = (lz / len) * cameraDistance
+        cameraPosition.set(
+          MathUtils.clamp(talkNpcPos.x + ox, camMinX, camMaxX),
+          isMobile ? cam.heightYMobile : cam.heightY,
+          MathUtils.clamp(talkNpcPos.z + oz, camMinZ, camMaxZ),
+        )
+        cameraTarget.set(
+          talkNpcPos.x,
+          isMobile ? cam.lookYMobile : cam.lookY,
+          talkNpcPos.z,
+        )
+        state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))
+        state.camera.lookAt(cameraTarget)
+        return
+      }
+
+      sculptureSideLockRef.current = null
 
       const isCameraInside = (pos: Vector3) =>
         pos.x >= camMinX && pos.x <= camMaxX && pos.z >= camMinZ && pos.z <= camMaxZ
@@ -309,6 +365,8 @@ export function MarketPlayer() {
       state.camera.lookAt(cameraTarget)
       return
     }
+
+    sculptureSideLockRef.current = null
 
     const pitch = lookPitchRef.current
     const flatDist = Math.hypot(OPEN_SEA_MARKET.cameraFollow.x, OPEN_SEA_MARKET.cameraFollow.z)

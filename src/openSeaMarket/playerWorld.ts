@@ -14,8 +14,11 @@ export const openSeaMarketPlayerWorld: MarketPlayerWorld = {
   ready: false,
 }
 
-/** 会話カメラ用 — 台座は静的、歩行NPCは毎フレーム更新 */
-export const marketNpcPositions = new Map<number, { x: number; z: number }>()
+/** 会話カメラ用 — 台座は静的＋向き、歩行NPCは毎フレーム更新 */
+export const marketNpcPositions = new Map<
+  number,
+  { x: number; z: number; rotationY?: number }
+>()
 
 export function resetOpenSeaMarketPlayerWorld(x: number, z: number, rotationY: number) {
   openSeaMarketPlayerWorld.x = x

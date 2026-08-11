@@ -29,6 +29,7 @@ export function MarketMobileControls() {
 
 function MarketTalkButton() {
   const nearestTalkTokenId = useOpenSeaMarketStore((state) => state.nearestTalkTokenId)
+  const nearestTalkKind = useOpenSeaMarketStore((state) => state.nearestTalkKind)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const activeNpcId = useDialogueStore((state) => state.activeNpcId)
   const lines = useDialogueStore((state) => state.lines)
@@ -59,6 +60,9 @@ function MarketTalkButton() {
 
   if (nearestTalkTokenId == null) return <div className="h-20 w-20 shrink-0" />
 
+  const isSculpture = nearestTalkKind === 'listing'
+  const actionLabel = isSculpture ? t.viewAction : t.inspectAction
+
   return (
     <button
       type="button"
@@ -71,7 +75,7 @@ function MarketTalkButton() {
       }}
     >
       <InspectIcon />
-      <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{t.inspectAction}</span>
+      <span className="mt-1 text-[0.6rem] font-black uppercase tracking-[0.15em]">{actionLabel}</span>
     </button>
   )
 }

@@ -30,6 +30,7 @@ type UiMessages = {
   pressEInspect: string
   pressEReadAbout: string
   inspectAction: string
+  viewAction: string
   readAboutAction: string
   retry: string
   retryStage: string
@@ -172,6 +173,7 @@ const en: UiMessages = {
   pressEInspect: 'Press E to talk',
   pressEReadAbout: 'Press E to read',
   inspectAction: 'Talk',
+  viewAction: 'View',
   readAboutAction: 'Read',
   retry: 'Retry',
   retryStage: 'Retry Stage',
@@ -323,6 +325,7 @@ const ja: UiMessages = {
   pressEInspect: 'Eで話す',
   pressEReadAbout: 'Eで記事を読む',
   inspectAction: '話す',
+  viewAction: '見る',
   readAboutAction: '読む',
   retry: 'リトライ',
   retryStage: 'リトライ',

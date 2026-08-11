@@ -92,20 +92,22 @@ export const OPEN_SEA_MARKET = {
     orbitBiasTowardNpc: 0.5,
   },
 
-  /** 2倍スケール Digital Sculpture 閲覧カメラ（引き＋見上げ） */
+  /** 2倍スケール Digital Sculpture — 正面斜め固定（プレイヤー位置非依存） */
   sculptureDialogueCamera: {
-    distance: 7.8,
-    distanceMobile: 9.2,
-    heightY: 3.4,
-    heightYMobile: 3.15,
-    lookY: 2.5,
-    lookYMobile: 2.25,
-    sideScale: 0.55,
-    sideScaleMobile: 0.42,
-    forwardScale: 0.4,
-    forwardScaleMobile: 0.3,
-    lookBiasTowardNpc: 0.88,
-    orbitBiasTowardNpc: 0.78,
+    distance: 6.8,
+    distanceMobile: 7.8,
+    heightY: 3.15,
+    heightYMobile: 2.95,
+    lookY: 2.35,
+    lookYMobile: 2.15,
+    /** 正面成分（彫刻の顔向き） */
+    forwardScale: 0.78,
+    forwardScaleMobile: 0.75,
+    /** 横成分（斜め感） */
+    sideScale: 0.62,
+    sideScaleMobile: 0.58,
+    lookBiasTowardNpc: 1,
+    orbitBiasTowardNpc: 1,
   },
 
   colors: {

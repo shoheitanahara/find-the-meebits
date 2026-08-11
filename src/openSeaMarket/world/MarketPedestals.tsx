@@ -3,7 +3,6 @@ import { Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Group, MeshStandardMaterial } from 'three'
 import { VRMUtils } from '@pixiv/three-vrm'
-import { useDialogueStore } from '../../dialogue/dialogueStore'
 import type { ListedMeebit } from '../../opensea/types'
 import {
   acquireVrmColorExhibitScene,
@@ -110,21 +109,14 @@ function MarketPedestalSlot({
   rotationY: number
   index: number
 }) {
-  const nearestTalkTokenId = useOpenSeaMarketStore((s) => s.nearestTalkTokenId)
-  const nearestTalkKind = useOpenSeaMarketStore((s) => s.nearestTalkKind)
-  const isDialogueOpen = useDialogueStore((s) => s.isOpen)
-  const showPin =
-    nearestTalkTokenId === listing.tokenId &&
-    nearestTalkKind === 'listing' &&
-    !isDialogueOpen
   const { pedestal, sculptureVrmScale, colors } = OPEN_SEA_MARKET
 
   useEffect(() => {
-    marketNpcPositions.set(listing.tokenId, { x, z })
+    marketNpcPositions.set(listing.tokenId, { x, z, rotationY })
     return () => {
       marketNpcPositions.delete(listing.tokenId)
     }
-  }, [listing.tokenId, x, z])
+  }, [listing.tokenId, x, z, rotationY])
 
   const priceLabel =
     listing.priceEth == null ? 'Listed' : `${formatPrice(listing.priceEth)} ETH`
@@ -147,19 +139,28 @@ function MarketPedestalSlot({
         scale={sculptureVrmScale}
       />
 
-      {/* 値札: 上に大きな #ID／下に少し小さめの値段（黒地） */}
+      {/* 透明値札: 足元が見える。文字はアウトラインで可読性確保 */}
       <group position={[0, pedestal.sizeY + 0.28, pedestal.sizeZ * 0.48]}>
         <group rotation={[-0.18, 0, 0]}>
-          <mesh position={[0, 0, 0]} castShadow>
-            <boxGeometry args={[1.85, 0.72, 0.05]} />
-            <meshStandardMaterial color="#0b1220" roughness={0.75} metalness={0.08} />
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[1.85, 0.72, 0.04]} />
+            <meshStandardMaterial
+              color="#dbeafe"
+              transparent
+              opacity={0.14}
+              roughness={0.25}
+              metalness={0.05}
+              depthWrite={false}
+            />
           </mesh>
           <Text
             position={[0, 0.14, 0.04]}
             fontSize={0.22}
-            color="#f0f9ff"
+            color="#f8fafc"
             anchorX="center"
             anchorY="middle"
+            outlineWidth={0.018}
+            outlineColor="#0b1220"
             renderOrder={2}
             depthOffset={-2}
           >
@@ -171,6 +172,8 @@ function MarketPedestalSlot({
             color={colors.priceTag}
             anchorX="center"
             anchorY="middle"
+            outlineWidth={0.014}
+            outlineColor="#0b1220"
             renderOrder={2}
             depthOffset={-2}
           >
@@ -178,8 +181,6 @@ function MarketPedestalSlot({
           </Text>
         </group>
       </group>
-
-      {showPin ? <MarketExhibitPin /> : null}
     </group>
   )
 }
@@ -235,19 +236,5 @@ function MarketSculptureFigure({
     <group position={[0, y, 0]}>
       <primitive object={scene} scale={scale} />
     </group>
-  )
-}
-
-function MarketExhibitPin() {
-  return (
-    <mesh position={[0, 3.6, 0]}>
-      <sphereGeometry args={[0.14, 14, 14]} />
-      <meshStandardMaterial
-        color="#dc2626"
-        emissive="#b91c1c"
-        emissiveIntensity={0.85}
-        toneMapped={false}
-      />
-    </mesh>
   )
 }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { getLocale } from '../../i18n/locale'
+import { dialogueChromeDimClass } from '../../ui/dialogueChrome'
 import { galleryLabel } from '../galleryLabels'
 import { OPEN_SEA_MARKET } from '../config'
 import { openSeaMarketPlayerWorld } from '../playerWorld'
@@ -15,6 +17,7 @@ export function MarketMinimap() {
   const activeRoomIndex = useOpenSeaMarketStore((s) => s.activeRoomIndex)
   const sessionGalleries = useOpenSeaMarketStore((s) => s.sessionGalleries)
   const bootPhase = useOpenSeaMarketStore((s) => s.bootPhase)
+  const isDialogueOpen = useDialogueStore((s) => s.isOpen)
   const locale = getLocale()
   const [dot, setDot] = useState({ x: 0.5, y: 0.75 })
 
@@ -34,9 +37,20 @@ export function MarketMinimap() {
     return () => window.clearInterval(id)
   }, [bootPhase])
 
-  const { roomHalfX, roomMinZ, roomMaxZ, playerExit, defaultRoomIndex } = OPEN_SEA_MARKET
+  const {
+    roomHalfX,
+    roomMinZ,
+    roomMaxZ,
+    playerExit,
+    defaultRoomIndex,
+    galleryGate,
+  } = OPEN_SEA_MARKET
   const exitNx = (playerExit.x + roomHalfX) / (roomHalfX * 2)
   const exitNz = (playerExit.z - roomMinZ) / (roomMaxZ - roomMinZ)
+  const gateNz = Math.min(
+    0.9,
+    Math.max(0.12, (galleryGate.z - roomMinZ) / (roomMaxZ - roomMinZ)),
+  )
 
   if (bootPhase !== 'ready') return null
 
@@ -44,7 +58,9 @@ export function MarketMinimap() {
   if (filled <= 1) return null
 
   return (
-    <div className="pointer-events-none absolute bottom-28 left-3 z-20 max-lg:bottom-36 max-lg:left-2">
+    <div
+      className={`pointer-events-none absolute left-3 top-16 z-20 max-lg:left-2 max-lg:top-[max(4.5rem,env(safe-area-inset-top))] ${dialogueChromeDimClass(isDialogueOpen)}`}
+    >
       <div className="rounded-2xl border border-sky-300/35 bg-[#0c1828]/88 px-2.5 py-2 shadow-lg backdrop-blur-md">
         <p className="mb-1.5 text-center text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-sky-300/75">
           {locale === 'ja' ? 'マップ' : 'Map'}
@@ -55,6 +71,14 @@ export function MarketMinimap() {
             const empty = count === 0
             const active = room === activeRoomIndex
             const isMain = room === defaultRoomIndex
+            const hasWestGate =
+              !empty &&
+              room > 0 &&
+              (sessionGalleries[(room - 1) as MarketRoomIndex]?.length ?? 0) > 0
+            const hasEastGate =
+              !empty &&
+              room < OPEN_SEA_MARKET.roomCount - 1 &&
+              (sessionGalleries[(room + 1) as MarketRoomIndex]?.length ?? 0) > 0
             return (
               <div
                 key={room}
@@ -73,6 +97,21 @@ export function MarketMinimap() {
                 >
                   {galleryLabel(room, locale)}
                 </p>
+                {/* 左右ギャラリー接続ゲート（控えめな開口印） */}
+                {hasWestGate ? (
+                  <span
+                    aria-hidden
+                    className="absolute left-0 h-2.5 w-[3px] -translate-y-1/2 rounded-r-[1px] bg-sky-200/70"
+                    style={{ top: `${gateNz * 100}%` }}
+                  />
+                ) : null}
+                {hasEastGate ? (
+                  <span
+                    aria-hidden
+                    className="absolute right-0 h-2.5 w-[3px] -translate-y-1/2 rounded-l-[1px] bg-sky-200/70"
+                    style={{ top: `${gateNz * 100}%` }}
+                  />
+                ) : null}
                 {/* MAIN のみ EXIT 位置 */}
                 {isMain && !empty ? (
                   <span
@@ -95,9 +134,6 @@ export function MarketMinimap() {
             )
           })}
         </div>
-        <p className="mt-1.5 text-center text-[0.55rem] tabular-nums text-sky-200/55">
-          {galleryLabel(activeRoomIndex, locale)}
-        </p>
       </div>
     </div>
   )
