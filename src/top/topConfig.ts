@@ -344,8 +344,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'OPENSEA MARKET',
     subtitle: 'Live Listings',
     description: {
-      en: 'Listed Meebits are displayed as sculptures.\nStep close to view details.',
-      ja: '出品中のMeebitは彫刻として置かれている。\n近づいて詳細を見よう。',
+      en: 'A gallery of beautiful\nMeebits sculptures.',
+      ja: '美しいMeebitsの\n彫刻が並ぶギャラリー。',
     },
     storyTitle: {
       en: 'FOR SALE NOW',
