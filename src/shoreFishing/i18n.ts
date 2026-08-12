@@ -105,14 +105,16 @@ export function ratingLabel(id: ShoreFishingRatingId) {
 }
 
 export function fishScoreRows() {
-  return SHORE_FISHING.fishKinds.map((f) => {
-    const kind = getFishKind(f.id)
-    return {
-      id: kind.id,
-      color: kind.color,
-      score: kind.score,
-      rare: Boolean(kind.rare),
-      label: fishLabel(kind.id),
-    }
-  })
+  return SHORE_FISHING.fishKinds
+    .map((f) => {
+      const kind = getFishKind(f.id)
+      return {
+        id: kind.id,
+        color: kind.color,
+        score: kind.score,
+        rare: Boolean(kind.rare),
+        label: fishLabel(kind.id),
+      }
+    })
+    .sort((a, b) => b.score - a.score)
 }
