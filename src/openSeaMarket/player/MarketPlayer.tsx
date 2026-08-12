@@ -121,7 +121,7 @@ export function MarketPlayer() {
   }, [gl])
 
   useFrame((state, delta) => {
-    const dt = Math.min(delta, 0.05)
+    const dt = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), 0.05) : 1 / 60
     localTimeRef.current += dt
 
     const look = useOpenSeaMarketControlsStore.getState().consumeLookDelta()

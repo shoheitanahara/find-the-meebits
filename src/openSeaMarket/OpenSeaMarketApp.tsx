@@ -8,6 +8,8 @@ import {
   LanguageSwitcher,
 } from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
+import { kickVrmLoadQueue } from '../avatar/vrmLoadQueue'
+import { TabResumeInvalidator } from '../systems/TabResumeInvalidator'
 import { loadMeebitsListings } from '../opensea/loadMeebitsListings'
 import { recordOpenSeaVisit } from '../park/dailyRecords'
 import { OPEN_SEA_MARKET } from './config'
@@ -18,6 +20,7 @@ import { MarketPlayer } from './player/MarketPlayer'
 import { MarketMobileControls } from './player/MarketMobileControls'
 import { MarketTouchLookPad } from './player/MarketTouchLookPad'
 import { resetOpenSeaMarketPlayerWorld } from './playerWorld'
+import { useOpenSeaMarketControlsStore } from './controlsStore'
 import { useOpenSeaMarketStore } from './store'
 import { MarketBgmSystem } from './MarketBgmSystem'
 import { MarketGalleryFade } from './ui/MarketGalleryFade'
@@ -33,11 +36,17 @@ function useTabFrameloop() {
   )
 
   useEffect(() => {
-    const onVisibilityChange = () => {
+    const sync = () => {
       setFrameloop(document.visibilityState === 'hidden' ? 'never' : 'always')
     }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+    document.addEventListener('visibilitychange', sync)
+    window.addEventListener('pageshow', sync)
+    window.addEventListener('focus', sync)
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('pageshow', sync)
+      window.removeEventListener('focus', sync)
+    }
   }, [])
 
   return frameloop
@@ -46,6 +55,7 @@ function useTabFrameloop() {
 function MarketScene() {
   return (
     <>
+      <TabResumeInvalidator />
       <PerspectiveCamera
         makeDefault
         fov={50}
@@ -140,6 +150,26 @@ export function OpenSeaMarketApp() {
     if (bootPhase !== 'ready') return
     recordOpenSeaVisit()
   }, [bootPhase])
+
+  useEffect(() => {
+    const onResume = () => {
+      if (document.visibilityState === 'hidden') return
+      kickVrmLoadQueue()
+      const state = useOpenSeaMarketStore.getState()
+      if (state.isSwitchingGallery) {
+        state.finishGallerySwitch()
+      }
+      useOpenSeaMarketControlsStore.getState().consumeLookDelta()
+    }
+    document.addEventListener('visibilitychange', onResume)
+    window.addEventListener('pageshow', onResume)
+    window.addEventListener('focus', onResume)
+    return () => {
+      document.removeEventListener('visibilitychange', onResume)
+      window.removeEventListener('pageshow', onResume)
+      window.removeEventListener('focus', onResume)
+    }
+  }, [])
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#0c1522] text-[#e8f4ff]">

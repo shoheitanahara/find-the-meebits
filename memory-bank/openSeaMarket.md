@@ -76,6 +76,8 @@ Sea 中央の室内アトラクション。OpenSea の **公開 Listing** と **
 - 彫刻カメラ: 彫刻 `rotationY` 基準の正面斜め。左右は壁クリアランスだけで選び会話中ロック。プレイヤー位置は使わない
 - 案内カメラ: 従来どおりプレイヤー基準
 - 会話中は歩行停止。ミニマップは `dialogueChromeDimClass`（消さず薄く）
+- WEST/EAST 到着: `fromEast` は `-π/2`（中央=-X）、`fromWest` は `π/2`（中央=+X）。カメラ lookYaw は 0 のまま（入口側からの正面）
+- タブ復帰: `TabResumeInvalidator` で clock delta 破棄＋invalidate。フェード中なら解除。VRM キューを kick
 
 ### 座標系（Runway と同じ）
 

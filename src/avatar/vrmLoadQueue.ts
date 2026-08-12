@@ -40,6 +40,11 @@ function drainQueue() {
   }
 }
 
+/** タブ復帰などで止まっているキューを再駆動する */
+export function kickVrmLoadQueue() {
+  drainQueue()
+}
+
 /** ステージ切り替え時にキューに溜まったロード要求を捨てる */
 export function clearPendingVrmLoads() {
   const cancelled = pendingLoads.splice(0)

@@ -20,19 +20,19 @@ export type MarketSpawnPose = {
 function spawnPoseForEntry(entry: MarketGateEntry | null): MarketSpawnPose {
   const { playerStart, roomHalfX, galleryGate } = OPEN_SEA_MARKET
   if (entry === 'fromEast') {
-    // 東ゲートから入室 → 部屋の右下手前（+X / +Z）、中央へ向く
+    // 東ゲートから入室 → 部屋の右下手前（+X / +Z）、中央（-X）へ向く
     return {
       x: roomHalfX - galleryGate.spawnInsetX,
       z: galleryGate.spawnZ,
-      rotationY: Math.PI / 2,
+      rotationY: -Math.PI / 2,
     }
   }
   if (entry === 'fromWest') {
-    // 西ゲートから入室 → 部屋の左下手前（-X / +Z）、中央へ向く
+    // 西ゲートから入室 → 部屋の左下手前（-X / +Z）、中央（+X）へ向く
     return {
       x: -roomHalfX + galleryGate.spawnInsetX,
       z: galleryGate.spawnZ,
-      rotationY: -Math.PI / 2,
+      rotationY: Math.PI / 2,
     }
   }
   return { ...playerStart }

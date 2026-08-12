@@ -168,7 +168,7 @@ function MarketWalker({
     !isDialogueOpen
 
   useFrame((_, delta) => {
-    const safeDelta = Math.min(Math.max(delta, 0), 0.05)
+    const safeDelta = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), 0.05) : 1 / 60
     const group = groupRef.current
     if (!group) return
     localTimeRef.current += safeDelta
