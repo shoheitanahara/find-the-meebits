@@ -22,6 +22,7 @@
 - 三人称・固定追従カメラ。移動速度は本編と同一
 - アトラクションは `TOP_ATTRACTIONS`（ゾーン所属・footprint 付き）
 - 各入口にストーリーテリング調の説明看板（`description` / `storyTitle`、EN/JA）
+- **コピー正本**: [attractionCopy.md](./attractionCopy.md)（文字量・ディズニー入口トーン）
 - 入口を通過すると自動でゲームへ遷移（アバター ID 引継ぎ）
 - Plaza では NPC 群衆が徘徊。Mountain は山岳テーマ（Coming Soon 可）
 - Culture の Meebits Runway は**入場可**（Open）
@@ -29,8 +30,8 @@
 
 ### アトラクション説明トーン
 
-- **ワクワク / ストーリーテリング調**（無機質な機能説明にしない）
-- TRAIT HUNT は「同じ特徴を持つ Meebit を探そう！」のポップな導入
+入口看板とスタートカード上段は **ディズニーの入口**。機能説明・秒数・操作は書かない。  
+文字量と例は **[attractionCopy.md](./attractionCopy.md)**。
 
 ### ワールドの日替わり・ランダム（重要）
 

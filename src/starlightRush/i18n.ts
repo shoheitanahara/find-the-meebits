@@ -41,8 +41,8 @@ type StarlightCopy = {
 
 const en: StarlightCopy = {
   title: 'Starlight Rush',
-  subtitle: 'Aurora Station → Zenith Station',
-  storyLine: 'Launch from Aurora, shoot the stars, and dock at Zenith.',
+  subtitle: 'Stars on the rails. Hold on.',
+  storyLine: 'The light doesn’t wait.',
   storyDepart: 'Departing Aurora Station',
   storyCruise: 'Open space',
   storyApproach: 'Approaching Zenith Station',
@@ -87,8 +87,8 @@ const en: StarlightCopy = {
 
 const ja: StarlightCopy = {
   title: 'スターライト・ラッシュ',
-  subtitle: 'オーロラ駅 → ゼニス駅',
-  storyLine: 'オーロラ駅を飛び立ち、星を撃ちながらゼニス駅へ到着するライド。',
+  subtitle: '星がレールを走る。つかまって。',
+  storyLine: '光は待ってくれない。',
   storyDepart: 'オーロラ駅 発進',
   storyCruise: '宇宙航路',
   storyApproach: 'ゼニス駅 接近',

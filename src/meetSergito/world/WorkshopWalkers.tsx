@@ -5,7 +5,7 @@ import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../../avatar/VRMLocom
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { INTERACTION_DISTANCE, VRM_WORLD_SCALE } from '../../game/gameConfig'
-import { isWorkshopPositionWalkable } from '../collisions'
+import { distanceToSergito, isWorkshopPositionWalkable, isWorkshopWalkerPositionWalkable } from '../collisions'
 import { MEET_SERGITO } from '../config'
 import { meetSergitoPlayerWorld } from '../playerWorld'
 import { useMeetSergitoStore } from '../store'
@@ -47,10 +47,8 @@ function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
     const x = MathUtils.randFloat(-6.5, 6.5)
     const z = MathUtils.randFloat(-4.5, 7.5)
 
-    if (!isWorkshopPositionWalkable(x, z, WALKER_RADIUS)) continue
+    if (!isWorkshopWalkerPositionWalkable(x, z, WALKER_RADIUS)) continue
     if (spawns.some((spawn) => Math.hypot(spawn.x - x, spawn.z - z) < 2.0)) continue
-    // Sergito / プレイヤー開始付近は避ける
-    if (Math.hypot(x - MEET_SERGITO.sergito.x, z - MEET_SERGITO.sergito.z) < 2.8) continue
     if (Math.hypot(x - MEET_SERGITO.playerStart.x, z - MEET_SERGITO.playerStart.z) < 2.2) continue
 
     const meebitNumber = meebitIds[spawns.length]
@@ -160,7 +158,7 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
       rotationYRef.current = faceY
       targetRotationYRef.current = faceY
       group.rotation.y = faceY
-      group.position.y = groundY + 0.06
+      group.position.y = groundY
       applyVRMLocomotion(vrmRef.current, {
         elapsedTime: localTimeRef.current,
         isMoving: false,
@@ -194,8 +192,14 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
 
       const nextX = group.position.x + Math.sin(rotationYRef.current) * WALKER_WALK_SPEED * safeDelta
       const nextZ = group.position.z + Math.cos(rotationYRef.current) * WALKER_WALK_SPEED * safeDelta
+      const keepAway = MEET_SERGITO.sergitoKeepAwayRadius
+      const nextDist = distanceToSergito(nextX, nextZ)
+      const currentDist = distanceToSergito(group.position.x, group.position.z)
+      const canStep =
+        isWorkshopPositionWalkable(nextX, nextZ, WALKER_RADIUS) &&
+        (nextDist >= keepAway || nextDist >= currentDist)
 
-      if (isWorkshopPositionWalkable(nextX, nextZ, WALKER_RADIUS)) {
+      if (canStep) {
         group.position.x = nextX
         group.position.z = nextZ
       } else {
@@ -208,7 +212,7 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
 
     if (group) {
       group.position.y =
-        groundY + 0.06 + Math.sin(localTimeRef.current * 1.6 + walkPhaseOffset) * 0.03
+        groundY + (isWalkingRef.current ? Math.abs(Math.sin(localTimeRef.current * 10.5 + walkPhaseOffset)) * 0.02 : 0)
     }
 
     applyVRMLocomotion(vrmRef.current, {

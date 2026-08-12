@@ -1138,26 +1138,29 @@ function AttractionInfoBoard({
         />
       </mesh>
       <Text
-        position={[0, displayDescription ? 1.98 : 1.55, 0.15]}
-        fontSize={displayDescription ? 0.18 : underConstruction ? 0.24 : 0.28}
+        position={[0, displayDescription ? 2.06 : 1.55, 0.15]}
+        fontSize={displayDescription ? 0.16 : underConstruction ? 0.24 : 0.28}
         color={accentColor}
         anchorX="center"
         anchorY="middle"
-        maxWidth={2.6}
+        maxWidth={2.7}
         textAlign="center"
+        overflowWrap="normal"
+        whiteSpace="nowrap"
       >
         {displayHeading}
       </Text>
       {displayDescription ? (
         <Text
-          position={[0, 1.46, 0.15]}
-          fontSize={0.2}
-          lineHeight={1.45}
+          position={[0, 1.36, 0.15]}
+          fontSize={0.145}
+          lineHeight={1.22}
           color="#f1eadc"
           anchorX="center"
           anchorY="middle"
           textAlign="center"
-          maxWidth={2.65}
+          maxWidth={2.7}
+          overflowWrap="normal"
         >
           {displayDescription}
         </Text>

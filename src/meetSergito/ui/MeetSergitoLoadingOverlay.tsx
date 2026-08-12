@@ -5,12 +5,14 @@ const copy = {
   en: {
     eyebrow: 'Sea District',
     title: 'Meet Sergito',
+    tagline: 'He looks.',
     loading: 'Preparing the workshop…',
     finishing: 'Almost ready…',
   },
   ja: {
     eyebrow: 'シーエリア',
     title: 'Meet Sergito',
+    tagline: '職人が見る。',
     loading: '工房を準備中…',
     finishing: '表示を仕上げています…',
   },
@@ -43,6 +45,7 @@ export function MeetSergitoLoadingOverlay() {
           {t.eyebrow}
         </p>
         <h2 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl">{t.title}</h2>
+        <p className="mt-2 text-sm text-[#c8b898]">{t.tagline}</p>
         <p className="mt-4 text-sm text-[#c8b898]">{assetsReady ? t.finishing : t.loading}</p>
         {!assetsReady ? (
           <p className="mt-2 text-[0.7rem] tabular-nums text-[#a89070]">

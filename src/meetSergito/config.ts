@@ -23,6 +23,8 @@ export const MEET_SERGITO = {
   /** Sergito（作業デスク手前） */
   sergito: { x: 1.6, z: -5.8, rotationY: 0 },
   sergitoTalkRadius: 2.8,
+  /** 歩行NPCがこれより近づかない（会話スペース） */
+  sergitoKeepAwayRadius: 4.2,
 
   /** 手前（+Z）入口の床パッドのみ */
   playerExit: {

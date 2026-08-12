@@ -27,8 +27,8 @@ type PhotoStudioCopy = {
 
 const en: PhotoStudioCopy = {
   title: 'Photo Booth',
-  subtitle: 'PFP & visit pass',
-  storyLine: 'Shoot a clean square PFP, then issue today’s Meebits Park visit pass.',
+  subtitle: 'You were here.',
+  storyLine: 'One square. Proof you came.',
   play: 'Enter booth',
   rulesTitle: 'Photo Booth',
   controls: 'Change Meebit ID if you want, then shoot with soft studio lighting.',
@@ -52,8 +52,8 @@ const en: PhotoStudioCopy = {
 
 const ja: PhotoStudioCopy = {
   title: 'フォトブース',
-  subtitle: 'PFPと来場証明書',
-  storyLine: 'きれいな正方形PFPを撮って、今日のミービッツ・パーク来場証明書を発行しよう。',
+  subtitle: '来た証明。',
+  storyLine: '一枚撮って、来た証明。',
   play: 'ブースへ',
   rulesTitle: 'フォトブース',
   controls: '必要ならMeebit IDを変えてから、スタジオ照明で撮影。',

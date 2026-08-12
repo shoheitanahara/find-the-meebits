@@ -93,7 +93,7 @@ function useVisitPassPromoTexture(locale: 'en' | 'ja', accentColor: string): Tex
       ctx.fillRect(0, 0, TEX_W, TEX_H)
 
       const caption =
-        locale === 'ja' ? 'VisitorPassを受け取る' : 'Get your Visitor Pass'
+        locale === 'ja' ? '来た証明' : 'YOU WERE HERE'
       ctx.fillStyle = accentColor
       ctx.font = `700 52px ${JP_SANS}`
       ctx.textAlign = 'center'

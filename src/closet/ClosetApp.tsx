@@ -26,7 +26,7 @@ const copy = {
   en: {
     eyebrow: 'Culture District',
     title: 'Look Locker',
-    subtitle: 'Pick a type first — then mix looks and try them on.',
+    subtitle: 'Try a look. Leave as someone else.',
     typeStep: 'Step 1 · Type',
     typeHint: 'Who are you dressing up?',
     looksStep: 'Step 2 · Looks',
@@ -47,7 +47,7 @@ const copy = {
   ja: {
     eyebrow: 'カルチャーエリア',
     title: 'ルックロッカー',
-    subtitle: 'まずタイプ → 見た目を足す → きせかえ！',
+    subtitle: 'ためして、別人で出る。',
     typeStep: 'ステップ1 · タイプ',
     typeHint: 'どんな Meebit をきせかえる？',
     looksStep: 'ステップ2 · 見た目',

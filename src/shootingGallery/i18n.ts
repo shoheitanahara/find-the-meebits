@@ -32,7 +32,7 @@ type ShootingGalleryCopy = {
 
 const en: ShootingGalleryCopy = {
   title: 'Shooting Gallery',
-  subtitle: 'Hit the moving targets.',
+  subtitle: 'Gold sings. Red bites.',
   play: 'Play',
   rulesTitle: '45 Second Challenge',
   controls: 'Aim with the mouse, or drag the screen. Fire at the center crosshair.',
@@ -72,7 +72,7 @@ const en: ShootingGalleryCopy = {
 
 const ja: ShootingGalleryCopy = {
   title: 'シューティングギャラリー',
-  subtitle: '動く的を狙おう。',
+  subtitle: '金は鳴る。赤は噛む。',
   play: 'プレイ',
   rulesTitle: '45秒チャレンジ',
   controls: 'マウスまたは画面ドラッグで照準を動かし、中央の照準で撃とう。',

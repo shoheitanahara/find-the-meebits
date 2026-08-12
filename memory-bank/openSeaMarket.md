@@ -11,7 +11,7 @@ Sea 中央の室内アトラクション。OpenSea の **公開 Listing** と **
 | パス | `/opensea-market` `/jp/opensea-market` |
 | edition | `opensea`（`appEdition.ts`） |
 | Park | Sea 中央スロット `attractionId: opensea`（旧 TIDE POOL 工事中枠を置換） |
-| 看板 | `topConfig.ts` — JA「美しいMeebitsの彫刻が並ぶギャラリー。」 / EN「A gallery of beautiful Meebits sculptures.」 |
+| 看板 | `topConfig.ts` — `STILL LIFE` / `今夜の彫刻`。本文は「美しい彫刻が待っている」。コピー規約は `attractionCopy.md` |
 | 復帰 | `?from=opensea`。Visitor Pass は入場で Visited |
 
 ## Listing / Sales API

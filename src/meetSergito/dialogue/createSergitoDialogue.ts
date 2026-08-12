@@ -3,8 +3,13 @@ import { getLocale } from '../../i18n/locale'
 import type { DialogueLine } from '../../npc/npcTypes'
 import { SERGITO_MEEBIT_ID } from '../config'
 import {
+  SERGITO_CATEGORY_COMMENTS,
+  SERGITO_CLOSINGS,
   SERGITO_FALLBACK_DIALOGUES,
+  SERGITO_GREETINGS,
   SERGITO_SPECIAL_DIALOGUES,
+  SERGITO_TRAIT_SPECIFIC,
+  TRAIT_KEY_TO_CATEGORY,
   type LocalizedText,
   type SergitoDialogueCategory,
 } from './sergitoDialogueData'
@@ -15,7 +20,7 @@ export type SergitoDialogueContext = {
   talkCount: number
 }
 
-/** 1回を短く保ちつつ、2行の中で複数traitを拾う */
+/** 1会話は最大2行。挨拶・観察・組み合わせ・締めをランダムに組み合わせる */
 const SERGITO_LINES_PER_TALK = 2
 
 type TraitFeature = {
@@ -24,6 +29,11 @@ type TraitFeature = {
   ja: string
   en: string
   impact: number
+}
+
+type TalkBeat = {
+  text: LocalizedText
+  category: SergitoDialogueCategory
 }
 
 const COLOR_JA: Record<string, string> = {
@@ -51,6 +61,48 @@ function pickLocalized(text: LocalizedText) {
   return getLocale() === 'ja' ? text.ja : text.en
 }
 
+function pickFromPool(pool: LocalizedText[], seed: number, talkCount: number) {
+  return pool[seededIndex(seed, talkCount, pool.length)]
+}
+
+function resolveTraitSpecificPool(traitKey: string, value: string): LocalizedText[] | null {
+  const byValue = SERGITO_TRAIT_SPECIFIC[traitKey]
+  if (!byValue) return null
+
+  const exact = byValue[value]
+  if (exact?.length) return exact
+
+  let bestKey = ''
+  for (const key of Object.keys(byValue)) {
+    if (!byValue[key]?.length) continue
+    if (value.startsWith('No ') && !key.startsWith('No ')) continue
+    const hit = value.includes(key) || key.includes(value)
+    if (hit && key.length > bestKey.length) bestKey = key
+  }
+  return bestKey ? byValue[bestKey] : null
+}
+
+/** そのMeebitが持っている trait の固有セリフを全部集め、会話ごとに別の行を出す */
+function pickTraitSpecificFromMeebit(
+  traits: MeebitTraitMap,
+  meebitId: number,
+  talkCount: number,
+): TalkBeat | null {
+  const hits: TalkBeat[] = []
+  for (const traitKey of Object.keys(SERGITO_TRAIT_SPECIFIC)) {
+    const value = getTrait(traits, traitKey)
+    if (!value) continue
+    const pool = resolveTraitSpecificPool(traitKey, value)
+    if (!pool?.length) continue
+    const category = TRAIT_KEY_TO_CATEGORY[traitKey] ?? 'overall'
+    for (const text of pool) {
+      hits.push({ text, category })
+    }
+  }
+  if (!hits.length) return null
+  return hits[seededIndex(meebitId + 17, talkCount, hits.length)]
+}
+
 function seededIndex(seed: number, talkCount: number, length: number) {
   if (length <= 0) return 0
   return Math.abs((seed * 17 + talkCount * 31 + 7) % length)
@@ -69,6 +121,18 @@ function colorJa(value: string) {
   return COLOR_JA[value] ?? value
 }
 
+function featureNoun(id: string, value: string): { ja: string; en: string } | null {
+  if (id === 'hair') return { ja: '髪', en: 'Hair' }
+  if (id === 'beard') {
+    if (/mask|mustache|muttonchops/i.test(value)) return null
+    return { ja: '髭', en: 'Beard' }
+  }
+  if (id === 'glasses' && !/glasses|specs|sunglasses/i.test(value)) {
+    return { ja: 'メガネ', en: 'Glasses' }
+  }
+  return null
+}
+
 function makeStyledFeature({
   id,
   value,
@@ -83,11 +147,14 @@ function makeStyledFeature({
   impact: number
 }): TraitFeature | null {
   if (!value) return null
+  const noun = featureNoun(id, value)
+  const labeledJa = noun ? `「${value}」の${noun.ja}` : `「${value}」`
+  const labeledEn = noun ? `${value} ${noun.en}` : value
   return {
     id,
     category,
-    ja: color ? `${colorJa(color)}の「${value}」` : `「${value}」`,
-    en: color ? `${color} ${value}` : value,
+    ja: color ? `${colorJa(color)}の${labeledJa}` : labeledJa,
+    en: color ? `${color} ${labeledEn}` : labeledEn,
     impact,
   }
 }
@@ -194,18 +261,24 @@ function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
   return features.filter((feature): feature is TraitFeature => feature !== null)
 }
 
+function takeTalkWindow(pool: LocalizedText[], seed: number, talkCount: number): LocalizedText[] {
+  if (pool.length <= SERGITO_LINES_PER_TALK) return pool
+  const start = seededIndex(seed, talkCount, pool.length - SERGITO_LINES_PER_TALK + 1)
+  return pool.slice(start, start + SERGITO_LINES_PER_TALK)
+}
+
 function buildSpecialDialogue(talkCount: number): DialogueLine[] {
   const pool = SERGITO_SPECIAL_DIALOGUES[seededIndex(SERGITO_MEEBIT_ID, talkCount, SERGITO_SPECIAL_DIALOGUES.length)]
-  return pool
-    .slice(0, SERGITO_LINES_PER_TALK)
-    .map((line, index) => toLine(`sergito-special-${index}`, pickLocalized(line), 'special'))
+  return takeTalkWindow(pool, SERGITO_MEEBIT_ID + 3, talkCount).map((line, index) =>
+    toLine(`sergito-special-${index}`, pickLocalized(line), 'special'),
+  )
 }
 
 function buildFallbackDialogue(talkCount: number): DialogueLine[] {
   const pool = SERGITO_FALLBACK_DIALOGUES[seededIndex(0, talkCount, SERGITO_FALLBACK_DIALOGUES.length)]
-  return pool
-    .slice(0, SERGITO_LINES_PER_TALK)
-    .map((line, index) => toLine(`sergito-fallback-${index}`, pickLocalized(line), 'fallback'))
+  return takeTalkWindow(pool, 5, talkCount).map((line, index) =>
+    toLine(`sergito-fallback-${index}`, pickLocalized(line), 'fallback'),
+  )
 }
 
 function rotateFeatures(features: TraitFeature[], seed: number, talkCount: number) {
@@ -355,7 +428,10 @@ function getCategoryOpenings(feature: TraitFeature): LocalizedText[] {
       },
     ],
   }
-  return byCategory[feature.category] ?? []
+  const commentCategory = feature.category as keyof typeof SERGITO_CATEGORY_COMMENTS
+  const categoryComments =
+    commentCategory in SERGITO_CATEGORY_COMMENTS ? SERGITO_CATEGORY_COMMENTS[commentCategory] : undefined
+  return [...(byCategory[feature.category] ?? []), ...(categoryComments ?? [])]
 }
 
 function buildOpening(feature: TraitFeature, seed: number, talkCount: number): LocalizedText {
@@ -408,6 +484,18 @@ function buildOpening(feature: TraitFeature, seed: number, talkCount: number): L
       ja: `最初の一秒で${feature.ja}に目が行ったよ。強いけど、ちゃんと品がある。`,
       en: `My eye went straight to the ${feature.en}. Strong, but still beautifully composed.`,
     },
+    {
+      ja: `作業の手、止まったよ。その${feature.ja}、近くで見たかった。`,
+      en: `You stopped my hands. I wanted a closer look at that ${feature.en}.`,
+    },
+    {
+      ja: `棚にも似たのはある。でもその${feature.ja}は、歩いてるほうがいい。`,
+      en: `I’ve got something like it on the shelf. That ${feature.en} looks better walking.`,
+    },
+    {
+      ja: `今日の工房、その${feature.ja}が来て完成した感じだ。`,
+      en: `The workshop feels finished now that that ${feature.en} walked in.`,
+    },
   ]
   const openings = [...getCategoryOpenings(feature), ...genericOpenings]
   return openings[seededIndex(seed + feature.id.length, talkCount, openings.length)]
@@ -432,6 +520,36 @@ function getSynergyTemplates(
         ja: `${jaTraits}が${focus.ja}をうまく受け止めてる。上半身だけでも忘れられない組み合わせだ。`,
         en: `${enTraits} balance the ${focus.en} beautifully. The upper silhouette alone is unforgettable.`,
       },
+      {
+        ja: `顔は${jaTraits}、頭は${focus.ja}。見る順番が自然にできる。`,
+        en: `Face is ${enTraits}, head is the ${focus.en}. The eye knows where to go.`,
+      },
+    )
+  }
+
+  if (categories.has('head') && categories.has('clothing')) {
+    templates.push(
+      {
+        ja: `${focus.ja}のあと、服の${jaTraits}に目が落ちる。上から下がつながってる。`,
+        en: `After the ${focus.en}, the eye drops to ${enTraits}. Top to bottom, it connects.`,
+      },
+      {
+        ja: `頭の${focus.ja}に、${jaTraits}が負けてない。`,
+        en: `${enTraits} hold their own against the ${focus.en} up top.`,
+      },
+    )
+  }
+
+  if (categories.has('face') && categories.has('clothing')) {
+    templates.push(
+      {
+        ja: `${jaTraits}があるから、顔だけ見て終わらない。`,
+        en: `${enTraits} keep you from stopping at the face.`,
+      },
+      {
+        ja: `顔の${focus.ja}と、${jaTraits}。距離が違うのに、同じMeebitに見える。`,
+        en: `The ${focus.en} on the face, then ${enTraits}. Different distance, same Meebit.`,
+      },
     )
   }
 
@@ -449,6 +567,10 @@ function getSynergyTemplates(
         ja: `${jaTraits}で色と形のテンポができてる。服を並べただけじゃなく、ちゃんと編集してるね。`,
         en: `${enTraits} create a real tempo of color and shape. This is styled, not merely assembled.`,
       },
+      {
+        ja: `${jaTraits}、一枚ずつなら普通なのに、重ねると君になる。`,
+        en: `${enTraits} look ordinary one by one. Together, they become you.`,
+      },
     )
   }
 
@@ -463,14 +585,24 @@ function getSynergyTemplates(
         ja: `${jaTraits}を合わせたことで、シルエットが上から下まできれいにつながってる。`,
         en: `Adding ${enTraits} makes the silhouette flow cleanly from top to bottom.`,
       },
+      {
+        ja: `${bodyFeature?.ja ?? 'その形'}に${jaTraits}を乗せるの、工房向きだ。`,
+        en: `${enTraits} on that ${bodyFeature?.en ?? 'shape'} belong in a workshop.`,
+      },
     )
   }
 
   if (categories.has('overall')) {
-    templates.push({
-      ja: `${jaTraits}まで見ると、偶然じゃなくて全部狙ってるのがわかる。細部まで気持ちいいよ。`,
-      en: `Once I notice ${enTraits}, I can tell none of this is accidental. The details are deeply satisfying.`,
-    })
+    templates.push(
+      {
+        ja: `${jaTraits}まで見ると、偶然じゃなくて全部狙ってるのがわかる。細部まで気持ちいいよ。`,
+        en: `Once I notice ${enTraits}, I can tell none of this is accidental. The details are deeply satisfying.`,
+      },
+      {
+        ja: `最後に${jaTraits}。そこで全体が締まる。`,
+        en: `Then ${enTraits} at the end. That’s what tightens the whole look.`,
+      },
+    )
   }
 
   return templates
@@ -482,8 +614,8 @@ function buildCombination(
   seed: number,
   talkCount: number,
 ): LocalizedText {
-  // 2つ拾う回と3つ拾う回を混ぜ、毎回同じ列挙リズムになるのを避ける。
-  const pickedCount = supporting.length >= 3 && (seed + talkCount) % 3 !== 0 ? 3 : 2
+  // 列挙は少なめ。1つだけの回を多めにして、同じリズムにしない。
+  const pickedCount = supporting.length >= 2 && (seed + talkCount) % 5 === 0 ? 2 : 1
   const picked = supporting.slice(0, pickedCount)
   const jaTraits = joinJa(picked)
   const enTraits = joinEn(picked)
@@ -552,12 +684,58 @@ function buildCombination(
       ja: `${focus.ja}で惹きつけて、${jaTraits}で記憶に残す。見せ方まで完璧だね。`,
       en: `The ${focus.en} pulls me in; ${enTraits} make the memory stick. Even the presentation is perfect.`,
     },
+    {
+      ja: `あと${jaTraits}。そこ、最初は見てなかった。`,
+      en: `And ${enTraits}. Missed that at first.`,
+    },
+    {
+      ja: `${focus.ja}の次に目が行ったのが${jaTraits}だ。`,
+      en: `After the ${focus.en}, my eye went to ${enTraits}.`,
+    },
+    {
+      ja: `${jaTraits}もいいね。${focus.ja}の隣に置いても喧嘩しない。`,
+      en: `${enTraits} work too. They don’t fight sitting next to the ${focus.en}.`,
+    },
+    {
+      ja: `横からだと${jaTraits}のほうが先に来る。`,
+      en: `From the side, ${enTraits} show up first.`,
+    },
+    {
+      ja: `${jaTraits}、工房の光だとまた違う。`,
+      en: `${enTraits} look different in this light.`,
+    },
+    {
+      ja: `${focus.ja}を見て、${jaTraits}で納得した。`,
+      en: `Saw the ${focus.en}. ${enTraits} made it click.`,
+    },
+    {
+      ja: `${jaTraits}はおまけじゃない。ちゃんと残る。`,
+      en: `${enTraits} aren’t extra. They stick.`,
+    },
+    {
+      ja: `棚に並べたら、${jaTraits}のほうから探しそうだ。`,
+      en: `On a shelf, I’d look for you by the ${enTraits}.`,
+    },
+    {
+      ja: `${jaTraits}があるから、上だけ見て終わらない。`,
+      en: `${enTraits} keep you from stopping at the top.`,
+    },
+    {
+      ja: `振り返るとき、${jaTraits}が残るタイプだ。`,
+      en: `The kind where ${enTraits} linger when you turn away.`,
+    },
   ]
   const templates = [
     ...getSynergyTemplates(focus, picked, jaTraits, enTraits),
     ...generalTemplates,
   ]
   return templates[seededIndex(seed + picked.length * 13, talkCount, templates.length)]
+}
+
+function assembleTalk(beats: TalkBeat[]): DialogueLine[] {
+  return beats.slice(0, SERGITO_LINES_PER_TALK).map((beat, index) =>
+    toLine(`sergito-${index}`, pickLocalized(beat.text), beat.category),
+  )
 }
 
 export function createSergitoDialogue(context: SergitoDialogueContext): DialogueLine[] {
@@ -575,23 +753,34 @@ export function createSergitoDialogue(context: SergitoDialogueContext): Dialogue
     return buildFallbackDialogue(context.talkCount)
   }
 
-  const opening = buildOpening(focus, context.meebitId, context.talkCount)
+  const greeting: TalkBeat = {
+    text: pickFromPool(SERGITO_GREETINGS, context.meebitId, context.talkCount),
+    category: 'greeting',
+  }
+  const closing: TalkBeat = {
+    text: pickFromPool(SERGITO_CLOSINGS, context.meebitId + 11, context.talkCount),
+    category: 'closing',
+  }
+  const observation: TalkBeat =
+    pickTraitSpecificFromMeebit(context.traits, context.meebitId, context.talkCount) ?? {
+      text: buildOpening(focus, context.meebitId, context.talkCount),
+      category: focus.category,
+    }
   const supporting = features.slice(1)
-  if (supporting.length === 0) {
-    return [
-      toLine('sergito-focus', pickLocalized(opening), focus.category),
-      ...buildFallbackDialogue(context.talkCount).slice(1),
-    ]
+  const combination: TalkBeat | null = supporting.length
+    ? {
+        text: buildCombination(focus, supporting, context.meebitId, context.talkCount),
+        category: 'overall',
+      }
+    : null
+
+  if (combination && seededIndex(context.meebitId + 23, context.talkCount, 4) === 0) {
+    return assembleTalk([observation, combination])
   }
 
-  const combination = buildCombination(
-    focus,
-    supporting,
-    context.meebitId,
-    context.talkCount,
-  )
-  return [
-    toLine('sergito-focus', pickLocalized(opening), focus.category),
-    toLine('sergito-combination', pickLocalized(combination), 'overall'),
-  ].slice(0, SERGITO_LINES_PER_TALK)
+  const patterns: TalkBeat[][] = [
+    [greeting, observation],
+    [observation, closing],
+  ]
+  return assembleTalk(patterns[seededIndex(context.meebitId + 19, context.talkCount, patterns.length)])
 }

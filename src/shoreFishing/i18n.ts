@@ -30,7 +30,7 @@ const ratingNames: Record<ShoreFishingRatingId, { en: string; ja: string }> = {
 const copy = {
   en: {
     title: 'Shore Fishing',
-    subtitle: 'Shadows in the water. One perfect strike.',
+    subtitle: 'A shadow. A strike. The sea decides.',
     rulesTitle: 'Fish on!',
     controls: 'Walk the shore. Cast on a shadow. Reel on the big bite.',
     scoreGuideTitle: 'Catch list',
@@ -61,8 +61,8 @@ const copy = {
   },
   ja: {
     title: 'ショアフィッシング',
-    subtitle: '水面の影を見つけて、タイミングよく引け！',
-    rulesTitle: 'はじめよう',
+    subtitle: '影。一振り。海が決める。',
+    rulesTitle: 'Fish on!',
     controls: '岸を歩いて影にキャスト。大きく沈んだらすぐ引け。',
     scoreGuideTitle: '釣れる魚',
     ratingGuideTitle: '評価',

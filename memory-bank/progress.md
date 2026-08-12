@@ -2,6 +2,13 @@
 
 ## 完了済み
 
+### Meet Sergito（`/meet-sergito`）
+
+- [x] **Open**（Sea 東棟 `underConstruction` 解除）
+- [x] NPC接地: プレイヤーと同じ `playerGroundY: -0.05`。walkers の余分な +0.06 を削除
+- [x] Sergito 会話は最大2行。挨拶・trait固有・組み合わせ・締めをランダムに組み合わせ、実trait値のプールを拡充
+- [x] 入口看板の見出し／本文の重なりを修正。全区コピーをディズニー入口トーンへ。規約は `memory-bank/attractionCopy.md`
+
 ### OpenSea Market（`/opensea-market`）
 
 - [x] Sea 中央 TIDE POOL 工事中枠を `opensea` アトラクションに置換
@@ -174,7 +181,7 @@
 | SP 5 体 HUD | PC `TargetHUD` とは別レイアウト |
 | Shawn DJ 位置 | 微調整は `CLUB_CREATOR_DJ_POSITION` の z のみ |
 | Runway 接地 Y | `playerGroundY` / `benchGroundY` / `audienceSeatY` は見た目で微調整。符号は座標ルール参照 |
-| Runway 建物看板 | Open（`The Catwalk` / `本日の色が歩く`）。**New Open 表記は使わない** |
+| Runway 建物看板 | Open（`The Catwalk` / `TONIGHT WALKS`）。**New Open 表記は使わない** |
 
 ## 未着手・任意改善
 

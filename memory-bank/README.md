@@ -38,16 +38,18 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 3. **[systemPatterns.md](./systemPatterns.md)** — アーキテクチャ・主要ファイル・設計パターン
 4. **[productContext.md](./productContext.md)** — ゲームデザイン・ユーザー嗜好・コンテンツ方針
 5. **[parkDesigner.md](./parkDesigner.md)** — **Park 設計士ノート**（ゾーン／導線／**§14 配置デフォルト**）
-6. **[parkNpcDialogue.md](./parkNpcDialogue.md)** — **NPC Dialogue Bible**（来場者の生活として語る／アプリ実態との合わせ方）
-7. **[meebitVrmArms.md](./meebitVrmArms.md)** / **[photoStudio.md](./photoStudio.md)** / **[shoreFishing.md](./shoreFishing.md)** — VRM 腕・スタジオ・釣り
-8. **[activeContext.md](./activeContext.md)** — 直近の作業内容・現在の状態
-9. **[progress.md](./progress.md)** — 完了済み・既知の課題・未着手
+6. **[attractionCopy.md](./attractionCopy.md)** — **入口看板・スタートカード**（文字量／ディズニー入口トーン）
+7. **[parkNpcDialogue.md](./parkNpcDialogue.md)** — **NPC Dialogue Bible**（来場者の生活として語る／アプリ実態との合わせ方）
+8. **[meebitVrmArms.md](./meebitVrmArms.md)** / **[photoStudio.md](./photoStudio.md)** / **[shoreFishing.md](./shoreFishing.md)** — VRM 腕・スタジオ・釣り
+9. **[activeContext.md](./activeContext.md)** — 直近の作業内容・現在の状態
+10. **[progress.md](./progress.md)** — 完了済み・既知の課題・未着手
 
 ## 更新ルール
 
 - 大きな機能追加・設計変更・バグ修正のたびに **activeContext.md** と **progress.md** を更新する
 - 恒久的な仕様変更は **productContext.md** / **systemPatterns.md** に反映する
 - **Park のゾーン・導線・配置ルール**が変わったら **parkDesigner.md** も更新する
+- **入口看板・スタートカードのコピー**が変わったら **attractionCopy.md** も更新する
 - **NPC の魅力トーン・日替わり伝え方**が変わったら **parkNpcDialogue.md** と `parkDialogueExpand.ts` をセットで更新する
 - **Photo Booth のポーズ／カメラ／小道具**が変わったら **photoStudio.md**（と必要なら **meebitVrmArms.md**）を更新する
 - **Shore Fishing の竿・島・NPC**が変わったら **shoreFishing.md** / **meebitVrmArms.md** を更新する

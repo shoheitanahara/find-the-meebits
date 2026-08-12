@@ -1,8 +1,16 @@
 # Active Context
 
-最終更新: 2026-08-11
+最終更新: 2026-08-12
 
 ## 直近の作業サマリー
+
+### Meet Sergito（`/meet-sergito`）— Open
+
+- **状態**: Sea 東棟 Open（`underConstruction` 解除）
+- **看板**: `HE LOOKS` / `職人が見る`。本文は扉と Meebit。コピー規約は `memory-bank/attractionCopy.md`
+- **会話**: 最大2行。挨拶／trait固有／組み合わせ／締めを毎回ランダムに組み合わせる。trait名は実データに合わせた
+- **トーン**: 工房の職人。売り込み・traitロジック説明はしない
+- 主要ファイル: `src/meetSergito/config.ts` / `dialogue/createSergitoDialogue.ts` / `dialogue/sergitoDialogueData.ts`
 
 ### OpenSea Market（`/opensea-market`）— Open
 
@@ -11,13 +19,13 @@
 - **売却**: 48時間以内の sale を最大10体混ぜる（出品中 token は除外）。値札左上に SOLD リボン
 - **カメラ**: 彫刻はプレイヤー非依存の正面斜め固定。案内だけプレイヤー基準
 - **API**: listings/best + events/sale。キーは永続 `OPENSEA_API_KEY` のみ
-- **看板**: 「美しいMeebitsの彫刻が並ぶギャラリー。」
+- **看板**: `STILL LIFE` / `今夜の彫刻`
 - **ノウハウ正本**: `memory-bank/openSeaMarket.md`
 
 ### Shore Fishing（`/shore-fishing`）— Open
 
 - **状態**: Sea 西棟 Open（`underConstruction` 解除）
-- **看板**: `FISH ON!` / `魚影を探せ` + 短い本文
+- **看板**: `FISH ON!` / `海が決める`
 - **入口**: `entranceZ: -7.85`（ドア手前で発火）。小屋前のヤシを削除
 - **島**: ボクセル床。ヤシ廃止 → コケ付きの小さな岩／小山（`islandRocks` / `IslandVoxelRocks`）
 - **アバター**: `applyVRMFishingPose` — 歩行は脇やや開き、立ち／釣りは脇クローズ。キャスト＝リール逆
@@ -92,7 +100,7 @@
 
 - **名称**: Meebits Runway（旧 Fashion Runway）
 - **ルート**: `/runway` `/jp/runway` → edition `runway` → `RunwayApp`（`src/runway/`）
-- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`。看板 subtitle `The Catwalk`、storyTitle `TODAY'S COLOR WALKS`
+- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`。看板 subtitle `The Catwalk`、storyTitle `TONIGHT WALKS`
 - **体験**: 白黒暗室＋中央ランウェイ。日替わりカラーテーマに合う Meebit がキャットウォーク。観客はベンチ着席＋呼吸ポーズ
 - **空席・着席**: 日替わり 4〜8 空席。接近で Sit（E / モバイルボタン）。立ち上がりは通路側へ逃がす（`resolveRunwayStandUpPosition`）
 - **ベンチ当たり**: mesh 軸は local X=長辺 / local Z=奥行。前後隣ベンチ間・列間通路側を非対称に短縮（`benchCollision` + `collisions.ts`）

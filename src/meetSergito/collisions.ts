@@ -88,6 +88,16 @@ export function isWorkshopPositionWalkable(x: number, z: number, radius: number 
   return true
 }
 
+export function distanceToSergito(x: number, z: number) {
+  return Math.hypot(x - MEET_SERGITO.sergito.x, z - MEET_SERGITO.sergito.z)
+}
+
+/** 歩行NPC用。プレイヤーは Sergito に近づけるので、こちらは walkers だけが使う */
+export function isWorkshopWalkerPositionWalkable(x: number, z: number, radius: number) {
+  if (!isWorkshopPositionWalkable(x, z, radius)) return false
+  return distanceToSergito(x, z) >= MEET_SERGITO.sergitoKeepAwayRadius
+}
+
 export function resolveWorkshopMovement(
   fromX: number,
   fromZ: number,
