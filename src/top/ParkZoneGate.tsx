@@ -878,7 +878,7 @@ function PlazaReturnGate({
 
       <group
         position={[faceSign * 0.45, 0, 0]}
-        rotation={[0, gate.id === 'culture-to-plaza' || gate.id === 'sea-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
+        rotation={[0, gate.id === 'culture-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
       >
         <Text position={[0, 4.25, 0]} fontSize={0.26} color="#f5e6c8" anchorX="center" anchorY="middle">
           {gate.label[locale]}
