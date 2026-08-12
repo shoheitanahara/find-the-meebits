@@ -153,11 +153,6 @@ function pickSpawnPlan(
   }
 }
 
-function targetMinX(y: number) {
-  const { lowerMin, upperMin, upperThresholdY } = SHOOTING_GALLERY.targetXRange
-  return y >= upperThresholdY ? upperMin : lowerMin
-}
-
 function chooseSpawnPosition(
   motion: TargetMotion,
   horizontalMargin: number,
@@ -180,7 +175,7 @@ function chooseSpawnPosition(
             SHOOTING_GALLERY.targetYRange.max - 0.1,
           )
     const x = MathUtils.randFloat(
-      targetMinX(y) + horizontalMargin,
+      SHOOTING_GALLERY.targetXRange.min + horizontalMargin,
       SHOOTING_GALLERY.targetXRange.max - horizontalMargin,
     )
     const nearestDistanceSq =
@@ -406,7 +401,7 @@ export function ShootingGalleryTargets() {
         }
         x = MathUtils.clamp(
           x,
-          targetMinX(y),
+          SHOOTING_GALLERY.targetXRange.min,
           SHOOTING_GALLERY.targetXRange.max,
         )
         y = MathUtils.clamp(

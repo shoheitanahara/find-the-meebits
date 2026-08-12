@@ -43,14 +43,9 @@ export const SHOOTING_GALLERY = {
   ] as const,
   /**
    * 的が移動できる横範囲。
-   * 左端はアバターと重ならない「画面中央より少し左」までに制限する。
    */
   targetXRange: {
-    /** 低い位置はアバターと重ならない範囲に限定 */
-    lowerMin: -1.05,
-    /** 左上はアバターの頭上まで使用可能 */
-    upperMin: -2.35,
-    upperThresholdY: 1.75,
+    min: -2.35,
     max: 4.4,
   },
   targetYRange: { min: 0.45, max: 2.85 },
