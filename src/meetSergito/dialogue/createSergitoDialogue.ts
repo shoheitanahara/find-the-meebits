@@ -90,6 +90,7 @@ function pickTraitSpecificFromMeebit(
 ): TalkBeat | null {
   const hits: TalkBeat[] = []
   for (const traitKey of Object.keys(SERGITO_TRAIT_SPECIFIC)) {
+    if (!shouldMentionTraitKey(traits, traitKey)) continue
     const value = getTrait(traits, traitKey)
     if (!value) continue
     const pool = resolveTraitSpecificPool(traitKey, value)
@@ -115,6 +116,19 @@ function toLine(id: string, text: string, category: SergitoDialogueCategory): Di
 function getTrait(traits: MeebitTraitMap, key: string) {
   const value = traits[key]
   return value && value !== 'No' ? value : null
+}
+
+/** Look Locker と同様。Human 以外は Hair Style が Bald 固定で Beard も変化しない */
+const HUMAN_ONLY_TRAIT_KEYS = new Set(['Hair Style', 'Hair Color', 'Beard', 'Beard Color'])
+
+function isHumanMeebit(traits: MeebitTraitMap): boolean {
+  const type = getTrait(traits, 'Type')
+  return !type || type === 'Human'
+}
+
+function shouldMentionTraitKey(traits: MeebitTraitMap, traitKey: string): boolean {
+  if (!HUMAN_ONLY_TRAIT_KEYS.has(traitKey)) return true
+  return isHumanMeebit(traits)
 }
 
 function colorJa(value: string) {
@@ -228,8 +242,8 @@ function buildFeatures(traits: MeebitTraitMap): TraitFeature[] {
     }),
   )
 
-  // Human 以外は Hair Style がほぼ Bald 固定なので言及しない。代わりに他特徴へ寄せる。
-  if (!type || type === 'Human') {
+  // Human 以外は髪・髭を言及しない（Look Locker と同じ前提）。
+  if (isHumanMeebit(traits)) {
     features.push(
       makeStyledFeature({
         id: 'hair',

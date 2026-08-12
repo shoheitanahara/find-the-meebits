@@ -375,11 +375,11 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MEET SERGITO',
     subtitle: 'The Workshop',
     description: {
-      en: 'Wood shop. Shelf of figures.\nHe sees your look.',
-      ja: '木の工房、棚の人形。\nあなたの姿を見る。',
+      en: 'Wood shop by the sea\nFigures on shelves.',
+      ja: '海辺の木の工房。\n棚に並ぶ人形たち。',
     },
     storyTitle: {
-      en: 'MEET SERGITO',
+      en: 'Sergito Awaits',
       ja: 'Sergitoが待つ',
     },
     color: '#c8b898',

@@ -3,7 +3,8 @@ import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
 import { SERGITO_MEEBIT_ID, SERGITO_NPC_ID } from '../config'
 import { advanceSergitoDialogue, closeSergitoDialogue } from './interactWithSergito'
-import { getLocale } from '../../i18n/locale'
+
+const SERGITO_ROLE = 'MeebCo. CEO'
 
 export function SergitoDialogueBox() {
   const isOpen = useDialogueStore((state) => state.isOpen)
@@ -11,7 +12,6 @@ export function SergitoDialogueBox() {
   const lines = useDialogueStore((state) => state.lines)
   const currentIndex = useDialogueStore((state) => state.currentIndex)
   const t = ui()
-  const locale = getLocale()
 
   if (!isOpen || activeNpcId !== SERGITO_NPC_ID) return null
 
@@ -19,7 +19,6 @@ export function SergitoDialogueBox() {
   if (!currentLine) return null
 
   const isLastLine = currentIndex >= lines.length - 1
-  const role = locale === 'ja' ? 'MeebCo 代表' : 'MeebCo'
   const name = 'Sergito'
 
   return (
@@ -32,7 +31,7 @@ export function SergitoDialogueBox() {
             sizeClassName="h-40 w-40 rounded-2xl border border-[#d4a060]/30 bg-[#120e08]"
           />
           <SergitoDialogueContent
-            role={role}
+            role={SERGITO_ROLE}
             name={name}
             currentLine={currentLine.text}
             currentIndex={currentIndex}
@@ -45,7 +44,7 @@ export function SergitoDialogueBox() {
         </div>
         <div className="sm:hidden">
           <SergitoDialogueContent
-            role={role}
+            role={SERGITO_ROLE}
             name={name}
             currentLine={currentLine.text}
             currentIndex={currentIndex}

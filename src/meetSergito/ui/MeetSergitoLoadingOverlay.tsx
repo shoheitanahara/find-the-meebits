@@ -5,14 +5,14 @@ const copy = {
   en: {
     eyebrow: 'Sea District',
     title: 'Meet Sergito',
-    tagline: 'He looks.',
+    tagline: "Sergito's inside.",
     loading: 'Preparing the workshop…',
     finishing: 'Almost ready…',
   },
   ja: {
     eyebrow: 'シーエリア',
     title: 'Meet Sergito',
-    tagline: '職人が見る。',
+    tagline: 'Sergitoは中にいる。',
     loading: '工房を準備中…',
     finishing: '表示を仕上げています…',
   },

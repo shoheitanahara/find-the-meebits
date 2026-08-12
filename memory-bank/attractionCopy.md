@@ -78,8 +78,8 @@
 **Good（空気 + 場面）**
 
 > MEET SERGITO / Sergitoが待つ  
-> Wood shop. Shelf of figures. / He sees your look.  
-> 木の工房、棚の人形。 / あなたの姿を見る。
+> Wood shop by the sea. / Figures on shelves.  
+> 海辺の木の工房。 / 棚に並ぶ人形たち。
 
 > FIND ONE / ひとり探せ  
 > Crowd in the gallery. / One face stands out.  
@@ -125,5 +125,5 @@
 | pfp | ONE SQUARE SHOT / 正方形一枚 | スタジオで一枚、来場証明書付き |
 | fishing | FISH ON! / 魚影を狙え | 岸辺の魚影、一振り |
 | opensea | LIVE GALLERY / 彫刻ギャラリー | 台座の彫刻、売れた体も |
-| sergito | MEET SERGITO / Sergitoが待つ | 木の工房、棚の人形 |
+| sergito | Sergito Awaits / Sergitoが待つ | 海辺の木の工房、棚の人形。本人に会う約束。MeebCo・役職・創業者は入口に出さない |
 | starlight | STAR RAILS / 星のレール | レールに乗り、流れ星を撃つ |

@@ -17,7 +17,6 @@ import { ParkDialogueBox } from './ParkDialogueBox'
 import { ParkDialogueSystem } from './ParkDialogueSystem'
 import { ParkInteractionPrompt } from './ParkInteractionPrompt'
 import { ParkTipsOverlay } from './ParkTipsOverlay'
-import { ParkDailyResetNotice } from './ParkDailyResetNotice'
 import { ParkCreatorCredit } from './ParkCreatorCredit'
 import { ParkBgmSystem } from './ParkBgmSystem'
 import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
@@ -31,7 +30,8 @@ const copy = {
   en: {
     eyebrow: 'Find the Meebits',
     title: 'Meebits Park',
-    subtitle: 'Choose your Meebit and explore the park attractions.',
+    subtitle: 'Pick a Meebit you own—or any number you like. Find a favorite and explore the park.',
+    meebitNote: 'You can change your Meebit anytime.',
     avatar: 'Your Meebit',
     random: 'Random',
     enterPark: 'Enter the Park',
@@ -56,7 +56,8 @@ const copy = {
   ja: {
     eyebrow: 'Find the Meebits',
     title: 'ミービッツ・パーク',
-    subtitle: '自分のMeebitを選んで、パークのアトラクションを巡ろう。',
+    subtitle: '所有している Meebit でも、好きな番号でも。お気に入りを見つけて、パークを歩こう。',
+    meebitNote: 'あとからいつでも変えられます。',
     avatar: 'あなたのMeebit',
     random: 'ランダム',
     enterPark: 'パークに入る',
@@ -284,7 +285,7 @@ export function TopApp() {
                 </h1>
                 <div className="mt-4 h-px w-14 bg-[#caa75b]" />
                 <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6]">{t.subtitle}</p>
-                <ParkDailyResetNotice />
+                <p className="mt-2 max-w-sm text-xs leading-5 text-[#8f897e]">{t.meebitNote}</p>
                 <ParkCreatorCredit />
 
                 <div className="mt-7">
