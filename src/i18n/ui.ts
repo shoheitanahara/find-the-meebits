@@ -13,13 +13,11 @@ type UiMessages = {
   enjoyDesc: string
   target: string
   targets: string
-  yourMeebit: string
   random: string
   startVenue: (venue: string) => string
   backToMuseum: string
   enterAfterHours: string
   meebitsInVenue: (count: number, venue: string) => string
-  defaultMeebitRange: (id: number) => string
   you: string
   youHash: (n: number) => string
   move: string
@@ -156,13 +154,11 @@ const en: UiMessages = {
   enjoyDesc: 'No timer. Find at your pace.',
   target: 'Target',
   targets: 'Targets',
-  yourMeebit: 'Your Meebit',
   random: 'Random',
   startVenue: (venue) => `Start ${venue}`,
   backToMuseum: 'Back to Museum',
   enterAfterHours: 'Enter After Hours',
   meebitsInVenue: (count, venue) => `${count} Meebits in the ${venue}`,
-  defaultMeebitRange: (id) => `#${id} default · 1–20000`,
   you: 'You',
   youHash: (n) => `You #${n}`,
   move: 'WASD: Move',
@@ -308,13 +304,11 @@ const ja: UiMessages = {
   enjoyDesc: '時間制限なし。好きなペースでターゲットを探せる。',
   target: 'ターゲット',
   targets: 'ターゲット',
-  yourMeebit: 'あなたのMeebit',
   random: 'ランダム',
   startVenue: (venue) => `${venue}を開始`,
   backToMuseum: 'Museumへ戻る',
   enterAfterHours: 'After Hoursへ',
   meebitsInVenue: (count, venue) => `${venue}に${count}体`,
-  defaultMeebitRange: (id) => `デフォルト #${id} · 1–20000`,
   you: 'あなた',
   youHash: (n) => `あなた #${n}`,
   move: 'WASD: 移動',

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ui } from '../i18n/ui'
-import { DEFAULT_PLAYER_MEEBIT_ID, PLAYER_START_POSITION } from '../game/gameConfig'
-import { getSavedPlayerMeebitNumber, normalizePlayerMeebitNumber } from '../systems/save/localStorage'
+import { PLAYER_START_POSITION } from '../game/gameConfig'
 import { resetPlayerWorldState } from '../avatar/playerWorldState'
 import {
   getGameModeDescription,
@@ -25,9 +24,6 @@ import { TraitQuestVisual } from './TraitQuestVisual'
 import { playSfx, unlockAudioIfNeeded } from './sfx'
 
 export function StartScreen() {
-  const [playerMeebitInput, setPlayerMeebitInput] = useState(() =>
-    String(getSavedPlayerMeebitNumber()),
-  )
   const [afterHoursUnlocked, setAfterHoursUnlocked] = useState(false)
   const gamePhase = useGameStore((state) => state.gamePhase)
   const gameMode = useGameStore((state) => state.gameMode)
@@ -42,19 +38,10 @@ export function StartScreen() {
   const rerollTargets = useGameStore((state) => state.rerollTargets)
   const firstTargetNpc = getNpcById(targetNpcIds[0] ?? '')
   const currentStep = getProgressionStep(progressionIndex, venueId)
-  const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
   const isClubVenue = venueId === 'club'
   const isTraitHunt = getCachedAppEdition() === 'v2'
   const quest = currentStep?.quest
   const t = ui()
-
-  useEffect(() => {
-    if (gamePhase !== 'intro') {
-      return
-    }
-
-    setPlayerMeebitInput(String(usePlayerStore.getState().meebitNumber))
-  }, [gamePhase, venueId])
 
   useEffect(() => {
     if (gamePhase !== 'intro' || isTraitHunt) {
@@ -71,7 +58,6 @@ export function StartScreen() {
   const handleStart = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
     resetPlayerWorldState(
       [PLAYER_START_POSITION[0], PLAYER_START_POSITION[1], PLAYER_START_POSITION[2]],
       Math.PI,
@@ -83,7 +69,6 @@ export function StartScreen() {
   const handleEnterAfterHours = () => {
     unlockAudioIfNeeded()
     playSfx('uiConfirm')
-    usePlayerStore.getState().setMeebitNumber(playerMeebitNumber)
     startAfterHours()
   }
 
@@ -270,68 +255,6 @@ export function StartScreen() {
             </div>
           </div>
 
-          <div
-            className={`mt-5 rounded-2xl border p-4 max-lg:mt-2 max-lg:p-2.5 ${
-              isClubVenue ? 'border-fuchsia-400/30 bg-violet-950/50' : 'border-neutral-200 bg-white'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <TargetPreview
-                meebitNumber={playerMeebitNumber}
-                modelScale={1}
-                sizeClassName="h-20 w-20 shrink-0"
-              />
-              <label className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className={`text-sm font-semibold max-lg:text-xs ${isClubVenue ? 'text-fuchsia-200' : 'text-neutral-500'}`}>
-                    {t.yourMeebit}
-                  </span>
-                  <button
-                    type="button"
-                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.15em] transition max-lg:px-2.5 max-lg:py-1 max-lg:text-[0.6rem] ${
-                      isClubVenue
-                        ? 'border-fuchsia-400/40 text-fuchsia-100 hover:border-fuchsia-300 hover:text-white'
-                        : 'border-neutral-300 text-neutral-700 hover:border-neutral-950 hover:text-neutral-950'
-                    }`}
-                    onClick={() => {
-                      unlockAudioIfNeeded()
-                      playSfx('uiClick')
-                      const next = getRandomMeebitNumber()
-                      setPlayerMeebitInput(String(next))
-                      usePlayerStore.getState().setMeebitNumber(next)
-                    }}
-                  >
-                    {t.random}
-                  </button>
-                </div>
-                <input
-                  className={`mt-1.5 w-full rounded-xl border px-3 py-2 text-xl font-black outline-none transition max-lg:py-1.5 max-lg:text-lg ${
-                    isClubVenue
-                      ? 'border-fuchsia-400/30 bg-neutral-950 text-white focus:border-fuchsia-300'
-                      : 'border-neutral-300 bg-neutral-50 focus:border-neutral-950'
-                  }`}
-                  inputMode="numeric"
-                  max={20000}
-                  min={1}
-                  type="number"
-                  value={playerMeebitInput}
-                  onChange={(event) => {
-                    const next = event.target.value
-                    setPlayerMeebitInput(next)
-                    usePlayerStore.getState().setMeebitNumber(normalizeMeebitNumber(next))
-                  }}
-                />
-                <span
-                  className={`mt-1 block text-xs font-medium max-lg:text-[0.65rem] ${
-                    isClubVenue ? 'text-neutral-400' : 'text-neutral-500'
-                  }`}
-                >
-                  {t.defaultMeebitRange(DEFAULT_PLAYER_MEEBIT_ID)}
-                </span>
-              </label>
-            </div>
-          </div>
-
           <button
             type="button"
             className={`mt-6 w-full rounded-full px-6 py-3.5 text-sm font-black uppercase tracking-[0.25em] transition max-lg:mt-2.5 max-lg:py-3 max-lg:text-xs ${
@@ -365,12 +288,4 @@ export function StartScreen() {
       </section>
     </div>
   )
-}
-
-function normalizeMeebitNumber(value: string) {
-  return normalizePlayerMeebitNumber(value)
-}
-
-function getRandomMeebitNumber() {
-  return Math.floor(Math.random() * 20000) + 1
 }
