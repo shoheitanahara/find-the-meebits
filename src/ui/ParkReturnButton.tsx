@@ -73,7 +73,7 @@ export function ParkReturnButton() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-[100] flex min-h-10 items-center justify-between border-b border-white/10 bg-neutral-950/80 px-3 pb-1.5 pt-[max(0.4rem,env(safe-area-inset-top))] text-white shadow-lg backdrop-blur-md sm:px-4">
+      <header className="fixed inset-x-0 top-0 z-[100] flex min-h-10 items-center justify-between border-b border-white/10 bg-neutral-950/80 px-3 pb-1.5 pt-[max(0.4rem,env(safe-area-inset-top))] text-white shadow-lg backdrop-blur-md sm:px-4 phone-land:min-h-8 phone-land:pb-0.5 phone-land:pt-[max(0.2rem,env(safe-area-inset-top))]">
         <span className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs tracking-[0.12em] text-amber-100/90">
           Meebits Park
         </span>

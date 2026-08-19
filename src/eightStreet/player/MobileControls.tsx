@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useEightStreetControlsStore } from '../controlsStore'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -10,7 +11,7 @@ export function EightStreetMobileControls() {
     <>
       {/* Full-screen drag look — sits under the move stick so the stick still wins. */}
       <TouchLookPad />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-start px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-40 flex items-end justify-start px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
         <MoveJoystick />
       </div>
     </>

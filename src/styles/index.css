@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/** スマホ横向き。iPhone 横 ~390px 高。タブレット縦は対象外。 */
+@custom-variant phone-land (@media (orientation: landscape) and (max-height: 540px));
+
 :root {
   color-scheme: light;
   font-family:

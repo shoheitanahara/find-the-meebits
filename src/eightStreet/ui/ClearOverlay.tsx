@@ -50,23 +50,23 @@ export function EightStreetClearOverlay() {
   if (!isVisible) return null
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_8%,#ffffff_0%,#f4f6f8_48%,#e8ecf1_100%)] px-6 text-center text-slate-900">
-      <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-700/80">
+    <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_8%,#ffffff_0%,#f4f6f8_48%,#e8ecf1_100%)] px-6 text-center text-slate-900 phone-land:px-4 phone-land:py-3">
+      <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-700/80 phone-land:mb-1">
         {copy.clearedEyebrow}
       </p>
-      <h1 className="max-w-lg font-[family-name:Georgia,Times_New_Roman,serif] text-4xl tracking-tight text-slate-950 sm:text-5xl">
+      <h1 className="max-w-lg font-[family-name:Georgia,Times_New_Roman,serif] text-4xl tracking-tight text-slate-950 sm:text-5xl phone-land:text-2xl">
         {copy.clearedHeadline}
       </h1>
-      <p className="mt-4 max-w-sm text-base leading-relaxed text-slate-500">
+      <p className="mt-4 max-w-sm text-base leading-relaxed text-slate-500 phone-land:mt-2 phone-land:text-sm">
         {copy.clearedBody}
       </p>
 
-      <dl className="mt-10 flex items-start justify-center gap-10 text-slate-900">
+      <dl className="mt-10 flex items-start justify-center gap-10 text-slate-900 phone-land:mt-4 phone-land:gap-6">
         <div>
           <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
             {copy.clearTime}
           </dt>
-          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight">
+          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight phone-land:text-2xl">
             {formatClearTime(clearTimeSeconds)}
           </dd>
         </div>
@@ -75,13 +75,13 @@ export function EightStreetClearOverlay() {
           <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
             {copy.mistakes}
           </dt>
-          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight">
+          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight phone-land:text-2xl">
             {mistakeCount}
           </dd>
         </div>
       </dl>
 
-      <div className="mt-10 w-full max-w-xs">
+      <div className="mt-10 w-full max-w-xs phone-land:mt-4">
         <button
           type="button"
           className="w-full rounded-md bg-amber-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:bg-amber-400"

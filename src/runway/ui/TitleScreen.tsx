@@ -66,14 +66,14 @@ export function RunwayTitleScreen() {
   }
 
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#050505] px-5">
-      <div className="w-full max-w-lg border border-white/15 bg-black/80 px-7 py-8 text-center text-white shadow-2xl backdrop-blur-md">
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#050505] px-5 phone-land:px-3">
+      <div className="w-full max-w-lg border border-white/15 bg-black/80 px-7 py-8 text-center text-white shadow-2xl backdrop-blur-md phone-land:max-h-[calc(100dvh-2.4rem)] phone-land:overflow-y-auto phone-land:px-4 phone-land:py-4">
         <p className="text-[0.65rem] font-bold uppercase tracking-[0.28em] text-white/45">{t.eyebrow}</p>
-        <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-[0.04em] text-white sm:text-4xl">
+        <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-[0.04em] text-white sm:text-4xl phone-land:mt-1 phone-land:text-2xl">
           {t.title}
         </h1>
 
-        <div className="mt-6 border border-white/10 bg-white/5 px-4 py-3">
+        <div className="mt-6 border border-white/10 bg-white/5 px-4 py-3 phone-land:mt-3 phone-land:py-2">
           <p className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-white/40">{t.theme}</p>
           <p className="mt-1 text-base font-semibold text-white">
             {error ? t.error : themeLabel ?? t.loading}
@@ -84,11 +84,11 @@ export function RunwayTitleScreen() {
           type="button"
           disabled={!ready || error}
           onClick={enter}
-          className="mt-7 w-full border border-white/40 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-7 w-full border border-white/40 bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40 phone-land:mt-4 phone-land:py-2.5"
         >
           {t.enter}
         </button>
-        <p className="mt-4 text-[0.7rem] text-white/40">{t.hint}</p>
+        <p className="mt-4 text-[0.7rem] text-white/40 phone-land:mt-2">{t.hint}</p>
       </div>
     </div>
   )

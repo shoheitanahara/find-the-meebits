@@ -112,7 +112,7 @@ export function MobileTopBar() {
 
   return (
     <header
-      className={`pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] z-30 lg:hidden ${dialogueChromeDimClass(isDialogueOpen)}`}
+      className={`pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] z-30 lg:hidden phone-land:top-[calc(env(safe-area-inset-top)+1.65rem)] ${dialogueChromeDimClass(isDialogueOpen)}`}
     >
       <div className="px-2.5 pt-2">
         <div

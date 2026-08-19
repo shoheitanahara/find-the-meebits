@@ -83,7 +83,7 @@ export function ClearOverlay() {
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-0 z-50 overflow-y-auto backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)] lg:grid lg:place-items-center lg:p-6 ${
+      className={`pointer-events-auto absolute inset-0 z-50 overflow-y-auto backdrop-blur-sm max-lg:flex max-lg:items-center max-lg:justify-center max-lg:px-3 max-lg:pb-3 max-lg:pt-[calc(env(safe-area-inset-top)+3.25rem)] lg:grid lg:place-items-center lg:p-6 phone-land:px-2 phone-land:pb-2 phone-land:pt-[max(0.35rem,env(safe-area-inset-top))] ${
         clubClearTheme ? 'bg-violet-950/85' : 'bg-neutral-950/75'
       }`}
     >
@@ -91,11 +91,11 @@ export function ClearOverlay() {
         className={
           isConquered
             ? clubClearTheme
-              ? 'mx-auto grid w-full max-w-3xl gap-6 rounded-[2rem] border-2 border-fuchsia-400/70 bg-neutral-950 p-5 text-white shadow-2xl shadow-fuchsia-950/30 max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8'
-              : 'mx-auto grid w-full max-w-3xl gap-6 rounded-[2rem] border-2 border-yellow-400 bg-yellow-50 p-5 text-neutral-950 shadow-2xl max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8'
+              ? 'mx-auto grid w-full max-w-3xl gap-6 rounded-[2rem] border-2 border-fuchsia-400/70 bg-neutral-950 p-5 text-white shadow-2xl shadow-fuchsia-950/30 max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8 phone-land:max-h-[calc(100dvh-0.5rem)] phone-land:gap-3 phone-land:overflow-y-auto phone-land:p-3'
+              : 'mx-auto grid w-full max-w-3xl gap-6 rounded-[2rem] border-2 border-yellow-400 bg-yellow-50 p-5 text-neutral-950 shadow-2xl max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8 phone-land:max-h-[calc(100dvh-0.5rem)] phone-land:gap-3 phone-land:overflow-y-auto phone-land:p-3'
             : clubClearTheme
-              ? 'mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-fuchsia-400/40 bg-neutral-950 p-5 text-white shadow-2xl shadow-fuchsia-950/20 max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8'
-              : 'mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-white/15 bg-white p-5 text-neutral-950 shadow-2xl max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8'
+              ? 'mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-fuchsia-400/40 bg-neutral-950 p-5 text-white shadow-2xl shadow-fuchsia-950/20 max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8 phone-land:max-h-[calc(100dvh-0.5rem)] phone-land:gap-3 phone-land:overflow-y-auto phone-land:p-3'
+              : 'mx-auto grid w-full max-w-2xl gap-6 rounded-[2rem] border border-white/15 bg-white p-5 text-neutral-950 shadow-2xl max-lg:my-auto sm:grid-cols-[auto_1fr] sm:p-8 phone-land:max-h-[calc(100dvh-0.5rem)] phone-land:gap-3 phone-land:overflow-y-auto phone-land:p-3'
         }
       >
         {isConquered ? (
@@ -117,7 +117,7 @@ export function ClearOverlay() {
           <TargetPreview
             meebitNumber={clearedNpc.meebitNumber}
             modelScale={1.14}
-            sizeClassName="mx-auto h-48 w-48 max-lg:h-36 max-lg:w-36"
+            sizeClassName="mx-auto h-48 w-48 max-lg:h-36 max-lg:w-36 phone-land:!h-24 phone-land:!w-24"
           />
         ) : null}
         <div className="text-center sm:text-left">
@@ -135,7 +135,7 @@ export function ClearOverlay() {
             {isConquered ? (isClubVenue ? t.afterHoursClear : t.fullConquest) : t.stageClear}
           </p>
           <h2
-            className={`mt-3 text-4xl font-black ${
+            className={`mt-3 text-4xl font-black phone-land:mt-1 phone-land:text-2xl ${
               isConquered
                 ? clubClearTheme
                   ? 'text-fuchsia-300'
@@ -292,7 +292,7 @@ function ConqueredAvatarPreview({ label, meebitNumber, variant = 'museum' }: Con
       >
         <TargetPreview
           meebitNumber={meebitNumber}
-          sizeClassName="h-32 w-32 rounded-none border-0 lg:h-44 lg:w-44"
+          sizeClassName="h-32 w-32 rounded-none border-0 lg:h-44 lg:w-44 phone-land:!h-20 phone-land:!w-20"
         />
       </div>
       <p

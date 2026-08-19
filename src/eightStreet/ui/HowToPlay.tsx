@@ -9,8 +9,8 @@ export function HowToPlay() {
   if (!open) return null
 
   return (
-    <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[1.5rem] border border-white/15 bg-[#f5f0e6] p-6 text-stone-900 shadow-2xl">
+    <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm phone-land:px-3">
+      <div className="w-full max-w-md rounded-[1.5rem] border border-white/15 bg-[#f5f0e6] p-6 text-stone-900 shadow-2xl phone-land:max-h-[calc(100dvh-1.5rem)] phone-land:overflow-y-auto phone-land:p-4">
         <h2 className="text-center text-base font-bold tracking-wide">{copy.wallRulesTitle}</h2>
         <ul className="mt-5 space-y-3 text-left">
           {copy.wallRules.map((line) => (

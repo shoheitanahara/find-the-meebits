@@ -73,16 +73,16 @@ export function PhotoStudioApp() {
       <ParkReturnButton />
       <LanguageSwitcher className={LANGUAGE_SWITCHER_ATTRACTION_CLASS} />
 
-      {/* ヘッダー下: モバイルは縦、lg以上は左調整 / 右プレビュー */}
-      <div className="flex min-h-0 flex-1 flex-col pt-[max(2.75rem,calc(env(safe-area-inset-top)+2.35rem))] lg:flex-row">
+      {/* ヘッダー下: モバイルは縦、lg / スマホ横は左調整 / 右プレビュー */}
+      <div className="flex min-h-0 flex-1 flex-col pt-[max(2.75rem,calc(env(safe-area-inset-top)+2.35rem))] lg:flex-row phone-land:flex-row phone-land:pt-[max(2.35rem,calc(env(safe-area-inset-top)+1.9rem))]">
         {phase === 'studio' ? (
-          <div className="order-2 max-h-[46%] min-h-0 shrink-0 lg:order-1 lg:max-h-none lg:h-full">
+          <div className="order-2 max-h-[46%] min-h-0 shrink-0 lg:order-1 lg:max-h-none lg:h-full phone-land:order-1 phone-land:h-full phone-land:max-h-none phone-land:w-[min(20rem,42%)]">
             <PhotoStudioControls />
           </div>
         ) : null}
 
-        <section className="relative order-1 flex min-h-0 flex-1 items-center justify-center bg-[#0a0e14] p-3 sm:p-5 lg:order-2">
-          <div className="relative aspect-square w-full max-h-full max-w-[min(100%,calc(100dvh-8rem))] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl lg:max-w-[min(100%,calc(100dvh-4rem))]">
+        <section className="relative order-1 flex min-h-0 flex-1 items-center justify-center bg-[#0a0e14] p-3 sm:p-5 lg:order-2 phone-land:order-2 phone-land:p-2">
+          <div className="relative aspect-square w-full max-h-full max-w-[min(100%,calc(100dvh-8rem))] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl lg:max-w-[min(100%,calc(100dvh-4rem))] phone-land:max-w-[min(100%,calc(100dvh-3rem))]">
             <Canvas
               id={PHOTO_STUDIO.canvasElementId}
               frameloop={frameloop}

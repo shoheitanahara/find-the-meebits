@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getLocale } from '../../i18n/locale'
 import { JumpIcon } from '../../ui/mobile/MobileActionIcons'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 import { MOUNTAIN } from '../config'
 import { useMountainControlsStore } from '../controlsStore'
 
@@ -17,8 +18,8 @@ export function MountainMobileControls() {
   const t = copy[getLocale()]
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
-      <p className="mb-2 text-center text-[0.65rem] text-white/55">{t.dashHint}</p>
+    <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
+      <p className="mb-2 text-center text-[0.65rem] text-white/55 phone-land:hidden">{t.dashHint}</p>
       <div className="flex items-end justify-between gap-3">
         <VirtualJoystick />
         <button

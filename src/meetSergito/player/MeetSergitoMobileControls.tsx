@@ -8,6 +8,7 @@ import { useTouchControlsStore } from '../../stores/touchControlsStore'
 import { SERGITO_NPC_ID } from '../config'
 import { useMeetSergitoStore } from '../store'
 import { advanceSergitoDialogue, tryInteractWithSergito } from '../dialogue/interactWithSergito'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -17,7 +18,7 @@ export function MeetSergitoMobileControls() {
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+    <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
       <div className="flex items-end justify-between gap-3">
         <div className={dialogueChromeDimClass(isDialogueOpen)}>
           <VirtualJoystick />
@@ -42,7 +43,7 @@ function SergitoTalkButton() {
     return (
       <button
         type="button"
-        className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95"
+        className="pointer-events-auto flex h-20 w-20 flex-col items-center justify-center rounded-full border-2 border-white/50 bg-neutral-950/90 text-white shadow-2xl backdrop-blur-md active:scale-95 phone-land:hidden"
         onPointerDown={(event) => {
           event.preventDefault()
           void unlockAudioIfNeeded()

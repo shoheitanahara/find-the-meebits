@@ -3,6 +3,11 @@ import { getLocale } from '../../i18n/locale'
 import { getClimbTheme } from '../climbTheme'
 import { MOUNTAIN_STAGE_COUNT, MOUNTAIN_STAGES } from '../config'
 import { useMountainStore } from '../store'
+import {
+  PHONE_LAND_OVERLAY_CARD,
+  PHONE_LAND_OVERLAY_FRAME,
+  PHONE_LAND_OVERLAY_TITLE,
+} from '../../ui/phoneLandscape'
 
 export function TitleScreen() {
   const phase = useMountainStore((state) => state.phase)
@@ -32,15 +37,15 @@ export function TitleScreen() {
   const eyebrowColor = isNeon ? 'text-cyan-300/90' : 'text-sky-200/90'
 
   return (
-    <div className={`pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-4 ${theme.titleGradient}`}>
-      <section className={`w-full max-w-md rounded-3xl border ${panelBorder} ${panelBg} p-6 text-white shadow-2xl backdrop-blur-md`}>
+    <div className={`pointer-events-auto absolute inset-0 z-40 flex items-center justify-center px-4 ${theme.titleGradient} ${PHONE_LAND_OVERLAY_FRAME}`}>
+      <section className={`w-full max-w-md rounded-3xl border ${panelBorder} ${panelBg} p-6 text-white shadow-2xl backdrop-blur-md ${PHONE_LAND_OVERLAY_CARD}`}>
         <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${eyebrowColor}`}>
           {theme.eyebrow[locale]}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">{brand}</h1>
-        <p className="mt-4 text-base font-bold leading-snug text-white sm:text-lg">{theme.tagline[locale]}</p>
-        <p className="mt-3 text-xs leading-relaxed text-white/55">{theme.dailyNote[locale]}</p>
-        <p className="mt-3 text-[0.7rem] text-white/45">
+        <h1 className={`mt-2 text-3xl font-black tracking-tight sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>{brand}</h1>
+        <p className="mt-4 text-base font-bold leading-snug text-white sm:text-lg phone-land:mt-1 phone-land:text-sm">{theme.tagline[locale]}</p>
+        <p className="mt-3 text-xs leading-relaxed text-white/55 phone-land:hidden">{theme.dailyNote[locale]}</p>
+        <p className="mt-3 text-[0.7rem] text-white/45 phone-land:hidden">
           {locale === 'ja'
             ? 'WASD — 移動（カメラ追従）· Space — ジャンプ · Shift — ダッシュ'
             : 'WASD — Move (camera follows) · Space — Jump · Shift — Dash'}
@@ -53,7 +58,7 @@ export function TitleScreen() {
         ) : null}
 
         {isDev ? (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 phone-land:hidden">
             <button
               type="button"
               className="rounded-full border border-amber-300/50 bg-amber-400/15 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-amber-100"
@@ -81,7 +86,7 @@ export function TitleScreen() {
           <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-white/50">
             {locale === 'ja' ? 'ステージ' : 'Stage'}
           </p>
-          <div className="grid grid-cols-5 gap-1.5">
+          <div className="grid grid-cols-5 gap-1.5 phone-land:grid-cols-10">
             {MOUNTAIN_STAGES.map((stage) => {
               const locked = stage.id > unlockedStage
               const active = stage.id === playStage
@@ -113,7 +118,7 @@ export function TitleScreen() {
 
         <button
           type="button"
-          className={`mt-6 w-full rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.16em] transition active:scale-[0.99] ${accentBtn}`}
+          className={`mt-6 w-full rounded-full px-5 py-3 text-sm font-black uppercase tracking-[0.16em] transition active:scale-[0.99] phone-land:mt-3 phone-land:py-2.5 ${accentBtn}`}
           onClick={() => start(playStage)}
         >
           {playStage === 1
@@ -148,9 +153,9 @@ export function ClearOverlay() {
   const isAllClear = phase === 'allCleared'
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+    <div className={`pointer-events-auto absolute inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm ${PHONE_LAND_OVERLAY_FRAME}`}>
       <section
-        className={`w-full max-w-md rounded-3xl border p-6 text-center text-white shadow-2xl ${
+        className={`w-full max-w-md rounded-3xl border p-6 text-center text-white shadow-2xl ${PHONE_LAND_OVERLAY_CARD} ${
           isNeon
             ? 'border-fuchsia-300/40 bg-[#10081c]/92'
             : 'border-amber-200/40 bg-[#101820]/92'
@@ -169,11 +174,11 @@ export function ClearOverlay() {
               ? `ステージ ${currentStage} クリア！`
               : `Stage ${currentStage} Clear!`}
         </p>
-        <h2 className="mt-2 text-3xl font-black">{timeLabel}</h2>
+        <h2 className="mt-2 text-3xl font-black phone-land:text-2xl">{timeLabel}</h2>
         <p className="mt-2 text-sm text-white/70">
           {locale === 'ja' ? '到達高度' : 'Peak height'} {heightBest.toFixed(0)}m
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <div className="mt-6 flex flex-wrap justify-center gap-3 phone-land:mt-3">
           {!isAllClear ? (
             <button
               type="button"

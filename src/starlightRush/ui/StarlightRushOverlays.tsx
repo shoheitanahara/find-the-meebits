@@ -4,6 +4,11 @@ import { getLocale } from '../../i18n/locale'
 import { STARLIGHT_RUSH } from '../config'
 import { STARLIGHT_SCORE_ROWS, starlightRushUi } from '../i18n'
 import { useStarlightRushStore } from '../store'
+import {
+  PHONE_LAND_OVERLAY_CARD,
+  PHONE_LAND_OVERLAY_FRAME,
+  PHONE_LAND_OVERLAY_TITLE,
+} from '../../ui/phoneLandscape'
 
 function requestAimPointerLock() {
   if (isTouchUiMode()) return
@@ -29,20 +34,20 @@ export function StarlightRushPlayPrompt() {
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-black/55 backdrop-blur-sm">
-      <div className="flex min-h-full items-start justify-center px-4 pb-6 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.75rem))] sm:items-center sm:py-6">
-        <section className="w-full max-w-xl rounded-[2rem] border border-[#5ce0ff]/35 bg-[#0b1220]/95 p-5 text-[#f4ead2] shadow-2xl sm:p-7">
+      <div className={`flex min-h-full items-start justify-center px-4 pb-6 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.75rem))] sm:items-center sm:py-6 ${PHONE_LAND_OVERLAY_FRAME}`}>
+        <section className={`w-full max-w-xl rounded-[2rem] border border-[#5ce0ff]/35 bg-[#0b1220]/95 p-5 text-[#f4ead2] shadow-2xl sm:p-7 ${PHONE_LAND_OVERLAY_CARD}`}>
           <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-[#8fdfff]/80">
             {t.rulesTitle}
           </p>
-          <h1 className="mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl">
+          <h1 className={`mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>
             {t.title}
           </h1>
-          <p className="mt-3 text-center text-sm text-white/65">{t.subtitle}</p>
-          <p className="mt-1 text-center text-xs leading-relaxed text-[#8fdfff]/75">{t.storyLine}</p>
-          <p className="mt-2 text-center text-xs leading-relaxed text-white/50">{t.controls}</p>
+          <p className="mt-3 text-center text-sm text-white/65 phone-land:hidden">{t.subtitle}</p>
+          <p className="mt-1 text-center text-xs leading-relaxed text-[#8fdfff]/75 phone-land:mt-1">{t.storyLine}</p>
+          <p className="mt-2 text-center text-xs leading-relaxed text-white/50 phone-land:hidden">{t.controls}</p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 phone-land:mt-2 phone-land:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 phone-land:p-2">
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-[#8fdfff]/75">
                 {t.scoreGuideTitle}
               </p>
@@ -69,7 +74,7 @@ export function StarlightRushPlayPrompt() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 phone-land:p-2">
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-[#8fdfff]/75">
                 {t.ratingGuideTitle}
               </p>
@@ -96,7 +101,7 @@ export function StarlightRushPlayPrompt() {
 
           <button
             type="button"
-            className="mt-6 w-full rounded-full border border-[#8fdfff]/55 bg-gradient-to-b from-[#3a6aa8] to-[#1a3a68] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#dff8ff] shadow-[0_10px_30px_rgba(40,100,180,0.35)] transition hover:brightness-110"
+            className="mt-6 w-full rounded-full border border-[#8fdfff]/55 bg-gradient-to-b from-[#3a6aa8] to-[#1a3a68] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#dff8ff] shadow-[0_10px_30px_rgba(40,100,180,0.35)] transition hover:brightness-110 phone-land:mt-3 phone-land:py-2.5"
             onClick={() => {
               requestAimPointerLock()
               startGame()
@@ -123,20 +128,20 @@ export function StarlightRushResult() {
   if (phase !== 'result' || !ratingId) return null
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm">
-      <section className="w-full max-w-md rounded-3xl border border-[#5ce0ff]/40 bg-[#0b1220]/94 p-6 text-center text-white shadow-2xl">
+    <div className={`pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-black/55 px-4 backdrop-blur-sm ${PHONE_LAND_OVERLAY_FRAME}`}>
+      <section className={`w-full max-w-md rounded-3xl border border-[#5ce0ff]/40 bg-[#0b1220]/94 p-6 text-center text-white shadow-2xl ${PHONE_LAND_OVERLAY_CARD}`}>
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#8fdfff]">
           {t.resultEyebrow}
         </p>
         <h2 className="mt-2 text-3xl font-black">{t.resultHeadline}</h2>
-        <p className="mt-4 font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tabular-nums text-[#dff8ff]">
+        <p className="mt-4 font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tabular-nums text-[#dff8ff] phone-land:mt-2 phone-land:text-4xl">
           {score}
         </p>
         <p className="mt-2 text-sm text-[#f1d48c]">
           {t.bestScore}: {bestScore}
         </p>
         <p className="mt-3 text-sm uppercase tracking-[0.2em] text-white/70">{t.rating[ratingId]}</p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
+        <div className="mt-7 flex flex-wrap justify-center gap-3 phone-land:mt-4">
           <button
             type="button"
             className="rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#0b1220]"

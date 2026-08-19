@@ -103,7 +103,7 @@ export function TimeUpOverlay() {
           left: `calc(${SP_MINI_MAP_LEFT_OFFSET} + ${SP_MINI_MAP_OUTER_WIDTH} + 0.5rem)`,
         }}
       >
-        <section className="pointer-events-auto w-[min(46vw,13.5rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-3.5 py-3 text-white shadow-lg backdrop-blur-md">
+        <section className="pointer-events-auto w-[min(46vw,13.5rem)] rounded-2xl border border-amber-300/35 bg-neutral-950/88 px-3.5 py-3 text-white shadow-lg backdrop-blur-md phone-land:w-[min(42vw,16rem)]">
           <p className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-amber-300/95">
             {t.timeUpAnswerReveal}
           </p>

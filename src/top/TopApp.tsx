@@ -243,7 +243,7 @@ export function TopApp() {
 
       {parkReady ? (
         <LanguageSwitcher
-          className="pointer-events-auto absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-[60] sm:right-4"
+          className="pointer-events-auto absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-[60] sm:right-4 phone-land:top-[max(0.35rem,env(safe-area-inset-top))]"
           persistParkSessionOnSwitch
         />
       ) : null}
@@ -257,18 +257,18 @@ export function TopApp() {
       ) : null}
 
       {showSelectionCard && parkReady ? (
-        <div className="absolute inset-0 z-40 flex items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_50%_16%,rgba(88,64,122,0.32),transparent_42%),linear-gradient(180deg,rgba(3,5,16,0.42),rgba(3,5,16,0.84))] px-4 py-6 backdrop-blur-[4px]">
-          <section className="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/92 shadow-[0_28px_90px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="absolute inset-0 z-40 flex items-center justify-center overflow-y-auto bg-[radial-gradient(circle_at_50%_16%,rgba(88,64,122,0.32),transparent_42%),linear-gradient(180deg,rgba(3,5,16,0.42),rgba(3,5,16,0.84))] px-4 py-6 backdrop-blur-[4px] phone-land:px-3 phone-land:py-2">
+          <section className="relative w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/92 shadow-[0_28px_90px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)] phone-land:max-h-[calc(100dvh-0.5rem)]">
             <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#f1d48c] to-transparent" />
-            <div className="grid md:grid-cols-[0.9fr_1.1fr]">
-              <div className="relative flex min-h-72 items-center justify-center overflow-hidden border-b border-[#d4b46a]/20 bg-[radial-gradient(circle_at_50%_38%,rgba(134,86,166,0.3),transparent_45%),linear-gradient(160deg,#171225,#080a14)] p-7 md:border-b-0 md:border-r">
-                <div className="absolute inset-5 rounded-full border border-[#d4b46a]/10" />
-                <div className="absolute inset-10 rounded-full border border-[#d4b46a]/10" />
+            <div className="grid md:grid-cols-[0.9fr_1.1fr] phone-land:max-h-[calc(100dvh-0.5rem)] phone-land:grid-cols-[minmax(0,10rem)_1fr]">
+              <div className="relative flex min-h-72 items-center justify-center overflow-hidden border-b border-[#d4b46a]/20 bg-[radial-gradient(circle_at_50%_38%,rgba(134,86,166,0.3),transparent_45%),linear-gradient(160deg,#171225,#080a14)] p-7 md:border-b-0 md:border-r phone-land:min-h-0 phone-land:p-3">
+                <div className="absolute inset-5 rounded-full border border-[#d4b46a]/10 phone-land:hidden" />
+                <div className="absolute inset-10 rounded-full border border-[#d4b46a]/10 phone-land:hidden" />
                 <div className="relative">
-                  <div className="absolute -inset-3 rounded-[2rem] bg-[#d4b46a]/10 blur-xl" />
+                  <div className="absolute -inset-3 rounded-[2rem] bg-[#d4b46a]/10 blur-xl phone-land:hidden" />
                   <TargetPreview
                     meebitNumber={previewMeebitNumber}
-                    sizeClassName="relative h-52 w-52 rounded-[1.5rem] border border-[#d4b46a]/40 bg-[#10111d] shadow-2xl sm:h-60 sm:w-60"
+                    sizeClassName="relative h-52 w-52 rounded-[1.5rem] border border-[#d4b46a]/40 bg-[#10111d] shadow-2xl sm:h-60 sm:w-60 phone-land:h-28 phone-land:w-28"
                   />
                   <p className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-[0.62rem] font-bold tracking-[0.18em] text-[#f1d48c] backdrop-blur">
                     MEEBIT&nbsp; #{previewMeebitNumber}
@@ -276,19 +276,19 @@ export function TopApp() {
                 </div>
               </div>
 
-              <div className="p-6 sm:p-9">
+              <div className="p-6 sm:p-9 phone-land:flex phone-land:min-h-0 phone-land:flex-col phone-land:overflow-y-auto phone-land:p-4 phone-land:py-3">
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.38em] text-[#caa75b]">
                   {t.eyebrow}
                 </p>
-                <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-4xl leading-none text-[#f4ead2] sm:text-5xl">
+                <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-4xl leading-none text-[#f4ead2] sm:text-5xl phone-land:mt-1 phone-land:text-2xl">
                   {t.title}
                 </h1>
-                <div className="mt-4 h-px w-14 bg-[#caa75b]" />
-                <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6]">{t.subtitle}</p>
-                <p className="mt-2 max-w-sm text-xs leading-5 text-[#8f897e]">{t.meebitNote}</p>
+                <div className="mt-4 h-px w-14 bg-[#caa75b] phone-land:mt-2" />
+                <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6] phone-land:mt-2 phone-land:text-xs phone-land:leading-5">{t.subtitle}</p>
+                <p className="mt-2 max-w-sm text-xs leading-5 text-[#8f897e] phone-land:mt-1">{t.meebitNote}</p>
                 <ParkCreatorCredit />
 
-                <div className="mt-7">
+                <div className="mt-7 phone-land:mt-3">
                   <div className="flex items-center justify-between gap-3">
                     <label
                       htmlFor="top-meebit-number"
@@ -318,7 +318,7 @@ export function TopApp() {
 
                 <button
                   type="button"
-                  className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25),inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:brightness-110 active:scale-[0.99]"
+                  className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25),inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:brightness-110 active:scale-[0.99] phone-land:mt-3 phone-land:py-2.5"
                   onClick={requestEnterPark}
                 >
                   {t.enterPark}

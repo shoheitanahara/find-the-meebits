@@ -4,7 +4,7 @@ import { saveParkLocaleResume } from '../top/parkSession'
 
 /** ParkReturnButton ヘッダー直下・右上（各アトラクション共通） */
 export const LANGUAGE_SWITCHER_ATTRACTION_CLASS =
-  'pointer-events-auto absolute right-3 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60] sm:right-4'
+  'pointer-events-auto absolute right-3 top-[max(3.25rem,calc(env(safe-area-inset-top)+2.75rem))] z-[60] sm:right-4 phone-land:top-[max(2.35rem,calc(env(safe-area-inset-top)+1.85rem))]'
 
 export function LanguageSwitcher({
   className = '',

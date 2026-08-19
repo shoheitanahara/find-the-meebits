@@ -3,6 +3,7 @@ import { SHOOTING_GALLERY } from '../config'
 import { useShootingControlsStore } from '../controlsStore'
 import { shootingGalleryUi } from '../i18n'
 import { useShootingGalleryStore } from '../store'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 
 /** カウントダウンから照準可能。発砲ボタンはゲーム開始後のみ表示する。 */
 export function ShootingGalleryMobileControls() {
@@ -12,7 +13,7 @@ export function ShootingGalleryMobileControls() {
   return (
     <>
       <DragAimSurface />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
         <div className="flex items-end justify-between gap-3">
           <p className="pb-3 pl-2 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/55">
             {shootingGalleryUi().dragToAim}

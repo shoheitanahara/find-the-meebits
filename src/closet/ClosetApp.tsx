@@ -247,16 +247,16 @@ export function ClosetApp() {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(88,120,180,0.28),transparent_42%),linear-gradient(180deg,#0c1428_0%,#070914_55%,#05060e_100%)]" />
 
-      <div className="relative z-10 flex h-full min-h-0 flex-col px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(3.4rem,calc(env(safe-area-inset-top)+2.9rem))] sm:px-5">
-        <header className="mb-2 flex shrink-0 flex-wrap items-end justify-between gap-2">
+      <div className="relative z-10 flex h-full min-h-0 flex-col px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(3.4rem,calc(env(safe-area-inset-top)+2.9rem))] sm:px-5 phone-land:px-3 phone-land:pt-[max(2.35rem,calc(env(safe-area-inset-top)+1.9rem))]">
+        <header className="mb-2 flex shrink-0 flex-wrap items-end justify-between gap-2 phone-land:mb-1">
           <div>
             <p className="text-[0.58rem] font-semibold uppercase tracking-[0.32em] text-[#8eb4e8]">
               {t.eyebrow}
             </p>
-            <h1 className="mt-1 font-[family-name:Georgia,Times_New_Roman,serif] text-xl leading-none text-[#f4ead2] sm:text-3xl">
+            <h1 className="mt-1 font-[family-name:Georgia,Times_New_Roman,serif] text-xl leading-none text-[#f4ead2] sm:text-3xl phone-land:text-lg">
               {t.title}
             </h1>
-            <p className="mt-1 max-w-md text-[0.7rem] leading-5 text-[#a8b4c8] sm:text-xs">
+            <p className="mt-1 max-w-md text-[0.7rem] leading-5 text-[#a8b4c8] sm:text-xs phone-land:hidden">
               {t.subtitle}
             </p>
           </div>
@@ -272,9 +272,9 @@ export function ClosetApp() {
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 pb-4 lg:grid lg:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.35fr)] lg:items-start lg:gap-4">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 pb-4 lg:grid lg:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.35fr)] lg:items-start lg:gap-4 phone-land:grid phone-land:grid-cols-[minmax(180px,0.85fr)_minmax(0,1.25fr)] phone-land:gap-2 phone-land:pb-2">
             {/* NOW LOOK / NEW LOOK 比較 */}
-            <section className="rounded-[1.25rem] border border-[#6a9ee8]/35 bg-[#0c1528]/90 p-3 shadow-xl lg:sticky lg:top-0 lg:rounded-[1.5rem] lg:p-4">
+            <section className="rounded-[1.25rem] border border-[#6a9ee8]/35 bg-[#0c1528]/90 p-3 shadow-xl lg:sticky lg:top-0 lg:rounded-[1.5rem] lg:p-4 phone-land:sticky phone-land:top-0 phone-land:p-2">
               <div className="flex items-end justify-center gap-2 sm:gap-3">
                 <div className="flex min-w-0 flex-1 flex-col items-center">
                   <p className="mb-1.5 text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#8a96aa]">
@@ -282,7 +282,7 @@ export function ClosetApp() {
                   </p>
                   <TargetPreview
                     meebitNumber={savedMeebit}
-                    sizeClassName="h-24 w-24 rounded-[1.1rem] border border-white/15 bg-[#10182a] sm:h-28 sm:w-28 lg:h-40 lg:w-40 lg:rounded-[1.25rem]"
+                    sizeClassName="h-24 w-24 rounded-[1.1rem] border border-white/15 bg-[#10182a] sm:h-28 sm:w-28 lg:h-40 lg:w-40 lg:rounded-[1.25rem] phone-land:!h-16 phone-land:!w-16"
                   />
                   <p className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-sm text-[#a8b4c8]">
                     #{savedMeebit}
@@ -313,7 +313,7 @@ export function ClosetApp() {
                   </p>
                   <TargetPreview
                     meebitNumber={previewId}
-                    sizeClassName={`h-24 w-24 rounded-[1.1rem] border bg-[#10182a] sm:h-28 sm:w-28 lg:h-40 lg:w-40 lg:rounded-[1.25rem] ${
+                    sizeClassName={`h-24 w-24 rounded-[1.1rem] border bg-[#10182a] sm:h-28 sm:w-28 lg:h-40 lg:w-40 lg:rounded-[1.25rem] phone-land:!h-16 phone-land:!w-16 ${
                       isWearingPreview
                         ? 'border-white/15'
                         : 'border-[#f1d48c]/55 shadow-[0_0_0_1px_rgba(241,212,140,0.25)]'
@@ -427,7 +427,7 @@ export function ClosetApp() {
                     {compatibleOptions.length === 0 ? (
                       <p className="mt-3 py-3 text-center text-sm text-[#8a96aa]">{t.noCompatible}</p>
                     ) : (
-                      <div className="mt-2 grid grid-cols-3 items-start gap-1.5 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6">
+                      <div className="mt-2 grid grid-cols-3 items-start gap-1.5 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 phone-land:grid-cols-5">
                         {compatibleOptions.map((option) => (
                           <TraitOptionButton
                             key={option.poolKey}

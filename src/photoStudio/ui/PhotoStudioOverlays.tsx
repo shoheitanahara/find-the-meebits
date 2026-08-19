@@ -19,6 +19,11 @@ import { composeVisitPass } from '../capture/composeVisitPass'
 import { getStudioGl } from '../capture/studioGlBridge'
 import { photoStudioUi } from '../i18n'
 import { usePhotoStudioStore } from '../store'
+import {
+  PHONE_LAND_OVERLAY_CARD,
+  PHONE_LAND_OVERLAY_FRAME,
+  PHONE_LAND_OVERLAY_TITLE,
+} from '../../ui/phoneLandscape'
 
 /** スタート: 引き継いだ ID を表示しつつ変更可能。 */
 export function PhotoStudioStartScreen() {
@@ -44,56 +49,58 @@ export function PhotoStudioStartScreen() {
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto bg-black/55 backdrop-blur-sm">
-      <div className="flex min-h-full items-start justify-center px-4 pb-6 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.75rem))] sm:items-center sm:py-6">
-        <section className="w-full max-w-md rounded-[2rem] border border-[#8eb4e8]/40 bg-[#101820]/95 p-5 text-[#f4ead2] shadow-2xl sm:p-7">
-          <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-[#8eb4e8]/85">
+      <div className={`flex min-h-full items-start justify-center px-4 pb-6 pt-[max(5.5rem,calc(env(safe-area-inset-top)+4.75rem))] sm:items-center sm:py-6 ${PHONE_LAND_OVERLAY_FRAME}`}>
+        <section className={`w-full max-w-md rounded-[2rem] border border-[#8eb4e8]/40 bg-[#101820]/95 p-5 text-[#f4ead2] shadow-2xl sm:p-7 phone-land:max-w-2xl phone-land:grid phone-land:grid-cols-[auto_1fr] phone-land:items-center phone-land:gap-4 ${PHONE_LAND_OVERLAY_CARD}`}>
+          <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-[#8eb4e8]/85 phone-land:col-span-2">
             {t.rulesTitle}
           </p>
-          <h1 className="mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl">
+          <h1 className={`mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl phone-land:col-span-2 ${PHONE_LAND_OVERLAY_TITLE}`}>
             {t.title}
           </h1>
-          <p className="mt-3 text-center text-sm text-white/65">{t.subtitle}</p>
-          <p className="mt-1 text-center text-xs leading-relaxed text-[#8eb4e8]/75">{t.storyLine}</p>
-          <p className="mt-2 text-center text-xs leading-relaxed text-white/50">{t.controls}</p>
+          <p className="mt-3 text-center text-sm text-white/65 phone-land:col-span-2 phone-land:mt-1 phone-land:text-xs">{t.subtitle}</p>
+          <p className="mt-1 text-center text-xs leading-relaxed text-[#8eb4e8]/75 phone-land:col-span-2">{t.storyLine}</p>
+          <p className="mt-2 text-center text-xs leading-relaxed text-white/50 phone-land:hidden">{t.controls}</p>
 
-          <div className="mt-5 flex flex-col items-center">
+          <div className="mt-5 flex flex-col items-center phone-land:mt-0">
             <TargetPreview
               meebitNumber={previewMeebitNumber}
-              sizeClassName="h-36 w-36 rounded-[1.35rem] border border-[#8eb4e8]/35 bg-[#0a1018] shadow-xl sm:h-44 sm:w-44"
+              sizeClassName="h-36 w-36 rounded-[1.35rem] border border-[#8eb4e8]/35 bg-[#0a1018] shadow-xl sm:h-44 sm:w-44 phone-land:!h-24 phone-land:!w-24"
             />
             <p className="mt-2 font-mono text-sm tracking-wide text-[#8eb4e8]/90">
               #{previewMeebitNumber}
             </p>
           </div>
 
-          <label className="mt-5 block">
-            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/55">
-              {t.meebitId}
-            </span>
-            <input
-              type="number"
-              min={PHOTO_STUDIO.meebitIdMin}
-              max={PHOTO_STUDIO.meebitIdMax}
-              value={draftMeebitInput}
-              onChange={(event) => setDraftMeebitInput(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 font-mono text-lg text-white outline-none focus:border-[#8eb4e8]"
-            />
-            <span className="mt-1 block text-[0.65rem] text-white/40">{t.meebitHint}</span>
-          </label>
+          <div className="mt-5 phone-land:mt-0">
+            <label className="block">
+              <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/55">
+                {t.meebitId}
+              </span>
+              <input
+                type="number"
+                min={PHOTO_STUDIO.meebitIdMin}
+                max={PHOTO_STUDIO.meebitIdMax}
+                value={draftMeebitInput}
+                onChange={(event) => setDraftMeebitInput(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 font-mono text-lg text-white outline-none focus:border-[#8eb4e8] phone-land:py-2"
+              />
+              <span className="mt-1 block text-[0.65rem] text-white/40">{t.meebitHint}</span>
+            </label>
 
-          <button
-            type="button"
-            disabled={!canEnter}
-            className="mt-5 w-full rounded-full bg-[#8eb4e8] px-6 py-3 text-sm font-black uppercase tracking-[0.18em] text-[#101820] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-            onClick={() => {
-              const id = clampMeebitId(parsed)
-              usePlayerStore.getState().setMeebitNumber(id)
-              enterStudio(id)
-              void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
-            }}
-          >
-            {t.play}
-          </button>
+            <button
+              type="button"
+              disabled={!canEnter}
+              className="mt-5 w-full rounded-full bg-[#8eb4e8] px-6 py-3 text-sm font-black uppercase tracking-[0.18em] text-[#101820] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 phone-land:mt-3 phone-land:py-2.5"
+              onClick={() => {
+                const id = clampMeebitId(parsed)
+                usePlayerStore.getState().setMeebitNumber(id)
+                enterStudio(id)
+                void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+              }}
+            >
+              {t.play}
+            </button>
+          </div>
         </section>
       </div>
     </div>
@@ -167,8 +174,8 @@ export function PhotoStudioControls() {
   if (phase !== 'studio') return null
 
   return (
-    <aside className="pointer-events-auto flex h-full min-h-0 w-full flex-col border-white/10 bg-[#0c121a]/95 lg:w-[22rem] lg:shrink-0 lg:border-r xl:w-[24rem]">
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
+    <aside className="pointer-events-auto flex h-full min-h-0 w-full flex-col border-white/10 bg-[#0c121a]/95 lg:w-[22rem] lg:shrink-0 lg:border-r xl:w-[24rem] phone-land:border-r">
+      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 phone-land:px-3 phone-land:py-2">
         <div>
           <p className="text-[0.55rem] font-bold uppercase tracking-[0.22em] text-[#8eb4e8]/80">
             {t.title}
@@ -187,7 +194,7 @@ export function PhotoStudioControls() {
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 phone-land:space-y-3 phone-land:px-3 phone-land:py-2">
         <p className="text-[0.65rem] text-white/40">{t.dragHint}</p>
 
         <label className="block">
@@ -345,7 +352,7 @@ export function PhotoStudioControls() {
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-white/10 px-4 py-3">
+      <div className="space-y-2 border-t border-white/10 px-4 py-3 phone-land:px-3 phone-land:py-2">
         <CaptureButton className="w-full" />
         <VisitPassButton className="w-full" />
       </div>

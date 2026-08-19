@@ -3,6 +3,7 @@ import { STARLIGHT_RUSH } from '../config'
 import { useStarlightControlsStore } from '../controlsStore'
 import { starlightRushUi } from '../i18n'
 import { useStarlightRushStore } from '../store'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 
 export function StarlightRushMobileControls() {
   const phase = useStarlightRushStore((state) => state.phase)
@@ -11,7 +12,7 @@ export function StarlightRushMobileControls() {
   return (
     <>
       <DragAimSurface />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
         <div className="flex items-end justify-between gap-3">
           <p className="pb-3 pl-2 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/55">
             {starlightRushUi().dragToAim}

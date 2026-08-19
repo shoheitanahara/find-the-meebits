@@ -35,20 +35,41 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
   }, [onConfirm])
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-[#070914]/75 p-4 backdrop-blur-sm max-lg:px-3 max-lg:py-[max(1rem,env(safe-area-inset-top))]">
-      <section className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/95 p-5 text-[#f4ead2] shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:p-4 lg:p-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#caa75b]">{t.tips}</p>
-        <h2 className="mt-2 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl tracking-tight lg:text-3xl">
-          {t.beforeStart}
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#b8b2a6] max-lg:text-xs">{park.lead}</p>
-        <ParkDailyResetNotice />
+    <div className="pointer-events-auto absolute inset-0 z-[45] grid place-items-center bg-[#070914]/75 p-4 backdrop-blur-sm max-lg:px-3 max-lg:py-[max(1rem,env(safe-area-inset-top))] phone-land:!flex phone-land:!items-start phone-land:!justify-center phone-land:!overflow-y-auto phone-land:!p-2 phone-land:!pt-[max(0.35rem,env(safe-area-inset-top))]">
+      <section className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/95 p-5 text-[#f4ead2] shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:p-4 lg:p-7 phone-land:!h-auto phone-land:!max-h-full phone-land:max-w-3xl phone-land:overflow-y-auto phone-land:p-2.5">
+        <div className="phone-land:flex phone-land:items-center phone-land:justify-between phone-land:gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#caa75b]">{t.tips}</p>
+            <h2 className="mt-2 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl tracking-tight lg:text-3xl phone-land:mt-0.5 phone-land:text-lg">
+              {t.beforeStart}
+            </h2>
+          </div>
+          <button
+            type="button"
+            className="hidden shrink-0 rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-4 py-2 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#fff9e9] phone-land:inline-flex"
+            onClick={() => {
+              void unlockAudioIfNeeded().then(() => {
+                playSfx('uiConfirm')
+                onConfirm()
+              })
+            }}
+          >
+            {t.gotIt}
+          </button>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-[#b8b2a6] max-lg:text-xs phone-land:hidden">{park.lead}</p>
+        <div className="phone-land:hidden">
+          <ParkDailyResetNotice />
+        </div>
+        <div className="hidden phone-land:block">
+          <ParkDailyResetNotice compact />
+        </div>
 
-        <ul className="mt-5 space-y-3">
+        <ul className="mt-5 space-y-3 phone-land:mt-2 phone-land:grid phone-land:grid-cols-3 phone-land:gap-2 phone-land:space-y-0">
           {park.tips.map((tip, index) => (
             <li
               key={tip.title}
-              className="flex gap-3 rounded-2xl border border-[#d4b46a]/20 bg-[#141522]/80 px-3.5 py-3 max-lg:px-3 max-lg:py-2.5"
+              className="flex gap-3 rounded-2xl border border-[#d4b46a]/20 bg-[#141522]/80 px-3.5 py-3 max-lg:px-3 max-lg:py-2.5 phone-land:gap-2 phone-land:px-2 phone-land:py-2"
             >
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
                 {index === 0 ? (
@@ -61,17 +82,17 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-black max-lg:text-xs">{tip.title}</p>
-                <p className="mt-1 text-sm leading-snug text-[#b8b2a6] max-lg:text-xs">{tip.body}</p>
+                <p className="mt-1 text-sm leading-snug text-[#b8b2a6] max-lg:text-xs phone-land:mt-0.5 phone-land:text-[0.65rem]">{tip.body}</p>
               </div>
             </li>
           ))}
         </ul>
 
-        <p className="mt-4 text-xs leading-relaxed text-[#8f897e] max-lg:text-[0.65rem]">{park.controls}</p>
+        <p className="mt-4 text-xs leading-relaxed text-[#8f897e] max-lg:text-[0.65rem] phone-land:hidden">{park.controls}</p>
 
         <button
           type="button"
-          className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25)] transition hover:brightness-110 active:scale-[0.99] max-lg:py-3"
+          className="mt-5 w-full rounded-lg border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#fff9e9] shadow-[0_10px_30px_rgba(136,96,28,0.25)] transition hover:brightness-110 active:scale-[0.99] max-lg:py-3 phone-land:hidden"
           onClick={() => {
             void unlockAudioIfNeeded().then(() => {
               playSfx('uiConfirm')

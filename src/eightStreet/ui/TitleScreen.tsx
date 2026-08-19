@@ -11,15 +11,15 @@ export function TitleScreen() {
   if (phase !== 'title') return null
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_10%,#1a2744_0%,#0a1020_42%,#05070d_100%)] px-6 pt-10 text-center text-slate-100">
-      <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-200/70">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_35%_10%,#1a2744_0%,#0a1020_42%,#05070d_100%)] px-6 pt-10 text-center text-slate-100 phone-land:px-4 phone-land:pt-6">
+      <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-200/70 phone-land:mb-1">
         Meebits
       </p>
-      <h1 className="font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tracking-tight text-white sm:text-6xl">
+      <h1 className="font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tracking-tight text-white sm:text-6xl phone-land:text-3xl">
         {copy.title}
       </h1>
-      <p className="mt-4 max-w-sm text-base text-slate-300">{copy.subtitle}</p>
-      <div className="mt-10 flex w-full max-w-xs flex-col gap-3">
+      <p className="mt-4 max-w-sm text-base text-slate-300 phone-land:mt-2 phone-land:text-sm">{copy.subtitle}</p>
+      <div className="mt-10 flex w-full max-w-xs flex-col gap-3 phone-land:mt-4">
         <button
           type="button"
           className="rounded-md bg-amber-500 px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-slate-950 transition hover:bg-amber-400"

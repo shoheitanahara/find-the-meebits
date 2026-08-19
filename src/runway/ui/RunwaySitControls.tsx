@@ -3,6 +3,7 @@ import { getLocale } from '../../i18n/locale'
 import { useTouchControlsStore } from '../../stores/touchControlsStore'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { useRunwayStore } from '../store'
+import { PHONE_LAND_MOBILE_BAR } from '../../ui/phoneLandscape'
 
 const JOYSTICK_RADIUS = 44
 const BASE_SIZE = 112
@@ -16,7 +17,7 @@ const copy = {
 /** モバイル: ジョイスティック + Sit / Stand */
 export function RunwayMobileControls() {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+    <div className={`pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden ${PHONE_LAND_MOBILE_BAR}`}>
       <div className="flex items-end justify-between gap-3">
         <VirtualJoystick />
         <RunwaySitButton />

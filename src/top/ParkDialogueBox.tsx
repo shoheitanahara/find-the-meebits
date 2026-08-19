@@ -1,6 +1,7 @@
 import { ui } from '../i18n/ui'
 import { useDialogueStore } from '../dialogue/dialogueStore'
 import { TargetPreview } from '../ui/TargetPreview'
+import { PHONE_LAND_DIALOGUE } from '../ui/phoneLandscape'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
 import { usePlayerStore } from '../stores/playerStore'
 import { getLocale } from '../i18n/locale'
@@ -43,9 +44,9 @@ export function ParkDialogueBox() {
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)]">
+    <div className={`pointer-events-auto absolute inset-x-0 z-[35] mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)] ${PHONE_LAND_DIALOGUE}`}>
       <div className="rounded-3xl border border-[#d4b46a]/40 bg-[#0c0d18]/92 px-5 py-4 text-[#f4ead2] shadow-2xl backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
-        <div className="hidden sm:grid sm:grid-cols-[auto_1fr] sm:gap-4">
+        <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-4">
           <TargetPreview
             meebitNumber={npc.meebitNumber}
             modelScale={1.1}
@@ -68,7 +69,7 @@ export function ParkDialogueBox() {
             nextLabel={isLastLine ? t.done : t.nextLine}
           />
         </div>
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <ParkDialogueContent
             role={role}
             name={name}
@@ -146,6 +147,29 @@ function ParkDialogueContent({
           <h2 className={`mt-0.5 font-black text-[#f4ead2] ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
             {name}
           </h2>
+          {name.includes(`#${meebitNumber}`) ? (
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+              {isCurrentAvatar ? (
+                <span
+                  className={`rounded-full bg-white/10 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-[#d8c9aa] ${
+                    compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                  }`}
+                >
+                  {yourAvatarLabel}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className={`rounded-full border border-[#d4b46a]/40 bg-[#d4b46a]/10 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-[#e9cf91] transition hover:bg-[#d4b46a]/20 ${
+                    compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                  }`}
+                  onClick={onUseAvatar}
+                >
+                  {useAvatarLabel}
+                </button>
+              )}
+            </div>
+          ) : (
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
             <p className={`font-semibold text-[#b8b2a6] ${compact ? 'text-xs' : 'text-sm'}`}>
               Meebit #{meebitNumber}
@@ -170,6 +194,7 @@ function ParkDialogueContent({
               </button>
             )}
           </div>
+          )}
         </div>
         <button
           type="button"

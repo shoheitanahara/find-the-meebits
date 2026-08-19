@@ -53,13 +53,13 @@ export function AfterHoursUnlockOverlay({ isVisible, onComplete }: AfterHoursUnl
         <p className="after-hours-unlock-rise text-xs font-semibold uppercase tracking-[0.45em] text-fuchsia-300/90">
           {t.newVenue}
         </p>
-        <h2 className="after-hours-unlock-pop mt-4 text-5xl font-black uppercase tracking-tight text-white max-lg:text-4xl">
+        <h2 className="after-hours-unlock-pop mt-4 text-5xl font-black uppercase tracking-tight text-white max-lg:text-4xl phone-land:mt-2 phone-land:text-3xl">
           {t.afterHours}
         </h2>
-        <p className="after-hours-unlock-pop-delay mt-2 text-6xl font-black uppercase tracking-[0.08em] text-fuchsia-300 max-lg:text-5xl">
+        <p className="after-hours-unlock-pop-delay mt-2 text-6xl font-black uppercase tracking-[0.08em] text-fuchsia-300 max-lg:text-5xl phone-land:text-3xl">
           {t.afterHoursUnlocked}
         </p>
-        <p className="after-hours-unlock-rise-delay mt-6 max-w-md text-sm font-medium leading-relaxed text-violet-100/85">
+        <p className="after-hours-unlock-rise-delay mt-6 max-w-md text-sm font-medium leading-relaxed text-violet-100/85 phone-land:mt-3 phone-land:text-xs">
           {t.unlockBody}
         </p>
         <p className="after-hours-unlock-rise-delay mt-8 text-[0.65rem] font-bold uppercase tracking-[0.3em] text-fuchsia-200/70">

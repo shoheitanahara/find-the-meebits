@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { ui } from '../../i18n/ui'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
+import { PHONE_LAND_DIALOGUE } from '../../ui/phoneLandscape'
 import { SoldCornerRibbon } from '../ui/SoldCornerRibbon'
 import { getLocale } from '../../i18n/locale'
 import { isSoldMeebit, openseaAssetUrl } from '../../opensea/types'
@@ -44,9 +45,9 @@ export function MarketDialogueBox() {
   const viewLabel = locale === 'ja' ? 'OpenSeaで見る' : 'View on OpenSea'
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 z-30 mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)]">
+    <div className={`pointer-events-auto absolute inset-x-0 z-[35] mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)] ${PHONE_LAND_DIALOGUE}`}>
       <div className="rounded-3xl border border-sky-400/30 bg-[#0c1828]/92 px-5 py-4 text-[#e8f4ff] shadow-2xl backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
-        <div className="hidden sm:grid sm:grid-cols-[auto_1fr] sm:gap-4">
+        <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-4">
           <div className="relative h-40 w-40 overflow-hidden rounded-2xl">
             <TargetPreview
               meebitNumber={tokenId}
@@ -70,7 +71,7 @@ export function MarketDialogueBox() {
             priceEth={listing?.priceEth ?? null}
           />
         </div>
-        <div className="sm:hidden">
+        <div className="lg:hidden">
           <MarketDialogueContent
             role={role}
             name={name}
