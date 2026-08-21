@@ -429,13 +429,16 @@ function paintRecords(
 
     ctx.fillStyle = record.filled ? theme.inkMuted : theme.inkFaint
     ctx.font = labelFont
-    ctx.fillText(record.label, x, y)
-    const labelWidth = ctx.measureText(record.label).width
+    const labelText = fitText(ctx, record.label, colW * 0.48)
+    ctx.fillText(labelText, x, y)
+    const labelWidth = ctx.measureText(labelText).width
 
     ctx.fillStyle = record.filled ? theme.ink : theme.inkFaint
     ctx.font = record.filled ? detailFontFilled : detailFontEmpty
-    const detailW = ctx.measureText(record.detail).width
-    ctx.fillText(record.detail, x + colW - detailW, y)
+    const maxDetailW = Math.max(24, colW - labelWidth - 16)
+    const detailText = fitText(ctx, record.detail, maxDetailW)
+    const detailW = ctx.measureText(detailText).width
+    ctx.fillText(detailText, x + colW - detailW, y)
 
     if (record.filled && colW - detailW - labelWidth > 24) {
       ctx.strokeStyle = withAlpha(theme.rule, 0.1)
@@ -448,6 +451,19 @@ function paintRecords(
       ctx.setLineDash([])
     }
   })
+}
+
+/** 列幅に収まるまで末尾を省略（…）。 */
+function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  if (ctx.measureText(text).width <= maxWidth) return text
+  const ellipsis = '…'
+  let end = text.length
+  while (end > 1) {
+    end -= 1
+    const candidate = `${text.slice(0, end).trimEnd()}${ellipsis}`
+    if (ctx.measureText(candidate).width <= maxWidth) return candidate
+  }
+  return ellipsis
 }
 
 function planRecordsLayout(count: number, maxBandH: number) {

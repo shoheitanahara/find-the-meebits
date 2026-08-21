@@ -1,4 +1,10 @@
 import { getLocale } from '../i18n/locale'
+import { getRatingId as getShootingRatingId } from '../shootingGallery/config'
+import { shootingGalleryUi } from '../shootingGallery/i18n'
+import { getRatingId as getShoreFishingRatingId } from '../shoreFishing/config'
+import { ratingLabel as shoreFishingRatingLabel } from '../shoreFishing/i18n'
+import { getRatingId as getStarlightRatingId } from '../starlightRush/config'
+import { starlightRushUi } from '../starlightRush/i18n'
 import { getUtcDateKey } from '../top/dailyFeatured'
 
 /** 来場証1行（常時枠。未記録は detail が空表示用） */
@@ -143,11 +149,44 @@ function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
 
+/** スコア系: `12,450 · Sharpshooter` */
+function scoreWithRatingDetail(score: number, ratingLabel: string, locale: 'en' | 'ja') {
+  if (score <= 0) return null
+  return `${scoreDetail(score, locale)} · ${ratingLabel}`
+}
+
+/**
+ * 登山系: 高度 + クリア済み最高ステージ。
+ * unlockedStage は「次に遊べる」なので、クリア数は unlockedStage - 1。
+ */
+function climbDetail(payload: HeightPayload | null, locale: 'en' | 'ja') {
+  if (!payload) return null
+  const height = Math.floor(payload.heightBestM ?? 0)
+  const clearedStages = Math.max(0, (payload.unlockedStage ?? 1) - 1)
+  if (height <= 0 && clearedStages <= 0) return null
+
+  const parts: string[] = []
+  if (height > 0) parts.push(`${height}m`)
+  if (clearedStages > 0) {
+    parts.push(locale === 'ja' ? `ステージ${clearedStages}クリア` : `Stage ${clearedStages} clear`)
+  }
+  return parts.join(' · ')
+}
+
+function huntDetail(payload: HuntPayload | null, locale: 'en' | 'ja') {
+  if (!payload) return null
+  const stage =
+    locale === 'ja' ? `ステージ ${payload.stageNumber}` : `Stage ${payload.stageNumber}`
+  if (payload.clearTimeSeconds == null) return stage
+  return `${stage} · ${formatClearTimeDetail(payload.clearTimeSeconds)}`
+}
+
 const EMPTY = '—'
 
 /**
  * 来場証用: 全アトラクションを固定順で返す（未プレイは —）。
  * Photo Booth 自身は含めない。
+ * スコア系は称号、登山はクリアステージも併記する。
  */
 export function collectVisitPassLines(): VisitPassLine[] {
   const locale = getLocale()
@@ -176,35 +215,40 @@ export function collectVisitPassLines(): VisitPassLine[] {
     filled: Boolean(detail && detail.trim()),
   })
 
+  const shootingRating =
+    shooting && shooting.score > 0
+      ? shootingGalleryUi().rating[getShootingRatingId(shooting.score)]
+      : ''
+  const starlightRating =
+    starlight && starlight.score > 0
+      ? starlightRushUi().rating[getStarlightRatingId(starlight.score)]
+      : ''
+  const fishingRating =
+    fishing && fishing.score > 0
+      ? shoreFishingRatingLabel(getShoreFishingRatingId(fishing.score))
+      : ''
+
   return [
     line(
       'starlight',
       locale === 'ja' ? 'スターライト・ラッシュ' : 'Starlight Rush',
-      starlight && starlight.score > 0 ? scoreDetail(starlight.score, locale) : null,
+      starlight ? scoreWithRatingDetail(starlight.score, starlightRating, locale) : null,
     ),
     line(
       'shooting',
       locale === 'ja' ? 'シューティングギャラリー' : 'Shooting Gallery',
-      shooting && shooting.score > 0 ? scoreDetail(shooting.score, locale) : null,
+      shooting ? scoreWithRatingDetail(shooting.score, shootingRating, locale) : null,
     ),
     line(
       'fishing',
       locale === 'ja' ? 'ショアフィッシング' : 'Shore Fishing',
-      fishing && fishing.score > 0 ? scoreDetail(fishing.score, locale) : null,
+      fishing ? scoreWithRatingDetail(fishing.score, fishingRating, locale) : null,
     ),
-    line(
-      'mountain',
-      'Mt. Meeb',
-      mountain && (mountain.heightBestM ?? 0) > 0
-        ? `${Math.floor(mountain.heightBestM ?? 0)}m`
-        : null,
-    ),
+    line('mountain', 'Mt. Meeb', climbDetail(mountain, locale)),
     line(
       'neon',
       locale === 'ja' ? 'ジェリーマウンテン' : 'Jerry Mountain',
-      neon && (neon.heightBestM ?? 0) > 0
-        ? `${Math.floor(neon.heightBestM ?? 0)}m`
-        : null,
+      climbDetail(neon, locale),
     ),
     line(
       'street',
@@ -215,23 +259,11 @@ export function collectVisitPassLines(): VisitPassLine[] {
           : `Clear ${formatClearTimeDetail(street.clearTimeSeconds)}`
         : null,
     ),
-    line(
-      'find',
-      'Find the Meebit',
-      find
-        ? locale === 'ja'
-          ? `ステージ ${find.stageNumber}`
-          : `Stage ${find.stageNumber}`
-        : null,
-    ),
+    line('find', 'Find the Meebit', huntDetail(find, locale)),
     line(
       'traits',
       locale === 'ja' ? 'トレイトハント' : 'Trait Hunt',
-      traits
-        ? locale === 'ja'
-          ? `ステージ ${traits.stageNumber}`
-          : `Stage ${traits.stageNumber}`
-        : null,
+      huntDetail(traits, locale),
     ),
     line(
       'runway',

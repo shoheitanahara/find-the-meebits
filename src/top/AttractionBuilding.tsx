@@ -478,22 +478,7 @@ function OpenSeaMarketLandmark({
         <boxGeometry args={[6.2, 0.28, 5.5]} />
         <meshStandardMaterial color={roofColor} roughness={0.4} metalness={0.22} />
       </mesh>
-      {/* 入口サイン帯 */}
-      <mesh position={[0, 2.85, 2.55]} castShadow>
-        <boxGeometry args={[4.2, 0.55, 0.12]} />
-        <meshStandardMaterial color="#0b1a2e" roughness={0.55} metalness={0.2} />
-      </mesh>
-      <Text
-        position={[0, 2.85, 2.64]}
-        fontSize={0.28}
-        color="#e8f2ff"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={4}
-      >
-        OpenSea Market
-      </Text>
-      {/* 円形ロゴ板 + OpenSea ブランド画像 */}
+      {/* 円形ロゴ板 + OpenSea ブランド画像（入口タイトルは TitleBanner に任せる） */}
       <mesh position={[0, 1.55, 2.52]} castShadow>
         <cylinderGeometry args={[0.72, 0.72, 0.1, 24]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} roughness={0.4} />
