@@ -4,18 +4,14 @@ import { Group, MathUtils } from 'three'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../../avatar/VRMLocomotion'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { useVRMModel } from '../../avatar/useVRMModel'
-import { INTERACTION_DISTANCE, VRM_WORLD_SCALE } from '../../game/gameConfig'
+import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { distanceToSergito, isWorkshopPositionWalkable, isWorkshopWalkerPositionWalkable } from '../collisions'
 import { MEET_SERGITO } from '../config'
-import { meetSergitoPlayerWorld } from '../playerWorld'
 import { useMeetSergitoStore } from '../store'
 import { getWorkshopWalkerMeebitIds } from './workshopFigureLayout'
 
 const WALKER_WALK_SPEED = 1.15
 const WALKER_RADIUS = 0.36
-const PLAYER_STOP_DISTANCE = INTERACTION_DISTANCE + 1
-const MIN_PLAYER_PAUSE_SECONDS = 2.2
-const MAX_PLAYER_PAUSE_SECONDS = 4.2
 
 /** パーク TopNpc と同じ歩行パターン */
 const WALKER_PATTERNS = [
@@ -30,11 +26,6 @@ type WalkerSpawn = {
   z: number
   rotationY: number
   walkPattern: 0 | 1 | 2
-}
-
-function seededNoise(seed: number) {
-  const value = Math.sin(seed * 12.9898) * 43758.5453
-  return value - Math.floor(value)
 }
 
 function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
@@ -82,33 +73,6 @@ function createWalkerSpawns(meebitIds: readonly number[]): WalkerSpawn[] {
   return spawns
 }
 
-function getWalkerStoppedForPlayer({
-  distance,
-  elapsedTime,
-  pauseSeed,
-  playerPauseUntilRef,
-}: {
-  distance: number
-  elapsedTime: number
-  pauseSeed: number
-  playerPauseUntilRef: { current: number }
-}) {
-  if (distance > PLAYER_STOP_DISTANCE) {
-    playerPauseUntilRef.current = 0
-    return false
-  }
-
-  if (playerPauseUntilRef.current === 0) {
-    const pauseNoise = seededNoise(pauseSeed * 4.17 + elapsedTime * 0.41)
-    playerPauseUntilRef.current =
-      elapsedTime +
-      MIN_PLAYER_PAUSE_SECONDS +
-      pauseNoise * (MAX_PLAYER_PAUSE_SECONDS - MIN_PLAYER_PAUSE_SECONDS)
-  }
-
-  return elapsedTime < playerPauseUntilRef.current
-}
-
 function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number }) {
   const groupRef = useRef<Group>(null)
   const walkPattern = WALKER_PATTERNS[spawn.walkPattern]
@@ -120,7 +84,6 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
       : walkPattern.idleSeconds[0] +
           ((index * 0.53) % 1) * (walkPattern.idleSeconds[1] - walkPattern.idleSeconds[0]),
   )
-  const playerPauseUntilRef = useRef(0)
   const rotationYRef = useRef(spawn.rotationY)
   const targetRotationYRef = useRef(spawn.rotationY)
   const localTimeRef = useRef(index * 0.37)
@@ -135,40 +98,10 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
     }
   }, [index, setWalkerVrmReady, status, vrmScene])
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     const safeDelta = Math.min(Math.max(delta, 0), 0.05)
     const group = groupRef.current
     localTimeRef.current += safeDelta
-
-    const playerReady = meetSergitoPlayerWorld.ready
-    const dx = group && playerReady ? meetSergitoPlayerWorld.x - group.position.x : 0
-    const dz = group && playerReady ? meetSergitoPlayerWorld.z - group.position.z : 0
-    const distance = Math.hypot(dx, dz)
-    const isStoppedForPlayer =
-      playerReady &&
-      getWalkerStoppedForPlayer({
-        distance,
-        elapsedTime: state.clock.elapsedTime,
-        pauseSeed: spawn.meebitNumber,
-        playerPauseUntilRef,
-      })
-
-    if (isStoppedForPlayer && group) {
-      const faceY = Math.atan2(dx, dz)
-      rotationYRef.current = faceY
-      targetRotationYRef.current = faceY
-      group.rotation.y = faceY
-      group.position.y = groundY
-      applyVRMLocomotion(vrmRef.current, {
-        elapsedTime: localTimeRef.current,
-        isMoving: false,
-        isRunning: false,
-        idleOffset: index * 0.61,
-        walkPhaseOffset,
-      })
-      update(safeDelta)
-      return
-    }
 
     behaviorTimerRef.current -= safeDelta
 
