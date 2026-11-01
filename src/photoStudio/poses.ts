@@ -33,8 +33,11 @@ const waveArm = {
  * Z=0 が T ポーズ、正が体側下ろしなので、万歳は Z を 0 より少し反対側へ。
  */
 const cheerArm = { upperX: 0.28, upperZ: -0.55, elbowX: 0.22 } as const
+/** フィギュア下垂。attention よりわずかに脇を閉じる */
+const figureArmZ = { left: 1.58, right: -1.58 } as const
 const elbowRest = 0.03
 const kneeBaseBend = -0.16
+const HALF_PI = Math.PI / 2
 
 /**
  * Runway 歩行（applyVRMLocomotion）を静止させた位相。
@@ -125,6 +128,56 @@ function applyStudioAttentionPose(vrm: VRM) {
   applyVRMAttentionPose(vrm)
 }
 
+/**
+ * BAYC 寄りの退屈 — 片足重心。腕は下垂のまま捻らない。
+ * 胴の正 X は後傾（後ろ倒れ）なので使わない。猫背は負 X。Head 負 X ＝顎引き。
+ */
+function applyStudioBoredPose(vrm: VRM) {
+  resetShoulders(vrm)
+  resetHands(vrm)
+  set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0.04, z: 0.08 })
+  set(bone(vrm, VRMHumanBoneName.Spine), { x: -0.05, y: -0.03, z: -0.04 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.04, y: -0.04, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: -0.1, y: 0.18, z: 0.02 })
+  setArm(vrm, 'left', { upperX: 0.12, upperZ: figureArmZ.left, lowerX: 0.14 })
+  setArm(vrm, 'right', { upperX: 0.08, upperZ: figureArmZ.right, lowerX: 0.1 })
+  set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 0.02, y: 0.02, z: -0.08 })
+  set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 0.2, y: -0.04, z: 0.06 })
+  set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: -0.04, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightLowerLeg), { x: -0.38, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.LeftFoot), { x: 0.04, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightFoot), { x: 0.1, y: 0, z: 0 })
+}
+
+/** 直立のまま顔だけカメラから外す。 */
+function applyStudioLookAwayPose(vrm: VRM) {
+  applyVRMAttentionPose(vrm)
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: 0, y: -0.1, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: 0.04, y: -0.62, z: 0.06 })
+}
+
+/**
+ * 射撃と同じ前方出し（UpperArm x ≈ π/2、y は使わない）。銃なし。
+ * 少し上を指し、顔もそちらへ。
+ */
+function applyStudioPointPose(vrm: VRM) {
+  applyVRMShootingPose(vrm, { aimPitch: 0.1, recoil: 0 })
+  set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Spine), { x: 0, y: 0.06, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: 0, y: 0.04, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: 0.1, y: 0.12, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightUpperArm), {
+    x: HALF_PI + 0.1,
+    y: 0,
+    z: attentionArmZ.right,
+  })
+}
+
+/** 直立と同じ。台座は StudioPlayer 側。 */
+function applyStudioFigurePose(vrm: VRM) {
+  applyVRMAttentionPose(vrm)
+}
+
 /** 右手を顔横へ上げる。 */
 function applyStudioWavePose(vrm: VRM) {
   resetTorso(vrm)
@@ -203,12 +256,28 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
     applyVRMSitPose(vrm)
     return
   }
+  if (poseId === 'bored') {
+    applyStudioBoredPose(vrm)
+    return
+  }
+  if (poseId === 'lookAway') {
+    applyStudioLookAwayPose(vrm)
+    return
+  }
   if (poseId === 'wave') {
     applyStudioWavePose(vrm)
     return
   }
   if (poseId === 'cheer') {
     applyStudioCheerPose(vrm)
+    return
+  }
+  if (poseId === 'point') {
+    applyStudioPointPose(vrm)
+    return
+  }
+  if (poseId === 'figure') {
+    applyStudioFigurePose(vrm)
     return
   }
   if (poseId === 'shoot') {

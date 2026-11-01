@@ -1,6 +1,6 @@
 # Photo Booth — アバター操作・カメラの落とし所
 
-最終更新: 2026-08-05
+最終更新: 2026-11-02
 
 正方形 PFP / 来場証明書用スタジオ。ルート: `/photo-booth` `/jp/photo-booth`（互換 `/pfp-studio`）。  
 正本: `src/photoStudio/`（`config.ts`・`poses.ts`・`player/StudioPlayer.tsx`・`world/`）
@@ -24,13 +24,17 @@
 | id | 実装の要点 |
 |----|------------|
 | `attention` | 直立。腕 attention z |
+| `bored` | 片足重心・猫背。腕はフィギュア下垂。顎引き（負 X） |
+| `lookAway` | 直立のまま Head Y で顔を外す |
 | `wave` | 右手顔横。`upperY` 寄せ + 肘。左は下ろし |
 | `cheer` | 両手を z のみ上げ（捻りなし） |
+| `point` | 射撃と同じ前方出し（`x ≈ π/2`）。銃なし。少し上を指す |
 | `shoot` | `applyVRMShootingPose` + `ShootingPistol` 右手追従 |
 | `gm` | 射撃と同じ腕。前傾リセット。顎上げ。マグ右手追従（白／黒選択・GM 文字は背景色） |
 | `walk` | `applyVRMLocomotion` を **左手前・右足前** の位相で固定（`WALK_POSE_ELAPSED`） |
 | `jump` | `isAirborne: true`（Mountain と同じ脚たたみ）。`jumpLiftY` で浮かせる |
 | `sit` | `applyVRMSitPose` + `StudioSitChair`（Sit 時のみ表示） |
+| `figure` | Stand と同じ直立 + 1段黒台座（`modelLiftY` で上面へ） |
 
 分岐: `poses.ts` → `applyStudioPose`。UI は `PHOTO_STUDIO.poses` を map。
 
@@ -91,6 +95,14 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 
 ---
 
+## Figure 台座
+
+`figurePedestal`（`config.ts`）+ `StudioFigurePedestal.tsx`
+
+1段の黒ボクセル。底は影受け面（world y=0）、Meebit は `modelLiftY` で上面へ。ポーズは Stand と同じ。
+
+---
+
 ## カメラ角度（構図の中央寄せ）
 
 `cameraAngles[].setups.{full,bust}` — `cameraPosition` + `cameraLookAt` + `fov`
@@ -143,6 +155,7 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | プレイヤー・小道具追従 | `src/photoStudio/player/StudioPlayer.tsx` |
 | マグ | `src/photoStudio/world/StudioGmMug.tsx` |
 | Sit 椅子 | `src/photoStudio/world/StudioSitChair.tsx` |
+| Figure 台座 | `src/photoStudio/world/StudioFigurePedestal.tsx` |
 | ロコモーション（Walk/Jump/Shoot/Sit/**Fishing**） | `src/avatar/VRMLocomotion.ts` |
 | 腕規約メモ | `memory-bank/meebitVrmArms.md` |
 | Shore Fishing | `memory-bank/shoreFishing.md` |

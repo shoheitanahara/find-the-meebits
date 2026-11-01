@@ -199,13 +199,17 @@ export const PHOTO_STUDIO = {
    */
   poses: [
     { id: 'attention', label: { en: 'Stand', ja: '直立' } },
+    { id: 'bored', label: { en: 'Bored', ja: '退屈' } },
+    { id: 'lookAway', label: { en: 'Look away', ja: 'そっぽ' } },
     { id: 'wave', label: { en: 'Wave', ja: '手を振る' } },
     { id: 'cheer', label: { en: 'Cheer', ja: '万歳' } },
+    { id: 'point', label: { en: 'Point', ja: '指差し' } },
     { id: 'shoot', label: { en: 'Shoot', ja: '射撃' } },
     { id: 'gm', label: { en: 'GM', ja: 'GM' } },
     { id: 'walk', label: { en: 'Walk', ja: '歩き' } },
     { id: 'jump', label: { en: 'Jump', ja: 'ジャンプ' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
+    { id: 'figure', label: { en: 'Figure', ja: 'フィギュア' } },
   ] as const,
 
   /**
@@ -297,6 +301,27 @@ export const PHOTO_STUDIO = {
       back: '#5a4538',
       leg: '#4a3a30',
     },
+  },
+
+  /**
+   * Figure 用の1段黒台座。
+   * 底は影受け面（world y=0）、Meebit は modelLiftY で上面へ乗せる。
+   */
+  figurePedestal: {
+    size: [0.96, 0.08, 0.96] as const,
+    /** 中心 Y（group は modelGroundY。底が world 0 になるよう 0.055 + 高さ/2） */
+    y: 0.095,
+    color: '#000000',
+    roughness: 1,
+    metalness: 0,
+    /** スタジオ IBL で上面が白く飛ばないように切る */
+    envMapIntensity: 0,
+    /**
+     * 上面のワールド高さ。足元 = modelGroundY + VRM_FEET_Y_OFFSET(0.06) なので
+     * modelLiftY = height - (modelGroundY + 0.06) = 0.08 - 0.005。
+     */
+    height: 0.08,
+    modelLiftY: 0.075,
   },
 
   lighting: {
