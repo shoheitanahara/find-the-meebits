@@ -34,6 +34,7 @@
 | `walk` | `applyVRMLocomotion` を **左手前・右足前** の位相で固定（`WALK_POSE_ELAPSED`） |
 | `jump` | `isAirborne: true`（Mountain と同じ脚たたみ）。`jumpLiftY` で浮かせる |
 | `sit` | `applyVRMSitPose` + `StudioSitChair`（Sit 時のみ表示） |
+| `sleep` | 胎児ポーズ + group を Z−90° で横向き。`StudioSleepSofa`（Sleep 時のみ） |
 | `figure` | Stand と同じ直立 + 1段黒台座（`modelLiftY` で上面へ） |
 
 分岐: `poses.ts` → `applyStudioPose`。UI は `PHOTO_STUDIO.poses` を map。
@@ -92,6 +93,22 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | 短くするとき | 高さを減らし、上端が座面に届くよう `y` を半分の減分だけ上げる |
 
 背もたれは local **-Z**（Runway ベンチと同じ）。
+
+---
+
+## Sleep ソファ
+
+`sleepSofa`（`config.ts`）+ `StudioSleepSofa.tsx`
+
+横倒しはボーンの正 X ではなく **group `rotation.z = −π/2`**（頭が +X、右側面が下）。  
+`hipsOffsetY` で足元原点をヒップへ戻してから回す。膝曲げは Sit と同じ UpperLeg X。
+
+| 項目 | キー |
+|------|------|
+| 座面 | `seat.y` / `seat.size` |
+| 本体位置 | `body.position`（座面の上） |
+| 横倒し | `body.rotation` |
+| ヒップ合わせ | `body.hipsOffsetY` |
 
 ---
 
@@ -156,6 +173,7 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | マグ | `src/photoStudio/world/StudioGmMug.tsx` |
 | Sit 椅子 | `src/photoStudio/world/StudioSitChair.tsx` |
 | Figure 台座 | `src/photoStudio/world/StudioFigurePedestal.tsx` |
+| Sleep ソファ | `src/photoStudio/world/StudioSleepSofa.tsx` |
 | ロコモーション（Walk/Jump/Shoot/Sit/**Fishing**） | `src/avatar/VRMLocomotion.ts` |
 | 腕規約メモ | `memory-bank/meebitVrmArms.md` |
 | Shore Fishing | `memory-bank/shoreFishing.md` |

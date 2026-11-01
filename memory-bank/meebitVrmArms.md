@@ -87,7 +87,7 @@ z: MathUtils.lerp(rodArmZClosed, rodArmZWalk, movementWeight)
 ## 限界とポーズ選定
 
 - 完全な腕組み・腰に手・力こぶは、肘曲げ近似でも掌／肩が崩れる → **採用しない**
-- Photo Booth 採用ポーズ: Stand / Bored / Look away / Wave / Cheer / Point / Shoot / GM / Walk / Jump / Sit / Figure（詳細は `photoStudio.md`）
+- Photo Booth 採用ポーズ: Stand / Bored / Look away / Wave / Cheer / Point / Shoot / GM / Walk / Jump / Sit / Sleep / Figure（詳細は `photoStudio.md`）
 - 射的・GM の前方銃／マグ構えは意図的に `x` を使う例外（掌より道具の向き優先）
 - 釣りの前方出しも `x` を使うが、**y は常に 0**。脇の調整は **z 係数だけ**（`rodArmZClosed` / `rodArmZWalk`）
 

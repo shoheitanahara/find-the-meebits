@@ -178,6 +178,36 @@ function applyStudioFigurePose(vrm: VRM) {
   applyVRMAttentionPose(vrm)
 }
 
+/**
+ * ソファで横向きに寝る — 横倒しは StudioPlayer の group 回転。
+ * ボーンは立位空間で胎児（膝を抱える）。胴の正 X は後傾なので使わない。
+ * 右腕は脇にすると座面を突き抜けるので、少し前へ出して胸の上へ。
+ */
+function applyStudioSleepPose(vrm: VRM) {
+  resetShoulders(vrm)
+  resetHands(vrm)
+  set(bone(vrm, VRMHumanBoneName.Hips), { x: 0, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Spine), { x: -0.14, y: -0.04, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Chest), { x: -0.08, y: -0.02, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.Head), { x: 0.1, y: -0.18, z: -0.06 })
+  setArm(vrm, 'left', {
+    upperX: 0.22,
+    upperZ: attentionArmZ.left * 0.96,
+    lowerX: 0.72,
+  })
+  setArm(vrm, 'right', {
+    upperX: 0.42,
+    upperZ: attentionArmZ.right * 0.98,
+    lowerX: 0.82,
+  })
+  set(bone(vrm, VRMHumanBoneName.LeftUpperLeg), { x: 1.05, y: 0.06, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightUpperLeg), { x: 1.18, y: -0.04, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.LeftLowerLeg), { x: -1.25, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightLowerLeg), { x: -1.38, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.LeftFoot), { x: -0.08, y: 0, z: 0 })
+  set(bone(vrm, VRMHumanBoneName.RightFoot), { x: -0.1, y: 0, z: 0 })
+}
+
 /** 右手を顔横へ上げる。 */
 function applyStudioWavePose(vrm: VRM) {
   resetTorso(vrm)
@@ -254,6 +284,10 @@ export function applyStudioPose(vrm: VRM | null, poseId: PhotoStudioPoseId) {
 
   if (poseId === 'sit') {
     applyVRMSitPose(vrm)
+    return
+  }
+  if (poseId === 'sleep') {
+    applyStudioSleepPose(vrm)
     return
   }
   if (poseId === 'bored') {

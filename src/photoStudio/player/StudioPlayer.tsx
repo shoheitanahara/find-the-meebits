@@ -14,6 +14,7 @@ import { usePhotoStudioStore } from '../store'
 import { StudioFigurePedestal } from '../world/StudioFigurePedestal'
 import { StudioGmMug } from '../world/StudioGmMug'
 import { StudioSitChair } from '../world/StudioSitChair'
+import { StudioSleepSofa } from '../world/StudioSleepSofa'
 
 const handWorld = new Vector3()
 
@@ -79,6 +80,8 @@ export function StudioPlayer() {
   const isGm = poseId === 'gm'
   const isJump = poseId === 'jump'
   const isFigure = poseId === 'figure'
+  const isSleep = poseId === 'sleep'
+  const sleepBody = PHOTO_STUDIO.sleepSofa.body
   const letterColor = getBackground(backgroundId).color
   const groundY =
     PHOTO_STUDIO.modelGroundY + (isJump ? PHOTO_STUDIO.jumpLiftY : 0)
@@ -117,13 +120,27 @@ export function StudioPlayer() {
       rotation={[0, rotYaw, 0]}
     >
       {poseId === 'sit' ? <StudioSitChair /> : null}
+      {isSleep ? <StudioSleepSofa /> : null}
       {isFigure ? <StudioFigurePedestal /> : null}
-      <group position={[0, isFigure ? PHOTO_STUDIO.figurePedestal.modelLiftY : 0, 0]}>
-        {vrmScene ? (
-          <primitive object={vrmScene} scale={VRM_WORLD_SCALE * PHOTO_STUDIO.modelScale} />
-        ) : (
-          <MeebitSilhouette />
-        )}
+      <group
+        position={
+          isSleep
+            ? [sleepBody.position[0], sleepBody.position[1], sleepBody.position[2]]
+            : [0, isFigure ? PHOTO_STUDIO.figurePedestal.modelLiftY : 0, 0]
+        }
+        rotation={
+          isSleep
+            ? [sleepBody.rotation[0], sleepBody.rotation[1], sleepBody.rotation[2]]
+            : [0, 0, 0]
+        }
+      >
+        <group position={[0, isSleep ? sleepBody.hipsOffsetY : 0, 0]}>
+          {vrmScene ? (
+            <primitive object={vrmScene} scale={VRM_WORLD_SCALE * PHOTO_STUDIO.modelScale} />
+          ) : (
+            <MeebitSilhouette />
+          )}
+        </group>
       </group>
       {isShoot ? (
         <group

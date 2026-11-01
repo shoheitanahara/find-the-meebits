@@ -209,6 +209,7 @@ export const PHOTO_STUDIO = {
     { id: 'walk', label: { en: 'Walk', ja: '歩き' } },
     { id: 'jump', label: { en: 'Jump', ja: 'ジャンプ' } },
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
+    { id: 'sleep', label: { en: 'Sleep', ja: '睡眠' } },
     { id: 'figure', label: { en: 'Figure', ja: 'フィギュア' } },
   ] as const,
 
@@ -300,6 +301,52 @@ export const PHOTO_STUDIO = {
       seat: '#6b5344',
       back: '#5a4538',
       leg: '#4a3a30',
+    },
+  },
+
+  /**
+   * Sleep 用ソファ。長辺は local X。背もたれは Sit と同じ local -Z。
+   * 本体はボーンで倒さず、body.rotation で横向きに寝かせる。
+   */
+  sleepSofa: {
+    offset: [0, 0, -0.12] as const,
+    seat: {
+      size: [2.2, 0.14, 0.86] as const,
+      y: 0.4,
+    },
+    back: {
+      size: [2.2, 0.7, 0.12] as const,
+      position: [0, 0.78, -0.37] as const,
+    },
+    arm: {
+      size: [0.14, 0.3, 0.86] as const,
+      y: 0.62,
+      x: 1.03,
+    },
+    leg: {
+      size: [0.1, 0.33, 0.1] as const,
+      y: 0.165,
+      positions: [
+        [-0.95, 0.32],
+        [0.95, 0.32],
+        [-0.95, -0.32],
+        [0.95, -0.32],
+      ] as const,
+    },
+    colors: {
+      seat: '#5c4a56',
+      back: '#4e3f4a',
+      arm: '#534553',
+      leg: '#3a3030',
+    },
+    /**
+     * ヒップを回転中心にして Z−90°（右側面を下＝頭が +X）。
+     * hipsOffsetY は足元原点をヒップへ戻す。
+     */
+    body: {
+      position: [-0.06, 0.64, -0.02] as const,
+      rotation: [0, 0, -Math.PI / 2] as const,
+      hipsOffsetY: -0.9,
     },
   },
 
