@@ -112,7 +112,15 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 
 `higher` は high の Y を少し足す程度に留める（例: full 1.95 → ~2.4）。頭上からの見下ろしはやりすぎになりやすい。
 
-構図切替: `framings`（`full` / `bust`）。角度 × 構図は `getCameraSetup`。
+構図切替: `framings`（`full` / `knee` / `waist` / `bust` / `close`）。角度 × 構図は `getCameraSetup`。
+
+| id | 意図 |
+|----|------|
+| `full` | 全身 |
+| `knee` | 膝上（full と waist の間） |
+| `waist` | ウエスト（knee と bust の間） |
+| `bust` | バストアップ |
+| `close` | 顔アップ（bust より寄る） |
 
 ---
 

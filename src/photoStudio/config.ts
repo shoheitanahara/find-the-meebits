@@ -53,7 +53,10 @@ export const PHOTO_STUDIO = {
 
   framings: [
     { id: 'full', label: { en: 'Full body', ja: '全身' } },
+    { id: 'knee', label: { en: 'Knees', ja: '膝上' } },
+    { id: 'waist', label: { en: 'Waist', ja: 'ウエスト' } },
     { id: 'bust', label: { en: 'Bust', ja: 'バストアップ' } },
+    { id: 'close', label: { en: 'Close-up', ja: '顔アップ' } },
   ] as const,
 
   /**
@@ -70,10 +73,25 @@ export const PHOTO_STUDIO = {
           cameraPosition: [-1.55, 1.35, 4.6] as const,
           cameraLookAt: [0, 0.85, 0] as const,
         },
+        knee: {
+          fov: 31,
+          cameraPosition: [-1.32, 1.42, 3.85] as const,
+          cameraLookAt: [0, 1.01, 0] as const,
+        },
+        waist: {
+          fov: 29,
+          cameraPosition: [-1.08, 1.48, 3.05] as const,
+          cameraLookAt: [0, 1.18, 0] as const,
+        },
         bust: {
           fov: 28,
           cameraPosition: [-0.85, 1.55, 2.35] as const,
           cameraLookAt: [0, 1.35, 0] as const,
+        },
+        close: {
+          fov: 26,
+          cameraPosition: [-0.58, 1.62, 1.62] as const,
+          cameraLookAt: [0, 1.5, 0] as const,
         },
       },
     },
@@ -87,10 +105,25 @@ export const PHOTO_STUDIO = {
           cameraPosition: [-1.45, 1.95, 4.45] as const,
           cameraLookAt: [0, 0.82, 0] as const,
         },
+        knee: {
+          fov: 31,
+          cameraPosition: [-1.24, 1.92, 3.75] as const,
+          cameraLookAt: [0, 0.97, 0] as const,
+        },
+        waist: {
+          fov: 29,
+          cameraPosition: [-1.03, 1.89, 3.0] as const,
+          cameraLookAt: [0, 1.12, 0] as const,
+        },
         bust: {
           fov: 28,
           cameraPosition: [-0.8, 1.85, 2.25] as const,
           cameraLookAt: [0, 1.28, 0] as const,
+        },
+        close: {
+          fov: 26,
+          cameraPosition: [-0.56, 1.81, 1.52] as const,
+          cameraLookAt: [0, 1.44, 0] as const,
         },
       },
     },
@@ -104,10 +137,25 @@ export const PHOTO_STUDIO = {
           cameraPosition: [-1.4, 2.4, 4.35] as const,
           cameraLookAt: [0, 0.95, 0] as const,
         },
+        knee: {
+          fov: 31,
+          cameraPosition: [-1.2, 2.32, 3.66] as const,
+          cameraLookAt: [0, 1.08, 0] as const,
+        },
+        waist: {
+          fov: 29,
+          cameraPosition: [-1.0, 2.24, 2.96] as const,
+          cameraLookAt: [0, 1.21, 0] as const,
+        },
         bust: {
           fov: 28,
           cameraPosition: [-0.78, 2.15, 2.2] as const,
           cameraLookAt: [0, 1.35, 0] as const,
+        },
+        close: {
+          fov: 26,
+          cameraPosition: [-0.55, 2.05, 1.48] as const,
+          cameraLookAt: [0, 1.49, 0] as const,
         },
       },
     },
@@ -121,10 +169,25 @@ export const PHOTO_STUDIO = {
           cameraPosition: [-1.5, 0.65, 4.3] as const,
           cameraLookAt: [0, 0.88, 0] as const,
         },
+        knee: {
+          fov: 31,
+          cameraPosition: [-1.29, 0.8, 3.64] as const,
+          cameraLookAt: [0, 1.01, 0] as const,
+        },
+        waist: {
+          fov: 29,
+          cameraPosition: [-1.08, 0.95, 2.99] as const,
+          cameraLookAt: [0, 1.14, 0] as const,
+        },
         bust: {
           fov: 28,
           cameraPosition: [-0.85, 1.12, 2.25] as const,
           cameraLookAt: [0, 1.28, 0] as const,
+        },
+        close: {
+          fov: 26,
+          cameraPosition: [-0.62, 1.28, 1.55] as const,
+          cameraLookAt: [0, 1.42, 0] as const,
         },
       },
     },
