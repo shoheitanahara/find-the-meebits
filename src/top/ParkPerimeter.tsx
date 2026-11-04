@@ -115,7 +115,6 @@ export function ParkPerimeter({
       {!isSeaTheme(spec) ? <RiverAndWalls spec={spec} /> : null}
       {!isSeaTheme(spec) ? <LowCornerMarkers spec={spec} /> : null}
       <CardinalFeatures spec={spec} locale={locale} />
-      {!isSeaTheme(spec) ? <WallLanterns spec={spec} /> : null}
     </group>
   )
 }
@@ -871,26 +870,6 @@ function BridgeGateApproach({
           ))}
         </group>
       ))}
-      {([-1, 1] as const).map((end) =>
-        ([-1, 1] as const).map((sideSign) =>
-          mountain ? (
-            <TorchLantern
-              key={`${end}-${sideSign}`}
-              position={[end * length * 0.42, 0, sideSign * (w * 0.42)]}
-            />
-          ) : sea ? (
-            <PierLantern
-              key={`${end}-${sideSign}`}
-              position={[end * length * 0.42, 0, sideSign * (w * 0.42)]}
-            />
-          ) : (
-            <BridgeLantern
-              key={`${end}-${sideSign}`}
-              position={[end * length * 0.42, 0, sideSign * (w * 0.42)]}
-            />
-          ),
-        ),
-      )}
       <mesh position={[0, -0.35, 0]}>
         <boxGeometry args={[length * 0.7, 0.2, w * 0.7]} />
         <meshStandardMaterial
@@ -900,80 +879,6 @@ function BridgeGateApproach({
           depthWrite={false}
         />
       </mesh>
-    </group>
-  )
-}
-
-function BridgeLantern({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.1, 1.1, 8]} />
-        <meshStandardMaterial color={STONE_DARK} roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <boxGeometry args={[0.38, 0.42, 0.38]} />
-        <meshStandardMaterial
-          color="#f0d090"
-          emissive="#f0d090"
-          emissiveIntensity={0.7}
-          roughness={0.35}
-        />
-      </mesh>
-      <mesh position={[0, 1.48, 0]}>
-        <boxGeometry args={[0.42, 0.08, 0.42]} />
-        <meshStandardMaterial color={GOLD} metalness={0.5} roughness={0.4} />
-      </mesh>
-      <pointLight position={[0, 1.2, 0]} color="#ffd9a0" intensity={0.75} distance={5} />
-    </group>
-  )
-}
-
-/** 桟橋用：木ポール＋暖色キューブランタン */
-function PierLantern({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <cylinderGeometry args={[0.07, 0.09, 1.1, 8]} />
-        <meshStandardMaterial color={SEA_WOOD_DARK} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.18, 0]} castShadow>
-        <boxGeometry args={[0.32, 0.38, 0.32]} />
-        <meshStandardMaterial
-          color="#fff2c8"
-          emissive="#ffb040"
-          emissiveIntensity={0.95}
-          roughness={0.35}
-          transparent
-          opacity={0.92}
-        />
-      </mesh>
-      <mesh position={[0, 1.42, 0]} castShadow>
-        <boxGeometry args={[0.36, 0.06, 0.36]} />
-        <meshStandardMaterial color={SEA_WOOD} roughness={0.88} />
-      </mesh>
-      <pointLight position={[0, 1.18, 0]} color="#ffb060" intensity={0.9} distance={5.5} />
-    </group>
-  )
-}
-
-function TorchLantern({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.55, 0]} castShadow>
-        <boxGeometry args={[0.14, 1.1, 0.14]} />
-        <meshStandardMaterial color={MT_WOOD} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <boxGeometry args={[0.28, 0.35, 0.28]} />
-        <meshStandardMaterial
-          color="#ff9040"
-          emissive="#ff6020"
-          emissiveIntensity={1.1}
-          roughness={0.4}
-        />
-      </mesh>
-      <pointLight position={[0, 1.25, 0]} color="#ffb060" intensity={0.85} distance={6} />
     </group>
   )
 }
@@ -1458,39 +1363,3 @@ function MountainSealedGate({
   )
 }
 
-function WallLanterns({ spec }: { spec: PerimeterSpec }) {
-  const { cx, cz, riverInnerZS } = spec
-  const mountain = isMountainTheme(spec)
-  const spots: Array<[number, number]> = []
-  if (shouldBuildPerimeterSide(spec, 's')) {
-    const lz = riverInnerZS - 1.1
-    spots.push([cx + 7, cz - lz], [cx - 7, cz - lz])
-  }
-
-  return (
-    <group>
-      {spots.map(([x, z], index) =>
-        mountain ? (
-          <TorchLantern key={index} position={[x, 0, z]} />
-        ) : (
-          <group key={index} position={[x, 0, z]}>
-            <mesh position={[0, 0.85, 0]} castShadow>
-              <cylinderGeometry args={[0.06, 0.08, 1.7, 8]} />
-              <meshStandardMaterial color={STONE_DARK} roughness={0.85} />
-            </mesh>
-            <mesh position={[0, 1.8, 0]}>
-              <sphereGeometry args={[0.18, 12, 12]} />
-              <meshStandardMaterial
-                color="#ffe2b0"
-                emissive="#ffe2b0"
-                emissiveIntensity={0.85}
-                roughness={0.3}
-              />
-            </mesh>
-            <pointLight position={[0, 1.8, 0]} color="#ffd9a0" intensity={0.5} distance={7} />
-          </group>
-        ),
-      )}
-    </group>
-  )
-}
