@@ -491,7 +491,11 @@ function CulturePortalGate({
   gate: ParkGateDef
   locale: 'en' | 'ja'
 }) {
+  // Astro 西門はエリア内側（+X）から近づくので看板だけ反転（Mountain 門と同パターン）
   const faceSign = -1
+  const fromAstro = gate.id === 'astro-to-culture'
+  const signFaceSign = fromAstro ? -faceSign : faceSign
+  const signRotationY = fromAstro ? Math.PI / 2 : -Math.PI / 2
   const pillarZ = gate.halfWidth * 0.88
   const accent = '#6a9ee8'
   const marble = '#2a4068'
@@ -576,8 +580,8 @@ function CulturePortalGate({
         </group>
       ))}
 
-      {/* 看板（広場から読めるよう −X 向き） */}
-      <group position={[faceSign * 0.45, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+      {/* 看板：通常は −X（接近側）。Astro 西門は +X（エリア内側）向き */}
+      <group position={[signFaceSign * 0.45, 0, 0]} rotation={[0, signRotationY, 0]}>
         <Text position={[0, 4.85, 0]} fontSize={0.24} color="#e8f0ff" anchorX="center" anchorY="middle">
           {gate.label[locale]}
         </Text>

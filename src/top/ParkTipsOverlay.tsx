@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { getLocale } from '../i18n/locale'
 import { ui } from '../i18n/ui'
 import { playSfx, unlockAudioIfNeeded } from '../ui/sfx'
+import { getParkChristmasCopy, isParkChristmasSeason } from './parkChristmas'
 import { getParkTips } from './parkTips'
 import { ParkDailyResetNotice } from './ParkDailyResetNotice'
 
@@ -19,6 +20,7 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
   const locale = getLocale()
   const t = ui()
   const park = getParkTips(locale)
+  const christmasCopy = isParkChristmasSeason() ? getParkChristmasCopy(locale) : null
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -39,7 +41,14 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
       <section className="w-full max-w-lg overflow-hidden rounded-[1.75rem] border border-[#d4b46a]/35 bg-[#0c0d18]/95 p-5 text-[#f4ead2] shadow-2xl max-lg:max-h-[calc(100dvh-2rem)] max-lg:overflow-y-auto max-lg:p-4 lg:p-7 phone-land:!h-auto phone-land:!max-h-full phone-land:max-w-3xl phone-land:overflow-y-auto phone-land:p-2.5">
         <div className="phone-land:flex phone-land:items-center phone-land:justify-between phone-land:gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#caa75b]">{t.tips}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#caa75b]">{t.tips}</p>
+              {christmasCopy ? (
+                <span className="rounded-full border border-[#e8c878]/45 bg-[#c42828]/20 px-2.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#f0d8a0]">
+                  {christmasCopy.badge}
+                </span>
+              ) : null}
+            </div>
             <h2 className="mt-2 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl tracking-tight lg:text-3xl phone-land:mt-0.5 phone-land:text-lg">
               {t.beforeStart}
             </h2>
@@ -58,6 +67,11 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
           </button>
         </div>
         <p className="mt-2 text-sm leading-relaxed text-[#b8b2a6] max-lg:text-xs phone-land:hidden">{park.lead}</p>
+        {christmasCopy ? (
+          <p className="mt-2 text-xs leading-relaxed text-[#d4b46a]/95 max-lg:text-[0.65rem] phone-land:mt-1 phone-land:text-[0.65rem]">
+            {christmasCopy.tipsNote}
+          </p>
+        ) : null}
         <div className="phone-land:hidden">
           <ParkDailyResetNotice />
         </div>

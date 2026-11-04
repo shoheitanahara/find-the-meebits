@@ -51,6 +51,7 @@ import { AstroDistrictGround } from './AstroDistrictGround'
 import { CultureDistrictGround } from './CultureDistrictGround'
 import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
+import { ParkSnowCover } from './ParkSnowCover'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp } from './ParkBenchProp'
 import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
@@ -388,11 +389,11 @@ function HubGround({
       {voxelGround ? (
         <MountainVoxelGround layout={layout} christmas={look.christmas} />
       ) : cultureGround ? (
-        <CultureDistrictGround layout={layout} />
+        <CultureDistrictGround layout={layout} christmas={look.christmas} />
       ) : seaGround ? (
         <SeaDistrictGround layout={layout} />
       ) : astroGround ? (
-        <AstroDistrictGround layout={layout} />
+        <AstroDistrictGround layout={layout} christmas={look.christmas} />
       ) : (
         <>
           {/* エリア床（海・砂浜は置かない。外周は将来の崖・川） */}
@@ -428,6 +429,14 @@ function HubGround({
               <meshStandardMaterial color={look.pathEdgeColor} metalness={0.42} roughness={0.42} />
             </mesh>
           ))}
+          {look.christmas ? (
+            <ParkSnowCover
+              layout={layout}
+              clearRadius={plazaRadius + 0.35}
+              density={0.62}
+              y={0.085}
+            />
+          ) : null}
         </>
       )}
       {showFountain ? (

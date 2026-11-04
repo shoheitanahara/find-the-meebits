@@ -10,7 +10,15 @@ const scratch = new Object3D()
 const TILE = 1
 const TILE_H = 0.12
 
-type FloorRole = 'regolith' | 'regolithAlt' | 'metal' | 'metalEdge' | 'glow' | 'crater' | 'frame'
+type FloorRole =
+  | 'regolith'
+  | 'regolithAlt'
+  | 'metal'
+  | 'metalEdge'
+  | 'glow'
+  | 'crater'
+  | 'frame'
+  | 'frost'
 
 const ROLE_COLOR: Record<FloorRole, string> = {
   regolith: '#1a1e2e',
@@ -20,6 +28,8 @@ const ROLE_COLOR: Record<FloorRole, string> = {
   glow: '#5ce0ff',
   crater: '#0e121c',
   frame: '#0a0e18',
+  // 月面の霜／薄雪（シアン寄りで Astro 世界観を維持）
+  frost: '#d8e8f4',
 }
 
 function hash2(x: number, z: number) {
@@ -27,7 +37,7 @@ function hash2(x: number, z: number) {
   return n - Math.floor(n)
 }
 
-function roleAt(x: number, z: number, groundZ: number): FloorRole {
+function roleAt(x: number, z: number, groundZ: number, christmas: boolean): FloorRole {
   const cx = x + 0.5
   const cz = z + 0.5 - groundZ
   const ax = Math.abs(cx)
@@ -35,7 +45,7 @@ function roleAt(x: number, z: number, groundZ: number): FloorRole {
 
   if (ax > 22.2 || az > 22.2) return 'frame'
 
-  // 中央南北の発光導線
+  // 中央南北の発光導線 — 通路は積雪でも残す
   if (ax <= 0.55) return 'glow'
   if (ax <= 1.35) {
     const stripe = Math.floor(cz + 40) % 2 === 0
@@ -44,11 +54,17 @@ function roleAt(x: number, z: number, groundZ: number): FloorRole {
 
   // 東西の横断導線
   if (az <= 0.55 && ax > 1.35) return 'glow'
-  if (az <= 1.25 && ax > 1.35) return Math.floor(cx + 40) % 2 === 0 ? 'metalEdge' : 'metal'
+  if (az <= 1.25 && ax > 1.35) {
+    const frostEdge = hash2(x + 17, z - 9)
+    if (christmas && frostEdge < 0.18) return 'frost'
+    return Math.floor(cx + 40) % 2 === 0 ? 'metalEdge' : 'metal'
+  }
 
   // クレーターっぽい暗い斑
   const n = hash2(x, z)
+  const frostPatch = hash2(x + 17, z - 9)
   if (n > 0.92 && ax > 4 && az > 3) return 'crater'
+  if (christmas && frostPatch < 0.58 && ax > 1.6) return 'frost'
 
   const checker = (Math.floor(cx) + Math.floor(cz)) % 2 === 0
   if (checker) return n < 0.1 ? 'metal' : 'regolith'
@@ -98,8 +114,24 @@ function FloorBatch({
         color={color}
         emissive={color}
         emissiveIntensity={emissive}
-        roughness={role === 'glow' ? 0.28 : role === 'metal' || role === 'metalEdge' ? 0.42 : 0.92}
-        metalness={role === 'glow' ? 0.55 : role === 'metal' || role === 'metalEdge' ? 0.62 : 0.08}
+        roughness={
+          role === 'frost'
+            ? 0.88
+            : role === 'glow'
+              ? 0.28
+              : role === 'metal' || role === 'metalEdge'
+                ? 0.42
+                : 0.92
+        }
+        metalness={
+          role === 'frost'
+            ? 0.05
+            : role === 'glow'
+              ? 0.55
+              : role === 'metal' || role === 'metalEdge'
+                ? 0.62
+                : 0.08
+        }
       />
     </instancedMesh>
   )
@@ -141,7 +173,13 @@ function AstroProp({
   )
 }
 
-export function AstroDistrictGround({ layout }: { layout: ParkZoneLayout }) {
+export function AstroDistrictGround({
+  layout,
+  christmas = false,
+}: {
+  layout: ParkZoneLayout
+  christmas?: boolean
+}) {
   const { groundZ, districtHalfX, districtHalfZ, pathEdgeX, pathEdgeLength } = layout
 
   const batches = useMemo(() => {
@@ -159,19 +197,19 @@ export function AstroDistrictGround({ layout }: { layout: ParkZoneLayout }) {
 
     for (let x = xMin; x <= xMax; x += 1) {
       for (let z = zMin; z <= zMax; z += 1) {
-        push(roleAt(x, z, groundZ), x, z)
+        push(roleAt(x, z, groundZ, christmas), x, z)
       }
     }
 
     return byRole
-  }, [districtHalfX, districtHalfZ, groundZ])
+  }, [christmas, districtHalfX, districtHalfZ, groundZ])
 
   return (
     <group>
       {/* 下地レゴリス */}
       <mesh position={[0, -0.08, groundZ]} receiveShadow>
         <boxGeometry args={[districtHalfX * 2, 0.2, districtHalfZ * 2]} />
-        <meshStandardMaterial color="#12161f" roughness={0.95} />
+        <meshStandardMaterial color={christmas ? '#1a2434' : '#12161f'} roughness={0.95} />
       </mesh>
 
       {([...batches.entries()] as Array<[FloorRole, Array<{ x: number; z: number }>]>).map(

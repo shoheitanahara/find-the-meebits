@@ -21,6 +21,7 @@ import { ParkCreatorCredit } from './ParkCreatorCredit'
 import { ParkBgmSystem } from './ParkBgmSystem'
 import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
 import { useTopStore, type AttractionId } from './topStore'
+import { getParkChristmasCopy, isParkChristmasSeason } from './parkChristmas'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
@@ -225,6 +226,8 @@ export function TopApp() {
 
   const showSelectionCard = !started && !isReturningFromGame && !showParkTips
   const parkReady = lineup !== null
+  const christmasSeason = isParkChristmasSeason()
+  const christmasCopy = christmasSeason ? getParkChristmasCopy(locale) : null
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-[#070914] text-[#f4ead2]">
@@ -277,14 +280,26 @@ export function TopApp() {
               </div>
 
               <div className="p-6 sm:p-9 phone-land:flex phone-land:min-h-0 phone-land:flex-col phone-land:overflow-y-auto phone-land:p-4 phone-land:py-3">
-                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.38em] text-[#caa75b]">
-                  {t.eyebrow}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[0.62rem] font-semibold uppercase tracking-[0.38em] text-[#caa75b]">
+                    {t.eyebrow}
+                  </p>
+                  {christmasCopy ? (
+                    <span className="rounded-full border border-[#e8c878]/45 bg-[#c42828]/20 px-2.5 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.16em] text-[#f0d8a0]">
+                      {christmasCopy.badge}
+                    </span>
+                  ) : null}
+                </div>
                 <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-4xl leading-none text-[#f4ead2] sm:text-5xl phone-land:mt-1 phone-land:text-2xl">
                   {t.title}
                 </h1>
                 <div className="mt-4 h-px w-14 bg-[#caa75b] phone-land:mt-2" />
                 <p className="mt-4 max-w-sm text-sm leading-6 text-[#b8b2a6] phone-land:mt-2 phone-land:text-xs phone-land:leading-5">{t.subtitle}</p>
+                {christmasCopy ? (
+                  <p className="mt-2 max-w-sm text-xs leading-5 text-[#d4b46a]/90 phone-land:mt-1">
+                    {christmasCopy.openingNote}
+                  </p>
+                ) : null}
                 <p className="mt-2 max-w-sm text-xs leading-5 text-[#8f897e] phone-land:mt-1">{t.meebitNote}</p>
                 <ParkCreatorCredit />
 
@@ -346,6 +361,11 @@ export function TopApp() {
             <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
               {getParkZone(activeZoneId).title[locale]}
             </p>
+            {christmasCopy ? (
+              <p className="mt-1.5 text-[0.55rem] uppercase tracking-[0.14em] text-[#e8c878]/85">
+                {christmasCopy.hudTag}
+              </p>
+            ) : null}
           </div>
 
           {zoneTransitioning ? (

@@ -2,6 +2,7 @@
  * Meebits Park クリスマス季節スキン（11–12月）。
  * Sea エリアは常に除外。骨格レイアウトは変えず look / デコだけ差し替える。
  */
+import type { Locale } from '../i18n/locale'
 import type { ParkLook } from './parkLook'
 import type { ParkZoneId } from './parkZones'
 
@@ -14,6 +15,24 @@ export function isParkChristmasSeason(now = new Date()): boolean {
 /** Sea 以外かつシーズン中なら装飾を有効にする。 */
 export function isParkChristmasActive(zoneId: ParkZoneId, now = new Date()): boolean {
   return zoneId !== 'sea' && isParkChristmasSeason(now)
+}
+
+/** UI 用の短い季節コピー（オープニング／左上HUD）。 */
+export function getParkChristmasCopy(locale: Locale) {
+  if (locale === 'ja') {
+    return {
+      badge: 'Christmas Season',
+      hudTag: 'Christmas Season',
+      openingNote: 'クリスマスシーズン開催中。雪とイルミをお楽しみください。',
+      tipsNote: 'クリスマスシーズン中です。広場や山に雪が積もっています。',
+    } as const
+  }
+  return {
+    badge: 'Christmas Season',
+    hudTag: 'Christmas Season',
+    openingNote: 'Christmas Season is on. Enjoy the snow and lights.',
+    tipsNote: 'Christmas Season is on — snow covers the plaza and mountain.',
+  } as const
 }
 
 /** ゾーン look の上に冬／イルミ寄りを乗せる。Sea では何もしない。 */
@@ -42,12 +61,14 @@ export function applyChristmasLook(zoneId: ParkZoneId, look: ParkLook, now = new
     lampBulbColor: '#fff4e0',
     lampEmissiveColor: '#ffb060',
     lampPointColor: '#ffc878',
-    // 広場・園路をわずかに霜寄り（voxel 床以外のフォールバック）
-    districtColor: mixHex(look.districtColor, '#d8e0ea', 0.18),
-    plazaColor: mixHex(look.plazaColor, '#e4eaf2', 0.14),
-    pathColor: mixHex(look.pathColor, '#9aa4b0', 0.12),
+    // 広場・園路を霜寄り（Plaza 連続床＋パッチ積雪の下地）
+    districtColor: mixHex(look.districtColor, '#dce4ee', 0.42),
+    plazaColor: mixHex(look.plazaColor, '#e8eef6', 0.28),
+    pathColor: mixHex(look.pathColor, '#a8b0bc', 0.22),
+    paverColorA: mixHex(look.paverColorA, '#c8d0dc', 0.25),
+    paverColorB: mixHex(look.paverColorB, '#b8c0cc', 0.22),
     pathEdgeColor: '#d4a050',
-    fountainRingColor: mixHex(look.fountainRingColor, '#c8d0dc', 0.2),
+    fountainRingColor: mixHex(look.fountainRingColor, '#d0d8e4', 0.35),
   }
 }
 

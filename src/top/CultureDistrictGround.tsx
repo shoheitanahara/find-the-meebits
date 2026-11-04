@@ -11,7 +11,15 @@ const TILE = 1
 const TILE_H = 0.12
 
 /** 床タイルの役割 */
-type FloorRole = 'base' | 'baseAlt' | 'diamond' | 'runway' | 'runwayEdge' | 'accent' | 'frame'
+type FloorRole =
+  | 'base'
+  | 'baseAlt'
+  | 'diamond'
+  | 'runway'
+  | 'runwayEdge'
+  | 'accent'
+  | 'frame'
+  | 'snow'
 
 const ROLE_COLOR: Record<FloorRole, string> = {
   base: '#1a2744',
@@ -21,6 +29,7 @@ const ROLE_COLOR: Record<FloorRole, string> = {
   runwayEdge: '#8eb4e8',
   accent: '#4a7ab8',
   frame: '#0e182c',
+  snow: '#e4ecf4',
 }
 
 function hash2(x: number, z: number) {
@@ -28,7 +37,7 @@ function hash2(x: number, z: number) {
   return n - Math.floor(n)
 }
 
-function roleAt(x: number, z: number, groundZ: number): FloorRole {
+function roleAt(x: number, z: number, groundZ: number, christmas: boolean): FloorRole {
   const cx = x + 0.5
   const cz = z + 0.5 - groundZ
   const ax = Math.abs(cx)
@@ -37,7 +46,7 @@ function roleAt(x: number, z: number, groundZ: number): FloorRole {
   // 外周フレーム
   if (ax > 22.2 || az > 22.2) return 'frame'
 
-  // 中央ランウェイ（NS）
+  // 中央ランウェイ（NS）— 積雪でも通路面は残す
   if (ax <= 1.15) {
     const stripe = Math.floor(cz + 40) % 2 === 0
     return stripe ? 'runway' : 'runwayEdge'
@@ -47,6 +56,8 @@ function roleAt(x: number, z: number, groundZ: number): FloorRole {
 
   // 東西のギャラリー通路（やや明るい帯）
   if (az <= 1.4 && ax > 1.85) {
+    const snowEdge = hash2(x + 17, z - 9)
+    if (christmas && snowEdge < 0.22) return 'snow'
     return Math.floor(cx + 40) % 2 === 0 ? 'accent' : 'diamond'
   }
 
@@ -54,7 +65,9 @@ function roleAt(x: number, z: number, groundZ: number): FloorRole {
   const checker = (Math.floor(cx) + Math.floor(cz)) % 2 === 0
   const diamond = (Math.floor(cx + cz) + Math.floor(cx - cz)) % 4 === 0
   const n = hash2(x, z)
+  const snowPatch = hash2(x + 17, z - 9)
 
+  if (christmas && snowPatch < 0.62 && ax > 2.2) return 'snow'
   if (diamond && n > 0.35) return 'diamond'
   if (checker) return n < 0.12 ? 'accent' : 'base'
   return n < 0.08 ? 'diamond' : 'baseAlt'
@@ -97,14 +110,20 @@ function FloorBatch({
         color={color}
         emissive={color}
         emissiveIntensity={emissive}
-        roughness={role === 'runwayEdge' ? 0.45 : 0.88}
-        metalness={role === 'runwayEdge' ? 0.35 : 0.12}
+        roughness={role === 'snow' ? 0.9 : role === 'runwayEdge' ? 0.45 : 0.88}
+        metalness={role === 'snow' ? 0.02 : role === 'runwayEdge' ? 0.35 : 0.12}
       />
     </instancedMesh>
   )
 }
 
-export function CultureDistrictGround({ layout }: { layout: ParkZoneLayout }) {
+export function CultureDistrictGround({
+  layout,
+  christmas = false,
+}: {
+  layout: ParkZoneLayout
+  christmas?: boolean
+}) {
   const { groundZ, districtHalfX, districtHalfZ } = layout
 
   const batches = useMemo(() => {
@@ -122,19 +141,19 @@ export function CultureDistrictGround({ layout }: { layout: ParkZoneLayout }) {
 
     for (let x = xMin; x <= xMax; x += 1) {
       for (let z = zMin; z <= zMax; z += 1) {
-        push(roleAt(x, z, groundZ), x, z)
+        push(roleAt(x, z, groundZ, christmas), x, z)
       }
     }
 
     return [...byRole.entries()].map(([role, positions]) => ({ role, positions }))
-  }, [districtHalfX, districtHalfZ, groundZ])
+  }, [christmas, districtHalfX, districtHalfZ, groundZ])
 
   return (
     <group>
       {/* 下地の濃紺スラブ */}
       <mesh position={[0, -0.06, groundZ]} receiveShadow>
         <boxGeometry args={[districtHalfX * 2 + 0.4, 0.16, districtHalfZ * 2 + 0.4]} />
-        <meshStandardMaterial color="#0c1424" roughness={0.95} />
+        <meshStandardMaterial color={christmas ? '#1a2438' : '#0c1424'} roughness={0.95} />
       </mesh>
       {batches.map((batch) => (
         <FloorBatch key={batch.role} role={batch.role} positions={batch.positions} />
