@@ -10,6 +10,7 @@ import {
 } from '../ui/LanguageSwitcher'
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { MeetSergitoPlayer } from './player/MeetSergitoPlayer'
+import { LookControlsHint } from '../ui/LookControlsHint'
 import { MeetSergitoTouchLookPad } from './player/MeetSergitoTouchLookPad'
 import { MeetSergitoMobileControls } from './player/MeetSergitoMobileControls'
 import { WorkshopRoom } from './world/WorkshopRoom'
@@ -100,6 +101,7 @@ export function MeetSergitoApp() {
           <SergitoDialogueSystem />
           <SergitoDialogueBox />
           <SergitoInteractionPrompt />
+          <LookControlsHint />
           <MeetSergitoTouchLookPad />
           <MeetSergitoMobileControls />
         </>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { isTouchUiMode } from '../../game/perfConfig'
 import { getLocale } from '../../i18n/locale'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { formatRunwayThemeLabel, getDailyRunwayShow } from '../dailyRunway'
@@ -12,7 +13,8 @@ const copy = {
     enter: 'Enter the Show',
     loading: 'Preparing the lineup…',
     error: 'Could not load today’s runway. Try again.',
-    hint: 'WASD to walk · Click to look around · Esc to release',
+    hintDesktop: 'WASD to walk · Click to look around · Esc to release',
+    hintTouch: 'Joystick to move · Flick the screen to look around',
   },
   ja: {
     eyebrow: 'カルチャーエリア',
@@ -21,7 +23,8 @@ const copy = {
     enter: '会場に入る',
     loading: 'ラインナップを準備中…',
     error: '本日のランウェイを読み込めませんでした。',
-    hint: 'WASDで歩行 · クリックで視点変更 · Escで解除',
+    hintDesktop: 'WASDで歩行 · クリックで視点変更 · Escで解除',
+    hintTouch: 'スティックで移動 · 画面フリックで視点変更',
   },
 } as const
 
@@ -29,6 +32,7 @@ export function RunwayTitleScreen() {
   const phase = useRunwayStore((state) => state.phase)
   const locale = getLocale()
   const t = copy[locale]
+  const hint = isTouchUiMode() ? t.hintTouch : t.hintDesktop
   const [themeLabel, setThemeLabel] = useState<string | null>(null)
   const [error, setError] = useState(false)
   const [ready, setReady] = useState(false)
@@ -88,7 +92,7 @@ export function RunwayTitleScreen() {
         >
           {t.enter}
         </button>
-        <p className="mt-4 text-[0.7rem] text-white/40 phone-land:mt-2">{t.hint}</p>
+        <p className="mt-4 text-[0.7rem] text-white/40 phone-land:mt-2">{hint}</p>
       </div>
     </div>
   )

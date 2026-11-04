@@ -4,7 +4,12 @@ import { getLocale } from '../i18n/locale'
 import { getCreatorDialogueLinesEn } from '../npc/npcGeneration'
 import type { DialogueLine } from '../npc/npcTypes'
 import type { DailyThemeTrait } from './dailyFeatured'
-import { getParkDialoguePools, type ParkDialoguePools } from './parkDialogueExpand'
+import { isParkChristmasSeason } from './parkChristmas'
+import {
+  getChristmasGreetingLines,
+  getParkDialoguePools,
+  type ParkDialoguePools,
+} from './parkDialogueExpand'
 import type { ParkNpcRecord } from './parkNpcRegistry'
 import type { ParkZoneId } from './parkZones'
 
@@ -71,7 +76,11 @@ export function selectParkDialogueLines(
   const isSea = zoneId === 'sea'
   const isAstro = zoneId === 'astro'
 
-  const greeting = pickLine(pools.greetings, seed, talkCount, 11)
+  // クリスマスシーズンは通常挨拶に季節パターンを足す（必ず出るわけではない）
+  const greetPool = isParkChristmasSeason()
+    ? [...pools.greetings, ...getChristmasGreetingLines(locale === 'ja' ? 'ja' : 'en')]
+    : pools.greetings
+  const greeting = pickLine(greetPool, seed, talkCount, 11)
   lines.push({
     id: `${npc.id}-greet-${talkCount}`,
     text: greeting,

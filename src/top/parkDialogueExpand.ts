@@ -923,6 +923,34 @@ const JA_ASTRO_GREET = [
   'やあ。建物を見てた。',
 ]
 
+/** 11–12月だけ greetings に混ぜる（全区共通・軽め） */
+const JA_XMAS_GREET = [
+  'メリークリスマス。',
+  'あ、メリークリスマス。',
+  'この時期っぽい空気だね。',
+  'イルミ、いい感じ。',
+  '季節もの、ちょっと好き。',
+  '今夜、少し華やかだね。',
+  '冬のパーク、悪くない。',
+  'やあ。メリークリスマス。',
+]
+
+const EN_XMAS_GREET = [
+  'Merry Christmas.',
+  'Oh — Merry Christmas.',
+  'Feels like that time of year.',
+  'Lights look nice tonight.',
+  'Kind of into the seasonal stuff.',
+  'Night feels a bit brighter.',
+  'Winter park’s not bad.',
+  'Hey. Merry Christmas.',
+]
+
+/** シーズン中だけ通常挨拶プールに追加する行。 */
+export function getChristmasGreetingLines(lang: Lang): readonly string[] {
+  return lang === 'ja' ? JA_XMAS_GREET : EN_XMAS_GREET
+}
+
 const JA_ASTRO_FLAVOR = [
   'スタードーム、まだ骨組みだけ。',
   'ルナラボの奥で、金属の音がした。',

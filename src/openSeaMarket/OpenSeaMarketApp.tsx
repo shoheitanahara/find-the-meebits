@@ -18,6 +18,7 @@ import { MarketDialogueSystem, MarketInteractionPrompt } from './dialogue/Market
 import { pickSessionGalleries, pickSessionWalkerIds } from './pickSessionListings'
 import { MarketPlayer } from './player/MarketPlayer'
 import { MarketMobileControls } from './player/MarketMobileControls'
+import { LookControlsHint } from '../ui/LookControlsHint'
 import { MarketTouchLookPad } from './player/MarketTouchLookPad'
 import { resetOpenSeaMarketPlayerWorld } from './playerWorld'
 import { useOpenSeaMarketControlsStore } from './controlsStore'
@@ -195,6 +196,7 @@ export function OpenSeaMarketApp() {
           <MarketDialogueBox />
           <MarketInteractionPrompt />
           <MarketMinimap />
+          <LookControlsHint />
           <MarketTouchLookPad />
           <MarketMobileControls />
         </>

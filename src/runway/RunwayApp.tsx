@@ -8,6 +8,7 @@ import {
   LanguageSwitcher,
 } from '../ui/LanguageSwitcher'
 import { RunwayPlayer } from './player/RunwayPlayer'
+import { LookControlsHint } from '../ui/LookControlsHint'
 import { RunwayTouchLookPad } from './player/RunwayTouchLookPad'
 import { RunwayCatwalkShow } from './show/RunwayCatwalkShow'
 import { RunwayAudience } from './show/RunwayAudience'
@@ -100,6 +101,7 @@ export function RunwayApp() {
       ) : null}
       {phase === 'playing' ? (
         <>
+          <LookControlsHint />
           <RunwayTouchLookPad />
           <RunwayMobileControls />
           <RunwaySitPrompt />
