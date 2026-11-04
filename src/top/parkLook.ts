@@ -56,6 +56,14 @@ export type ParkLook = {
 
   lampLightIntensity: number
   lampEmissiveIntensity: number
+  /** 街灯ガラス色（季節スキンで上書き可） */
+  lampBulbColor: string
+  /** 街灯 emissive 色 */
+  lampEmissiveColor: string
+  /** 街灯 pointLight 色 */
+  lampPointColor: string
+  /** 11–12月クリスマス装飾（Sea 以外）。`applyChristmasLook` が立てる */
+  christmas: boolean
 
   /**
    * ベンチ横オブジェ。
@@ -91,6 +99,10 @@ export const PARK_LOOK: ParkLook = {
   fountainRingColor: '#7b6648',
   lampLightIntensity: 14,
   lampEmissiveIntensity: 3.2,
+  lampBulbColor: '#fff0bd',
+  lampEmissiveColor: '#f6b84f',
+  lampPointColor: '#ffd080',
+  christmas: false,
   // パラソル＋ビーチボール（旧夏 Ver. から常設）
   benchProp: 'beachSet',
 }

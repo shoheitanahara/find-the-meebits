@@ -15,26 +15,37 @@ const scratch = new Object3D()
 const TILE = 1
 const TILE_H = 0.14
 
-type FloorKind = Extract<BlockKind, 'grass' | 'dirt' | 'path' | 'stone' | 'gravel'>
+type FloorKind = Extract<BlockKind, 'grass' | 'dirt' | 'path' | 'stone' | 'gravel' | 'snow'>
 
 function hash2(x: number, z: number) {
   const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453
   return n - Math.floor(n)
 }
 
-function kindAt(x: number, z: number, groundZ: number, pathHalfX: number, pathHalfZ: number): FloorKind {
+function kindAt(
+  x: number,
+  z: number,
+  groundZ: number,
+  pathHalfX: number,
+  pathHalfZ: number,
+  christmas: boolean,
+): FloorKind {
   const dx = Math.abs(x + 0.5)
   const dz = Math.abs(z + 0.5 - groundZ)
   const onPath = dx <= pathHalfX && dz <= pathHalfZ
   const onPathEdge = !onPath && dx <= pathHalfX + 1.2 && dz <= pathHalfZ + 0.8
   const n = hash2(x, z)
+  const snowPatch = hash2(x + 17, z - 9)
 
   if (onPath) {
     if (n < 0.12) return 'gravel'
     if (n < 0.22) return 'dirt'
+    // クリスマス：園路端に薄い積雪パッチ
+    if (christmas && snowPatch < 0.14) return 'snow'
     return 'path'
   }
   if (onPathEdge) {
+    if (christmas && snowPatch < 0.55) return 'snow'
     if (n < 0.35) return 'gravel'
     if (n < 0.55) return 'dirt'
     return 'grass'
@@ -42,6 +53,8 @@ function kindAt(x: number, z: number, groundZ: number, pathHalfX: number, pathHa
   if (n < 0.06) return 'stone'
   if (n < 0.14) return 'dirt'
   if (n < 0.2) return 'gravel'
+  // 芝生帯は大半を雪に（道は通せる）
+  if (christmas && snowPatch < 0.72) return 'snow'
   return 'grass'
 }
 
@@ -58,7 +71,7 @@ function FloorBatch({
     const map = getBlockTexture(kind, face) as Texture
     return new MeshStandardMaterial({
       map,
-      roughness: kind === 'path' ? 0.92 : 0.96,
+      roughness: kind === 'path' ? 0.92 : kind === 'snow' ? 0.88 : 0.96,
       metalness: 0.02,
     })
   }, [kind])
@@ -86,7 +99,13 @@ function FloorBatch({
   )
 }
 
-export function MountainVoxelGround({ layout }: { layout: ParkZoneLayout }) {
+export function MountainVoxelGround({
+  layout,
+  christmas = false,
+}: {
+  layout: ParkZoneLayout
+  christmas?: boolean
+}) {
   const { groundZ, districtHalfX, districtHalfZ } = layout
   const pathHalfX = 3.5
   const pathHalfZ = Math.min(districtHalfZ - 1, layout.pathSizeZ * 0.42)
@@ -106,22 +125,22 @@ export function MountainVoxelGround({ layout }: { layout: ParkZoneLayout }) {
 
     for (let x = xMin; x <= xMax; x += 1) {
       for (let z = zMin; z <= zMax; z += 1) {
-        push(kindAt(x, z, groundZ, pathHalfX, pathHalfZ), x, z)
+        push(kindAt(x, z, groundZ, pathHalfX, pathHalfZ, christmas), x, z)
       }
     }
 
-    return (['grass', 'dirt', 'path', 'stone', 'gravel'] as const).map((kind) => ({
+    return (['grass', 'dirt', 'path', 'stone', 'gravel', 'snow'] as const).map((kind) => ({
       kind,
       positions: byKind.get(kind) ?? [],
     }))
-  }, [districtHalfX, districtHalfZ, groundZ, pathHalfX, pathHalfZ])
+  }, [christmas, districtHalfX, districtHalfZ, groundZ, pathHalfX, pathHalfZ])
 
   return (
     <group>
       {/* 下地の暗い土盤（タイルの隙間を埋める） */}
       <mesh position={[0, -0.06, groundZ]} receiveShadow>
         <boxGeometry args={[districtHalfX * 2 + 0.5, 0.22, districtHalfZ * 2 + 0.5]} />
-        <meshStandardMaterial color="#3a2a18" roughness={1} />
+        <meshStandardMaterial color={christmas ? '#2a3038' : '#3a2a18'} roughness={1} />
       </mesh>
       {batches.map((batch) => (
         <FloorBatch key={batch.kind} kind={batch.kind} positions={batch.positions} />

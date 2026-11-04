@@ -36,6 +36,7 @@ import {
 import { setParkDialogueContext } from './interactWithParkNpc'
 import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITION, PARK_CREATOR_ROTATION_Y, registerParkNpcs, getParkNpcById } from './parkNpcRegistry'
 import { ParkPerimeter } from './ParkPerimeter'
+import { applyChristmasLook } from './parkChristmas'
 import { getParkLook, type ParkBenchPropKind, type ParkLook } from './parkLook'
 import { applyZoneLook } from './parkZoneTheme'
 import {
@@ -98,7 +99,7 @@ export function TopScene({
   const locale = getLocale()
   const activeZoneId = useTopStore((state) => state.activeZoneId)
   const zone = getParkZone(activeZoneId)
-  const look = applyZoneLook(activeZoneId, getParkLook())
+  const look = applyChristmasLook(activeZoneId, applyZoneLook(activeZoneId, getParkLook()))
   const layout = zone.layout
   const zoneAttractions = getAttractionsForZone(activeZoneId)
 
@@ -154,10 +155,10 @@ export function TopScene({
         layout={layout}
         trees={zone.trees}
         treeStyle={
-          activeZoneId === 'mountain'
-            ? 'pine'
-            : activeZoneId === 'sea' || activeZoneId === 'astro'
-              ? 'none'
+          activeZoneId === 'sea' || activeZoneId === 'astro'
+            ? 'none'
+            : activeZoneId === 'mountain' || look.christmas
+              ? 'pine'
               : 'grove'
         }
         voxelGround={activeZoneId === 'mountain'}
@@ -193,6 +194,7 @@ export function TopScene({
       />
       <ParkDetails
         benchProp={look.benchProp}
+        christmas={look.christmas}
         benchStyle={activeZoneId === 'astro' ? 'astro' : 'classic'}
         benches={zone.benches}
         planters={zone.planters}
@@ -384,7 +386,7 @@ function HubGround({
   return (
     <group>
       {voxelGround ? (
-        <MountainVoxelGround layout={layout} />
+        <MountainVoxelGround layout={layout} christmas={look.christmas} />
       ) : cultureGround ? (
         <CultureDistrictGround layout={layout} />
       ) : seaGround ? (
@@ -441,7 +443,11 @@ function HubGround({
       {treeStyle !== 'none'
         ? trees.map(([x, z]) => (
             <group key={`${x}-${z}`} position={[x, 0, 0]}>
-              {treeStyle === 'pine' ? <PineTree z={z} /> : <Tree z={z} />}
+              {treeStyle === 'pine' ? (
+                <PineTree z={z} christmas={look.christmas} />
+              ) : (
+                <Tree z={z} christmas={look.christmas} />
+              )}
             </group>
           ))
         : null}
@@ -497,12 +503,20 @@ function FountainStatue({ featuredId }: { featuredId: number }) {
   )
 }
 
-function Tree({ z }: { z: number }) {
+function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
+  const ornaments = [
+    { x: 0.55, y: 2.85, z: 0.2, color: '#e04040' },
+    { x: -0.5, y: 3.05, z: -0.15, color: '#f0d040' },
+    { x: 0.15, y: 3.35, z: 0.45, color: '#e04040' },
+    { x: -0.35, y: 2.7, z: 0.4, color: '#40c878' },
+    { x: 0.4, y: 3.5, z: -0.25, color: '#f0d040' },
+  ] as const
+
   return (
     <group position={[0, 0, z]}>
       <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.72, 0.82, 0.56, 16]} />
-        <meshStandardMaterial color="#79654f" roughness={0.68} />
+        <meshStandardMaterial color={christmas ? '#c8d4e0' : '#79654f'} roughness={0.68} />
       </mesh>
       <mesh position={[0, 1.2, 0]} castShadow>
         <cylinderGeometry args={[0.2, 0.35, 2.4, 10]} />
@@ -516,36 +530,113 @@ function Tree({ z }: { z: number }) {
       ].map(([x, y, treeZ, scale], index) => (
         <mesh key={`crown-${index}`} position={[x, y, treeZ]} scale={scale} castShadow>
           <dodecahedronGeometry args={[1, 1]} />
-          <meshStandardMaterial color={index % 2 === 0 ? '#285849' : '#34705a'} roughness={0.94} />
+          <meshStandardMaterial
+            color={index % 2 === 0 ? '#1e5a38' : '#2a7048'}
+            roughness={0.94}
+          />
         </mesh>
       ))}
+      {christmas
+        ? ornaments.map((orb, index) => (
+            <mesh key={`orb-${index}`} position={[orb.x, orb.y, orb.z]} castShadow>
+              <sphereGeometry args={[0.12, 10, 8]} />
+              <meshStandardMaterial
+                color={orb.color}
+                emissive={orb.color}
+                emissiveIntensity={0.55}
+                roughness={0.35}
+              />
+            </mesh>
+          ))
+        : null}
+      {christmas ? (
+        <>
+          <mesh position={[0, 4.45, 0]} castShadow>
+            <octahedronGeometry args={[0.28, 0]} />
+            <meshStandardMaterial
+              color="#ffe090"
+              emissive="#ffd060"
+              emissiveIntensity={0.9}
+              metalness={0.4}
+              roughness={0.3}
+            />
+          </mesh>
+          <pointLight position={[0, 3.2, 0]} color="#ffc878" intensity={1.4} distance={5} />
+        </>
+      ) : null}
     </group>
   )
 }
 
 /** マインクラフト風の針葉樹（段々のボクセル葉） */
-function PineTree({ z }: { z: number }) {
+function PineTree({ z, christmas = false }: { z: number; christmas?: boolean }) {
+  const tiers = [
+    { y: 2.1, s: 1.55 },
+    { y: 2.75, s: 1.2 },
+    { y: 3.3, s: 0.9 },
+    { y: 3.75, s: 0.55 },
+  ] as const
+  const ornaments = [
+    { x: 0.55, y: 2.25, z: 0.35, color: '#e04040' },
+    { x: -0.5, y: 2.35, z: -0.3, color: '#f0d040' },
+    { x: 0.4, y: 2.9, z: -0.35, color: '#40c878' },
+    { x: -0.45, y: 2.95, z: 0.3, color: '#e04040' },
+    { x: 0.28, y: 3.4, z: 0.22, color: '#f0d040' },
+    { x: -0.22, y: 3.45, z: -0.2, color: '#e04040' },
+  ] as const
+
   return (
     <group position={[0, 0, z]}>
       <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.7, 0.4, 0.7]} />
-        <meshStandardMaterial color="#5a4a38" roughness={0.9} />
+        <meshStandardMaterial color={christmas ? '#d0dae6' : '#5a4a38'} roughness={0.9} />
       </mesh>
       <mesh position={[0, 1.3, 0]} castShadow>
         <boxGeometry args={[0.28, 2.2, 0.28]} />
         <meshStandardMaterial color="#4a3a28" roughness={0.92} />
       </mesh>
-      {[
-        { y: 2.1, s: 1.55 },
-        { y: 2.75, s: 1.2 },
-        { y: 3.3, s: 0.9 },
-        { y: 3.75, s: 0.55 },
-      ].map((tier) => (
-        <mesh key={tier.y} position={[0, tier.y, 0]} castShadow>
-          <boxGeometry args={[tier.s, 0.55, tier.s]} />
-          <meshStandardMaterial color={tier.y > 3 ? '#2f6a38' : '#3a7a40'} roughness={0.93} />
-        </mesh>
+      {tiers.map((tier) => (
+        <group key={tier.y}>
+          <mesh position={[0, tier.y, 0]} castShadow>
+            <boxGeometry args={[tier.s, 0.55, tier.s]} />
+            <meshStandardMaterial color={tier.y > 3 ? '#1e5a30' : '#2a6a38'} roughness={0.93} />
+          </mesh>
+          {christmas ? (
+            <mesh position={[0, tier.y + 0.32, 0]} castShadow>
+              <boxGeometry args={[tier.s * 0.92, 0.12, tier.s * 0.92]} />
+              <meshStandardMaterial color="#e8eef4" roughness={0.92} />
+            </mesh>
+          ) : null}
+        </group>
       ))}
+      {christmas
+        ? ornaments.map((orb, index) => (
+            <mesh key={`pine-orb-${index}`} position={[orb.x, orb.y, orb.z]} castShadow>
+              <boxGeometry args={[0.16, 0.16, 0.16]} />
+              <meshStandardMaterial
+                color={orb.color}
+                emissive={orb.color}
+                emissiveIntensity={0.65}
+                roughness={0.35}
+              />
+            </mesh>
+          ))
+        : null}
+      {christmas ? (
+        <>
+          <mesh position={[0, 4.2, 0]} castShadow>
+            <octahedronGeometry args={[0.22, 0]} />
+            <meshStandardMaterial
+              color="#ffe090"
+              emissive="#ffd060"
+              emissiveIntensity={1}
+              metalness={0.45}
+              roughness={0.28}
+            />
+          </mesh>
+          <pointLight position={[0, 3.0, 0]} color="#ffc070" intensity={1.6} distance={5.5} />
+        </>
+      ) : null}
     </group>
   )
 }
@@ -584,6 +675,12 @@ function AstroLamp({
   x: number
   z: number
 }) {
+  const ringColors = look.christmas
+    ? (['#e04040', '#40c878', '#f0d040'] as const)
+    : (['#5ce0ff', '#5ce0ff', '#5ce0ff'] as const)
+  const tipEmissive = look.christmas ? look.lampEmissiveColor : '#5ce0ff'
+  const tipColor = look.christmas ? look.lampBulbColor : '#dff8ff'
+
   return (
     <group position={[x, 0, z]}>
       <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
@@ -603,9 +700,9 @@ function AstroLamp({
           <mesh position={[0, y + 0.39, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry args={[0.14, 0.025, 8, 18]} />
             <meshStandardMaterial
-              color="#5ce0ff"
-              emissive="#5ce0ff"
-              emissiveIntensity={0.45}
+              color={ringColors[index]}
+              emissive={ringColors[index]}
+              emissiveIntensity={look.christmas ? 0.7 : 0.45}
               metalness={0.45}
               roughness={0.3}
             />
@@ -615,8 +712,8 @@ function AstroLamp({
       <mesh position={[0, 3.1, 0]} castShadow>
         <sphereGeometry args={[0.28, 16, 12]} />
         <meshStandardMaterial
-          color="#dff8ff"
-          emissive="#5ce0ff"
+          color={tipColor}
+          emissive={tipEmissive}
           emissiveIntensity={look.lampEmissiveIntensity * 1.15}
           roughness={0.22}
           metalness={0.12}
@@ -625,13 +722,21 @@ function AstroLamp({
       <mesh position={[0, 3.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.36, 0.055, 8, 24]} />
         <meshStandardMaterial
-          color="#a878ff"
-          emissive="#a878ff"
+          color={look.christmas ? '#e04040' : '#a878ff'}
+          emissive={look.christmas ? '#e04040' : '#a878ff'}
           emissiveIntensity={0.55}
           metalness={0.5}
           roughness={0.3}
         />
       </mesh>
+      {look.christmas ? (
+        <pointLight
+          position={[0, 3.1, 0]}
+          intensity={look.lampLightIntensity * 0.55}
+          distance={7.5}
+          color={look.lampPointColor}
+        />
+      ) : null}
     </group>
   )
 }
@@ -646,6 +751,16 @@ function ClassicLamp({
   x: number
   z: number
 }) {
+  const bulbColors = look.christmas
+    ? ([
+        { bulb: '#ffe0e0', emissive: '#e04040' },
+        { bulb: '#e8ffe8', emissive: '#40c878' },
+      ] as const)
+    : ([
+        { bulb: look.lampBulbColor, emissive: look.lampEmissiveColor },
+        { bulb: look.lampBulbColor, emissive: look.lampEmissiveColor },
+      ] as const)
+
   return (
     <group position={[x, 0, z]}>
       <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
@@ -660,13 +775,13 @@ function ClassicLamp({
         <boxGeometry args={[0.95, 0.06, 0.06]} />
         <meshStandardMaterial color="#343039" metalness={0.76} roughness={0.28} />
       </mesh>
-      {[-0.42, 0.42].map((lanternX) => (
+      {[-0.42, 0.42].map((lanternX, index) => (
         <group key={lanternX} position={[lanternX, 3.05, 0]}>
           <mesh castShadow>
             <sphereGeometry args={[0.19, 14, 12]} />
             <meshStandardMaterial
-              color="#fff0bd"
-              emissive="#f6b84f"
+              color={bulbColors[index].bulb}
+              emissive={bulbColors[index].emissive}
               emissiveIntensity={look.lampEmissiveIntensity}
             />
           </mesh>
@@ -680,7 +795,7 @@ function ClassicLamp({
         position={[0, 3.05, 0]}
         intensity={look.lampLightIntensity}
         distance={8.5}
-        color="#ffd080"
+        color={look.lampPointColor}
       />
     </group>
   )
@@ -755,6 +870,7 @@ function BeachLamp({
 
 function ParkDetails({
   benchProp,
+  christmas = false,
   benchStyle = 'classic',
   benches,
   planters,
@@ -763,6 +879,7 @@ function ParkDetails({
   showRailings,
 }: {
   benchProp: ParkBenchPropKind
+  christmas?: boolean
   benchStyle?: 'classic' | 'astro'
   benches: ReadonlyArray<readonly [number, number, number]>
   planters: ReadonlyArray<readonly [number, number]>
@@ -792,6 +909,7 @@ function ParkDetails({
         <ParkBenchProp
           key={`bench-prop-${index}`}
           kind={benchProp}
+          christmas={christmas}
           position={[x, 0, z]}
           index={index}
         />
