@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 import { resetParkPlayerWorld } from './parkPlayerWorld'
 import {
+  getParkTimeOfDayFromDate,
+  type ParkTimeOfDay,
+} from './parkTimeOfDay'
+import {
   DEFAULT_PARK_ZONE,
   getParkZone,
   readStoredParkZone,
@@ -35,6 +39,8 @@ type TopState = {
   activeZoneId: ParkZoneId
   /** ゾーン切替中の短いフェード用 */
   zoneTransitioning: boolean
+  /** 朝／昼／夕／夜。初期は現行 look と同じ夜 */
+  timeOfDay: ParkTimeOfDay
   start: (
     meebitNumber: number,
     spawn?: { x?: number; z?: number; rotationY?: number; zoneId?: ParkZoneId },
@@ -46,6 +52,7 @@ type TopState = {
   setAboutBrowserOpen: (aboutBrowserOpen: boolean) => void
   setActiveZone: (zoneId: ParkZoneId, spawn?: { x: number; z: number; rotationY: number }) => void
   setZoneTransitioning: (zoneTransitioning: boolean) => void
+  setTimeOfDay: (timeOfDay: ParkTimeOfDay) => void
 }
 
 export const useTopStore = create<TopState>((set) => ({
@@ -57,6 +64,7 @@ export const useTopStore = create<TopState>((set) => ({
   aboutBrowserOpen: false,
   activeZoneId: readStoredParkZone(),
   zoneTransitioning: false,
+  timeOfDay: getParkTimeOfDayFromDate(),
   start: (meebitNumber, spawn) => {
     const zoneId = spawn?.zoneId ?? DEFAULT_PARK_ZONE
     const zone = getParkZone(zoneId)
@@ -99,4 +107,5 @@ export const useTopStore = create<TopState>((set) => ({
     })
   },
   setZoneTransitioning: (zoneTransitioning) => set({ zoneTransitioning }),
+  setTimeOfDay: (timeOfDay) => set({ timeOfDay }),
 }))

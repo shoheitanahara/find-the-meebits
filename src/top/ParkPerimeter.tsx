@@ -1,5 +1,6 @@
 import { Text } from '@react-three/drei'
 import { useMemo } from 'react'
+import type { ParkLook } from './parkLook'
 import type { ParkGateDef, ParkZoneLayout } from './parkZones'
 import { TiledVoxelMat, VoxelBlockMat } from './VoxelBlockMat'
 import {
@@ -92,11 +93,13 @@ export function ParkPerimeter({
   perimeter,
   gates,
   locale,
+  look,
 }: {
   layout: ParkZoneLayout
   perimeter: ParkPerimeterDef
   gates: ParkGateDef[]
   locale: 'en' | 'ja'
+  look: ParkLook
 }) {
   const spec = useMemo(
     () => buildPerimeterSpec(layout, perimeter, gates),
@@ -107,7 +110,7 @@ export function ParkPerimeter({
     <group>
       {/* シーは広大な海＋砂浜を SeaDistrictGround が担う。ここは桟橋ゲートだけ */}
       {!isSeaTheme(spec) ? <RiverAndWalls spec={spec} /> : null}
-      <CardinalFeatures spec={spec} locale={locale} />
+      <CardinalFeatures spec={spec} locale={locale} look={look} />
     </group>
   )
 }
@@ -609,9 +612,11 @@ function GateWallReveal({
 function CardinalFeatures({
   spec,
   locale,
+  look,
 }: {
   spec: PerimeterSpec
   locale: 'en' | 'ja'
+  look: ParkLook
 }) {
   return (
     <group>
@@ -620,7 +625,15 @@ function CardinalFeatures({
         if (!opening) return null
         if (opening.kind === 'bridge-gate') {
           // 手前クリア辺でもゲート（＋橋アプローチ）は可
-          return <BridgeGateApproach key={side} spec={spec} side={side} />
+          return (
+            <BridgeGateApproach
+              key={side}
+              spec={spec}
+              side={side}
+              look={look}
+              passable
+            />
+          )
         }
         // シー: 封印門も橋も出さない（海が続くだけ）
         if (isSeaTheme(spec)) return null
@@ -628,7 +641,7 @@ function CardinalFeatures({
         if (isFrontClearSide(spec, side)) return null
         return (
           <group key={side}>
-            <BridgeGateApproach spec={spec} side={side} />
+            <BridgeGateApproach spec={spec} side={side} look={look} />
             <SealedPortal spec={spec} side={side} locale={locale} />
           </group>
         )
@@ -640,9 +653,14 @@ function CardinalFeatures({
 function BridgeGateApproach({
   spec,
   side,
+  look,
+  passable = false,
 }: {
   spec: PerimeterSpec
   side: CardinalSide
+  look: ParkLook
+  /** 本ゲートの通れる橋だけライトを置く */
+  passable?: boolean
 }) {
   const placement = getBridgePlacement(spec, side)
   if (!placement) return null
@@ -690,6 +708,59 @@ function BridgeGateApproach({
               <VoxelBlockMat kind={postKind} />
             </mesh>
           ))}
+        </group>
+      ))}
+      {passable ? (
+        <BridgePassageLights look={look} deckWidth={w} theme={spec.theme} />
+      ) : null}
+    </group>
+  )
+}
+
+/** 通れる橋のデッキ上ライト（左右の手すりに1つずつ）。 */
+function BridgePassageLights({
+  look,
+  deckWidth,
+  theme,
+}: {
+  look: ParkLook
+  deckWidth: number
+  theme: PerimeterSpec['theme']
+}) {
+  const railZ = deckWidth * 0.52
+  const bulbColor =
+    theme === 'astro' ? '#dff8ff' : theme === 'culture' ? '#c8dcff' : look.lampBulbColor
+  const emissiveColor =
+    theme === 'astro' ? '#5ce0ff' : theme === 'culture' ? '#6a9ee8' : look.lampEmissiveColor
+  const lightColor =
+    theme === 'astro' ? '#9ae8ff' : theme === 'culture' ? '#a8c8ff' : look.lampPointColor
+  const lightIntensity = Math.max(5.5, look.lampLightIntensity * 0.65)
+  const emissiveIntensity = Math.max(1.4, look.lampEmissiveIntensity * 0.7)
+
+  return (
+    <group>
+      {([-1, 1] as const).map((sideSign) => (
+        <group key={sideSign} position={[0, 0, sideSign * railZ]}>
+          <mesh position={[0, 0.55, 0]} castShadow>
+            <boxGeometry args={[0.12, 1.1, 0.12]} />
+            <meshStandardMaterial color="#2a262e" metalness={0.55} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 1.22, 0]} castShadow>
+            <boxGeometry args={[0.22, 0.22, 0.22]} />
+            <meshStandardMaterial
+              color={bulbColor}
+              emissive={emissiveColor}
+              emissiveIntensity={emissiveIntensity}
+              roughness={0.35}
+            />
+          </mesh>
+          <pointLight
+            position={[0, 1.35, -sideSign * railZ * 0.35]}
+            color={lightColor}
+            intensity={lightIntensity}
+            distance={12}
+            decay={2}
+          />
         </group>
       ))}
     </group>

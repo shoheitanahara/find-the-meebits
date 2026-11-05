@@ -38,6 +38,7 @@ import { parkNpcIdFor, parkCreatorNpcId, parkCreatorRecord, PARK_CREATOR_POSITIO
 import { ParkPerimeter } from './ParkPerimeter'
 import { applyChristmasLook } from './parkChristmas'
 import { getParkLook, type ParkBenchPropKind, type ParkLook } from './parkLook'
+import { applyTimeOfDayLook } from './parkTimeOfDay'
 import { applyZoneLook } from './parkZoneTheme'
 import {
   NPC_COLLISION_RADIUS,
@@ -99,8 +100,12 @@ export function TopScene({
 }) {
   const locale = getLocale()
   const activeZoneId = useTopStore((state) => state.activeZoneId)
+  const timeOfDay = useTopStore((state) => state.timeOfDay)
   const zone = getParkZone(activeZoneId)
-  const look = applyChristmasLook(activeZoneId, applyZoneLook(activeZoneId, getParkLook()))
+  const look = applyTimeOfDayLook(
+    applyChristmasLook(activeZoneId, applyZoneLook(activeZoneId, getParkLook())),
+    timeOfDay,
+  )
   const layout = zone.layout
   const zoneAttractions = getAttractionsForZone(activeZoneId)
 
@@ -174,6 +179,7 @@ export function TopScene({
           perimeter={zone.perimeter}
           gates={zone.gates}
           locale={locale}
+          look={look}
         />
       ) : null}
       {zone.hasFeaturedBoard ? (

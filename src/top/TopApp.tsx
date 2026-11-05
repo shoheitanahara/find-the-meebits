@@ -22,6 +22,12 @@ import { ParkBgmSystem } from './ParkBgmSystem'
 import { AboutMeebitsBrowser } from './AboutMeebitsBrowser'
 import { useTopStore, type AttractionId } from './topStore'
 import { getParkChristmasCopy, isParkChristmasSeason } from './parkChristmas'
+import {
+  formatParkClock,
+  getParkTimeOfDayFromDate,
+  getParkTimeOfDayLabel,
+  PARK_TIME_OF_DAY_OPTIONS,
+} from './parkTimeOfDay'
 import { getParkZone, getZoneForAttraction } from './parkZones'
 import { setParkCollisionZone } from './topCollisions'
 import { useDialogueStore } from '../dialogue/dialogueStore'
@@ -127,6 +133,8 @@ export function TopApp() {
   const aboutBrowserOpen = useTopStore((state) => state.aboutBrowserOpen)
   const activeZoneId = useTopStore((state) => state.activeZoneId)
   const zoneTransitioning = useTopStore((state) => state.zoneTransitioning)
+  const timeOfDay = useTopStore((state) => state.timeOfDay)
+  const setTimeOfDay = useTopStore((state) => state.setTimeOfDay)
   const isDialogueOpen = useDialogueStore((state) => state.isOpen)
   const savedMeebit = usePlayerStore((state) => state.meebitNumber)
   const [meebitInput, setMeebitInput] = useState(String(savedMeebit))
@@ -136,6 +144,23 @@ export function TopApp() {
   const [lineup, setLineup] = useState<DailyParkLineup | null>(null)
   const [lineupError, setLineupError] = useState(false)
   const [showParkTips, setShowParkTips] = useState(false)
+  const [clockText, setClockText] = useState(() => formatParkClock())
+  const isDev = import.meta.env.DEV
+
+  // パーク内: 実時刻表示＋時間帯の自動同期（DEV の手動切替は上書きしない）
+  useEffect(() => {
+    if (!started) return
+    const tick = () => {
+      const now = new Date()
+      setClockText(formatParkClock(now))
+      if (!isDev) {
+        setTimeOfDay(getParkTimeOfDayFromDate(now))
+      }
+    }
+    tick()
+    const id = window.setInterval(tick, 15_000)
+    return () => window.clearInterval(id)
+  }, [started, isDev, setTimeOfDay])
 
   // 日付シードのラインナップを先読み（ゲーム往復でも sessionStorage で即復帰）
   useEffect(() => {
@@ -245,10 +270,17 @@ export function TopApp() {
       <TargetPreviewCapture />
 
       {parkReady ? (
-        <LanguageSwitcher
-          className="pointer-events-auto absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-[60] sm:right-4 phone-land:top-[max(0.35rem,env(safe-area-inset-top))]"
-          persistParkSessionOnSwitch
-        />
+        <div className="pointer-events-none absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-[60] flex flex-col items-end gap-1.5 sm:right-4 phone-land:top-[max(0.35rem,env(safe-area-inset-top))]">
+          <LanguageSwitcher className="pointer-events-auto" persistParkSessionOnSwitch />
+          {started ? (
+            <p
+              className={`rounded-md border border-[#d4b46a]/25 bg-[#080912]/75 px-2 py-0.5 font-[family-name:Georgia,Times_New_Roman,serif] text-[0.7rem] tracking-[0.12em] text-[#e2c77f] tabular-nums shadow backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
+              aria-label={locale === 'ja' ? '現在時刻' : 'Current time'}
+            >
+              {clockText}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {!parkReady ? (
@@ -365,6 +397,35 @@ export function TopApp() {
               <p className="mt-1.5 text-[0.55rem] uppercase tracking-[0.14em] text-[#e8c878]/85">
                 {christmasCopy.hudTag}
               </p>
+            ) : null}
+            {isDev ? (
+              <div
+                className="pointer-events-auto mt-2.5 flex gap-1"
+                role="group"
+                aria-label={locale === 'ja' ? '時間帯（開発用）' : 'Time of day (dev)'}
+              >
+                {PARK_TIME_OF_DAY_OPTIONS.map((period) => {
+                  const active = timeOfDay === period
+                  return (
+                    <button
+                      key={period}
+                      type="button"
+                      className={`rounded border px-1.5 py-0.5 text-[0.52rem] font-semibold tracking-[0.08em] transition ${
+                        active
+                          ? 'border-[#e2c77f]/70 bg-[#d4b46a]/25 text-[#f4ead2]'
+                          : 'border-white/15 bg-black/25 text-[#b8b2a6] hover:border-[#d4b46a]/40 hover:text-[#e2c77f]'
+                      }`}
+                      aria-pressed={active}
+                      onClick={() => {
+                        setTimeOfDay(period)
+                        void unlockAudioIfNeeded().then(() => playSfx('uiClick'))
+                      }}
+                    >
+                      {getParkTimeOfDayLabel(period, locale)}
+                    </button>
+                  )
+                })}
+              </div>
             ) : null}
           </div>
 
