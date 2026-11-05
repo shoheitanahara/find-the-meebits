@@ -19,7 +19,6 @@ const DIRT_DARK = '#6e5210'
 const SNOW = '#e8eef4'
 const SNOW_BLUE = '#d5dee8'
 const ACCENT = '#c4a060'
-const WOOD = '#5a4030'
 const GOLD = '#c9a24a'
 
 /** マイクラ調の基本ボクセル辺長 */
@@ -109,32 +108,6 @@ function MountainPortalGate({
         distance={9}
         decay={2}
       />
-
-      {/* 旗竿 */}
-      {([-1, 1] as const).map((side) => (
-        <group key={`flag-${side}`} position={[faceSign * 0.9, 0, side * (corridorHalf + 0.45)]}>
-          <mesh position={[0, 2.5, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.06, 5.0, 8]} />
-            <meshStandardMaterial color={GOLD} metalness={0.45} roughness={0.4} />
-          </mesh>
-          <mesh position={[faceSign * 0.55, 4.55, 0]} castShadow>
-            <boxGeometry args={[1.05, 0.65, 0.06]} />
-            <meshStandardMaterial
-              color="#e85d4c"
-              emissive="#e85d4c"
-              emissiveIntensity={0.25}
-              roughness={0.55}
-            />
-          </mesh>
-        </group>
-      ))}
-
-      {([-1, 1] as const).map((side) => (
-        <PortalLantern
-          key={`lantern-${side}`}
-          position={[faceSign * 1.55, 0, side * (corridorHalf + 0.1)]}
-        />
-      ))}
 
       {/* Astro帰還門は本体だけ反転し、既存看板のワールド向き・位置を維持する。 */}
       <group position={[signFaceSign * 0.55, 0, 0]} rotation={[0, signRotationY, 0]}>
@@ -462,27 +435,6 @@ function ApproachPath({
   )
 }
 
-function PortalLantern({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 1.05, 0]} castShadow>
-        <cylinderGeometry args={[0.07, 0.09, 2.1, 8]} />
-        <meshStandardMaterial color={WOOD} roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 2.25, 0]} castShadow>
-        <boxGeometry args={[0.42, 0.55, 0.42]} />
-        <meshStandardMaterial
-          color="#f0c878"
-          emissive="#f0c878"
-          emissiveIntensity={0.65}
-          roughness={0.4}
-        />
-      </mesh>
-      <pointLight position={[0, 2.25, 0]} color="#ffd9a0" intensity={0.85} distance={5} decay={2} />
-    </group>
-  )
-}
-
 /** プラザ側：カルチャーエリアへの入口（ギャラリーアーチ） */
 function CulturePortalGate({
   gate,
@@ -560,25 +512,6 @@ function CulturePortalGate({
         distance={10}
         decay={2}
       />
-
-      {([-1, 1] as const).map((side) => (
-        <group key={side} position={[faceSign * 1.15, 0, side * (gate.halfWidth * 0.52)]}>
-          <mesh position={[0, 1.1, 0]} castShadow>
-            <cylinderGeometry args={[0.06, 0.08, 2.2, 8]} />
-            <meshStandardMaterial color={marbleDark} roughness={0.6} />
-          </mesh>
-          <mesh position={[0, 2.35, 0]} castShadow>
-            <boxGeometry args={[0.38, 0.48, 0.38]} />
-            <meshStandardMaterial
-              color="#d0e4ff"
-              emissive={accent}
-              emissiveIntensity={0.7}
-              roughness={0.35}
-            />
-          </mesh>
-          <pointLight position={[0, 2.35, 0]} color="#a8c8f0" intensity={0.7} distance={5} decay={2} />
-        </group>
-      ))}
 
       {/* 看板：通常は −X（接近側）。Astro 西門は +X（エリア内側）向き */}
       <group position={[signFaceSign * 0.45, 0, 0]} rotation={[0, signRotationY, 0]}>
@@ -660,24 +593,6 @@ function SeaPortalGate({
         distance={10}
         decay={2}
       />
-
-      {([-1, 1] as const).map((side) => (
-        <group key={side} position={[faceSign * 1.15, 0, side * (gate.halfWidth * 0.52)]}>
-          <mesh position={[0, 1.05, 0]} castShadow>
-            <cylinderGeometry args={[0.06, 0.08, 2.1, 8]} />
-            <meshStandardMaterial color={woodDark} roughness={0.85} />
-          </mesh>
-          <mesh position={[0, 2.25, 0]} castShadow>
-            <boxGeometry args={[0.36, 0.45, 0.36]} />
-            <meshStandardMaterial
-              color="#e8f4ff"
-              emissive={foam}
-              emissiveIntensity={0.55}
-              roughness={0.35}
-            />
-          </mesh>
-        </group>
-      ))}
 
       <group position={[faceSign * 0.45, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <Text position={[0, 4.25, 0]} fontSize={0.24} color="#f5e6c8" anchorX="center" anchorY="middle">
@@ -776,24 +691,6 @@ function AstroPortalGate({
         decay={2}
       />
 
-      {([-1, 1] as const).map((side) => (
-        <group key={`astro-lantern-${side}`} position={[faceSign * 1.45, 0, side * (gate.halfWidth * 0.55)]}>
-          <mesh position={[0, 1.05, 0]} castShadow>
-            <cylinderGeometry args={[0.07, 0.09, 2.1, 8]} />
-            <meshStandardMaterial color={hull} roughness={0.5} metalness={0.55} />
-          </mesh>
-          <mesh position={[0, 2.25, 0]} castShadow>
-            <boxGeometry args={[0.4, 0.5, 0.4]} />
-            <meshStandardMaterial
-              color={accent}
-              emissive={accent}
-              emissiveIntensity={0.7}
-              roughness={0.35}
-            />
-          </mesh>
-        </group>
-      ))}
-
       <group position={[faceSign * 0.5, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <mesh position={[0, 5.05, 0]} castShadow>
           <boxGeometry args={[3.5, 0.95, 0.14]} />
@@ -872,13 +769,6 @@ function PlazaReturnGate({
           opacity={0.26}
         />
       </mesh>
-
-      {([-1, 1] as const).map((side) => (
-        <PortalLantern
-          key={side}
-          position={[faceSign * 1.2, 0, side * (gate.halfWidth * 0.55)]}
-        />
-      ))}
 
       <group
         position={[faceSign * 0.45, 0, 0]}

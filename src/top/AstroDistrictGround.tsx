@@ -232,11 +232,9 @@ export function AstroDistrictGround({
         </mesh>
       ))}
 
+      {/* 減飾: 左右対称の過剰配置をやめ、識別用に最小限だけ残す */}
       <AstroProp position={[-11.5, 0, -2.5]} kind="beacon" />
-      <AstroProp position={[11.8, 0, -2.8]} kind="beacon" />
-      <AstroProp position={[-8.5, 0, 4.2]} kind="crate" />
       <AstroProp position={[8.2, 0, 4.5]} kind="crate" />
-      <AstroProp position={[0, 0, 9.5]} kind="beacon" />
     </group>
   )
 }

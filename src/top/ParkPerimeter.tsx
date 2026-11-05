@@ -1,7 +1,7 @@
 import { Text } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { ParkGateDef, ParkZoneLayout } from './parkZones'
-import { VoxelBlockMat } from './VoxelBlockMat'
+import { TiledVoxelMat, VoxelBlockMat } from './VoxelBlockMat'
 import {
   buildPerimeterSpec,
   getBridgePlacement,
@@ -10,7 +10,6 @@ import {
   isFrontClearSide,
   isPerimeterGateOpening,
   openCenterOnSide,
-  riverInnerOnNS,
   shouldBuildPerimeterSide,
   splitAxisSegments,
   type CardinalSide,
@@ -27,19 +26,14 @@ const GOLD_DIM = '#9a7a40'
 const WATER = '#1a6a8a'
 const WATER_DEEP = '#0f4a62'
 const WATER_FOAM = '#8ec8e0'
-const IVY = '#3d5a40'
-
 /** マウンテン（マインクラフト山岳）パレット */
-const MT_STONE = '#6a6e68'
 const MT_STONE_DARK = '#4a4e48'
-const MT_STONE_LIGHT = '#8a8e82'
 const MT_GRASS = '#5a8a48'
 const MT_DIRT = '#6a5a42'
 const MT_WATER = '#2a7a9a'
 const MT_WATER_DEEP = '#1a4a62'
 const MT_WATER_FOAM = '#a0d8e8'
 const MT_WOOD = '#7a5a38'
-const MT_MOSS = '#3d6a40'
 
 /** カルチャー（濃紺ギャラリー）パレット */
 const CU_STONE = '#1a2a48'
@@ -113,7 +107,6 @@ export function ParkPerimeter({
     <group>
       {/* シーは広大な海＋砂浜を SeaDistrictGround が担う。ここは桟橋ゲートだけ */}
       {!isSeaTheme(spec) ? <RiverAndWalls spec={spec} /> : null}
-      {!isSeaTheme(spec) ? <LowCornerMarkers spec={spec} /> : null}
       <CardinalFeatures spec={spec} locale={locale} />
     </group>
   )
@@ -613,111 +606,6 @@ function GateWallReveal({
   )
 }
 
-function LowCornerMarkers({ spec }: { spec: PerimeterSpec }) {
-  const { cx, cz, riverInnerX, riverWidth } = spec
-  const cornerX = riverInnerX + riverWidth * 0.45
-  const mountain = isMountainTheme(spec)
-
-  return (
-    <group>
-      {([-1, 1] as const).flatMap((sx) =>
-        ([-1, 1] as const)
-          .filter((sz) => {
-            if (sz < 0 && isFrontClearSide(spec, 's')) return false
-            if (sz > 0 && isFrontClearSide(spec, 'n')) return false
-            if (sx < 0 && isFrontClearSide(spec, 'w')) return false
-            if (sx > 0 && isFrontClearSide(spec, 'e')) return false
-            return true
-          })
-          .map((sz) => {
-            const cornerZ = riverInnerOnNS(spec, sz > 0 ? 'n' : 's') + riverWidth * 0.45
-            return (
-              <group key={`corner-${sx}-${sz}`} position={[cx + sx * cornerX, 0, cz + sz * cornerZ]}>
-                {mountain ? (
-                  <>
-                    <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
-                      <boxGeometry args={[1.4, 1.1, 1.4]} />
-                      <meshStandardMaterial color={MT_STONE} roughness={0.95} />
-                    </mesh>
-                    <mesh position={[0.35, 1.15, -0.2]} castShadow>
-                      <boxGeometry args={[0.8, 0.7, 0.75]} />
-                      <meshStandardMaterial color={MT_STONE_LIGHT} roughness={0.94} />
-                    </mesh>
-                    <mesh position={[0, 1.35, 0]} castShadow>
-                      <boxGeometry args={[1.2, 0.35, 1.2]} />
-                      <meshStandardMaterial color={MT_GRASS} roughness={0.9} />
-                    </mesh>
-                    <mesh position={[-0.4, 0.85, 0.35]} castShadow>
-                      <boxGeometry args={[0.45, 0.4, 0.45]} />
-                      <meshStandardMaterial color={MT_MOSS} roughness={0.92} />
-                    </mesh>
-                  </>
-                ) : (
-                  <>
-                    <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-                      <boxGeometry args={[1.1, 0.7, 1.1]} />
-                      <meshStandardMaterial color={STONE} roughness={0.93} />
-                    </mesh>
-                    <mesh position={[0, 0.78, 0]} castShadow>
-                      <boxGeometry args={[1.2, 0.12, 1.2]} />
-                      <meshStandardMaterial color={GOLD_DIM} metalness={0.35} roughness={0.5} />
-                    </mesh>
-                    <mesh position={[-sx * 0.35, 0.45, 0]}>
-                      <boxGeometry args={[0.1, 0.55, 0.55]} />
-                      <meshStandardMaterial color={IVY} roughness={0.9} />
-                    </mesh>
-                  </>
-                )}
-              </group>
-            )
-          }),
-      )}
-    </group>
-  )
-}
-
-function BeachCornerMarkers({ spec }: { spec: PerimeterSpec }) {
-  const { cx, cz, riverInnerX, riverWidth } = spec
-  const cornerX = riverInnerX + riverWidth * 0.45
-  return (
-    <group>
-      {([-1, 1] as const).flatMap((sx) =>
-        ([-1, 1] as const)
-          .filter((sz) => {
-            if (sz < 0 && isFrontClearSide(spec, 's')) return false
-            if (sz > 0 && isFrontClearSide(spec, 'n')) return false
-            if (sx < 0 && isFrontClearSide(spec, 'w')) return false
-            if (sx > 0 && isFrontClearSide(spec, 'e')) return false
-            return true
-          })
-          .map((sz) => {
-            const cornerZ = riverInnerOnNS(spec, sz > 0 ? 'n' : 's') + riverWidth * 0.45
-            return (
-              <group key={`beach-corner-${sx}-${sz}`} position={[cx + sx * cornerX, 0, cz + sz * cornerZ]}>
-                <mesh position={[0, 0.35, 0]} castShadow receiveShadow>
-                  <boxGeometry args={[1.6, 0.7, 1.6]} />
-                  <meshStandardMaterial color={SEA_SAND_DARK} roughness={0.96} />
-                </mesh>
-                <mesh position={[0.25, 0.75, -0.15]} castShadow>
-                  <boxGeometry args={[0.9, 0.45, 0.85]} />
-                  <meshStandardMaterial color={SEA_SAND} roughness={0.94} />
-                </mesh>
-                <mesh position={[-0.35, 1.1, 0.3]} castShadow>
-                  <cylinderGeometry args={[0.08, 0.12, 1.8, 8]} />
-                  <meshStandardMaterial color={SEA_WOOD} roughness={0.85} />
-                </mesh>
-                <mesh position={[-0.35, 2.05, 0.3]} castShadow>
-                  <sphereGeometry args={[0.35, 8, 8]} />
-                  <meshStandardMaterial color="#3d7a48" roughness={0.88} />
-                </mesh>
-              </group>
-            )
-          }),
-      )}
-    </group>
-  )
-}
-
 function CardinalFeatures({
   spec,
   locale,
@@ -761,124 +649,49 @@ function BridgeGateApproach({
 
   const { x, z, rotationY, length } = placement
   const w = spec.bridgeDeckWidth
-  const deckTop = 0.08
   const mountain = isMountainTheme(spec)
   const culture = isCultureTheme(spec)
   const sea = isSeaTheme(spec)
   const astro = isAstroTheme(spec)
-  const beam = mountain
-    ? MT_WOOD
-    : culture
-      ? CU_STONE_DARK
-      : sea
-        ? SEA_WOOD_DARK
+  // エリア世界観に合わせたデッキ材
+  // Plaza=レンガ / Mountain=木道 / Sea=桟橋材 / Culture=紺タイル / Astro=金属パネル
+  const deckKind = mountain
+    ? 'path'
+    : sea
+      ? 'pierWood'
+      : culture
+        ? 'gallery'
         : astro
-          ? AS_STONE_DARK
-          : STONE_DARK
-  const deck = mountain
-    ? '#8a6a42'
-    : culture
-      ? '#1e3050'
-      : sea
-        ? '#9a7a55'
-        : astro
-          ? '#243048'
-          : '#7a7268'
-  const plankA = mountain
-    ? '#9a7a50'
-    : culture
-      ? '#2a4068'
-      : sea
-        ? '#b89060'
-        : astro
-          ? '#2e3a52'
-          : '#8a8278'
-  const plankB = mountain
-    ? '#7a5a38'
-    : culture
-      ? '#162848'
-      : sea
-        ? '#8a6848'
-        : astro
-          ? '#1a2234'
-          : '#6e675e'
-  const rail = mountain
-    ? MT_WOOD
-    : culture
-      ? CU_ACCENT
-      : sea
-        ? SEA_WOOD
-        : astro
-          ? AS_ACCENT
-          : GOLD
-  const post = mountain
-    ? MT_STONE_DARK
-    : culture
-      ? CU_STONE
-      : sea
-        ? SEA_WOOD_DARK
-        : astro
-          ? AS_STONE
-          : STONE_DARK
-  const under = mountain
-    ? MT_WATER_DEEP
-    : culture
-      ? CU_WATER_DEEP
-      : sea
-        ? SEA_WATER_DEEP
-        : astro
-          ? AS_WATER_DEEP
-          : WATER_DEEP
+          ? 'panel'
+          : 'brick'
+  const railKind = deckKind
+  const postKind = mountain || sea ? 'dirt' : culture ? 'darkStone' : astro ? 'darkStone' : 'stone'
+  const deckW = w * 0.96
+  // 崖ボクセルと同じく「約1ワールド単位＝1タイル」でリピート（引き伸ばし防止）
+  const deckRepeatX = Math.max(1, Math.round(length))
+  const deckRepeatZ = Math.max(1, Math.round(deckW))
+  const railRepeatX = Math.max(1, Math.round(length * 0.96))
 
   return (
     <group position={[x, 0, z]} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, -0.12, 0]} castShadow receiveShadow>
-        <boxGeometry args={[length, 0.28, w * 0.98]} />
-        <meshStandardMaterial color={beam} roughness={0.88} />
+      <mesh position={[0, 0.02, 0]} castShadow receiveShadow>
+        <boxGeometry args={[length, 0.28, deckW]} />
+        <TiledVoxelMat kind={deckKind} repeatX={deckRepeatX} repeatY={deckRepeatZ} />
       </mesh>
-      <mesh position={[0, deckTop - 0.04, 0]} castShadow receiveShadow>
-        <boxGeometry args={[length * 0.98, 0.08, w * 0.92]} />
-        <meshStandardMaterial color={deck} roughness={0.78} />
-      </mesh>
-      {Array.from({ length: 6 }, (_, i) => {
-        const px = -length * 0.42 + i * (length * 0.16)
-        return (
-          <mesh key={i} position={[px, deckTop, 0]} receiveShadow>
-            <boxGeometry args={[length * 0.14, 0.05, w * 0.85]} />
-            <meshStandardMaterial
-              color={i % 2 === 0 ? plankA : plankB}
-              roughness={0.88}
-            />
-          </mesh>
-        )
-      })}
       {([-1, 1] as const).map((sideSign) => (
         <group key={sideSign} position={[0, 0, sideSign * (w * 0.48)]}>
           <mesh position={[0, 0.72, 0]} castShadow>
             <boxGeometry args={[length * 0.96, 0.1, 0.1]} />
-            <meshStandardMaterial
-              color={rail}
-              metalness={mountain || sea ? 0.05 : 0.5}
-              roughness={mountain || sea ? 0.85 : 0.35}
-            />
+            <TiledVoxelMat kind={railKind} repeatX={railRepeatX} repeatY={1} />
           </mesh>
-          {[-0.35, -0.1, 0.15, 0.35].map((t) => (
+          {[-0.38, -0.13, 0.13, 0.38].map((t) => (
             <mesh key={t} position={[t * length, 0.42, 0]} castShadow>
               <boxGeometry args={[0.1, 0.7, 0.1]} />
-              <meshStandardMaterial color={post} roughness={0.85} />
+              <VoxelBlockMat kind={postKind} />
             </mesh>
           ))}
         </group>
       ))}
-      <mesh position={[0, -0.35, 0]}>
-        <boxGeometry args={[length * 0.7, 0.2, w * 0.7]} />
-        <meshStandardMaterial
-          color={under}
-          transparent
-          opacity={0.18}
-          depthWrite={false}
-        />
-      </mesh>
     </group>
   )
 }
@@ -1186,31 +999,6 @@ function ClassicSealedGate({
         </mesh>
       ))}
 
-      {/* ランタン */}
-      {([-1, 1] as const).map((s) => (
-        <group key={`lantern-${s}`} position={[0.85, 0, s * (halfW * 0.55)]}>
-          <mesh position={[0, 1.15, 0]} castShadow>
-            <cylinderGeometry args={[0.06, 0.08, 2.2, 8]} />
-            <meshStandardMaterial color={culture ? CU_STONE_DARK : STONE_DARK} roughness={0.85} />
-          </mesh>
-          <mesh position={[0, 2.35, 0]}>
-            <sphereGeometry args={[0.2, 12, 12]} />
-            <meshStandardMaterial
-              color={culture ? '#c8e0ff' : '#ffe2b0'}
-              emissive={culture ? '#8eb4e8' : '#ffe2b0'}
-              emissiveIntensity={0.75}
-              roughness={0.3}
-            />
-          </mesh>
-          <pointLight
-            position={[0, 2.35, 0]}
-            color={culture ? '#a8c8f0' : '#ffd9a0'}
-            intensity={0.65}
-            distance={6}
-          />
-        </group>
-      ))}
-
       {/* 看板 */}
       <group position={[0.55, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         <mesh position={[0, 4.55, 0]} castShadow>
@@ -1325,26 +1113,6 @@ function MountainSealedGate({
         <boxGeometry args={[0.1, 0.14, halfW * 1.6]} />
         <meshStandardMaterial color="#2a2010" roughness={0.8} />
       </mesh>
-
-      {/* 松明 */}
-      {([-1, 1] as const).map((s) => (
-        <group key={`torch-${s}`} position={[0.9, 0, s * (halfW * 0.5)]}>
-          <mesh position={[0, 1.2, 0]} castShadow>
-            <boxGeometry args={[0.12, 2.2, 0.12]} />
-            <meshStandardMaterial color={MT_WOOD} roughness={0.9} />
-          </mesh>
-          <mesh position={[0, 2.4, 0]}>
-            <boxGeometry args={[0.28, 0.35, 0.28]} />
-            <meshStandardMaterial
-              color="#ffb060"
-              emissive="#ff9020"
-              emissiveIntensity={0.9}
-              roughness={0.4}
-            />
-          </mesh>
-          <pointLight position={[0, 2.4, 0]} color="#ffb060" intensity={0.7} distance={5} />
-        </group>
-      ))}
 
       {/* 看板 */}
       <group position={[0.6, 0, 0]} rotation={[0, Math.PI / 2, 0]}>

@@ -512,6 +512,30 @@ function FountainStatue({ featuredId }: { featuredId: number }) {
   )
 }
 
+/** ツリー頂上の星（八面体・縦長） */
+function TreeStar({
+  y,
+  radius = 0.22,
+  stretchY = 1.45,
+}: {
+  y: number
+  radius?: number
+  stretchY?: number
+}) {
+  return (
+    <mesh position={[0, y, 0]} scale={[1, stretchY, 1]} castShadow>
+      <octahedronGeometry args={[radius, 0]} />
+      <meshStandardMaterial
+        color="#ffe090"
+        emissive="#ffd060"
+        emissiveIntensity={1}
+        metalness={0.45}
+        roughness={0.28}
+      />
+    </mesh>
+  )
+}
+
 function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
   const ornaments = [
     { x: 0.55, y: 2.85, z: 0.2, color: '#e04040' },
@@ -560,16 +584,7 @@ function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
         : null}
       {christmas ? (
         <>
-          <mesh position={[0, 4.45, 0]} castShadow>
-            <octahedronGeometry args={[0.28, 0]} />
-            <meshStandardMaterial
-              color="#ffe090"
-              emissive="#ffd060"
-              emissiveIntensity={0.9}
-              metalness={0.4}
-              roughness={0.3}
-            />
-          </mesh>
+          <TreeStar y={4.55} radius={0.28} />
           <pointLight position={[0, 3.2, 0]} color="#ffc878" intensity={1.4} distance={5} />
         </>
       ) : null}
@@ -633,16 +648,8 @@ function PineTree({ z, christmas = false }: { z: number; christmas?: boolean }) 
         : null}
       {christmas ? (
         <>
-          <mesh position={[0, 4.2, 0]} castShadow>
-            <octahedronGeometry args={[0.22, 0]} />
-            <meshStandardMaterial
-              color="#ffe090"
-              emissive="#ffd060"
-              emissiveIntensity={1}
-              metalness={0.45}
-              roughness={0.28}
-            />
-          </mesh>
+          {/* 元サイズ 0.22 + 縦伸ばし。位置はやや高め */}
+          <TreeStar y={4.35} radius={0.22} />
           <pointLight position={[0, 3.0, 0]} color="#ffc070" intensity={1.6} distance={5.5} />
         </>
       ) : null}

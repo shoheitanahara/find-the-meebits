@@ -9,7 +9,19 @@ import {
   type Texture,
 } from 'three'
 
-export type BlockKind = 'grass' | 'dirt' | 'sand' | 'stone' | 'darkStone' | 'snow' | 'path' | 'gravel'
+export type BlockKind =
+  | 'grass'
+  | 'dirt'
+  | 'sand'
+  | 'stone'
+  | 'darkStone'
+  | 'snow'
+  | 'path'
+  | 'gravel'
+  | 'brick'
+  | 'pierWood'
+  | 'gallery'
+  | 'panel'
 
 const cache = new Map<string, Texture>()
 
@@ -115,11 +127,91 @@ function paintSnow(ctx: CanvasRenderingContext2D, size: number) {
 }
 
 function paintPath(ctx: CanvasRenderingContext2D, size: number) {
-  paintNoise(ctx, size, [158, 138, 88], 24, 41)
-  // 踏み固めの筋
-  for (let y = 2; y < size; y += 4) {
-    ctx.fillStyle = 'rgba(120,100,60,0.25)'
-    ctx.fillRect(1, y, size - 2, 1)
+  // 木目ボード（1タイル内に細かい板目 — 橋でリピートする前提）
+  paintNoise(ctx, size, [148, 118, 72], 22, 41)
+  const plankH = 2
+  for (let y = 0; y < size; y += plankH) {
+    ctx.fillStyle = 'rgba(70,50,28,0.5)'
+    ctx.fillRect(0, y, size, 1)
+    const yy = y + 1
+    if (yy < size) {
+      ctx.fillStyle = `rgba(100,78,42,${0.2 + hash(0, y, 3) * 0.25})`
+      ctx.fillRect(1, yy, size - 2, 1)
+    }
+  }
+}
+
+function paintBrick(ctx: CanvasRenderingContext2D, size: number) {
+  // Plaza: 細かいクラシックレンガ（崖のノイズ粒度に寄せる）
+  paintNoise(ctx, size, [150, 142, 132], 10, 61)
+  const rowH = 2
+  const brickW = 4
+  for (let row = 0; row < size / rowH; row += 1) {
+    const y = row * rowH
+    const offset = row % 2 === 0 ? 0 : brickW / 2
+    for (let col = -1; col < size / brickW + 1; col += 1) {
+      const x = col * brickW + offset
+      const n = hash(row, col, 17)
+      const r = 148 + n * 28
+      const g = 78 + n * 22
+      const b = 58 + n * 16
+      ctx.fillStyle = `rgb(${clampByte(r)},${clampByte(g)},${clampByte(b)})`
+      ctx.fillRect(x + 1, y, brickW - 1, rowH - 1)
+    }
+    ctx.fillStyle = 'rgba(170,162,150,0.8)'
+    ctx.fillRect(0, y, size, 1)
+  }
+}
+
+/** Sea: 潮で色あせた桟橋の木 */
+function paintPierWood(ctx: CanvasRenderingContext2D, size: number) {
+  paintNoise(ctx, size, [168, 140, 96], 18, 71)
+  const plankH = 2
+  for (let y = 0; y < size; y += plankH) {
+    ctx.fillStyle = 'rgba(90,70,40,0.35)'
+    ctx.fillRect(0, y, size, 1)
+    if (y + 1 < size) {
+      ctx.fillStyle = `rgba(190,165,120,${0.12 + hash(1, y, 4) * 0.18})`
+      ctx.fillRect(1, y + 1, size - 2, 1)
+    }
+  }
+}
+
+/** Culture: 濃紺ギャラリーの石タイル＋青アクセント */
+function paintGallery(ctx: CanvasRenderingContext2D, size: number) {
+  paintNoise(ctx, size, [28, 44, 72], 16, 81)
+  const tile = 4
+  for (let y = 0; y < size; y += tile) {
+    for (let x = 0; x < size; x += tile) {
+      const n = hash(x, y, 22)
+      ctx.fillStyle = `rgb(${clampByte(32 + n * 24)},${clampByte(52 + n * 28)},${clampByte(88 + n * 30)})`
+      ctx.fillRect(x + 1, y + 1, tile - 1, tile - 1)
+    }
+  }
+  ctx.fillStyle = 'rgba(110,150,210,0.3)'
+  for (let i = 0; i <= size; i += tile) {
+    ctx.fillRect(0, i, size, 1)
+    ctx.fillRect(i, 0, 1, size)
+  }
+}
+
+/** Astro: 暗い金属パネル＋シアン継ぎ目 */
+function paintPanel(ctx: CanvasRenderingContext2D, size: number) {
+  paintNoise(ctx, size, [22, 28, 40], 12, 91)
+  const tile = 4
+  for (let y = 0; y < size; y += tile) {
+    for (let x = 0; x < size; x += tile) {
+      const n = hash(x, y, 29)
+      ctx.fillStyle = `rgb(${clampByte(28 + n * 18)},${clampByte(34 + n * 20)},${clampByte(48 + n * 22)})`
+      ctx.fillRect(x + 1, y + 1, tile - 2, tile - 2)
+      ctx.fillStyle = 'rgba(90,110,140,0.5)'
+      ctx.fillRect(x + 1, y + 1, 1, 1)
+    }
+  }
+  ctx.fillStyle = 'rgba(70,200,240,0.4)'
+  for (let i = 0; i <= size; i += tile) {
+    ctx.fillRect(0, i, size, 1)
+    ctx.fillRect(i, 0, 1, size)
   }
 }
 
@@ -158,6 +250,10 @@ export function getBlockTexture(kind: BlockKind, face: 'top' | 'side' | 'all' = 
   if (kind === 'snow') return makeTexture('snow', paintSnow)
   if (kind === 'path') return makeTexture('path', paintPath)
   if (kind === 'gravel') return makeTexture('gravel', paintGravel)
+  if (kind === 'brick') return makeTexture('brick', paintBrick)
+  if (kind === 'pierWood') return makeTexture('pierWood', paintPierWood)
+  if (kind === 'gallery') return makeTexture('gallery', paintGallery)
+  if (kind === 'panel') return makeTexture('panel', paintPanel)
   return makeTexture('dirt', paintDirt)
 }
 

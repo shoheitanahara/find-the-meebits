@@ -2,7 +2,7 @@
  * Mt. Meeb / Mountain エリア共通のボクセルブロック材質（ニアレストテクスチャ）。
  */
 import { useMemo } from 'react'
-import { MeshStandardMaterial, type Material } from 'three'
+import { MeshStandardMaterial, RepeatWrapping, type Material } from 'three'
 import { getBlockTexture, getGrassMaterials, type BlockKind } from '../mountain/blockTextures'
 
 export type { BlockKind }
@@ -17,6 +17,31 @@ export function VoxelBlockMat({
 }) {
   const map = useMemo(() => getBlockTexture(kind, face === 'side' ? 'side' : face), [kind, face])
   return <meshStandardMaterial map={map} roughness={0.95} metalness={0.02} />
+}
+
+/**
+ * 大きな面に引き伸ばさず、ワールド約1ユニット＝1タイルでリピート。
+ * 橋デッキなど長いメッシュ向け（崖のボクセル粒度に合わせる）。
+ */
+export function TiledVoxelMat({
+  kind,
+  repeatX,
+  repeatY,
+}: {
+  kind: BlockKind
+  repeatX: number
+  repeatY: number
+}) {
+  const map = useMemo(() => {
+    const tex = getBlockTexture(kind).clone()
+    tex.wrapS = RepeatWrapping
+    tex.wrapT = RepeatWrapping
+    tex.repeat.set(Math.max(0.5, repeatX), Math.max(0.5, repeatY))
+    tex.needsUpdate = true
+    return tex
+  }, [kind, repeatX, repeatY])
+
+  return <meshStandardMaterial map={map} roughness={0.92} metalness={0.03} />
 }
 
 /** 草ブロックの6面材質（柱・大きな箱向け） */
