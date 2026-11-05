@@ -33,7 +33,28 @@ export const MOUNTAIN = {
   fallY: -1.5,
   /** 頂点（zEnd）から奥へ続く平台の長さ */
   summitPlateau: 10,
+  /** 隣接レーン間隔（7レーン・旧5レーンから約1.5倍） */
+  laneSpacing: 3.9,
+  /** 最外レーン（LLL/RRR）の頂上収束半幅 ≈ spacing*3 */
+  laneOuterHalf: 11.7,
+  /** 途中の最外レーン基準スプレッド */
+  laneBaseSpread: 8.7,
+  /** レーン中心から山肌裾まで生成する X 半幅 */
+  terrainHalfExtent: 48,
+  /** 棚外側のなだらかな下り斜面の長さ */
+  flankDepth: 14,
+  /** 頂点平台の X 半幅 */
+  summitHalfWidth: 12,
+  /** スタート床の X 半幅 */
+  startPadHalf: 8,
 } as const
+
+/** 7 レーン: 左外側〜右外側 */
+export const MOUNTAIN_LANES = ['LLL', 'LL', 'L', 'C', 'R', 'RR', 'RRR'] as const
+export type MountainLaneId = (typeof MOUNTAIN_LANES)[number]
+
+/** 最外レーンの係数（|mult| max） */
+const LANE_OUTER_MULT = 3
 
 export type VoxelBlock = {
   x: number
@@ -55,7 +76,7 @@ export type VoxelColumn = {
   isGrassTop?: boolean
 }
 
-type LaneId = 'L' | 'C' | 'R'
+type LaneId = MountainLaneId
 type Waypoint = { z: number; x: number }
 
 type Ravine = {
@@ -64,6 +85,17 @@ type Ravine = {
   cut: 'full' | 'lane'
   lanes?: readonly LaneId[]
   stones?: ReadonlyArray<{ lane: LaneId; xOff: number; z: number }>
+}
+
+/** レーン係数: C=0 … 最外 ±3 */
+const LANE_MULT: Record<LaneId, number> = {
+  LLL: -3,
+  LL: -2,
+  L: -1,
+  C: 0,
+  R: 1,
+  RR: 2,
+  RRR: 3,
 }
 
 export type MountainStageRuntime = {
@@ -100,14 +132,15 @@ function lerpWaypoints(pts: readonly Waypoint[], z: number): number {
   return 0
 }
 
-/** 蛇行レーン — 不等間隔・左右非対称・多周波で整ったS字を崩す */
+/** 蛇行レーン（7本）— 不等間隔・左右非対称・多周波で整ったS字を崩す */
 function generateLaneWays(def: MountainStageDef): Record<LaneId, Waypoint[]> {
   const { zStart, zEnd, windAmplitude, windFrequency, seed } = def
   const span = zStart - zEnd
   const steps = Math.max(10, Math.round(10 + windFrequency * 7))
-  const center: Waypoint[] = []
-  const left: Waypoint[] = []
-  const right: Waypoint[] = []
+  const ways = Object.fromEntries(MOUNTAIN_LANES.map((id) => [id, [] as Waypoint[]])) as Record<
+    LaneId,
+    Waypoint[]
+  >
 
   let zCursor = zStart
   for (let i = 0; i <= steps; i += 1) {
@@ -119,7 +152,7 @@ function generateLaneWays(def: MountainStageDef): Record<LaneId, Waypoint[]> {
     else {
       const stepFrac = (1 / steps) * (0.55 + hashSeed(seed, i, 41) * 0.9)
       zCursor = Math.round(zStart - span * Math.min(0.98, tBase + stepFrac * 0.35))
-      const prevZ = center[center.length - 1]?.z ?? zStart
+      const prevZ = ways.C[ways.C.length - 1]?.z ?? zStart
       zCursor = Math.min(prevZ - 1, Math.max(zEnd + 2, zCursor))
     }
     const z = zCursor
@@ -130,31 +163,46 @@ function generateLaneWays(def: MountainStageDef): Record<LaneId, Waypoint[]> {
       Math.sin(t * Math.PI * 7.2 + seed * 0.31) * windAmplitude * 0.18 * taper
     const kick = (hashSeed(seed, i, 42) - 0.5) * windAmplitude * 0.55 * taper
     const cx = wave + kick
-    const baseSpread = 4.6 + windAmplitude * 0.4
+    const baseSpread = MOUNTAIN.laneBaseSpread + windAmplitude * 0.45
     const spreadL = baseSpread * (0.75 + hashSeed(seed, i, 43) * 0.55)
     const spreadR = baseSpread * (0.75 + hashSeed(seed, i, 44) * 0.55)
-    center.push({ z, x: cx })
-    left.push({ z, x: cx - spreadL })
-    right.push({ z, x: cx + spreadR })
+    for (const id of MOUNTAIN_LANES) {
+      const m = LANE_MULT[id]
+      if (m === 0) {
+        ways[id].push({ z, x: cx })
+        continue
+      }
+      const spread = m < 0 ? spreadL : spreadR
+      const frac = Math.abs(m) / LANE_OUTER_MULT
+      ways[id].push({ z, x: cx + Math.sign(m) * spread * frac })
+    }
   }
 
-  center[0] = { z: zStart, x: 0 }
-  left[0] = { z: zStart, x: 0 }
-  right[0] = { z: zStart, x: 0 }
-  const last = center.length - 1
+  for (const id of MOUNTAIN_LANES) {
+    ways[id][0] = { z: zStart, x: 0 }
+  }
+  const last = ways.C.length - 1
   const convergeFrom = Math.max(1, last - 2)
+  const outer = MOUNTAIN.laneOuterHalf
   for (let i = convergeFrom; i <= last; i += 1) {
     const u = (i - convergeFrom) / Math.max(1, last - convergeFrom)
     const ease = u * u
-    center[i] = { z: center[i].z, x: center[i].x * (1 - ease) }
-    left[i] = { z: left[i].z, x: center[i].x - 2.2 * (1 - ease * 0.35) }
-    right[i] = { z: right[i].z, x: center[i].x + 2.2 * (1 - ease * 0.35) }
+    const cx = ways.C[i].x * (1 - ease)
+    const scale = 1 - ease * 0.35
+    for (const id of MOUNTAIN_LANES) {
+      const m = LANE_MULT[id]
+      ways[id][i] = {
+        z: ways[id][i].z,
+        x: cx + (m / LANE_OUTER_MULT) * outer * scale,
+      }
+    }
   }
-  center[last] = { z: zEnd, x: 0 }
-  left[last] = { z: zEnd, x: -2.2 }
-  right[last] = { z: zEnd, x: 2.2 }
+  for (const id of MOUNTAIN_LANES) {
+    const m = LANE_MULT[id]
+    ways[id][last] = { z: zEnd, x: (m / LANE_OUTER_MULT) * outer }
+  }
 
-  return { L: left, C: center, R: right }
+  return ways
 }
 
 /** 裂け目生成。水平ギャップは最大3。レーン単位の欠き／横断あり */
@@ -193,16 +241,22 @@ function generateRavines(def: MountainStageDef): Ravine[] {
       ravines.push({ zLo, zHi, cut: 'full', stones })
     } else {
       const lanePick = hashSeed(seed, i, 5)
-      const cutLanes: LaneId[] =
-        lanePick < 0.32
-          ? ['C']
-          : lanePick < 0.52
-            ? ['L']
-            : lanePick < 0.72
-              ? ['R']
-              : lanePick < 0.86
-                ? ['L', 'C']
-                : ['C', 'R']
+      const laneCuts: LaneId[][] = [
+        ['C'],
+        ['L'],
+        ['R'],
+        ['LL'],
+        ['RR'],
+        ['LLL'],
+        ['RRR'],
+        ['L', 'C'],
+        ['C', 'R'],
+        ['LL', 'L'],
+        ['R', 'RR'],
+        ['LLL', 'LL'],
+        ['RR', 'RRR'],
+      ]
+      const cutLanes = laneCuts[Math.floor(lanePick * laneCuts.length)] ?? ['C']
       ravines.push({ zLo, zHi, cut: 'lane', lanes: cutLanes })
     }
   }
@@ -343,17 +397,12 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 
   const laneX = (lane: LaneId, z: number) => {
     if (z <= def.zEnd) {
-      if (lane === 'L') return -2.2
-      if (lane === 'R') return 2.2
-      return 0
+      return LANE_MULT[lane] * MOUNTAIN.laneSpacing
     }
     return lerpWaypoints(laneWays[lane], z)
   }
-  const pathLaneCenters = (z: number) => (['L', 'C', 'R'] as const).map((id) => laneX(id, z))
-  const pathCenterX = (z: number) => {
-    const xs = pathLaneCenters(z)
-    return xs.reduce((a, b) => a + b, 0) / xs.length
-  }
+  const pathLaneCenters = (z: number) => MOUNTAIN_LANES.map((id) => laneX(id, z))
+  const pathCenterX = (z: number) => laneX('C', z)
 
   const shelfBounds = (z: number) => {
     const xs = [...pathLaneCenters(z), ...pathLaneCenters(z + 1), ...pathLaneCenters(z - 1)]
@@ -404,24 +453,14 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 
   const heightAt = (x: number, z: number): number => {
     const elev = trailElev(z)
-    const ridge = pathCenterX(z)
-    const distRidge = Math.abs(x - ridge)
     const n0 = hash2(Math.floor(x), Math.floor(z))
     const n1 = hash2(Math.floor(x) + 3, Math.floor(z) - 5)
 
-    if (z <= goalZ && z >= terrainEnd && Math.abs(x) <= 5) {
+    if (z <= goalZ && z >= terrainEnd && Math.abs(x) <= MOUNTAIN.summitHalfWidth) {
       return Math.max(elev, def.goalElev)
     }
 
     if (isRavineHole(x, z) || isCliffNotch(x, z)) return 0
-
-    const jagged = Math.floor(n0 * 5) - 2 + Math.floor(n1 * 3) - 1
-    let mountain =
-      elev + 6 + jagged - Math.floor(distRidge * (0.95 + n1 * 0.55)) - Math.floor(distRidge * distRidge * 0.035)
-    if (mountain < 2 && distRidge < 26) {
-      mountain = Math.max(0, 2 - Math.floor((distRidge - 12) * 0.7) + Math.max(0, jagged))
-    }
-    mountain = Math.max(0, mountain)
 
     if (isOnShelf(x, z)) {
       const laneDist = nearestLaneDist(x, z)
@@ -433,18 +472,15 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
       return elev
     }
 
+    // 棚の外側: 高くせず、外側へ自然に下がる裾野
     const { lo, hi } = shelfBounds(z)
     const distOut = x < lo ? lo - x : x - hi
-    if (distOut <= 5) {
-      const cliff =
-        elev -
-        Math.floor(distOut * (2.4 + n0 * 1.2)) -
-        Math.floor(n1 * 4) -
-        (n0 > 0.7 ? 2 : 0)
-      return Math.max(0, Math.min(mountain, Math.max(cliff, 0)))
-    }
+    if (distOut > MOUNTAIN.flankDepth) return 0
 
-    return mountain
+    const t = distOut / MOUNTAIN.flankDepth
+    const drop = Math.floor(t * (elev * 0.85 + 2) + t * t * 3)
+    const jitter = Math.floor(n0 * 2) - (n1 > 0.65 ? 1 : 0)
+    return Math.max(0, elev - 1 - drop + jitter)
   }
 
   const NEON_KINDS: BlockKind[] = [
@@ -533,8 +569,8 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 
   for (let z = def.zStart; z >= terrainEnd; z -= 1) {
     const centers = pathLaneCenters(z)
-    const minX = Math.floor(Math.min(...centers) - 22)
-    const maxX = Math.ceil(Math.max(...centers) + 22)
+    const minX = Math.floor(Math.min(...centers) - MOUNTAIN.terrainHalfExtent)
+    const maxX = Math.ceil(Math.max(...centers) + MOUNTAIN.terrainHalfExtent)
     for (let x = minX; x <= maxX; x += 1) {
       const h = heightAt(x, z)
       if (h <= 0) clearHeight(x, z)
@@ -542,7 +578,7 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     }
   }
 
-  for (let x = -3; x <= 3; x += 1) {
+  for (let x = -MOUNTAIN.startPadHalf; x <= MOUNTAIN.startPadHalf; x += 1) {
     for (let z = def.zStart - 4; z <= def.zStart - 1; z += 1) {
       setHeight(x, z, def.startElev)
     }
@@ -559,7 +595,7 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
   // レーン中心の段差を +1 に矯正
   for (let z = def.zStart - 1; z >= terrainEnd; z -= 1) {
     const elev = trailElev(z)
-    for (let lane = 0; lane < 3; lane += 1) {
+    for (let lane = 0; lane < MOUNTAIN_LANES.length; lane += 1) {
       const x = Math.round(pathLaneCenters(z)[lane])
       const key = `${x},${z}`
       const h = heights.get(key)
@@ -575,7 +611,7 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
 
   // 頂点平台（奥へ約10ブロック）
   for (let z = goalZ; z >= terrainEnd; z -= 1) {
-    for (let x = -5; x <= 5; x += 1) {
+    for (let x = -MOUNTAIN.summitHalfWidth; x <= MOUNTAIN.summitHalfWidth; x += 1) {
       heights.set(`${x},${z}`, def.goalElev)
     }
   }
@@ -589,7 +625,9 @@ function buildStageMountainData(def: MountainStageDef): Omit<MountainStageRuntim
     const [xs, zs] = key.split(',')
     const x = Number(xs)
     const z = Number(zs)
-    const onTrail = isTrailCell(x, z) || (z <= goalZ && z >= terrainEnd && Math.abs(x) <= 5)
+    const onTrail =
+      isTrailCell(x, z) ||
+      (z <= goalZ && z >= terrainEnd && Math.abs(x) <= MOUNTAIN.summitHalfWidth)
     const kind = blockKindFor(x, z, layers, onTrail)
     columns.push({
       x,

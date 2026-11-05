@@ -37,13 +37,14 @@ function stageParams(id: number): Omit<MountainStageDef, 'id' | 'labelBaseM' | '
   // 中盤以降を早めに上げる（旧 0.88 冪だと Stage7 が甘すぎた）
   const t = Math.pow(linear, 0.72)
   return {
-    windAmplitude: 3.8 + t * 7.2,
-    windFrequency: 0.62 + t * 1.4,
+    // 高レベルほど蛇行の振幅・波数を大きく（Stage20 で約 2 倍超）
+    windAmplitude: 4.2 + t * 14.5,
+    windFrequency: 0.7 + t * 2.6,
     // コース延長に合わせて密度を確保（約 1 / 7〜8z）
     ravineCount: Math.round(28 + t * 42),
     fullRatio: 0.32 + t * 0.55,
     cliffNotchChance: 0.28 + t * 0.42,
-    shelfPad: 0.95 - t * 0.4,
+    shelfPad: 0.85 - t * 0.28,
   }
 }
 
