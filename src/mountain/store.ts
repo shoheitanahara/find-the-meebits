@@ -16,9 +16,23 @@ const PROGRESS_KEY = getClimbTheme().progressKey
 type ProgressPayload = {
   /** UTC 日付。違う日なら進捗をリセット */
   dateKey?: string
+  /**
+   * 次に遊べるステージ。全クリア後は MOUNTAIN_STAGE_COUNT + 1 を保存し、
+   * 「20クリア済み」と「20解放・未クリア」を区別する。
+   */
   unlockedStage?: number
   /** 当日の最高到達高度（表示m）。日替わりで消える */
   heightBestM?: number
+}
+
+/** 保存用: 全クリア哨兵 (COUNT+1) まで許容 */
+function clampStoredUnlocked(id: number) {
+  return Math.max(1, Math.min(MOUNTAIN_STAGE_COUNT + 1, Math.floor(id)))
+}
+
+/** プレイ選択用: 実ステージ番号にクランプ */
+function clampPlayableUnlocked(id: number) {
+  return clampStageId(id)
 }
 
 function readStoredProgress(): ProgressPayload {
@@ -39,7 +53,7 @@ function readProgress(): ProgressPayload {
   if (stored.dateKey === today) {
     return {
       dateKey: today,
-      unlockedStage: clampStageId(stored.unlockedStage ?? 1),
+      unlockedStage: clampStoredUnlocked(stored.unlockedStage ?? 1),
       heightBestM: typeof stored.heightBestM === 'number' ? Math.max(0, stored.heightBestM) : 0,
     }
   }
@@ -64,7 +78,7 @@ function writeProgress(patch: ProgressPayload) {
       PROGRESS_KEY,
       JSON.stringify({
         dateKey: today,
-        unlockedStage: clampStageId(next.unlockedStage ?? 1),
+        unlockedStage: clampStoredUnlocked(next.unlockedStage ?? 1),
         heightBestM: Math.max(0, next.heightBestM ?? 0),
       }),
     )
@@ -74,7 +88,7 @@ function writeProgress(patch: ProgressPayload) {
 }
 
 function readUnlockedStage(): number {
-  return clampStageId(readProgress().unlockedStage ?? 1)
+  return clampPlayableUnlocked(readProgress().unlockedStage ?? 1)
 }
 
 function readHeightBestM(): number {
@@ -83,7 +97,7 @@ function readHeightBestM(): number {
 }
 
 function writeUnlockedStage(unlockedStage: number) {
-  writeProgress({ unlockedStage: clampStageId(unlockedStage) })
+  writeProgress({ unlockedStage: clampStoredUnlocked(unlockedStage) })
 }
 
 function writeHeightBestM(heightBestM: number) {
@@ -150,10 +164,11 @@ export const useMountainStore = create<MountainState>((set, get) => ({
   },
   clearStage: () => {
     const { currentStage, unlockedStage } = get()
-    const nextUnlocked = Math.max(unlockedStage, Math.min(MOUNTAIN_STAGE_COUNT, currentStage + 1))
-    writeUnlockedStage(nextUnlocked)
+    // 最終クリア後は COUNT+1 を保存（来場証のクリア数が 19 で止まらないように）
+    const nextStored = Math.max(unlockedStage, Math.min(MOUNTAIN_STAGE_COUNT + 1, currentStage + 1))
+    writeUnlockedStage(nextStored)
     set({
-      unlockedStage: nextUnlocked,
+      unlockedStage: clampPlayableUnlocked(nextStored),
       phase: currentStage >= MOUNTAIN_STAGE_COUNT ? 'allCleared' : 'stageCleared',
     })
   },

@@ -155,14 +155,25 @@ function scoreWithRatingDetail(score: number, ratingLabel: string, locale: 'en' 
   return `${scoreDetail(score, locale)} · ${ratingLabel}`
 }
 
+/** Mt. Meeb / Jerry Stack のステージ数（来場証表示用。store と揃える） */
+const CLIMB_STAGE_COUNT = 20
+/** Stage20 頂上付近の表示高度（labelBase 950 + 約50）。旧セーブの全クリア判定用 */
+const CLIMB_FINAL_HEIGHT_M = 1000
+
 /**
  * 登山系: 高度 + クリア済み最高ステージ。
- * unlockedStage は「次に遊べる」なので、クリア数は unlockedStage - 1。
+ * unlockedStage は「次に遊べる」。全クリア後は COUNT+1 が入り、クリア数 = unlocked - 1。
+ * 旧セーブは unlocked が COUNT で頭打ちのため、高度 1000m 以上なら全クリアとみなす。
  */
 function climbDetail(payload: HeightPayload | null, locale: 'en' | 'ja') {
   if (!payload) return null
   const height = Math.floor(payload.heightBestM ?? 0)
-  const clearedStages = Math.max(0, (payload.unlockedStage ?? 1) - 1)
+  const unlocked = payload.unlockedStage ?? 1
+  let clearedStages = Math.max(0, unlocked - 1)
+  if (unlocked === CLIMB_STAGE_COUNT && height >= CLIMB_FINAL_HEIGHT_M) {
+    clearedStages = CLIMB_STAGE_COUNT
+  }
+  clearedStages = Math.min(CLIMB_STAGE_COUNT, clearedStages)
   if (height <= 0 && clearedStages <= 0) return null
 
   const parts: string[] = []
