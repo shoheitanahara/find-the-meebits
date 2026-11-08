@@ -4,6 +4,18 @@
 
 ## 直近の作業サマリー
 
+### Meebits Podcast（`/meebits-podcast`）— Plaza 西棟 Open
+
+- **配置**: 旧 Trait Hunt 位置（Plaza 西）。Trait Hunt は Astro 東へ移動
+- **体験**: Cinema と同系統。The Meebits Podcast プレイリストをシャッフル再生
+- 主要: `src/podcast/`、外観はラジオスタジオ風 `PodcastRadioLandmark`
+
+### Meebit Cinema（`/meebit-cinema`）— Astro 西棟 Open
+
+- **配置**: Astro 左（west）。外観はクラシック映画館風に強化
+- **体験**: YouTube「Meebit Origins」自動再生（mute / M キー）。客席 1-2-1・通路フロアライト
+- 主要: `src/cinema/`
+
 ### Visit Pass（来場証）— 表示・装飾・クリア数
 
 - **合成**: `src/photoStudio/capture/composeVisitPass.ts`

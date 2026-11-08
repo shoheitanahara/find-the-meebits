@@ -127,3 +127,5 @@
 | opensea | LIVE GALLERY / 彫刻ギャラリー | 台座の彫刻、売れた体も |
 | sergito | Sergito Awaits / Sergitoが待つ | 海辺の木の工房、棚の人形。本人に会う約束。MeebCo・役職・創業者は入口に出さない |
 | starlight | STAR RAILS / 星のレール | レールに乗り、流れ星を撃つ |
+| cinema | ORIGINS / オリジンズ | はじまりの Meebits、大きなスクリーン |
+| podcast | ON AIR / オンエア | 席について再生、The Meebits Podcast |

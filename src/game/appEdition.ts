@@ -12,6 +12,8 @@ export type AppEdition =
   | 'opensea'
   | 'shooting'
   | 'starlight'
+  | 'cinema'
+  | 'podcast'
   | 'fishing'
   | 'pfp'
   | 'top'
@@ -27,6 +29,12 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   }
   if (segments.includes('starlight-rush')) {
     return 'starlight'
+  }
+  if (segments.includes('meebit-cinema')) {
+    return 'cinema'
+  }
+  if (segments.includes('meebits-podcast')) {
+    return 'podcast'
   }
   if (segments.includes('photo-booth') || segments.includes('pfp-studio')) {
     return 'pfp'

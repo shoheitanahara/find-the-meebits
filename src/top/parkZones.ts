@@ -167,7 +167,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   plaza: {
     id: 'plaza',
     title: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
-    attractionIds: ['find', 'traits', 'street'],
+    attractionIds: ['find', 'podcast', 'street'],
     layout: PLAZA_LAYOUT,
     perimeter: {
       theme: 'classic',
@@ -454,12 +454,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   },
   /**
    * Astro: Mountain の北 × Culture の東。
-   * 中央は Starlight Rush。西・東は工事中。
+   * 中央 Starlight / 西 Cinema / 東 Trait Hunt。
    */
   astro: {
     id: 'astro',
     title: { en: 'Astro District', ja: 'アストロエリア' },
-    attractionIds: ['starlight'],
+    attractionIds: ['starlight', 'cinema', 'traits'],
     layout: ASTRO_LAYOUT,
     perimeter: {
       theme: 'astro',
@@ -493,22 +493,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
     ],
     // 樹木なし（宇宙小物は地面コンポーネント側）
     trees: [],
-    comingSoonSlots: [
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
-        theme: 'astro',
-        title: { en: 'LUNAR LAB', ja: 'ルナラボ' },
-        subtitle: { en: 'Robot research bay', ja: 'ロボ研究ベイ' },
-      },
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
-        theme: 'astro',
-        title: { en: 'ORBITAL PORT', ja: 'オービタルポート' },
-        subtitle: { en: 'Visitor docking ring', ja: 'ビジター接岸リング' },
-      },
-    ],
+    comingSoonSlots: [],
     gates: [
       {
         id: 'astro-to-mountain',

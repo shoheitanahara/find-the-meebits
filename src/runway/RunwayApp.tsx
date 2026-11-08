@@ -101,7 +101,7 @@ export function RunwayApp() {
       ) : null}
       {phase === 'playing' ? (
         <>
-          <LookControlsHint />
+          <LookControlsHint key="runway-look-hint" />
           <RunwayTouchLookPad />
           <RunwayMobileControls />
           <RunwaySitPrompt />

@@ -23,6 +23,8 @@ export type AttractionId =
   | 'sergito'
   | 'shooting'
   | 'starlight'
+  | 'cinema'
+  | 'podcast'
   | 'pfp'
   | 'fishing'
   | 'opensea'

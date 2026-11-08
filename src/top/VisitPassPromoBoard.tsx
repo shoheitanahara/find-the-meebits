@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { CanvasTexture, SRGBColorSpace, type Texture } from 'three'
 
 /** public に置いた来場証サンプル（アスペクト 1024×648） */
-const SAMPLE_SRC = '/photo-booth/visit-pass-sample.jpg'
+const SAMPLE_SRC = '/photo-booth/visit-pass-sample.png'
 const SAMPLE_ASPECT = 1024 / 648
 
 /** 看板テクスチャのレイアウト（物理パネルと同じ比率にする） */

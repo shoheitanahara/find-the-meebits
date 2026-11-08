@@ -57,6 +57,8 @@ const copy = {
       fishing: 'Shore Fishing',
       shooting: 'Shooting Gallery',
       starlight: 'Starlight Rush',
+      cinema: 'Meebit Cinema',
+      podcast: 'Meebits Podcast',
       pfp: 'Photo Booth',
     },
   },
@@ -83,6 +85,8 @@ const copy = {
       fishing: 'ショアフィッシング',
       shooting: 'シューティングギャラリー',
       starlight: 'スターライト・ラッシュ',
+      cinema: 'ミービット・シネマ',
+      podcast: 'ミービッツ・ポッドキャスト',
       pfp: 'フォトブース',
     },
   },
@@ -101,6 +105,8 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'fishing') return `${localePrefix}/shore-fishing`
   if (id === 'shooting') return `${localePrefix}/shooting-gallery`
   if (id === 'starlight') return `${localePrefix}/starlight-rush`
+  if (id === 'cinema') return `${localePrefix}/meebit-cinema`
+  if (id === 'podcast') return `${localePrefix}/meebits-podcast`
   if (id === 'pfp') return `${localePrefix}/photo-booth`
   return `${localePrefix}/mountain`
 }
@@ -121,6 +127,8 @@ function getReturningAttractionId(): AttractionId | null {
     from === 'fishing' ||
     from === 'shooting' ||
     from === 'starlight' ||
+    from === 'cinema' ||
+    from === 'podcast' ||
     from === 'pfp'
     ? from
     : null

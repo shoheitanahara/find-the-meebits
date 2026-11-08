@@ -51,6 +51,14 @@ const metadata = {
       title: 'Starlight Rush | Meebits Park',
       description: 'Ride a cosmic coaster and shoot colorful stars racing toward you. Ninety seconds of Starlight Rush.',
     },
+    cinema: {
+      title: 'Meebit Cinema | Meebits Park',
+      description: 'Sit in a dark theater and watch Meebit Origins by Larva Labs on the big screen.',
+    },
+    podcast: {
+      title: 'Meebits Podcast | Meebits Park',
+      description: 'Settle into the studio and play a random episode from The Meebits Podcast.',
+    },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
       description: 'Spot fish shadows, cast from the shore, and reel in your catch in 90 seconds.',
@@ -108,6 +116,14 @@ const metadata = {
     starlight: {
       title: 'スターライト・ラッシュ | Meebits Park',
       description: '宇宙ジェットコースターに乗り、奥から流れてくる星を撃て。90秒のスコアアタック。',
+    },
+    cinema: {
+      title: 'ミービット・シネマ | Meebits Park',
+      description: '暗い劇場のスクリーンで、Larva Labs の Meebit Origins を観よう。',
+    },
+    podcast: {
+      title: 'ミービッツ・ポッドキャスト | Meebits Park',
+      description: 'スタジオで The Meebits Podcast の回をランダム再生。席について聞こう。',
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',

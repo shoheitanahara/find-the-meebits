@@ -29,6 +29,8 @@ const KEYS = {
   fishing: 'meebits-shore-fishing-best',
   mountain: 'meebits-mountain-progress-v3',
   neon: 'meebits-jerry-mountain-progress-v1',
+  cinema: 'meebits-cinema-daily-v1',
+  podcast: 'meebits-podcast-daily-v1',
 } as const
 
 type DailyEnvelope = { dateKey: string }
@@ -41,6 +43,8 @@ type RunwayPayload = DailyEnvelope & { visited: true; themeLabel?: string }
 type ClosetPayload = DailyEnvelope & { meebitNumber: number }
 type SergitoPayload = DailyEnvelope & { talked: true }
 type OpenSeaPayload = DailyEnvelope & { visited: true }
+type CinemaPayload = DailyEnvelope & { visited: true }
+type PodcastPayload = DailyEnvelope & { visited: true }
 
 export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
   if (typeof window === 'undefined') return null
@@ -145,6 +149,16 @@ export function recordOpenSeaVisit() {
   writeDailyJson(KEYS.opensea, { dateKey: getUtcDateKey(), visited: true })
 }
 
+/** Meebit Cinema: 入場。 */
+export function recordCinemaVisit() {
+  writeDailyJson(KEYS.cinema, { dateKey: getUtcDateKey(), visited: true })
+}
+
+/** Meebits Podcast: 入場。 */
+export function recordPodcastVisit() {
+  writeDailyJson(KEYS.podcast, { dateKey: getUtcDateKey(), visited: true })
+}
+
 function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
@@ -214,6 +228,8 @@ export function collectVisitPassLines(): VisitPassLine[] {
   const closet = readDailyJson<ClosetPayload>(KEYS.closet)
   const sergito = readDailyJson<SergitoPayload>(KEYS.sergito)
   const opensea = readDailyJson<OpenSeaPayload>(KEYS.opensea)
+  const cinema = readDailyJson<CinemaPayload>(KEYS.cinema)
+  const podcast = readDailyJson<PodcastPayload>(KEYS.podcast)
 
   const line = (
     id: string,
@@ -244,6 +260,16 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'starlight',
       locale === 'ja' ? 'スターライト・ラッシュ' : 'Starlight Rush',
       starlight ? scoreWithRatingDetail(starlight.score, starlightRating, locale) : null,
+    ),
+    line(
+      'cinema',
+      locale === 'ja' ? 'ミービット・シネマ' : 'Meebit Cinema',
+      cinema?.visited ? 'Visited · Meebit Origins' : null,
+    ),
+    line(
+      'podcast',
+      locale === 'ja' ? 'ミービッツ・ポッドキャスト' : 'Meebits Podcast',
+      podcast?.visited ? 'Visited · The Meebits Podcast' : null,
     ),
     line(
       'shooting',

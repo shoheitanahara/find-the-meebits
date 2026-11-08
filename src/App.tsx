@@ -13,6 +13,8 @@ import { MeetSergitoApp } from './meetSergito/MeetSergitoApp'
 import { OpenSeaMarketApp } from './openSeaMarket/OpenSeaMarketApp'
 import { ShootingGalleryApp } from './shootingGallery/ShootingGalleryApp'
 import { StarlightRushApp } from './starlightRush/StarlightRushApp'
+import { CinemaApp } from './cinema/CinemaApp'
+import { PodcastApp } from './podcast/PodcastApp'
 import { ShoreFishingApp } from './shoreFishing/ShoreFishingApp'
 import { PhotoStudioApp } from './photoStudio/PhotoStudioApp'
 import { TopApp } from './top/TopApp'
@@ -191,6 +193,24 @@ export default function App() {
     return (
       <>
         <StarlightRushApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'cinema') {
+    return (
+      <>
+        <CinemaApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'podcast') {
+    return (
+      <>
+        <PodcastApp />
         <Analytics />
       </>
     )

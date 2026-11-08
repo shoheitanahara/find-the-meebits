@@ -17,6 +17,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 | `/neon-stack` | `neon` | Jerry Mountain（互換ルート） |
 | `/shooting-gallery` `/jp/shooting-gallery` | `shooting` | Shooting Gallery |
 | `/photo-booth` `/jp/photo-booth` | `pfp`（互換 `/pfp-studio`） | Photo Booth（PFP・来場証明書） |
+| `/meebit-cinema` `/jp/meebit-cinema` | `cinema` | Meebit Cinema（Origins 上映） |
 | `/shore-fishing` `/jp/shore-fishing` | `fishing` | Shore Fishing（孤島釣り） |
 | `/opensea-market` `/jp/opensea-market` | `opensea` | OpenSea Market（出品／直近売却を彫刻展示） |
 | `/meet-sergito` `/jp/meet-sergito` | `sergito` | Meet Sergito |

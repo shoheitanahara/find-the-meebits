@@ -67,6 +67,14 @@ export function getLocaleHomePath(
     return locale === 'ja' ? '/jp/starlight-rush' : '/starlight-rush'
   }
 
+  if (segments.includes('meebit-cinema')) {
+    return locale === 'ja' ? '/jp/meebit-cinema' : '/meebit-cinema'
+  }
+
+  if (segments.includes('meebits-podcast')) {
+    return locale === 'ja' ? '/jp/meebits-podcast' : '/meebits-podcast'
+  }
+
   if (segments.includes('shore-fishing')) {
     return locale === 'ja' ? '/jp/shore-fishing' : '/shore-fishing'
   }

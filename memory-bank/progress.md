@@ -2,6 +2,14 @@
 
 ## 完了済み
 
+### Meebit Cinema（`/meebit-cinema`）
+
+- [x] Astro 西棟にドキュメンタリー映画館を Open（LUNAR LAB Coming Soon を置換）
+- [x] Runway 系: 暗室歩行・着席・EXIT・三人称視点
+- [x] 入場後 YouTube「Meebit Origins」(sY9OyRo4E58) をスクリーンで自動再生（mute）
+- [x] 客席約60%を日替わりランダム Meebit で埋める（スクリーン向き）
+- [x] 来場証 Visited 記録・ルート / SPA fallback / 看板コピー
+
 ### Visit Pass / Park 時間帯 / Mt. Meeb 幅（2026-11）
 
 - [x] 来場証: QR 右上・日替わり5テーマ（`visitPassTheme`）・DEV テーマピッカー

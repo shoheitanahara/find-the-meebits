@@ -19,6 +19,8 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - opensea: シーエリア中央の OpenSea Market
  * - shooting: マウンテンエリアの木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
+ * - cinema: アストロ西のドキュメンタリー映画館
+ * - podcast: プラザ西のポッドキャストスタジオ
  * - pfp: カルチャー東のフォトブース
  */
 export function AttractionBuilding({
@@ -51,6 +53,10 @@ export function AttractionBuilding({
                         ? '#e8b060'
                         : attraction.id === 'starlight'
                           ? '#5ce0ff'
+                          : attraction.id === 'cinema'
+                            ? '#5ce0ff'
+                          : attraction.id === 'podcast'
+                            ? '#ff9a3c'
                           : attraction.id === 'pfp'
                             ? '#8eb4e8'
                             : '#c4a060'
@@ -84,6 +90,10 @@ export function AttractionBuilding({
         <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'starlight' ? (
         <StarlightDomeLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'cinema' ? (
+        <CinemaLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'podcast' ? (
+        <PodcastRadioLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'pfp' ? (
         <PfpStudioLandmark color={attraction.color} accent={accent} />
       ) : (
@@ -546,8 +556,276 @@ function ShoreFishingLandmark({
   )
 }
 
-/** Mountain 東棟: 木造射的場（カウンター・樽・的レーン看板） */
-/** Astro 中央: Starlight Rush ドーム入口 */
+/** Astro 西棟: クラシック映画館（キャノピー・マーキー文字・チケット・ポスター列）— 宇宙地区の青シアン */
+function CinemaLandmark({ color, accent }: { color: string; accent: string }) {
+  const hull = '#0e1422'
+  const panel = '#2a3448'
+  const trim = '#1a3048'
+  const neon = accent
+  const bulb = '#b8f0ff'
+  const marqueeLetters = [-2.35, -1.4, -0.45, 0.45, 1.4, 2.35]
+  return (
+    <group>
+      {/* 基壇 */}
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.6, 0.28, 6.8]} />
+        <meshStandardMaterial color={hull} roughness={0.62} metalness={0.35} />
+      </mesh>
+      {/* 本館 */}
+      <mesh position={[0, 2.05, -0.45]} castShadow receiveShadow>
+        <boxGeometry args={[6.4, 3.8, 5.6]} />
+        <meshStandardMaterial color={color} roughness={0.55} metalness={0.28} />
+      </mesh>
+      {/* 上部パラペット＋センタークレスト */}
+      <mesh position={[0, 4.15, -0.45]} castShadow>
+        <boxGeometry args={[6.9, 0.42, 6.0]} />
+        <meshStandardMaterial color={panel} roughness={0.45} metalness={0.4} />
+      </mesh>
+      <mesh position={[0, 4.7, 2.0]} castShadow>
+        <boxGeometry args={[1.1, 0.85, 0.45]} />
+        <meshStandardMaterial color={trim} roughness={0.5} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, 5.2, 2.0]}>
+        <sphereGeometry args={[0.22, 10, 10]} />
+        <meshStandardMaterial color={neon} emissive={neon} emissiveIntensity={0.55} />
+      </mesh>
+      {/* 正面階段（広め） */}
+      {[0, 1, 2, 3].map((step) => (
+        <mesh key={step} position={[0, 0.14 + step * 0.16, 3.05 - step * 0.26]} castShadow receiveShadow>
+          <boxGeometry args={[5.0 - step * 0.32, 0.15, 0.52]} />
+          <meshStandardMaterial color="#1a2434" roughness={0.78} metalness={0.2} />
+        </mesh>
+      ))}
+      {/* チケットブース */}
+      <mesh position={[-2.55, 1.15, 2.45]} castShadow>
+        <boxGeometry args={[1.65, 1.9, 1.25]} />
+        <meshStandardMaterial color={panel} roughness={0.5} metalness={0.35} />
+      </mesh>
+      <mesh position={[-2.55, 1.45, 3.1]}>
+        <planeGeometry args={[1.15, 0.75]} />
+        <meshStandardMaterial color="#061018" emissive={neon} emissiveIntensity={0.22} />
+      </mesh>
+      <mesh position={[-2.55, 2.25, 3.08]}>
+        <boxGeometry args={[1.2, 0.18, 0.08]} />
+        <meshStandardMaterial color={neon} emissive={neon} emissiveIntensity={0.4} />
+      </mesh>
+      {/* ポスターケース 3連 */}
+      {[-1.15, 0.15, 1.45].map((x, i) => (
+        <group key={`poster-${x}`} position={[x, 2.25, 2.55]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.95, 1.55, 0.14]} />
+            <meshStandardMaterial color="#121820" roughness={0.4} metalness={0.5} />
+          </mesh>
+          <mesh position={[0, 0, 0.08]}>
+            <planeGeometry args={[0.76, 1.28]} />
+            <meshStandardMaterial
+              color={i === 1 ? trim : '#152030'}
+              emissive={neon}
+              emissiveIntensity={0.1 + i * 0.04}
+            />
+          </mesh>
+        </group>
+      ))}
+      {/* キャノピー */}
+      <mesh position={[0, 3.15, 2.85]} castShadow>
+        <boxGeometry args={[6.4, 0.18, 1.8]} />
+        <meshStandardMaterial color="#101820" roughness={0.45} metalness={0.4} />
+      </mesh>
+      {/* 点灯マーキー本体 */}
+      <mesh position={[0, 3.65, 2.55]} castShadow>
+        <boxGeometry args={[6.0, 0.85, 1.5]} />
+        <meshStandardMaterial color={neon} emissive={neon} emissiveIntensity={0.72} roughness={0.28} />
+      </mesh>
+      {/* マーキー文字ブロック */}
+      {marqueeLetters.map((x, i) => (
+        <mesh key={`letter-${x}`} position={[x, 3.68, 3.28]}>
+          <boxGeometry args={[0.55, 0.42, 0.08]} />
+          <meshStandardMaterial
+            color="#0a1018"
+            emissive={i % 2 === 0 ? '#e8fbff' : '#9ae8ff'}
+            emissiveIntensity={0.35}
+          />
+        </mesh>
+      ))}
+      {/* 下縁の球電球 */}
+      {[-2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7].map((x) => (
+        <mesh key={`bulb-${x}`} position={[x, 3.22, 3.55]}>
+          <sphereGeometry args={[0.075, 8, 8]} />
+          <meshStandardMaterial color={bulb} emissive={bulb} emissiveIntensity={1.35} />
+        </mesh>
+      ))}
+      {/* 入口アーチ＋枠 */}
+      <mesh position={[0, 1.45, 2.7]} castShadow>
+        <boxGeometry args={[2.55, 2.5, 0.4]} />
+        <meshStandardMaterial color="#060a12" roughness={0.75} metalness={0.25} />
+      </mesh>
+      <mesh position={[0, 2.85, 2.72]}>
+        <boxGeometry args={[2.85, 0.32, 0.45]} />
+        <meshStandardMaterial color={trim} roughness={0.5} metalness={0.35} />
+      </mesh>
+      {/* 柱装飾 */}
+      {[-3.1, 3.1].map((x) => (
+        <group key={`col-${x}`}>
+          <mesh position={[x, 2.0, 2.15]} castShadow>
+            <cylinderGeometry args={[0.22, 0.26, 3.6, 10]} />
+            <meshStandardMaterial color={panel} roughness={0.45} metalness={0.4} />
+          </mesh>
+          <mesh position={[x, 3.95, 2.15]}>
+            <boxGeometry args={[0.55, 0.22, 0.55]} />
+            <meshStandardMaterial color={neon} emissive={neon} emissiveIntensity={0.25} />
+          </mesh>
+        </group>
+      ))}
+      <pointLight position={[0, 3.55, 3.4]} intensity={18} distance={14} color={neon} />
+      <pointLight position={[-2.55, 1.55, 3.3]} intensity={7} distance={7} color={bulb} />
+    </group>
+  )
+}
+
+/** Plaza 西棟: ラジオ／ポッドキャストスタジオ（ON AIR・ブース窓・卓・波形・アンテナ） */
+function PodcastRadioLandmark({ color, accent }: { color: string; accent: string }) {
+  const wood = '#5a3a24'
+  const foam = '#2a221c'
+  const metal = '#8a9098'
+  const desk = '#3a2818'
+  const waveform = [0.35, 0.7, 1.15, 0.55, 0.95, 0.4, 0.8, 0.5]
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.28, 6.5]} />
+        <meshStandardMaterial color="#1a1410" roughness={0.88} />
+      </mesh>
+      {/* 本館 */}
+      <mesh position={[0, 1.75, -0.35]} castShadow receiveShadow>
+        <boxGeometry args={[5.9, 3.2, 5.3]} />
+        <meshStandardMaterial color={color} roughness={0.82} />
+      </mesh>
+      {/* 木製パラペット */}
+      <mesh position={[0, 3.55, -0.2]} castShadow>
+        <boxGeometry args={[6.3, 0.32, 5.7]} />
+        <meshStandardMaterial color={wood} roughness={0.72} />
+      </mesh>
+      {/* コーナー木梁 */}
+      {[-2.85, 2.85].map((x) => (
+        <mesh key={`beam-${x}`} position={[x, 2.0, 2.15]} castShadow>
+          <boxGeometry args={[0.28, 3.4, 0.28]} />
+          <meshStandardMaterial color={wood} roughness={0.75} />
+        </mesh>
+      ))}
+      {/* ON AIR 看板 */}
+      <mesh position={[0, 4.05, 2.1]} castShadow>
+        <boxGeometry args={[2.55, 0.6, 0.38]} />
+        <meshStandardMaterial color="#401018" emissive="#ff3040" emissiveIntensity={0.85} />
+      </mesh>
+      <mesh position={[0, 4.05, 2.32]}>
+        <boxGeometry args={[2.15, 0.34, 0.08]} />
+        <meshStandardMaterial color="#20080c" emissive={accent} emissiveIntensity={0.4} />
+      </mesh>
+      {/* 点滅っぽいランプ */}
+      <mesh position={[-1.05, 4.05, 2.35]}>
+        <sphereGeometry args={[0.1, 8, 8]} />
+        <meshStandardMaterial color="#ff4050" emissive="#ff2030" emissiveIntensity={1.4} />
+      </mesh>
+      {/* 正面ガラス・ブース窓枠 */}
+      <mesh position={[0, 1.95, 2.4]} castShadow>
+        <boxGeometry args={[3.9, 2.15, 0.22]} />
+        <meshStandardMaterial color="#1a120e" roughness={0.35} metalness={0.48} />
+      </mesh>
+      <mesh position={[0, 1.95, 2.53]}>
+        <planeGeometry args={[3.35, 1.65]} />
+        <meshStandardMaterial
+          color="#402818"
+          emissive={accent}
+          emissiveIntensity={0.22}
+          transparent
+          opacity={0.82}
+        />
+      </mesh>
+      {/* 窓の十字桟 */}
+      <mesh position={[0, 1.95, 2.55]}>
+        <boxGeometry args={[3.35, 0.06, 0.04]} />
+        <meshStandardMaterial color={metal} metalness={0.55} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 1.95, 2.55]}>
+        <boxGeometry args={[0.06, 1.65, 0.04]} />
+        <meshStandardMaterial color={metal} metalness={0.55} roughness={0.4} />
+      </mesh>
+      {/* 窓内の卓と機材シルエット */}
+      <mesh position={[0, 1.15, 2.15]} castShadow>
+        <boxGeometry args={[2.6, 0.18, 0.9]} />
+        <meshStandardMaterial color={desk} roughness={0.8} />
+      </mesh>
+      {[-0.55, 0.55].map((x) => (
+        <group key={`mic-${x}`} position={[x, 1.45, 2.2]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.04, 0.05, 0.45, 8]} />
+            <meshStandardMaterial color={metal} metalness={0.7} roughness={0.35} />
+          </mesh>
+          <mesh position={[0, 0.28, 0]} rotation={[0.35, 0, x > 0 ? 0.15 : -0.15]} castShadow>
+            <sphereGeometry args={[0.12, 10, 10]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.55} />
+          </mesh>
+        </group>
+      ))}
+      {/* 波形メーター */}
+      {waveform.map((h, i) => (
+        <mesh
+          key={`wave-${i}`}
+          position={[-1.05 + i * 0.3, 2.55 + h * 0.2, 2.56]}
+          castShadow
+        >
+          <boxGeometry args={[0.18, h * 0.55, 0.06]} />
+          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} />
+        </mesh>
+      ))}
+      {/* 吸音パネル列 */}
+      {[-2.45, -1.65, 1.65, 2.45].map((x, i) => (
+        <mesh key={`foam-${x}`} position={[x, 2.05 + (i % 2) * 0.12, 2.25]} castShadow>
+          <boxGeometry args={[0.58, 1.35, 0.16]} />
+          <meshStandardMaterial color={foam} roughness={0.96} />
+        </mesh>
+      ))}
+      {/* 入口脇スピーカー */}
+      {[-2.65, 2.65].map((x) => (
+        <group key={`spk-${x}`} position={[x, 0.95, 2.2]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.75, 1.35, 0.6]} />
+            <meshStandardMaterial color="#1e1814" roughness={0.82} />
+          </mesh>
+          <mesh position={[0, 0.25, 0.32]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.22, 0.22, 0.08, 12]} />
+            <meshStandardMaterial color="#111" roughness={0.7} />
+          </mesh>
+          <mesh position={[0, -0.28, 0.32]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.14, 0.14, 0.08, 12]} />
+            <meshStandardMaterial color="#111" roughness={0.7} />
+          </mesh>
+        </group>
+      ))}
+      {/* 屋上アンテナ＋クロスバー */}
+      <mesh position={[2.35, 4.7, -0.55]} castShadow>
+        <cylinderGeometry args={[0.045, 0.055, 2.4, 8]} />
+        <meshStandardMaterial color={metal} metalness={0.78} roughness={0.28} />
+      </mesh>
+      <mesh position={[2.35, 5.55, -0.55]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.03, 0.03, 1.1, 8]} />
+        <meshStandardMaterial color={metal} metalness={0.78} roughness={0.28} />
+      </mesh>
+      <mesh position={[2.35, 5.9, -0.55]}>
+        <sphereGeometry args={[0.13, 8, 8]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.9} />
+      </mesh>
+      {/* 入口ステップ */}
+      <mesh position={[0, 0.22, 2.95]} receiveShadow>
+        <boxGeometry args={[3.2, 0.2, 0.7]} />
+        <meshStandardMaterial color="#2a1c14" roughness={0.9} />
+      </mesh>
+      <pointLight position={[0, 4.1, 2.7]} intensity={14} distance={12} color="#ff5060" />
+      <pointLight position={[0, 2.3, 2.9]} intensity={9} distance={10} color={accent} />
+    </group>
+  )
+}
+
 function StarlightDomeLandmark({ color, accent }: { color: string; accent: string }) {
   const hullDark = '#0e1422'
   const panel = '#2a3448'

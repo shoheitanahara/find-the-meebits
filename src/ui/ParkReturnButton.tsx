@@ -55,6 +55,10 @@ export function ParkReturnButton() {
           ? 'shooting'
           : pathSegments.includes('starlight-rush')
             ? 'starlight'
+            : pathSegments.includes('meebit-cinema')
+              ? 'cinema'
+            : pathSegments.includes('meebits-podcast')
+              ? 'podcast'
             : pathSegments.includes('photo-booth') || pathSegments.includes('pfp-studio')
               ? 'pfp'
           : pathSegments.includes('runway')

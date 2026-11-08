@@ -13,8 +13,8 @@ const copy = {
     enter: 'Enter the Show',
     loading: 'Preparing the lineup…',
     error: 'Could not load today’s runway. Try again.',
-    hintDesktop: 'WASD to walk · Click to look around · Esc to release',
-    hintTouch: 'Joystick to move · Flick the screen to look around',
+    hintDesktop: 'WASD to walk · Click, then drag to look around · Esc to release',
+    hintTouch: 'Joystick to move · Drag the screen to look around',
   },
   ja: {
     eyebrow: 'カルチャーエリア',
@@ -23,8 +23,8 @@ const copy = {
     enter: '会場に入る',
     loading: 'ラインナップを準備中…',
     error: '本日のランウェイを読み込めませんでした。',
-    hintDesktop: 'WASDで歩行 · クリックで視点変更 · Escで解除',
-    hintTouch: 'スティックで移動 · 画面フリックで視点変更',
+    hintDesktop: 'WASDで歩行 · クリック後ドラッグで見回す · Escで解除',
+    hintTouch: 'スティックで移動 · 画面ドラッグで視点変更',
   },
 } as const
 
