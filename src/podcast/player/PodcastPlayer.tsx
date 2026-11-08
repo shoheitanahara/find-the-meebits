@@ -30,9 +30,9 @@ const WALK_BOB_FREQUENCY = 10.5
 export function PodcastPlayer({ enabled }: { enabled: boolean }) {
   const { gl } = useThree()
   const groupRef = useRef<Group>(null)
-  const xRef = useRef(PODCAST.playerStart.x)
-  const zRef = useRef(PODCAST.playerStart.z)
-  const rotationYRef = useRef(PODCAST.playerStart.rotationY)
+  const xRef = useRef<number>(PODCAST.playerStart.x)
+  const zRef = useRef<number>(PODCAST.playerStart.z)
+  const rotationYRef = useRef<number>(PODCAST.playerStart.rotationY)
   const lookYawRef = useRef(0)
   const lookPitchRef = useRef(0)
   const lockedRef = useRef(false)

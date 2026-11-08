@@ -50,21 +50,21 @@ export function ShootingGalleryPlayPrompt() {
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-amber-100/75">
               {t.scoreGuideTitle}
             </p>
-            <div className="mt-3 grid gap-1.5">
+            <div className="mt-3 grid grid-cols-2 gap-1.5">
               {TARGET_SCORE_ROWS.map(({ id, color, score }) => (
                 <div
                   key={id}
-                  className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5"
+                  className="flex min-w-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5"
                 >
                   <span
                     aria-hidden="true"
-                    className="h-3 w-3 shrink-0 rounded-full border border-white/25 shadow-sm"
+                    className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/25 shadow-sm"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="min-w-0 flex-1 text-[0.7rem] font-semibold text-white/75">
+                  <span className="min-w-0 flex-1 truncate text-[0.65rem] font-semibold text-white/75 sm:text-[0.7rem]">
                     {t.targetLabels[id]}
                   </span>
-                  <span className={`font-mono text-xs font-black ${score < 0 ? 'text-red-300' : 'text-amber-100'}`}>
+                  <span className={`shrink-0 font-mono text-[0.7rem] font-black sm:text-xs ${score < 0 ? 'text-red-300' : 'text-amber-100'}`}>
                     {score > 0 ? '+' : ''}
                     {score}
                   </span>

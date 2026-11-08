@@ -30,9 +30,9 @@ const WALK_BOB_FREQUENCY = 10.5
 export function CinemaPlayer({ enabled }: { enabled: boolean }) {
   const { gl } = useThree()
   const groupRef = useRef<Group>(null)
-  const xRef = useRef(CINEMA.playerStart.x)
-  const zRef = useRef(CINEMA.playerStart.z)
-  const rotationYRef = useRef(CINEMA.playerStart.rotationY)
+  const xRef = useRef<number>(CINEMA.playerStart.x)
+  const zRef = useRef<number>(CINEMA.playerStart.z)
+  const rotationYRef = useRef<number>(CINEMA.playerStart.rotationY)
   const lookYawRef = useRef(0)
   const lookPitchRef = useRef(0)
   const lockedRef = useRef(false)
