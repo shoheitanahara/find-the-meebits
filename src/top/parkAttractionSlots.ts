@@ -39,6 +39,24 @@ export const DEFAULT_PARK_ATTRACTION_SLOTS = {
   },
 } as const satisfies Record<ParkAttractionSlotId, ParkAttractionSlot>
 
+/**
+ * 入口横の説明看板ローカル xz（標準 footprint: halfDepth≈3.5 / door≈1.15）。
+ * 扉脇・正面すぐ前。左右は符号で選ぶ。
+ */
+export const DEFAULT_INFO_BOARD_LOCAL = {
+  right: [3.15, 3.55] as [number, number],
+  left: [-3.15, 3.55] as [number, number],
+}
+
+/** 建物の halfDepth に合わせて看板を正面すぐ前に置く */
+export function infoBoardNearEntrance(
+  side: 'left' | 'right',
+  halfDepth: number,
+): [number, number] {
+  const x = side === 'right' ? DEFAULT_INFO_BOARD_LOCAL.right[0] : DEFAULT_INFO_BOARD_LOCAL.left[0]
+  return [x, halfDepth + 0.05]
+}
+
 export function getDefaultAttractionSlot(id: ParkAttractionSlotId): ParkAttractionSlot {
   return DEFAULT_PARK_ATTRACTION_SLOTS[id]
 }

@@ -1,4 +1,8 @@
-import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
+import {
+  DEFAULT_INFO_BOARD_LOCAL,
+  DEFAULT_PARK_ATTRACTION_SLOTS,
+  infoBoardNearEntrance,
+} from './parkAttractionSlots'
 import type { AttractionId } from './topStore'
 import type { ParkZoneId } from './parkZones'
 
@@ -34,7 +38,7 @@ export type Attraction = {
   /** 入口トリガーのワールド Z（正面すぐ前） */
   entranceZ: number
   footprint: AttractionFootprint
-  /** 説明看板のローカル xz */
+  /** 説明看板のローカル xz（標準は DEFAULT_INFO_BOARD_LOCAL） */
   infoBoardLocal: [number, number]
   /** 入口看板を工事中表示（施設自体は enter 可） */
   underConstruction?: boolean
@@ -69,7 +73,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 4.5, z: 0.2, halfX: 1.3, halfZ: 2.2 },
       ],
     },
-    infoBoardLocal: [5.8, 3.6],
+    infoBoardLocal: infoBoardNearEntrance('right', 3.4),
   },
   {
     id: 'podcast',
@@ -95,7 +99,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       doorHalfWidth: 1.25,
       alcoveDepth: 2.2,
     },
-    infoBoardLocal: [-4.6, 3.8],
+    infoBoardLocal: infoBoardNearEntrance('left', 3.2),
   },
   {
     id: 'street',
@@ -122,7 +126,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       alcoveDepth: 2.3,
       extraBoxes: [{ x: -3.4, z: -0.6, halfX: 2.0, halfZ: 2.4 }],
     },
-    infoBoardLocal: [-5.2, 3.5],
+    infoBoardLocal: infoBoardNearEntrance('left', 3.5),
   },
   {
     id: 'mountain',
@@ -152,7 +156,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 3.0, z: -1.2, halfX: 1.1, halfZ: 1.5 },
       ],
     },
-    infoBoardLocal: [-5.6, 4.2],
+    infoBoardLocal: infoBoardNearEntrance('left', 3.8),
   },
   {
     id: 'neon',
@@ -183,7 +187,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [-5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.left,
   },
   {
     id: 'shooting',
@@ -213,7 +217,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'runway',
@@ -243,7 +247,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.8, z: -1.0, halfX: 1.0, halfZ: 1.4 },
       ],
     },
-    infoBoardLocal: [5.4, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'closet',
@@ -274,7 +278,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [-5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.left,
   },
   {
     id: 'pfp',
@@ -304,7 +308,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'fishing',
@@ -335,7 +339,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'opensea',
@@ -366,7 +370,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.7, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.4, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'sergito',
@@ -397,7 +401,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'starlight',
@@ -427,7 +431,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'cinema',
@@ -457,7 +461,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
   {
     id: 'traits',
@@ -487,7 +491,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
       ],
     },
-    infoBoardLocal: [5.2, 4.0],
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
 ]
 
