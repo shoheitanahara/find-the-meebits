@@ -15,7 +15,12 @@ import {
   type PhotoStudioPoseId,
 } from '../config'
 import { captureSquarePfp, downloadDataUrl } from '../capture/captureSquare'
-import { composeVisitPass } from '../capture/composeVisitPass'
+import { composeVisitPass, preloadVisitPassQr } from '../capture/composeVisitPass'
+import {
+  getVisitPassThemeById,
+  VISIT_PASS_THEMES,
+  type VisitPassThemeId,
+} from '../capture/visitPassTheme'
 import { getStudioGl } from '../capture/studioGlBridge'
 import { photoStudioUi } from '../i18n'
 import { usePhotoStudioStore } from '../store'
@@ -352,10 +357,7 @@ export function PhotoStudioControls() {
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-white/10 px-4 py-3 phone-land:px-3 phone-land:py-2">
-        <CaptureButton className="w-full" />
-        <VisitPassButton className="w-full" />
-      </div>
+      <VisitPassIssuePanel />
     </aside>
   )
 }
@@ -414,12 +416,77 @@ function CaptureButton({ className = '' }: { className?: string }) {
   )
 }
 
-function VisitPassButton({ className = '' }: { className?: string }) {
+const VISIT_PASS_THEME_DEV_LABELS: Record<VisitPassThemeId | 'daily', string> = {
+  daily: 'Daily',
+    ivorySlate: 'Lilac',
+  creamClay: 'Clay',
+  mistSage: 'Sage',
+  blushInk: 'Blush',
+  fogNavy: 'Navy',
+}
+
+function VisitPassIssuePanel() {
+  const [devThemeId, setDevThemeId] = useState<VisitPassThemeId | 'daily'>('daily')
+  const isDev = import.meta.env.DEV
+
+  return (
+    <div className="space-y-2 border-t border-white/10 px-4 py-3 phone-land:px-3 phone-land:py-2">
+      <CaptureButton className="w-full" />
+      <VisitPassButton
+        className="w-full"
+        themeOverride={
+          isDev && devThemeId !== 'daily' ? getVisitPassThemeById(devThemeId) : undefined
+        }
+      />
+      {isDev ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-amber-300/80">
+            DEV · Pass theme
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {(['daily', ...VISIT_PASS_THEMES.map((theme) => theme.id)] as const).map((id) => {
+              const active = devThemeId === id
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
+                    active
+                      ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
+                      : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
+                  }`}
+                  onClick={() => {
+                    setDevThemeId(id)
+                    playSfx('uiClick')
+                  }}
+                >
+                  {VISIT_PASS_THEME_DEV_LABELS[id]}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function VisitPassButton({
+  className = '',
+  themeOverride,
+}: {
+  className?: string
+  themeOverride?: ReturnType<typeof getVisitPassThemeById>
+}) {
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
   const capturing = usePhotoStudioStore((state) => state.capturing)
   const [issuing, setIssuing] = useState(false)
   const t = photoStudioUi()
   const busy = capturing || issuing
+
+  useEffect(() => {
+    void preloadVisitPassQr()
+  }, [])
 
   return (
     <button
@@ -432,11 +499,14 @@ function VisitPassButton({ className = '' }: { className?: string }) {
         setIssuing(true)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            const dataUrl = composeVisitPass(gl, { meebitNumber })
-            setIssuing(false)
-            if (!dataUrl) return
-            downloadDataUrl(dataUrl, `meebit-${meebitNumber}-visit-pass.png`)
-            void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+            void composeVisitPass(gl, { meebitNumber, theme: themeOverride })
+              .then((dataUrl) => {
+                if (dataUrl) {
+                  downloadDataUrl(dataUrl, `meebit-${meebitNumber}-visit-pass.png`)
+                  void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+                }
+              })
+              .finally(() => setIssuing(false))
           })
         })
       }}

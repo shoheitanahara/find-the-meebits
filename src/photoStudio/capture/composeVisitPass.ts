@@ -20,10 +20,36 @@ const MARGIN = 44
 const PHOTO = 268
 const PHOTO_X = MARGIN + 8
 const PHOTO_Y = 152
+/** 右上枠の QR */
+const QR_SIZE = 76
+const QR_PAD = 5
+const QR_SRC = '/photo-booth/visit-pass-qr.png'
 
 const SERIF = 'Georgia, "Times New Roman", Times, serif'
 const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+
+let visitPassQrImage: HTMLImageElement | null = null
+let visitPassQrLoad: Promise<HTMLImageElement | null> | null = null
+
+/** 発行前に呼ぶと QR の読み込み待ちを減らせる */
+export function preloadVisitPassQr(): Promise<HTMLImageElement | null> {
+  if (visitPassQrImage) return Promise.resolve(visitPassQrImage)
+  if (typeof Image === 'undefined') return Promise.resolve(null)
+  if (!visitPassQrLoad) {
+    visitPassQrLoad = new Promise((resolve) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.onload = () => {
+        visitPassQrImage = img
+        resolve(img)
+      }
+      img.onerror = () => resolve(null)
+      img.src = QR_SRC
+    })
+  }
+  return visitPassQrLoad
+}
 
 export type VisitPassOptions = {
   meebitNumber: number
@@ -38,10 +64,10 @@ export type VisitPassOptions = {
  * ミュージアム会員証寄りの紙質・ヘアライン・セリフ見出し。
  * 色味だけ日替わり（`visitPassTheme`）。
  */
-export function composeVisitPass(
+export async function composeVisitPass(
   gl: WebGLRenderer,
   options: VisitPassOptions,
-): string | null {
+): Promise<string | null> {
   const source = gl.domElement
   const sw = source.width
   const sh = source.height
@@ -65,10 +91,12 @@ export function composeVisitPass(
   const dateKey = getUtcDateKey(issuedAt)
   const serial = buildSerial(options.meebitNumber, dateKey)
   const theme = options.theme ?? getDailyVisitPassTheme(dateKey)
+  const qr = await preloadVisitPassQr()
 
   paintPaper(ctx, theme)
   paintOuterFrame(ctx, theme)
   paintHeader(ctx, locale, theme)
+  paintHeaderQr(ctx, qr, theme)
   paintPhoto(ctx, source, sw, sh, theme)
   paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel, theme)
   paintRecords(ctx, locale, records, theme)
@@ -161,16 +189,50 @@ function paintHeader(
   ctx.fillStyle = theme.accent
   ctx.fillRect(MARGIN + 4, 100, Math.min(72, passWidth * 0.35), 3)
 
+  const qrBox = QR_SIZE + QR_PAD * 2
+  const ruleEndX = CARD_W - MARGIN - qrBox - 16
   ctx.strokeStyle = theme.rule
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(MARGIN + 4, 116)
-  ctx.lineTo(CARD_W - MARGIN - 4, 116)
+  ctx.lineTo(ruleEndX, 116)
   ctx.stroke()
 
   ctx.fillStyle = theme.inkMuted
   ctx.font = `500 12px ${SANS}`
   ctx.fillText(district, MARGIN + 4, 136)
+}
+
+/** ヘッダー右上の枠内に QR を置く */
+function paintHeaderQr(
+  ctx: CanvasRenderingContext2D,
+  qr: HTMLImageElement | null,
+  theme: VisitPassTheme,
+) {
+  const box = QR_SIZE + QR_PAD * 2
+  const x = CARD_W - MARGIN - box
+  const y = 36
+
+  ctx.fillStyle = theme.paperEdge
+  ctx.fillRect(x - 2, y - 2, box + 4, box + 4)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(x, y, box, box)
+
+  ctx.strokeStyle = theme.ink
+  ctx.lineWidth = 1
+  ctx.strokeRect(x + 0.5, y + 0.5, box - 1, box - 1)
+
+  ctx.strokeStyle = theme.rule
+  ctx.lineWidth = 0.75
+  ctx.strokeRect(x + 3.5, y + 3.5, box - 7, box - 7)
+
+  if (qr) {
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(qr, x + QR_PAD, y + QR_PAD, QR_SIZE, QR_SIZE)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+  }
 }
 
 function paintPhoto(
