@@ -3,102 +3,14 @@
  * getVideoData() で現在エピソードのタイトルを取得できる。
  */
 
+import { disableYoutubeCaptions, loadYoutubeApi, type YtPlayer } from '../youtube/ytApi'
 import { PODCAST_YOUTUBE_PLAYLIST_ID, PODCAST_YOUTUBE_VIDEO_ID } from './config'
 
 export const PODCAST_YT_PLAYER_ELEMENT_ID = 'meebits-podcast-yt-player'
 
-type YtVideoData = {
-  title?: string
-  video_id?: string
-  author?: string
-}
-
-type YtPlayer = {
-  mute: () => void
-  unMute: () => void
-  isMuted: () => boolean
-  setVolume: (volume: number) => void
-  playVideo: () => void
-  playVideoAt: (index: number) => void
-  setShuffle: (shufflePlaylist: boolean) => void
-  nextVideo: () => void
-  getCurrentTime: () => number
-  getDuration: () => number
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void
-  getVideoData: () => YtVideoData
-  unloadModule: (module: string) => void
-  destroy: () => void
-}
-
-type YtNamespace = {
-  Player: new (
-    elementId: string,
-    config: {
-      videoId?: string
-      width?: number | string
-      height?: number | string
-      playerVars?: Record<string, string | number>
-      events?: {
-        onReady?: (event: { target: YtPlayer }) => void
-        onStateChange?: (event: { data: number; target: YtPlayer }) => void
-      }
-    },
-  ) => YtPlayer
-  PlayerState?: { PLAYING: number; CUED: number }
-}
-
-declare global {
-  interface Window {
-    YT?: YtNamespace
-    onYouTubeIframeAPIReady?: () => void
-  }
-}
-
-let apiLoadPromise: Promise<YtNamespace> | null = null
 let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
 let titleListeners: Array<(title: string) => void> = []
-
-function loadYoutubeApi(): Promise<YtNamespace> {
-  if (typeof window === 'undefined') {
-    return Promise.reject(new Error('[podcast] no window'))
-  }
-  if (window.YT?.Player) return Promise.resolve(window.YT)
-  if (apiLoadPromise) return apiLoadPromise
-
-  apiLoadPromise = new Promise((resolve, reject) => {
-    const prev = window.onYouTubeIframeAPIReady
-    window.onYouTubeIframeAPIReady = () => {
-      prev?.()
-      if (window.YT?.Player) resolve(window.YT)
-      else reject(new Error('[podcast] YT API missing Player'))
-    }
-
-    if (document.querySelector('script[data-meebits-podcast-yt]')) return
-
-    const script = document.createElement('script')
-    script.src = 'https://www.youtube.com/iframe_api'
-    script.async = true
-    script.dataset.meebitsPodcastYt = '1'
-    script.onerror = () => reject(new Error('[podcast] failed to load YouTube API'))
-    document.head.appendChild(script)
-  })
-
-  return apiLoadPromise
-}
-
-function disableCaptions(target: YtPlayer) {
-  try {
-    target.unloadModule('captions')
-  } catch {
-    // ignore
-  }
-  try {
-    target.unloadModule('cc')
-  } catch {
-    // ignore
-  }
-}
 
 function readEpisodeTitle(target: YtPlayer): string | null {
   try {
@@ -122,7 +34,6 @@ function startRandomPlaylistVideo(target: YtPlayer) {
   } catch {
     // ignore
   }
-  // プレイリスト内のだいたいの位置からランダム開始（長さ不明なので幅広め）
   const index = Math.floor(Math.random() * 24)
   try {
     target.playVideoAt(index)
@@ -163,7 +74,7 @@ export async function mountPodcastYoutubePlayer(size: { width: number; height: n
     player = null
   }
 
-  const YT = await loadYoutubeApi()
+  const YT = await loadYoutubeApi('podcast')
   const playing = YT.PlayerState?.PLAYING ?? 1
   const cued = YT.PlayerState?.CUED ?? 5
 
@@ -189,9 +100,8 @@ export async function mountPodcastYoutubePlayer(size: { width: number; height: n
         onReady: (event) => {
           event.target.mute()
           startRandomPlaylistVideo(event.target)
-          disableCaptions(event.target)
+          disableYoutubeCaptions(event.target)
           publishEpisodeTitle(event.target)
-          // shuffle 直後はタイトルが遅れることがある
           window.setTimeout(() => publishEpisodeTitle(event.target), 400)
           window.setTimeout(() => publishEpisodeTitle(event.target), 1200)
           player = event.target
@@ -201,7 +111,7 @@ export async function mountPodcastYoutubePlayer(size: { width: number; height: n
         },
         onStateChange: (event) => {
           if (event.data === playing || event.data === cued) {
-            disableCaptions(event.target)
+            disableYoutubeCaptions(event.target)
             publishEpisodeTitle(event.target)
           }
         },
@@ -217,7 +127,7 @@ export function unmutePodcastYoutube(): boolean {
     player.unMute()
     player.setVolume(100)
     player.playVideo()
-    disableCaptions(player)
+    disableYoutubeCaptions(player)
     return true
   } catch {
     return false
