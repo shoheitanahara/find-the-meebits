@@ -1,5 +1,6 @@
 import type { WebGLRenderer } from 'three'
 import { getLocale } from '../../i18n/locale'
+import { isParkChristmasSeason } from '../../top/parkChristmas'
 import { getUtcDateKey } from '../../top/dailyFeatured'
 import { PHOTO_STUDIO } from '../config'
 import {
@@ -57,6 +58,8 @@ export type VisitPassOptions = {
   records?: VisitPassLine[]
   /** 省略時は UTC 日替わりテーマ */
   theme?: VisitPassTheme
+  /** 省略時は端末ローカルの 11–12月で判定 */
+  christmas?: boolean
 }
 
 /**
@@ -91,6 +94,7 @@ export async function composeVisitPass(
   const dateKey = getUtcDateKey(issuedAt)
   const serial = buildSerial(options.meebitNumber, dateKey)
   const theme = options.theme ?? getDailyVisitPassTheme(dateKey)
+  const christmas = options.christmas ?? isParkChristmasSeason(issuedAt)
   const qr = await preloadVisitPassQr()
 
   paintPaper(ctx, theme)
@@ -101,6 +105,7 @@ export async function composeVisitPass(
   paintIdentity(ctx, locale, options.meebitNumber, timestamp, timezoneLabel, theme)
   paintRecords(ctx, locale, records, theme)
   paintFooter(ctx, serial, theme)
+  if (christmas) paintPixelChristmasDecor(ctx, locale)
 
   return canvas.toDataURL('image/png')
 }
@@ -128,6 +133,228 @@ function paintPaper(ctx: CanvasRenderingContext2D, theme: VisitPassTheme) {
     ctx.fillRect(x, y, 1.2, 1.2)
   }
   ctx.restore()
+}
+
+/**
+ * クリスマス装飾
+ * - 中央上: 大きめリース
+ * - 左右: 枠の内側に寄せた赤／緑／金ストライプ
+ * - 背景色を残しつつ雪（降雪＋下辺の積雪）
+ */
+function paintPixelChristmasDecor(ctx: CanvasRenderingContext2D, _locale: 'en' | 'ja') {
+  const px = 5
+  ctx.save()
+  ctx.imageSmoothingEnabled = false
+
+  paintChristmasSnowDrift(ctx)
+  paintChristmasSideStripes(ctx, px)
+  paintPixelWreath(ctx, CARD_W * 0.5, 48, px)
+  paintChristmasFallingSnow(ctx)
+
+  ctx.restore()
+}
+
+/** 左右帯 — カード外縁寄り */
+function paintChristmasSideStripes(ctx: CanvasRenderingContext2D, px: number) {
+  const colors = ['#c42828', '#1e6a38', '#e8c050'] as const
+  const band = colors.length * px
+  const inset = 8
+  const top = 10
+  const bottom = CARD_H - 10
+  const h = bottom - top
+
+  const paintBand = (x: number) => {
+    for (let i = 0; i < colors.length; i += 1) {
+      ctx.fillStyle = colors[i]
+      ctx.fillRect(x + i * px, top, px, h)
+    }
+  }
+
+  paintBand(inset)
+  paintBand(CARD_W - inset - band)
+}
+
+/** 下辺に積もる雪（フッターより下〜外縁寄り） */
+function paintChristmasSnowDrift(ctx: CanvasRenderingContext2D) {
+  ctx.save()
+  const baseY = CARD_H - 10
+  for (let x = 28; x < CARD_W - 28; x += 3) {
+    const wave =
+      Math.sin(x * 0.05) * 3.5 + Math.sin(x * 0.12) * 1.8 + ((x * 17) % 4) * 0.25
+    const h = 4 + wave
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.48)'
+    ctx.fillRect(x, baseY - h, 3, h + 2)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.24)'
+    ctx.fillRect(x, baseY - h - 2, 3, 2)
+  }
+  // 下左右の積雪のみ（上隅は控えめ）
+  for (const [cx, cy, s] of [
+    [40, CARD_H - 16, 1.1],
+    [CARD_W - 40, CARD_H - 16, 1.1],
+  ] as const) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+    ctx.beginPath()
+    ctx.ellipse(cx, cy, 22 * s, 6 * s, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+/** 舞い散る雪（丸粒・写真枠には被せない） */
+function paintChristmasFallingSnow(ctx: CanvasRenderingContext2D) {
+  const photoPad = 14
+  const photoL = PHOTO_X - photoPad
+  const photoT = PHOTO_Y - photoPad
+  const photoR = PHOTO_X + PHOTO + photoPad
+  const photoB = PHOTO_Y + PHOTO + photoPad
+  const hitsPhoto = (x: number, y: number, r: number) =>
+    x + r >= photoL && x - r <= photoR && y + r >= photoT && y - r <= photoB
+
+  // 線形合同だと斜め筋が出るので、ハッシュでばらす
+  const rand = (n: number) => {
+    const t = Math.sin(n * 127.1 + 311.7) * 43758.5453
+    return t - Math.floor(t)
+  }
+
+  ctx.save()
+  for (let i = 0; i < 110; i += 1) {
+    const x = 36 + rand(i * 3.17 + 0.11) * (CARD_W - 72)
+    const y = 32 + rand(i * 5.91 + 1.7) * (CARD_H - 70)
+    const r = 1.8 + rand(i * 2.3 + 0.4) * 3.4
+    if (hitsPhoto(x, y, r + 1)) continue
+
+    const alpha = 0.22 + rand(i * 4.1 + 2.2) * 0.28
+    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+    ctx.beginPath()
+    ctx.arc(x, y, r, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(0.5, alpha + 0.1)})`
+    ctx.beginPath()
+    ctx.arc(x - r * 0.28, y - r * 0.28, r * 0.32, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+/** 中央上の大きめピクセルリース */
+function paintPixelWreath(ctx: CanvasRenderingContext2D, cx: number, cy: number, px: number) {
+  const ox = Math.round(cx / px)
+  const oy = Math.round(cy / px)
+  const put = (x: number, y: number, c: string) => {
+    ctx.fillStyle = c
+    ctx.fillRect((ox + x) * px, (oy + y) * px, px, px)
+  }
+
+  // 厚みのある緑リング
+  for (const [r, c] of [
+    [11, '#164a28'],
+    [10, '#1e5a30'],
+    [9, '#246838'],
+    [8, '#2a7040'],
+    [7, '#348048'],
+    [6, '#2f6840'],
+  ] as const) {
+    for (const [x, y, color] of ringCells(r, c)) put(x, y, color)
+  }
+
+  // 葉の凸凹（外側に飛び出す緑）
+  const tufts: Array<[number, number]> = [
+    [0, -12],
+    [4, -11],
+    [8, -9],
+    [11, -4],
+    [12, 0],
+    [11, 4],
+    [8, 9],
+    [4, 11],
+    [0, 12],
+    [-4, 11],
+    [-8, 9],
+    [-11, 4],
+    [-12, 0],
+    [-11, -4],
+    [-8, -9],
+    [-4, -11],
+  ]
+  for (const [x, y] of tufts) {
+    put(x, y, '#2a7040')
+    put(x + (x === 0 ? 0 : Math.sign(x)), y + (y === 0 ? 0 : Math.sign(y)), '#1e5a30')
+  }
+
+  // 赤実
+  const berries: Array<[number, number]> = [
+    [0, -10],
+    [7, -7],
+    [10, 0],
+    [7, 7],
+    [0, 10],
+    [-7, 7],
+    [-10, 0],
+    [-7, -7],
+    [3, -9],
+    [-3, 9],
+  ]
+  for (const [x, y] of berries) {
+    put(x, y, '#c42828')
+    put(x, y - 1, '#e04848')
+    put(x + 1, y, '#a02028')
+  }
+
+  // 金オーナメント
+  for (const [x, y] of [
+    [5, -3],
+    [-5, 3],
+    [3, 6],
+    [-6, -5],
+  ] as const) {
+    put(x, y, '#e8c050')
+    put(x, y + 1, '#c8a030')
+    put(x - 1, y, '#f0d060')
+  }
+
+  // 下部の大きめリボン
+  put(-5, 11, '#c42828')
+  put(-4, 12, '#e04040')
+  put(-3, 11, '#c42828')
+  put(-2, 12, '#e04040')
+  put(-1, 11, '#c42828')
+  put(0, 10, '#e04040')
+  put(1, 11, '#c42828')
+  put(2, 12, '#e04040')
+  put(3, 11, '#c42828')
+  put(4, 12, '#e04040')
+  put(5, 11, '#c42828')
+  put(0, 11, '#f0d060')
+  put(0, 12, '#e8c050')
+  put(-3, 13, '#a02028')
+  put(-4, 14, '#c42828')
+  put(-2, 14, '#a02028')
+  put(3, 13, '#a02028')
+  put(4, 14, '#c42828')
+  put(2, 14, '#a02028')
+  put(-1, 13, '#c42828')
+  put(1, 13, '#c42828')
+
+  // 中央の金ベル風
+  put(0, -2, '#e8c050')
+  put(0, -1, '#f0d060')
+  put(-1, 0, '#e8c050')
+  put(0, 0, '#fff0a8')
+  put(1, 0, '#e8c050')
+  put(0, 1, '#c8a030')
+  put(-1, 1, '#c8a030')
+  put(1, 1, '#c8a030')
+}
+
+function ringCells(radius: number, color: string): Array<[number, number, string]> {
+  const cells: Array<[number, number, string]> = []
+  for (let y = -radius - 1; y <= radius + 1; y += 1) {
+    for (let x = -radius - 1; x <= radius + 1; x += 1) {
+      const d = Math.hypot(x, y)
+      if (d >= radius - 0.75 && d <= radius + 0.45) cells.push([x, y, color])
+    }
+  }
+  return cells
 }
 
 function paintOuterFrame(ctx: CanvasRenderingContext2D, theme: VisitPassTheme) {

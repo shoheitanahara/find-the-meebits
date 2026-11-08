@@ -427,6 +427,7 @@ const VISIT_PASS_THEME_DEV_LABELS: Record<VisitPassThemeId | 'daily', string> = 
 
 function VisitPassIssuePanel() {
   const [devThemeId, setDevThemeId] = useState<VisitPassThemeId | 'daily'>('daily')
+  const [devChristmas, setDevChristmas] = useState<'auto' | 'on' | 'off'>('auto')
   const isDev = import.meta.env.DEV
 
   return (
@@ -437,33 +438,69 @@ function VisitPassIssuePanel() {
         themeOverride={
           isDev && devThemeId !== 'daily' ? getVisitPassThemeById(devThemeId) : undefined
         }
+        christmasOverride={
+          isDev ? (devChristmas === 'auto' ? undefined : devChristmas === 'on') : undefined
+        }
       />
       {isDev ? (
-        <div className="space-y-1.5">
-          <p className="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-amber-300/80">
-            DEV · Pass theme
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {(['daily', ...VISIT_PASS_THEMES.map((theme) => theme.id)] as const).map((id) => {
-              const active = devThemeId === id
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
-                    active
-                      ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
-                      : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
-                  }`}
-                  onClick={() => {
-                    setDevThemeId(id)
-                    playSfx('uiClick')
-                  }}
-                >
-                  {VISIT_PASS_THEME_DEV_LABELS[id]}
-                </button>
-              )
-            })}
+        <div className="space-y-2">
+          <div className="space-y-1.5">
+            <p className="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-amber-300/80">
+              DEV · Pass theme
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {(['daily', ...VISIT_PASS_THEMES.map((theme) => theme.id)] as const).map((id) => {
+                const active = devThemeId === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
+                      active
+                        ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
+                        : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
+                    }`}
+                    onClick={() => {
+                      setDevThemeId(id)
+                      playSfx('uiClick')
+                    }}
+                  >
+                    {VISIT_PASS_THEME_DEV_LABELS[id]}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-amber-300/80">
+              DEV · Xmas decor
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {([
+                ['auto', 'Auto'],
+                ['on', 'On'],
+                ['off', 'Off'],
+              ] as const).map(([id, label]) => {
+                const active = devChristmas === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
+                      active
+                        ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
+                        : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
+                    }`}
+                    onClick={() => {
+                      setDevChristmas(id)
+                      playSfx('uiClick')
+                    }}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
       ) : null}
@@ -474,9 +511,11 @@ function VisitPassIssuePanel() {
 function VisitPassButton({
   className = '',
   themeOverride,
+  christmasOverride,
 }: {
   className?: string
   themeOverride?: ReturnType<typeof getVisitPassThemeById>
+  christmasOverride?: boolean
 }) {
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
   const capturing = usePhotoStudioStore((state) => state.capturing)
@@ -499,7 +538,11 @@ function VisitPassButton({
         setIssuing(true)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            void composeVisitPass(gl, { meebitNumber, theme: themeOverride })
+            void composeVisitPass(gl, {
+              meebitNumber,
+              theme: themeOverride,
+              christmas: christmasOverride,
+            })
               .then((dataUrl) => {
                 if (dataUrl) {
                   downloadDataUrl(dataUrl, `meebit-${meebitNumber}-visit-pass.png`)
