@@ -1,56 +1,55 @@
 # Active Context
 
-最終更新: 2026-08-12
+最終更新: 2026-11-09
 
 ## 直近の作業サマリー
 
-### Meet Sergito（`/meet-sergito`）— Open
+### Visit Pass（来場証）— 表示・装飾・クリア数
 
-- **状態**: Sea 東棟 Open（`underConstruction` 解除）
-- **看板**: `HE LOOKS` / `職人が見る`。本文は扉と Meebit。コピー規約は `memory-bank/attractionCopy.md`
-- **会話**: 最大2行。挨拶／trait固有／組み合わせ／締めを毎回ランダムに組み合わせる。trait名は実データに合わせた
-- **トーン**: 工房の職人。売り込み・traitロジック説明はしない
-- 主要ファイル: `src/meetSergito/config.ts` / `dialogue/createSergitoDialogue.ts` / `dialogue/sergitoDialogueData.ts`
+- **合成**: `src/photoStudio/capture/composeVisitPass.ts`
+- **日替わり色**: `visitPassTheme.ts`（5テーマ・UTC日付固定）。DEV でテーマピッカー可
+- **QR**: 右上配置
+- **クリスマス装飾**（11–12月 / `isParkChristmasSeason`）: 画素リース（中央上）・サイドストライプ・丸い降雪（写真枠と非重複）。DEV で Auto/On/Off
+- **クリア数 off-by-one 修正**: Mt. Meeb / Jerry は全クリア後 `unlockedStage = COUNT+1` を保存。来場証は `unlocked - 1`。旧セーブ（unlocked=20 頭打ち）は高度 ≥1000m なら 20クリア扱い（`dailyRecords.climbDetail`）
+- 記録集約: `src/park/dailyRecords.ts`
 
-### OpenSea Market（`/opensea-market`）— Open
+### Meebits Park — 時間帯ライティング
 
-- **状態**: Sea 中央棟 Open。Digital Sculpture ギャラリー（出品は歩かない）
-- **3室**: WEST / MAIN / EAST。MAIN=最新30。左右ゲート＋フェード。EXIT は MAIN のみ
-- **売却**: 48時間以内の sale を最大10体混ぜる（出品中 token は除外）。値札左上に SOLD リボン
-- **カメラ**: 彫刻はプレイヤー非依存の正面斜め固定。案内だけプレイヤー基準
-- **API**: listings/best + events/sale。キーは永続 `OPENSEA_API_KEY` のみ
-- **看板**: `STILL LIFE` / `今夜の彫刻`
-- **ノウハウ正本**: `memory-bank/openSeaMarket.md`
+- **時間帯**: `morning` / `noon` / `evening` / `night`（`parkTimeOfDay.ts`）
+- **自動**: 端末ローカル時刻（朝 5–10 / 昼 11–15 / 夕 16–19 / 夜 20–4）
+- **適用**: `applyTimeOfDayLook` → `TopScene`。ベース look は旧「夜」相当。朝昼は色味中心、夕は暗め、夜は一段暗く
+- **UI**: 時計 `HH:mm`。DEV のみ時間帯トグル（言語切替付近の左）
+- **橋ライト**: 通行可能な左右レール橋のみ点灯（`ParkPerimeter`）
+- 状態: `topStore.timeOfDay`
 
-### Shore Fishing（`/shore-fishing`）— Open
+### Park クリスマスシーズン（11–12月）
 
-- **状態**: Sea 西棟 Open（`underConstruction` 解除）
-- **看板**: `FISH ON!` / `海が決める`
-- **入口**: `entranceZ: -7.85`（ドア手前で発火）。小屋前のヤシを削除
-- **島**: ボクセル床。ヤシ廃止 → コケ付きの小さな岩／小山（`islandRocks` / `IslandVoxelRocks`）
-- **アバター**: `applyVRMFishingPose` — 歩行は脇やや開き、立ち／釣りは脇クローズ。キャスト＝リール逆
-- **NPC**: 対岸を歩いて釣るだけ（プレイヤー無反応）
-- **ホオジロ**: 頭を一番太く（胴より頭が太い紡錘）
-- **BGM**: `Meebits Shore Fishing.mp3`
-- **ノウハウ正本**: `memory-bank/shoreFishing.md` + `meebitVrmArms.md`（釣り）+ `techContext.md`（TS リテラル型）
+- `parkChristmas.ts`: Sea 以外で look / デコ差し替え。骨格レイアウトは変えない
+- 来場証のクリスマス装飾は上記シーズン判定を共有
 
-### Photo Booth（`/photo-booth`）— アバター操作の仕上がり
+### Mt. Meeb / Jerry Mountain — コース幅・風
 
-- **体験**: 正方形 PFP + 来場証明書。ポーズ／背景／構図／カメラ角度／明るさ／左右回転
-- **ポーズ**: Stand / Wave / Cheer / Shoot / GM / Walk / Jump / Sit
-  - Walk・Jump・Shoot・Sit は `VRMLocomotion` 再利用（Walk は左手前・右足前で位相固定）
-  - GM: 射撃腕 + 前傾リセット + 顎上げ（Head **正 X**）+ マグ（白／黒・文字は背景色）
-- **カメラ**: default / high / higher（high の少し上）/ low。下寄り補正は `cameraLookAt.Y` を下げる
-- **ノウハウ正本**: `memory-bank/photoStudio.md`（腕は `meebitVrmArms.md` も更新済み）
+- **7レーン**: `MOUNTAIN_LANES` = LLL/LL/L/C/R/RR/RRR（`mountain/config.ts`）
+- 道幅・棚・山体生成を拡張。両脇は低めの flank 斜面
+- 高ステージほど `windAmplitude` / `windFrequency` を強化（`stages.ts`）
+- 進捗: `mountain/store.ts`（日替わり。全クリア哨兵は COUNT+1）
 
-主要ファイル:
+主要ファイル（直近）:
 
 | 用途 | パス |
 |------|------|
-| 定数・カメラ・マグ・椅子 | `src/photoStudio/config.ts` |
-| ポーズ | `src/photoStudio/poses.ts` |
-| プレイヤー | `src/photoStudio/player/StudioPlayer.tsx` |
-| メモリ | `memory-bank/photoStudio.md` |
+| 来場証合成 | `src/photoStudio/capture/composeVisitPass.ts` |
+| 来場証テーマ | `src/photoStudio/capture/visitPassTheme.ts` |
+| 日次記録・クリア表示 | `src/park/dailyRecords.ts` |
+| 時間帯 look | `src/top/parkTimeOfDay.ts` |
+| クリスマス | `src/top/parkChristmas.ts` |
+| 登山進捗 | `src/mountain/store.ts` |
+| レーン・地形 | `src/mountain/config.ts` / `stages.ts` |
+| Photo Booth メモ | `memory-bank/photoStudio.md` |
+
+### Meet Sergito / OpenSea / Shore Fishing / Photo Booth ポーズ
+
+（安定済み。詳細は各ノウハウファイルと下記「既存オープン施設」）
 
 ### JA ゾーン表記
 - すべて「〜エリア」に統一（地区は使わない）
@@ -63,129 +62,69 @@
 - Sea NPC: Meet Sergito 工房での観察・Traitコメント体験を話す
 - Astro NPC: エリア固有の挨拶・工事中3棟・主役・Trait会話を使う
 
-### Astro District（パーク新ゾーン）— Open（工事中建物のみ）
+### Astro District — Open（工事中建物のみ）
 
 - **Zone ID**: `astro`（Mountain の北 × Culture の東）
-- **接続**: Mountain 北門 `mountain-to-astro` / Culture 東門 `culture-to-astro`（双方向）
-- **地面**: `AstroDistrictGround`（レゴリス・金属パネル・シアン発光ライン）
-- **建物**: 共通3スロットに工事中のみ（STAR DOME / LUNAR LAB / ORBITAL PORT）。`TOP_ATTRACTIONS` 未登録＝進入不可
-- **NPC**: 日次15体・Robot / Visitor 8体＋他Type 7体（`dailyFeatured` STORAGE_KEY `v11`）
-- **家具**: Astro専用ベンチ＋環状ライト街灯（ベンチ横オブジェは置かない）
-- **軽量化**: Astroの街灯・ビーコン・工事中棟はemissive表現を維持し、個別pointLightを省略
-- **NPC会話**: Astro専用の挨拶・エリア雑談・今日の主役・Trait会話。Mountain会話の流用なし
-- **スロット正本**: `src/top/parkAttractionSlots.ts`（Mountain 配置を全区デフォルト化）
+- **接続**: `mountain-to-astro` / `culture-to-astro`
+- **建物**: 工事中のみ（STAR DOME / LUNAR LAB / ORBITAL PORT）。進入不可
+- **スロット正本**: `src/top/parkAttractionSlots.ts`
 
-### Mountain Shooting Gallery（`/shooting-gallery`）— Open
+### 既存オープン施設（要約）
 
-- **名称**: Shooting Gallery（仮）
-- **ルート**: `/shooting-gallery` `/jp/shooting-gallery` → edition `shooting` → `ShootingGalleryApp`（`src/shootingGallery/`）
-- **パーク導線**: Mountain District 東棟 `TOP_ATTRACTIONS` id=`shooting`（建物位置 `(15.7, -11.0)`）
-- **体験**: 45秒・固定射撃位置・三人称右肩越し。動く的をポインターで撃つスコアアタック
-- **操作**: PC マウス照準 + クリック発砲（Pointer Lock）。SP 画面ドラッグ照準 + 右下 Fire
-- **的**: 高品質な丸的（金／赤／通常／小）。Bullseye ×2
-- **スコア**: 通常100 / 小・速200 / 金500 / 赤-300。コンボ倍率 1 / 1.5 / 2
-
-主要ファイル:
-
-| 用途 | パス |
+| 施設 | 要点 |
 |------|------|
-| 定数 | `src/shootingGallery/config.ts` |
-| 状態 | `src/shootingGallery/store.ts` |
-| App | `src/shootingGallery/ShootingGalleryApp.tsx` |
-| プレイヤー / カメラ / 入力 | `src/shootingGallery/player/` |
-| 会場・的 | `src/shootingGallery/world/` |
-| UI | `src/shootingGallery/ui/` |
-
-### Meebits Runway（`/runway`）— Open
-
-- **名称**: Meebits Runway（旧 Fashion Runway）
-- **ルート**: `/runway` `/jp/runway` → edition `runway` → `RunwayApp`（`src/runway/`）
-- **パーク導線**: Culture District の `TOP_ATTRACTIONS` id=`runway`。看板 subtitle `The Catwalk`、storyTitle `TONIGHT WALKS`
-- **体験**: 白黒暗室＋中央ランウェイ。日替わりカラーテーマに合う Meebit がキャットウォーク。観客はベンチ着席＋呼吸ポーズ
-- **空席・着席**: 日替わり 4〜8 空席。接近で Sit（E / モバイルボタン）。立ち上がりは通路側へ逃がす（`resolveRunwayStandUpPosition`）
-- **ベンチ当たり**: mesh 軸は local X=長辺 / local Z=奥行。前後隣ベンチ間・列間通路側を非対称に短縮（`benchCollision` + `collisions.ts`）
-- **視点**: 三人称オービット。マウス: `+movementY` = 下を見る。**スマホタッチ: `-lookDeltaY`（上下反転・指上スワイプで上を見る）**
-- **座標・接地**: `.cursor/rules/threejs-coordinates.mdc`（alwaysApply）。Runway は +Z=手前（入口）、−Z=奥（スクリーン）
-- **BGM**: `RunwayBgmSystem` + `src/audio/runwayAudioConfig.ts` → `/audio/runway/Meebits Runway.mp3`
-
-主要ファイル:
-
-| 用途 | パス |
-|------|------|
-| 寸法・接地・当たり | `src/runway/config.ts` |
-| 衝突 | `src/runway/collisions.ts` |
-| 座席・Sit | `src/runway/runwaySeats.ts` |
-| 日替わりショー | `src/runway/dailyRunway.ts` |
-| プレイヤー | `src/runway/player/RunwayPlayer.tsx` |
-| 会場 | `src/runway/world/RunwayRoom.tsx` |
-| 観客 | `src/runway/show/RunwayAudience.tsx` |
-| Sit UI | `src/runway/ui/RunwaySitControls.tsx` |
-| Three.js 座標ルール | `.cursor/rules/threejs-coordinates.mdc` |
+| Shooting Gallery | Mountain 東棟。45秒三人称射的 |
+| Meebits Runway | Culture。日替わりカラー・着席。座標は `.cursor/rules/threejs-coordinates.mdc` |
+| Photo Booth | PFP + 来場証。ポーズ詳細は `photoStudio.md` |
+| Shore Fishing | Sea 西。`shoreFishing.md` |
+| OpenSea Market | Sea 中央。彫刻ギャラリー。`openSeaMarket.md` |
+| Meet Sergito | Sea 東。最大2行会話 |
 
 ### Park 配置の凍結
 
-- **Canonical Default Layout** を `memory-bank/parkDesigner.md` §14 に記録（2026-07-24）
-- 正本コード: `src/top/parkZones.ts`（家具・ゲート・Coming Soon）+ `src/top/topConfig.ts`（建物）
-- Culture の Meebits Runway は **Open**（§14.4 更新済み）
-- 封印門は本ゲートと同品質（開口・橋・門・通過不可衝突）
-- Coming Soon は南西／南東の建設中ランドマーク棟
-- 以降の Park レイアウト変更は §14 とコードをセットで更新すること
+- **Canonical Default Layout**: `parkDesigner.md` §14（2026-07-24）+ Culture Runway Open 更新
+- 正本: `parkZones.ts` / `topConfig.ts`
 
-### Meebits Park（`/`）ハブ + ルーティング
+### ルーティング
 
-- **ルート変更**: `/` `/jp` = Meebits Park（`top`）。旧本編は `/find-the-meebit` へ移設。**互換リダイレクトなし**
-  - `src/game/appEdition.ts` で判定。SPA fallback は `vite.config.ts` + `vercel.json` 両方に追加
-- **パーク（`src/top/`）**: アバター選択 → 入場。`?from=<attractionId>` で自動 start(spawn)
-- **共通ヘッダー**: `ParkReturnButton`（左「Meebits Park」/右「Back to Top」）
-- **本番ドメイン**: `https://meebits-park.vercel.app`。ドメイン変更時は Worker `ALLOWED_ORIGINS` 必須
-
-### 8th Street / After Hours / タブ停止 / BGM
-
-- 8th Street: 一人称クランク路地。定数 `src/eightStreet/config.ts`
-- Club: Museum Grand Final 後解放。Shawn は DJ 固定（`CLUB_CREATOR_DJ_POSITION`）
-- タブ非表示: レンダー停止 + タイマー除外 + BGM pause（常時 delta クランプは使わない）
-- Museum/Club BGM: `VenueBgmSystem` + `venueAudioConfig.ts`
+- `/` `/jp` = Park（`top`）。本編は `/find-the-meebit`。互換リダイレクトなし
+- 本番: `https://meebits-park.vercel.app`。ドメイン変更時は Worker `ALLOWED_ORIGINS` 必須
 
 ## 現在のブランチ状態
 
-- Photo Booth（ポーズ拡充・GM マグ・カメラ角度・Sit 椅子）は **作業ツリーに未コミットの可能性あり**
-- Worker / Vercel VRM 構成は以前どおり（変更なし）
+- Visit Pass クリア数修正・時間帯・山7レーン・来場証クリスマスは **作業ツリーに未コミットの可能性あり**
+- Worker / Vercel VRM 構成は以前どおり
 
 ## 次に触る可能性が高いファイル
 
 | 用途 | パス |
 |------|------|
-| Photo Booth 定数 | `src/photoStudio/config.ts` |
-| Photo Booth ポーズ | `src/photoStudio/poses.ts` |
+| 来場証合成 | `src/photoStudio/capture/composeVisitPass.ts` |
+| 来場証テーマ | `src/photoStudio/capture/visitPassTheme.ts` |
+| 日次記録 | `src/park/dailyRecords.ts` |
+| 時間帯 | `src/top/parkTimeOfDay.ts` |
+| 登山進捗 | `src/mountain/store.ts` |
+| レーン・地形 | `src/mountain/config.ts` |
 | Photo Booth メモ | `memory-bank/photoStudio.md` |
-| Runway 寸法・接地・当たり | `src/runway/config.ts` |
-| Runway 衝突 | `src/runway/collisions.ts` |
-| Three.js 座標 | `.cursor/rules/threejs-coordinates.mdc` |
-| パーク UI/入場 | `src/top/TopApp.tsx` |
-| パーク建物設定 | `src/top/topConfig.ts` |
-| ルート判定 | `src/game/appEdition.ts` |
+| パーク UI | `src/top/TopApp.tsx` / `TopScene.tsx` |
 
 ## エージェント向け注意
 
 1. **Next.js ではない** — Vite + React
 2. **`/` は Park**（`top`）。本編は `/find-the-meebit`。新ルートは `vite.config.ts` + `vercel.json` の両方に登録
-3. **本番ドメイン変更時は Worker `ALLOWED_ORIGINS` を更新して再デプロイ**（忘れると VRM が CORS 全滅）
-4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park 建物 → `topConfig.ts` / **Runway → `runway/config.ts`** / **Photo Booth → `photoStudio/config.ts`**
-5. **パーク NPC は `useVRMModel(exclusive:true)`**（プール共有だと T ポーズになる）
-6. **DJ ブース collision** は `CLUB_DJ_BOOTH_LAYOUT` と `ClubProps` を同期すること
-7. **Shawn Club 回転** は `0`（+Z = ダンスフロア）。`Math.PI` は後ろ向きになる
-8. タブ非表示は **全部止める**方針。常時 delta クランプは使わない
-9. **Runway 座標**: +Z=手前（入口）、−Z=奥。ベンチ mesh は local X=長辺 / local Z=奥行。詳細は `.cursor/rules/threejs-coordinates.mdc`
-10. **Runway タッチ視点**: pitch は `-lookDeltaY`（マウスの `+movementY` とは逆）。変えるときは両方確認
-11. **Photo Booth**: ポーズ・カメラ・マグは `photoStudio.md`。顎は Head **正 X＝上げ**。カメラ下寄りは lookAt Y を下げる
-12. **Shore Fishing**: 竿・島は `shoreFishing.md`。腕は捻らず、立ちは脇クローズ／歩きは開。config 数値のデフォルト引数は `param: number = ...`
-13. **TS2345 `0.38` not assignable to `0.45`**: config リテラルがデフォルト引数型になるやつ → `techContext.md` TypeScript 落とし穴
-14. commit はユーザー依頼時のみ
+3. **本番ドメイン変更時は Worker `ALLOWED_ORIGINS` を更新して再デプロイ**
+4. **会場座標**: Museum → `worldLandmarks.ts` / Club → `clubLandmarks.ts` / Park → `topConfig.ts` / Runway → `runway/config.ts` / Photo Booth → `photoStudio/config.ts`
+5. **パーク NPC は `useVRMModel(exclusive:true)`**
+6. **Runway 座標**: +Z=手前（入口）、−Z=奥。詳細は `.cursor/rules/threejs-coordinates.mdc`
+7. **登山 unlockedStage**: プレイ選択は 1..20。全クリア保存は **21**。来場証クリア数は `unlocked - 1`（旧セーブは高度ヒューリスティック）
+8. **時間帯**: マジックナンバーを JSX に直書きせず `parkTimeOfDay` / config 定数へ
+9. **来場証クリスマス雪**: 写真枠と重ねない。画素デコは画像 import せず canvas 描画
+10. commit はユーザー依頼時のみ
 
 ## デプロイチェックリスト
 
 1. **本番ドメインを変えた場合**: `workers/vrm-cache/wrangler.toml` の `ALLOWED_ORIGINS` に新ドメイン追加
 2. `npm run vrm-worker:deploy`
 3. Vercel `VITE_VRM_BASE_URL` → Redeploy
-4. 新ルートを足したら `vite.config.ts`（`SPA_FALLBACK_PATHS`）と `vercel.json` を確認（`/runway` 済み）
-5. 任意: `VITE_BGM_BASE_URL`（BGM を R2/CDN に置く場合）
+4. 新ルートを足したら `vite.config.ts`（`SPA_FALLBACK_PATHS`）と `vercel.json` を確認
+5. 任意: `VITE_BGM_BASE_URL`

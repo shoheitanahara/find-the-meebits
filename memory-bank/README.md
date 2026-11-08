@@ -2,7 +2,7 @@
 
 AI エージェントが作業を中断・再開しても文脈を失わないためのドキュメント群。
 
-## 全体像（2026-07）
+## 全体像（2026-11 時点）
 
 **Meebits Park** をハブに、複数テーマエリアとゲームがぶら下がる構成。
 
@@ -26,7 +26,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - **配置の正**: `parkDesigner.md` **§14 Canonical Default Layout**（2026-07-24 凍結、Culture Runway は 2026-07-28 更新）+ `src/top/parkZones.ts` / `topConfig.ts`
 - Runway 座標・接地: `.cursor/rules/threejs-coordinates.mdc`
 - Meebit VRM 腕ボーン: **[meebitVrmArms.md](./meebitVrmArms.md)**（捻れ禁止・attention z・肘 x・**釣り竿脇**）
-- Photo Booth（ポーズ・カメラ・小道具）: **[photoStudio.md](./photoStudio.md)**
+- Photo Booth（ポーズ・カメラ・小道具・**来場証**）: **[photoStudio.md](./photoStudio.md)**
 - Shore Fishing（島・竿・NPC）: **[shoreFishing.md](./shoreFishing.md)**
 - OpenSea Market（Listing / 直近売却・3ギャラリー彫刻）: **[openSeaMarket.md](./openSeaMarket.md)**
 - `/` `/jp` は Park（`top`）。`find-the-meebit` セグメントで v1。
@@ -51,7 +51,9 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - **Park のゾーン・導線・配置ルール**が変わったら **parkDesigner.md** も更新する
 - **入口看板・スタートカードのコピー**が変わったら **attractionCopy.md** も更新する
 - **NPC の魅力トーン・日替わり伝え方**が変わったら **parkNpcDialogue.md** と `parkDialogueExpand.ts` をセットで更新する
-- **Photo Booth のポーズ／カメラ／小道具**が変わったら **photoStudio.md**（と必要なら **meebitVrmArms.md**）を更新する
+- **Photo Booth のポーズ／カメラ／小道具／来場証**が変わったら **photoStudio.md**（と必要なら **meebitVrmArms.md**）を更新する
+- **Park 時間帯・季節スキン**が変わったら **activeContext.md** / **productContext.md** を更新する
+- **登山進捗（unlockedStage 哨兵など）**が変わったら **activeContext.md** / **progress.md** / **photoStudio.md**（Visit Pass）を更新する
 - **Shore Fishing の竿・島・NPC**が変わったら **shoreFishing.md** / **meebitVrmArms.md** を更新する
 - **OpenSea Market**（API・ギャラリー・彫刻／売却リボン・カメラ）が変わったら **openSeaMarket.md** を更新する
 - ファイルパス・定数・インフラ・**頻出 TS エラー**が変わったら **techContext.md** も更新する

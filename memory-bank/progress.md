@@ -2,6 +2,15 @@
 
 ## 完了済み
 
+### Visit Pass / Park 時間帯 / Mt. Meeb 幅（2026-11）
+
+- [x] 来場証: QR 右上・日替わり5テーマ（`visitPassTheme`）・DEV テーマピッカー
+- [x] 来場証クリスマス装飾（11–12月）: 画素リース・サイド・降雪（写真非重複）。DEV Auto/On/Off
+- [x] 登山クリア数 off-by-one 修正: 全クリア後 `unlockedStage = 21` 保存。旧セーブは高度≥1000m で 20クリア
+- [x] Park 時間帯ライティング（朝/昼/夕/夜）+ DEV トグル + 通行橋のみライト
+- [x] Park クリスマスシーズン look（Sea 除外、`parkChristmas.ts`）
+- [x] Mt. Meeb 7レーン化・棚/flank 調整・高ステージ風強化
+
 ### Meet Sergito（`/meet-sergito`）
 
 - [x] **Open**（Sea 東棟 `underConstruction` 解除）
@@ -45,6 +54,7 @@
 - [x] Sit 用ボクセル椅子（脚長は `sitChair.leg`）
 - [x] カメラ角度: default / high / higher / low（中央寄せは lookAt Y）
 - [x] 操作ノウハウを `memory-bank/photoStudio.md` に記録（腕規約も更新）
+- [x] 来場証: 日替わりテーマ・QR・季節デコ・登山クリア数表示（詳細は `photoStudio.md`）
 
 ### Astro District（パーク新ゾーン）
 
@@ -182,6 +192,7 @@
 | Shawn DJ 位置 | 微調整は `CLUB_CREATOR_DJ_POSITION` の z のみ |
 | Runway 接地 Y | `playerGroundY` / `benchGroundY` / `audienceSeatY` は見た目で微調整。符号は座標ルール参照 |
 | Runway 建物看板 | Open（`The Catwalk` / `TONIGHT WALKS`）。**New Open 表記は使わない** |
+| 登山 unlocked=20 旧セーブ | 全クリアと「20解放・未クリア」が曖昧。来場証は高度≥1000m ヒューリスティック。新規クリアは unlocked=21 |
 
 ## 未着手・任意改善
 

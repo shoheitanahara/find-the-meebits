@@ -27,6 +27,8 @@
 - Plaza では NPC 群衆が徘徊。Mountain は山岳テーマ（Coming Soon 可）
 - Culture の Meebits Runway は**入場可**（Open）
 - 噴水中央に Meebit #11143 の銅像（Plaza）
+- **時間帯ライティング**: 朝/昼/夕/夜（端末ローカル自動 + DEV 手動）。`parkTimeOfDay.ts`
+- **クリスマスシーズン**（11–12月・Sea 除外）: look / デコ差し替え。`parkChristmas.ts`
 
 ### アトラクション説明トーン
 
@@ -39,12 +41,13 @@
 
 | 体験 | 内容 |
 |------|------|
-| Mt. Meeb / Jerry Mountain | コースが日替わり。進捗も毎日 Stage 1 から |
+| Mt. Meeb / Jerry Mountain | コースが日替わり。進捗も毎日 Stage 1 から。7レーン |
 | 8th Street | 歩行者・異変の感じがランごとに違う |
 | Find the Meebit | 群衆が常にランダムで新鮮 |
 | Plaza | 噴水 Featured・テーマトレイトが日付で変わる |
 | Meebits Runway | 日替わり衣装カラーテーマ・観客顔ぶれ・空席位置 |
 | OpenSea Market | ライブ出品＋48時間以内の売却を彫刻として展示（顔ぶれは API 依存） |
+| Visit Pass | 日替わり紙色テーマ。季節デコ（11–12月）。各アトラクションの当日記録を1枚に |
 
 NPC はこの魅力を **来場者の生活・失敗・寄り道** としてにじませる（仕様説明・広告口調にしない）。詳細は [parkNpcDialogue.md](./parkNpcDialogue.md)（Dialogue Bible）。
 

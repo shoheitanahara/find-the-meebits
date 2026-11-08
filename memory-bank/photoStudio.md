@@ -1,9 +1,9 @@
 # Photo Booth — アバター操作・カメラの落とし所
 
-最終更新: 2026-11-02
+最終更新: 2026-11-09
 
 正方形 PFP / 来場証明書用スタジオ。ルート: `/photo-booth` `/jp/photo-booth`（互換 `/pfp-studio`）。  
-正本: `src/photoStudio/`（`config.ts`・`poses.ts`・`player/StudioPlayer.tsx`・`world/`）
+正本: `src/photoStudio/`（`config.ts`・`poses.ts`・`player/StudioPlayer.tsx`・`world/`・`capture/`）
 
 関連: **[meebitVrmArms.md](./meebitVrmArms.md)**（腕の軸）、`.cursor/rules/threejs-coordinates.mdc`（Y/Z 一般）
 
@@ -159,7 +159,23 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 - パネル: `ui/PhotoStudioOverlays.tsx`  
   - GM 時のみマグ色スウォッチ  
   - 背景色スウォッチ（GM 文字色にも連動）
+  - DEV: 来場証テーマピッカー / クリスマス Auto·On·Off
 - 文言: `i18n.ts`
+
+---
+
+## Visit Pass（来場証明書）
+
+合成正本: `capture/composeVisitPass.ts`。記録行: `src/park/dailyRecords.ts`。
+
+| 項目 | 内容 |
+|------|------|
+| 日替わり色 | `visitPassTheme.ts`（5テーマ・UTC日付固定） |
+| QR | 右上 |
+| クリスマス | 11–12月（`isParkChristmasSeason`）。画素リース・サイド・降雪。写真枠と雪を重ねない |
+| 登山クリア数 | `unlockedStage - 1`。全クリア後は保存値が **21**（`mountain/store`）。旧セーブは unlocked=20 かつ高度≥1000m で 20クリア |
+
+マジックナンバーはテーマ／compose 側に集約。クリスマス用の画像 import は使わない（canvas 画素描画）。
 
 ---
 
@@ -170,6 +186,9 @@ Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。
 | 定数・ポーズ一覧・カメラ・マグ・椅子 | `src/photoStudio/config.ts` |
 | ポーズ適用 | `src/photoStudio/poses.ts` |
 | プレイヤー・小道具追従 | `src/photoStudio/player/StudioPlayer.tsx` |
+| 来場証合成 | `src/photoStudio/capture/composeVisitPass.ts` |
+| 来場証テーマ | `src/photoStudio/capture/visitPassTheme.ts` |
+| 日次記録行 | `src/park/dailyRecords.ts` |
 | マグ | `src/photoStudio/world/StudioGmMug.tsx` |
 | Sit 椅子 | `src/photoStudio/world/StudioSitChair.tsx` |
 | Figure 台座 | `src/photoStudio/world/StudioFigurePedestal.tsx` |
