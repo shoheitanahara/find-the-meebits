@@ -5,6 +5,11 @@ import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { LEARN_ART_FILM_CREDIT, LEARN_ART_FILM_TITLE } from '../config'
 import { getDailyLearnArtShow } from '../dailyLearnArt'
 import { useLearnArtStore } from '../store'
+import {
+  armLearnArtSoundOnEnter,
+  onLearnArtYoutubeReady,
+  unmuteLearnArtYoutube,
+} from '../youtubePlayer'
 
 const copy = {
   en: {
@@ -16,7 +21,7 @@ const copy = {
     error: 'Could not seat today’s audience. Try again.',
     hintDesktop: 'WASD to walk · Click, then drag to look around · Esc to release',
     hintTouch: 'Joystick to move · Drag the screen to look around',
-    audioNote: 'Video starts muted — press M or tap Sound on after you enter.',
+    audioNote: 'Enter also turns sound on. Press M anytime to mute or unmute.',
   },
   ja: {
     eyebrow: 'ミュージック＆アートエリア',
@@ -27,7 +32,7 @@ const copy = {
     error: '本日の客席を用意できませんでした。',
     hintDesktop: 'WASDで歩行 · クリック後ドラッグで見回す · Escで解除',
     hintTouch: 'スティックで移動 · 画面ドラッグで視点変更',
-    audioNote: '動画はミュートで開始します。入場後は M キーか「音声オン」で切り替えできます。',
+    audioNote: '入場と同時に音声がオンになります。ミュート切替は M キーか「音声オン」。',
   },
 } as const
 
@@ -57,12 +62,21 @@ export function LearnArtTitleScreen() {
   if (phase !== 'title') return null
 
   const enter = () => {
-    void getDailyLearnArtShow().then((show) => {
-      useLearnArtStore.getState().start({
-        audienceIds: show.audienceIds,
-        emptySeatIndices: show.emptySeatIndices,
+    armLearnArtSoundOnEnter()
+    void unlockAudioIfNeeded().then(() => {
+      void getDailyLearnArtShow().then((show) => {
+        useLearnArtStore.getState().start({
+          audienceIds: show.audienceIds,
+          emptySeatIndices: show.emptySeatIndices,
+        })
+        playSfx('timerStart')
+        const unsubscribe = onLearnArtYoutubeReady(() => {
+          if (unmuteLearnArtYoutube()) {
+            useLearnArtStore.getState().setSoundMuted(false)
+          }
+          unsubscribe()
+        })
       })
-      void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
     })
   }
 

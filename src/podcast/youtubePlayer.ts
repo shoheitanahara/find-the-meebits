@@ -18,6 +18,12 @@ let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
 let titleListeners: Array<(title: string) => void> = []
 let mountGeneration = 0
+/** Enter クリック時に立て、onReady で unmute する */
+let soundOnEnterArmed = false
+
+export function armPodcastSoundOnEnter() {
+  soundOnEnterArmed = true
+}
 
 function readEpisodeTitle(target: YtPlayer): string | null {
   try {
@@ -67,6 +73,17 @@ function destroyCurrentPlayer() {
 
 export function getPodcastYoutubePlayer(): YtPlayer | null {
   return player
+}
+
+export function onPodcastYoutubeReady(listener: (p: YtPlayer) => void) {
+  if (player) {
+    listener(player)
+    return () => undefined
+  }
+  readyListeners.push(listener)
+  return () => {
+    readyListeners = readyListeners.filter((item) => item !== listener)
+  }
 }
 
 /** 再生中タイトルが更新されたら通知（入場後の Now Playing 用） */
@@ -134,7 +151,17 @@ export async function mountPodcastYoutubePlayer(size: { width: number; height: n
               resolve(null)
               return
             }
-            event.target.mute()
+            if (soundOnEnterArmed) {
+              soundOnEnterArmed = false
+              try {
+                event.target.unMute()
+                event.target.setVolume(100)
+              } catch {
+                event.target.mute()
+              }
+            } else {
+              event.target.mute()
+            }
             startRandomPlaylistVideo(event.target)
             disableYoutubeCaptions(event.target)
             publishEpisodeTitle(event.target)

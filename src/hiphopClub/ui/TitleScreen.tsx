@@ -5,6 +5,11 @@ import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { CLUB_SHOW_CREDIT, CLUB_SHOW_TITLE } from '../config'
 import { getDailyClubShow } from '../dailyClub'
 import { useClubStore } from '../store'
+import {
+  armClubSoundOnEnter,
+  onClubYoutubeReady,
+  unmuteClubYoutube,
+} from '../youtubePlayer'
 
 const copy = {
   en: {
@@ -16,7 +21,7 @@ const copy = {
     error: 'Could not seat today’s crowd. Try again.',
     hintDesktop: 'WASD to walk · Click, then drag to look around · Esc to release',
     hintTouch: 'Joystick to move · Drag the screen to look around',
-    audioNote: 'A random track starts muted. Title appears after you enter — press M or Sound on.',
+    audioNote: 'Enter also turns sound on. Title appears after you enter — press M anytime to mute.',
   },
   ja: {
     eyebrow: 'ミュージック＆アートエリア',
@@ -27,7 +32,7 @@ const copy = {
     error: '本日のダンサーを用意できませんでした。',
     hintDesktop: 'WASDで歩行 · クリック後ドラッグで見回す · Escで解除',
     hintTouch: 'スティックで移動 · 画面ドラッグで視点変更',
-    audioNote: 'ランダムな曲がミュートで始まります。タイトルは入場後に表示。M か「音声オン」で切替。',
+    audioNote: '入場と同時に音声オン。タイトルは入場後に表示。ミュート切替は M か「音声オン」。',
   },
 } as const
 
@@ -57,11 +62,20 @@ export function ClubTitleScreen() {
   if (phase !== 'title') return null
 
   const enter = () => {
-    void getDailyClubShow().then((show) => {
-      useClubStore.getState().start({
-        audienceIds: show.audienceIds,
+    armClubSoundOnEnter()
+    void unlockAudioIfNeeded().then(() => {
+      void getDailyClubShow().then((show) => {
+        useClubStore.getState().start({
+          audienceIds: show.audienceIds,
+        })
+        playSfx('timerStart')
+        const unsubscribe = onClubYoutubeReady(() => {
+          if (unmuteClubYoutube()) {
+            useClubStore.getState().setSoundMuted(false)
+          }
+          unsubscribe()
+        })
       })
-      void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
     })
   }
 

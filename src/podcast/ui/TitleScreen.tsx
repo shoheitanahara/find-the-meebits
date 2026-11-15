@@ -5,6 +5,11 @@ import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { PODCAST_SHOW_CREDIT, PODCAST_SHOW_TITLE } from '../config'
 import { getDailyPodcastShow } from '../dailyPodcast'
 import { usePodcastStore } from '../store'
+import {
+  armPodcastSoundOnEnter,
+  onPodcastYoutubeReady,
+  unmutePodcastYoutube,
+} from '../youtubePlayer'
 
 const copy = {
   en: {
@@ -16,7 +21,7 @@ const copy = {
     error: 'Could not seat today’s audience. Try again.',
     hintDesktop: 'WASD to walk · Click, then drag to look around · Esc to release',
     hintTouch: 'Joystick to move · Drag the screen to look around',
-    audioNote: 'A random episode starts muted. Title appears after you enter — press M or Sound on.',
+    audioNote: 'Enter also turns sound on. Title appears after you enter — press M anytime to mute.',
   },
   ja: {
     eyebrow: 'ミービッツ広場',
@@ -27,7 +32,7 @@ const copy = {
     error: '本日の客席を用意できませんでした。',
     hintDesktop: 'WASDで歩行 · クリック後ドラッグで見回す · Escで解除',
     hintTouch: 'スティックで移動 · 画面ドラッグで視点変更',
-    audioNote: 'ランダムな回がミュートで始まります。タイトルは入場後に表示。M か「音声オン」で切替。',
+    audioNote: '入場と同時に音声オン。タイトルは入場後に表示。ミュート切替は M か「音声オン」。',
   },
 } as const
 
@@ -57,12 +62,21 @@ export function PodcastTitleScreen() {
   if (phase !== 'title') return null
 
   const enter = () => {
-    void getDailyPodcastShow().then((show) => {
-      usePodcastStore.getState().start({
-        audienceIds: show.audienceIds,
-        emptySeatIndices: show.emptySeatIndices,
+    armPodcastSoundOnEnter()
+    void unlockAudioIfNeeded().then(() => {
+      void getDailyPodcastShow().then((show) => {
+        usePodcastStore.getState().start({
+          audienceIds: show.audienceIds,
+          emptySeatIndices: show.emptySeatIndices,
+        })
+        playSfx('timerStart')
+        const unsubscribe = onPodcastYoutubeReady(() => {
+          if (unmutePodcastYoutube()) {
+            usePodcastStore.getState().setSoundMuted(false)
+          }
+          unsubscribe()
+        })
       })
-      void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
     })
   }
 

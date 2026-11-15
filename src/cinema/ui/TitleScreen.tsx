@@ -5,6 +5,11 @@ import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { CINEMA_FILM_CREDIT, CINEMA_FILM_TITLE } from '../config'
 import { getDailyCinemaShow } from '../dailyCinema'
 import { useCinemaStore } from '../store'
+import {
+  armCinemaSoundOnEnter,
+  onCinemaYoutubeReady,
+  unmuteCinemaYoutube,
+} from '../youtubePlayer'
 
 const copy = {
   en: {
@@ -16,7 +21,7 @@ const copy = {
     error: 'Could not seat today’s audience. Try again.',
     hintDesktop: 'WASD to walk · Click, then drag to look around · Esc to release',
     hintTouch: 'Joystick to move · Drag the screen to look around',
-    audioNote: 'Video starts muted — press M or tap Sound on after you enter.',
+    audioNote: 'Enter also turns sound on. Press M anytime to mute or unmute.',
   },
   ja: {
     eyebrow: 'アストロエリア',
@@ -27,7 +32,7 @@ const copy = {
     error: '本日の客席を用意できませんでした。',
     hintDesktop: 'WASDで歩行 · クリック後ドラッグで見回す · Escで解除',
     hintTouch: 'スティックで移動 · 画面ドラッグで視点変更',
-    audioNote: '動画はミュートで開始します。入場後は M キーか「音声オン」で切り替えできます。',
+    audioNote: '入場と同時に音声がオンになります。ミュート切替は M キーか「音声オン」。',
   },
 } as const
 
@@ -57,12 +62,22 @@ export function CinemaTitleScreen() {
   if (phase !== 'title') return null
 
   const enter = () => {
-    void getDailyCinemaShow().then((show) => {
-      useCinemaStore.getState().start({
-        audienceIds: show.audienceIds,
-        emptySeatIndices: show.emptySeatIndices,
+    // Enter のユーザー操作内で音声解除を予約（onReady で unmute）
+    armCinemaSoundOnEnter()
+    void unlockAudioIfNeeded().then(() => {
+      void getDailyCinemaShow().then((show) => {
+        useCinemaStore.getState().start({
+          audienceIds: show.audienceIds,
+          emptySeatIndices: show.emptySeatIndices,
+        })
+        playSfx('timerStart')
+        const unsubscribe = onCinemaYoutubeReady(() => {
+          if (unmuteCinemaYoutube()) {
+            useCinemaStore.getState().setSoundMuted(false)
+          }
+          unsubscribe()
+        })
       })
-      void unlockAudioIfNeeded().then(() => playSfx('timerStart'))
     })
   }
 

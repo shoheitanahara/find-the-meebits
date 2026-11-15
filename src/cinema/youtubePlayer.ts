@@ -17,6 +17,13 @@ export const CINEMA_YT_PLAYER_ELEMENT_ID = 'meebit-cinema-yt-player'
 let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
 let mountGeneration = 0
+/** Enter クリック時に立て、onReady で unmute する */
+let soundOnEnterArmed = false
+
+/** Enter のユーザー操作内で同期呼び出しすること */
+export function armCinemaSoundOnEnter() {
+  soundOnEnterArmed = true
+}
 
 export function getCinemaYoutubePlayer(): YtPlayer | null {
   return player
@@ -95,7 +102,17 @@ export async function mountCinemaYoutubePlayer(size: { width: number; height: nu
               resolve(null)
               return
             }
-            event.target.mute()
+            if (soundOnEnterArmed) {
+              soundOnEnterArmed = false
+              try {
+                event.target.unMute()
+                event.target.setVolume(100)
+              } catch {
+                event.target.mute()
+              }
+            } else {
+              event.target.mute()
+            }
             event.target.playVideo()
             ensureYoutubePlaying(event.target)
             disableYoutubeCaptions(event.target)
