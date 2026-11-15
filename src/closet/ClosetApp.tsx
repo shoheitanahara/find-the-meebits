@@ -13,7 +13,12 @@ import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { TraitQuestVisual } from '../ui/TraitQuestVisual'
 import { formatTraitDisplayName } from '../game/traitHunt'
 import { recordClosetWear } from '../park/dailyRecords'
-import { getMatchPreviewIds, applyTraitSelection, filterCompatibleTraitOptions } from './matchMeebits'
+import {
+  findMatchingMeebitIds,
+  shuffleMeebitIds,
+  applyTraitSelection,
+  filterCompatibleTraitOptions,
+} from './matchMeebits'
 import {
   CLOSET_MATCH_PREVIEW_LIMIT,
   getClosetTraitTypes,
@@ -182,9 +187,18 @@ export function ClosetApp() {
     setMatchLimit(CLOSET_MATCH_PREVIEW_LIMIT)
   }, [selections])
 
+  /** 選択が変わるたびにランダム順。もっと見るは同じ並びを延長する */
+  const shuffledMatchIds = useMemo(
+    () => shuffleMeebitIds(findMatchingMeebitIds(selections)),
+    [selections],
+  )
+
   const match = useMemo(
-    () => getMatchPreviewIds(selections, matchLimit, savedMeebit),
-    [matchLimit, savedMeebit, selections],
+    () => ({
+      total: shuffledMatchIds.length,
+      ids: shuffledMatchIds.slice(0, matchLimit),
+    }),
+    [matchLimit, shuffledMatchIds],
   )
 
   // 非 Human で Hair が消えたあと、active が Hair のまま残らないようにする。
@@ -458,46 +472,56 @@ export function ClosetApp() {
                 ) : match.total === 0 ? (
                   <p className="mt-2 text-sm text-[#c9a24a]">{t.none}</p>
                 ) : (
-                  <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    {match.ids.map((id) => {
-                      const active = id === previewId
-                      return (
+                  <>
+                    <div className="mt-2 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {match.ids.map((id) => {
+                        const active = id === previewId
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => selectMatch(id)}
+                            className={`shrink-0 rounded-2xl border p-1.5 transition ${
+                              active
+                                ? 'border-[#f1d48c] bg-[#f1d48c]/15'
+                                : 'border-white/10 bg-black/25 hover:border-[#8eb4e8]/40'
+                            }`}
+                          >
+                            <TargetPreview
+                              meebitNumber={id}
+                              sizeClassName="h-14 w-14 rounded-xl border-0 bg-[#10182a] sm:h-16 sm:w-16"
+                            />
+                            <span className="mt-1 block text-center text-[0.55rem] font-bold text-[#c8d4e8]">
+                              #{id}
+                            </span>
+                          </button>
+                        )
+                      })}
+                      {match.total > match.ids.length ? (
                         <button
-                          key={id}
                           type="button"
-                          onClick={() => selectMatch(id)}
-                          className={`shrink-0 rounded-2xl border p-1.5 transition ${
- active
- ? 'border-[#f1d48c] bg-[#f1d48c]/15'
- : 'border-white/10 bg-black/25 hover:border-[#8eb4e8]/40'
- }`}
+                          onClick={loadMoreMatches}
+                          className="flex h-[4.75rem] w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border border-dashed border-[#8eb4e8]/45 bg-[#8eb4e8]/10 px-1 text-[#c8d4e8] transition hover:border-[#f1d48c]/55 hover:bg-[#f1d48c]/10 hover:text-[#f4ead2] sm:h-[5.5rem] sm:w-[4.5rem]"
+                          aria-label={t.loadMore}
                         >
-                          <TargetPreview
-                            meebitNumber={id}
-                            sizeClassName="h-14 w-14 rounded-xl border-0 bg-[#10182a] sm:h-16 sm:w-16"
-                          />
-                          <span className="mt-1 block text-center text-[0.55rem] font-bold text-[#c8d4e8]">
-                            #{id}
+                          <span className="text-[0.62rem] font-bold leading-tight">
+                            {t.more(match.total - match.ids.length)}
+                          </span>
+                          <span className="text-[0.5rem] font-semibold uppercase tracking-[0.08em] text-[#8eb4e8]">
+                            {t.loadMore}
                           </span>
                         </button>
-                      )
-                    })}
-                    {match.total > match.ids.length ? (
-                      <button
-                        type="button"
-                        onClick={loadMoreMatches}
-                        className="flex h-[4.75rem] w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border border-dashed border-[#8eb4e8]/45 bg-[#8eb4e8]/10 px-1 text-[#c8d4e8] transition hover:border-[#f1d48c]/55 hover:bg-[#f1d48c]/10 hover:text-[#f4ead2] sm:h-[5.5rem] sm:w-[4.5rem]"
-                        aria-label={t.loadMore}
-                      >
-                        <span className="text-[0.62rem] font-bold leading-tight">
-                          {t.more(match.total - match.ids.length)}
-                        </span>
-                        <span className="text-[0.5rem] font-semibold uppercase tracking-[0.08em] text-[#8eb4e8]">
-                          {t.loadMore}
-                        </span>
-                      </button>
-                    ) : null}
-                  </div>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isWearingPreview}
+                      onClick={wearPreview}
+                      className="mt-2.5 w-full rounded-xl border border-[#ead394]/50 bg-gradient-to-b from-[#b18a3f] to-[#7f5d22] px-3 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[#fff9e9] transition hover:brightness-110 disabled:cursor-default disabled:opacity-40 sm:py-3"
+                    >
+                      {isWearingPreview ? t.wearing : t.wear}
+                    </button>
+                  </>
                 )}
               </div>
             </section>

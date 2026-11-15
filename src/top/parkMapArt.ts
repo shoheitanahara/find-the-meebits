@@ -108,42 +108,43 @@ export function drawParkMap(
   const mapH = mapBottom - mapTop
 
   // 上 Culture / その奥 Music & Art / 左 Sea / 中央 Plaza / 右 Mountain / 右上 Astro
-  // 少し寄せて余白を詰める（重ならない程度）
+  // 全体を下げつつ、Music & Art ↔ Culture の間隔を空ける
+  const yShift = mapH * 0.1
   const plaza: Blob = {
     x: mapLeft + mapW * 0.5,
-    y: mapTop + mapH * 0.6,
+    y: mapTop + mapH * 0.6 + yShift,
     w: mapW * 0.3,
-    h: mapH * 0.36,
+    h: mapH * 0.34,
   }
   const culture: Blob = {
     x: mapLeft + mapW * 0.4,
-    y: mapTop + mapH * 0.28,
+    y: mapTop + mapH * 0.34 + yShift,
     w: mapW * 0.28,
-    h: mapH * 0.24,
+    h: mapH * 0.22,
   }
   const musicArt: Blob = {
     x: mapLeft + mapW * 0.34,
-    y: mapTop + mapH * 0.1,
+    y: mapTop + mapH * 0.08 + yShift,
     w: mapW * 0.24,
-    h: mapH * 0.2,
+    h: mapH * 0.18,
   }
   const sea: Blob = {
     x: mapLeft + mapW * 0.15,
-    y: mapTop + mapH * 0.54,
-    w: mapW * 0.26,
-    h: mapH * 0.4,
-  }
-  const mountain: Blob = {
-    x: mapLeft + mapW * 0.85,
-    y: mapTop + mapH * 0.56,
+    y: mapTop + mapH * 0.54 + yShift,
     w: mapW * 0.26,
     h: mapH * 0.38,
   }
+  const mountain: Blob = {
+    x: mapLeft + mapW * 0.85,
+    y: mapTop + mapH * 0.56 + yShift,
+    w: mapW * 0.26,
+    h: mapH * 0.36,
+  }
   const astro: Blob = {
     x: mapLeft + mapW * 0.78,
-    y: mapTop + mapH * 0.22,
+    y: mapTop + mapH * 0.24 + yShift,
     w: mapW * 0.24,
-    h: mapH * 0.24,
+    h: mapH * 0.22,
   }
 
   const paper = ctx.createLinearGradient(0, 0, 0, height)
@@ -189,7 +190,7 @@ export function drawParkMap(
   ctx.lineJoin = 'round'
   strokePath(ctx, [
     [plaza.x - plaza.w * 0.08, plaza.y - plaza.h * 0.42],
-    [plaza.x - plaza.w * 0.18, mapTop + mapH * 0.38],
+    [plaza.x - plaza.w * 0.18, mapTop + mapH * 0.38 + yShift],
     [culture.x + culture.w * 0.12, culture.y + culture.h * 0.42],
   ])
   strokePath(ctx, [
@@ -209,7 +210,7 @@ export function drawParkMap(
   ])
   strokePath(ctx, [
     [mountain.x - mountain.w * 0.1, mountain.y - mountain.h * 0.42],
-    [mountain.x - mountain.w * 0.2, mapTop + mapH * 0.36],
+    [mountain.x - mountain.w * 0.2, mapTop + mapH * 0.36 + yShift],
     [astro.x + astro.w * 0.05, astro.y + astro.h * 0.42],
   ])
   strokePath(ctx, [

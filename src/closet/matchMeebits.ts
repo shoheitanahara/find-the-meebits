@@ -102,13 +102,29 @@ export function applyTraitSelection(
   return kept
 }
 
+/** マッチ一覧用のシャッフル（選択が変わるたびに呼び、もっと見るでは同じ順を維持） */
+export function shuffleMeebitIds(ids: readonly number[]): number[] {
+  const next = [...ids]
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = next[i]
+    next[i] = next[j]
+    next[j] = tmp
+  }
+  return next
+}
+
 export function getMatchPreviewIds(
   selections: ClosetTraitSelection[],
   limit = CLOSET_MATCH_PREVIEW_LIMIT,
-  preferId?: number,
+  options?: { preferId?: number; randomize?: boolean },
 ) {
-  const all = findMatchingMeebitIds(selections)
-  if (preferId !== undefined) {
+  const preferId = options?.preferId
+  const randomize = options?.randomize ?? false
+  let all = findMatchingMeebitIds(selections)
+  if (randomize) {
+    all = shuffleMeebitIds(all)
+  } else if (preferId !== undefined) {
     const index = all.indexOf(preferId)
     if (index > 0) {
       all.splice(index, 1)
