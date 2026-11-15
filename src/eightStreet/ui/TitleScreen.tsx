@@ -15,7 +15,7 @@ export function TitleScreen() {
       <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-200/70 phone-land:mb-1">
         Meebits
       </p>
-      <h1 className="font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tracking-tight text-white sm:text-6xl phone-land:text-3xl">
+      <h1 className="text-5xl tracking-tight text-white sm:text-6xl phone-land:text-3xl">
         {copy.title}
       </h1>
       <p className="mt-4 max-w-sm text-base text-slate-300 phone-land:mt-2 phone-land:text-sm">{copy.subtitle}</p>

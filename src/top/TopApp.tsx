@@ -282,7 +282,7 @@ export function TopApp() {
           <LanguageSwitcher className="pointer-events-auto" persistParkSessionOnSwitch />
           {started ? (
             <p
-              className={`rounded-md border border-[#d4b46a]/25 bg-[#080912]/75 px-2 py-0.5 font-[family-name:Georgia,Times_New_Roman,serif] text-[0.7rem] tracking-[0.12em] text-[#e2c77f] tabular-nums shadow backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
+              className={`rounded-md border border-[#d4b46a]/25 bg-[#080912]/75 px-2 py-0.5 text-[0.7rem] tracking-[0.12em] text-[#e2c77f] tabular-nums shadow backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
               aria-label={locale === 'ja' ? '現在時刻' : 'Current time'}
             >
               {clockText}
@@ -330,7 +330,7 @@ export function TopApp() {
                     </span>
                   ) : null}
                 </div>
-                <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-4xl leading-none text-[#f4ead2] sm:text-5xl phone-land:mt-1 phone-land:text-2xl">
+                <h1 className="mt-3 text-4xl leading-none text-[#f4ead2] sm:text-5xl phone-land:mt-1 phone-land:text-2xl">
                   {t.title}
                 </h1>
                 <div className="mt-4 h-px w-14 bg-[#caa75b] phone-land:mt-2" />
@@ -367,7 +367,7 @@ export function TopApp() {
                     inputMode="numeric"
                     value={meebitInput}
                     onChange={(event) => setMeebitInput(event.target.value)}
-                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/25 px-4 py-3 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl text-[#f4ead2] outline-none transition placeholder:text-white/20 focus:border-[#d4b46a]/70 focus:ring-2 focus:ring-[#d4b46a]/10"
+                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/25 px-4 py-3 text-2xl text-[#f4ead2] outline-none transition placeholder:text-white/20 focus:border-[#d4b46a]/70 focus:ring-2 focus:ring-[#d4b46a]/10"
                   />
                 </div>
 
@@ -395,7 +395,7 @@ export function TopApp() {
           <div
             className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
           >
-            <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
               Meebits Park
             </p>
             <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
@@ -419,10 +419,10 @@ export function TopApp() {
                       key={period}
                       type="button"
                       className={`rounded border px-1.5 py-0.5 text-[0.52rem] font-semibold tracking-[0.08em] transition ${
-                        active
-                          ? 'border-[#e2c77f]/70 bg-[#d4b46a]/25 text-[#f4ead2]'
-                          : 'border-white/15 bg-black/25 text-[#b8b2a6] hover:border-[#d4b46a]/40 hover:text-[#e2c77f]'
-                      }`}
+ active
+ ? 'border-[#e2c77f]/70 bg-[#d4b46a]/25 text-[#f4ead2]'
+ : 'border-white/15 bg-black/25 text-[#b8b2a6] hover:border-[#d4b46a]/40 hover:text-[#e2c77f]'
+ }`}
                       aria-pressed={active}
                       onClick={() => {
                         setTimeOfDay(period)

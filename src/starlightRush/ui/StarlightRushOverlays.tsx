@@ -39,7 +39,7 @@ export function StarlightRushPlayPrompt() {
           <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-[#8fdfff]/80">
             {t.rulesTitle}
           </p>
-          <h1 className={`mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>
+          <h1 className={`mt-2 text-center text-3xl sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>
             {t.title}
           </h1>
           <p className="mt-3 text-center text-sm text-white/65 phone-land:hidden">{t.subtitle}</p>
@@ -134,7 +134,7 @@ export function StarlightRushResult() {
           {t.resultEyebrow}
         </p>
         <h2 className="mt-2 text-3xl font-black">{t.resultHeadline}</h2>
-        <p className="mt-4 font-[family-name:Georgia,Times_New_Roman,serif] text-5xl tabular-nums text-[#dff8ff] phone-land:mt-2 phone-land:text-4xl">
+        <p className="mt-4 text-5xl tabular-nums text-[#dff8ff] phone-land:mt-2 phone-land:text-4xl">
           {score}
         </p>
         <p className="mt-2 text-sm text-[#f1d48c]">

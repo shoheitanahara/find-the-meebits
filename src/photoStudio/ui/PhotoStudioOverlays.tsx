@@ -59,7 +59,7 @@ export function PhotoStudioStartScreen() {
           <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-[#8eb4e8]/85 phone-land:col-span-2">
             {t.rulesTitle}
           </p>
-          <h1 className={`mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl phone-land:col-span-2 ${PHONE_LAND_OVERLAY_TITLE}`}>
+          <h1 className={`mt-2 text-center text-3xl sm:text-4xl phone-land:col-span-2 ${PHONE_LAND_OVERLAY_TITLE}`}>
             {t.title}
           </h1>
           <p className="mt-3 text-center text-sm text-white/65 phone-land:col-span-2 phone-land:mt-1 phone-land:text-xs">{t.subtitle}</p>
@@ -227,8 +227,8 @@ export function PhotoStudioControls() {
                 title={bg.label[locale]}
                 aria-label={bg.label[locale]}
                 className={`h-8 w-8 shrink-0 rounded-full border-2 transition ${
-                  backgroundId === bg.id ? 'scale-110 border-white' : 'border-white/20'
-                }`}
+ backgroundId === bg.id ? 'scale-110 border-white' : 'border-white/20'
+ }`}
                 style={{ backgroundColor: bg.color }}
                 onClick={() => {
                   setBackgroundId(bg.id as PhotoStudioBackgroundId)
@@ -250,10 +250,10 @@ export function PhotoStudioControls() {
                 key={pose.id}
                 type="button"
                 className={`rounded-full px-3 py-1.5 text-[0.65rem] font-bold transition ${
-                  poseId === pose.id
-                    ? 'bg-[#8eb4e8] text-[#101820]'
-                    : 'bg-white/10 text-white/80 hover:bg-white/15'
-                }`}
+ poseId === pose.id
+ ? 'bg-[#8eb4e8] text-[#101820]'
+ : 'bg-white/10 text-white/80 hover:bg-white/15'
+ }`}
                 onClick={() => {
                   setPoseId(pose.id as PhotoStudioPoseId)
                   playSfx('uiClick')
@@ -278,8 +278,8 @@ export function PhotoStudioControls() {
                   title={variant.label[locale]}
                   aria-label={variant.label[locale]}
                   className={`h-8 w-8 shrink-0 rounded-full border-2 transition ${
-                    gmMugColorId === variant.id ? 'scale-110 border-white' : 'border-white/20'
-                  }`}
+ gmMugColorId === variant.id ? 'scale-110 border-white' : 'border-white/20'
+ }`}
                   style={{ backgroundColor: variant.swatch }}
                   onClick={() => {
                     setGmMugColorId(variant.id as PhotoStudioGmMugColorId)
@@ -302,10 +302,10 @@ export function PhotoStudioControls() {
                 key={framing.id}
                 type="button"
                 className={`rounded-full px-3 py-1.5 text-[0.65rem] font-bold transition ${
-                  framingId === framing.id
-                    ? 'bg-white text-[#101820]'
-                    : 'bg-white/10 text-white/80 hover:bg-white/15'
-                }`}
+ framingId === framing.id
+ ? 'bg-white text-[#101820]'
+ : 'bg-white/10 text-white/80 hover:bg-white/15'
+ }`}
                 onClick={() => {
                   setFramingId(framing.id as PhotoStudioFramingId)
                   playSfx('uiClick')
@@ -341,10 +341,10 @@ export function PhotoStudioControls() {
                 key={angle.id}
                 type="button"
                 className={`rounded-full px-3 py-1.5 text-[0.65rem] font-bold transition ${
-                  cameraAngleId === angle.id
-                    ? 'bg-[#8eb4e8] text-[#101820]'
-                    : 'bg-white/10 text-white/80 hover:bg-white/15'
-                }`}
+ cameraAngleId === angle.id
+ ? 'bg-[#8eb4e8] text-[#101820]'
+ : 'bg-white/10 text-white/80 hover:bg-white/15'
+ }`}
                 onClick={() => {
                   setCameraAngleId(angle.id as PhotoStudioCameraAngleId)
                   playSfx('uiClick')
@@ -456,10 +456,10 @@ function VisitPassIssuePanel() {
                     key={id}
                     type="button"
                     className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
-                      active
-                        ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
-                        : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
-                    }`}
+ active
+ ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
+ : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
+ }`}
                     onClick={() => {
                       setDevThemeId(id)
                       playSfx('uiClick')
@@ -487,10 +487,10 @@ function VisitPassIssuePanel() {
                     key={id}
                     type="button"
                     className={`rounded border px-2 py-0.5 text-[0.55rem] font-semibold tracking-wide transition ${
-                      active
-                        ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
-                        : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
-                    }`}
+ active
+ ? 'border-amber-300/70 bg-amber-300/20 text-amber-100'
+ : 'border-white/15 bg-black/25 text-white/55 hover:border-amber-300/40 hover:text-amber-100/80'
+ }`}
                     onClick={() => {
                       setDevChristmas(id)
                       playSfx('uiClick')

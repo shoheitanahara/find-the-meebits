@@ -49,7 +49,7 @@ export function ParkTipsOverlay({ onConfirm }: { onConfirm: () => void }) {
                 </span>
               ) : null}
             </div>
-            <h2 className="mt-2 font-[family-name:Georgia,Times_New_Roman,serif] text-2xl tracking-tight lg:text-3xl phone-land:mt-0.5 phone-land:text-lg">
+            <h2 className="mt-2 text-2xl tracking-tight lg:text-3xl phone-land:mt-0.5 phone-land:text-lg">
               {t.beforeStart}
             </h2>
           </div>

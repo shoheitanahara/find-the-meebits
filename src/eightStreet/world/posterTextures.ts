@@ -52,7 +52,7 @@ const JP_SANS =
 
 /** Enamel street plaques — serif / mincho reads more period than UI gothic. */
 const EN_SIGN =
-  'Georgia, "Palatino Linotype", Palatino, "Times New Roman", Times, serif'
+  'Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 const JP_SIGN =
   '"Hiragino Mincho ProN", "Hiragino Mincho", "Yu Mincho", "Noto Serif JP", "Hiragino Mincho Pro", serif'
 

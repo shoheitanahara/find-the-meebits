@@ -54,7 +54,7 @@ export function EightStreetClearOverlay() {
       <p className="mb-3 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-amber-700/80 phone-land:mb-1">
         {copy.clearedEyebrow}
       </p>
-      <h1 className="max-w-lg font-[family-name:Georgia,Times_New_Roman,serif] text-4xl tracking-tight text-slate-950 sm:text-5xl phone-land:text-2xl">
+      <h1 className="max-w-lg text-4xl tracking-tight text-slate-950 sm:text-5xl phone-land:text-2xl">
         {copy.clearedHeadline}
       </h1>
       <p className="mt-4 max-w-sm text-base leading-relaxed text-slate-500 phone-land:mt-2 phone-land:text-sm">
@@ -66,7 +66,7 @@ export function EightStreetClearOverlay() {
           <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
             {copy.clearTime}
           </dt>
-          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight phone-land:text-2xl">
+          <dd className="mt-1.5 text-3xl tracking-tight phone-land:text-2xl">
             {formatClearTime(clearTimeSeconds)}
           </dd>
         </div>
@@ -75,7 +75,7 @@ export function EightStreetClearOverlay() {
           <dt className="text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-slate-400">
             {copy.mistakes}
           </dt>
-          <dd className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-tight phone-land:text-2xl">
+          <dd className="mt-1.5 text-3xl tracking-tight phone-land:text-2xl">
             {mistakeCount}
           </dd>
         </div>

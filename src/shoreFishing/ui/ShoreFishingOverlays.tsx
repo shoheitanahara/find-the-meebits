@@ -24,7 +24,7 @@ export function ShoreFishingPlayPrompt() {
           <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-cyan-200/80">
             {t.rulesTitle}
           </p>
-          <h1 className={`mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>
+          <h1 className={`mt-2 text-center text-3xl sm:text-4xl ${PHONE_LAND_OVERLAY_TITLE}`}>
             {t.title}
           </h1>
           <p className="mt-3 text-center text-sm text-white/65 phone-land:hidden">{t.subtitle}</p>
@@ -121,7 +121,7 @@ export function ShoreFishingResult() {
           <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-cyan-200/70">
             {t.resultTitle}
           </p>
-          <p className="mt-2 text-center font-[family-name:Georgia,Times_New_Roman,serif] text-3xl phone-land:text-xl">
+          <p className="mt-2 text-center text-3xl phone-land:text-xl">
             {ratingId ? ratingLabel(ratingId) : '—'}
           </p>
           <p className="mt-3 text-center font-mono text-4xl font-black text-amber-100 phone-land:mt-1 phone-land:text-3xl">{score}</p>

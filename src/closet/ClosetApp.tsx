@@ -98,12 +98,12 @@ function TraitOptionButton({
       type="button"
       onClick={() => onToggle(option)}
       className={`flex w-full flex-col items-center gap-1 self-start rounded-2xl border text-left transition ${
-        compact ? 'p-1.5' : 'p-2'
-      } ${
-        selected
-          ? 'border-[#f1d48c] bg-[#f1d48c]/15 shadow-[0_0_0_1px_rgba(241,212,140,0.35)]'
-          : 'border-white/10 bg-black/20 hover:border-[#8eb4e8]/45 hover:bg-[#8eb4e8]/10'
-      }`}
+ compact ? 'p-1.5' : 'p-2'
+ } ${
+ selected
+ ? 'border-[#f1d48c] bg-[#f1d48c]/15 shadow-[0_0_0_1px_rgba(241,212,140,0.35)]'
+ : 'border-white/10 bg-black/20 hover:border-[#8eb4e8]/45 hover:bg-[#8eb4e8]/10'
+ }`}
     >
       <TraitQuestVisual
         traitType={option.traitType}
@@ -253,7 +253,7 @@ export function ClosetApp() {
             <p className="text-[0.58rem] font-semibold uppercase tracking-[0.32em] text-[#8eb4e8]">
               {t.eyebrow}
             </p>
-            <h1 className="mt-1 font-[family-name:Georgia,Times_New_Roman,serif] text-xl leading-none text-[#f4ead2] sm:text-3xl phone-land:text-lg">
+            <h1 className="mt-1 text-xl leading-none text-[#f4ead2] sm:text-3xl phone-land:text-lg">
               {t.title}
             </h1>
             <p className="mt-1 max-w-md text-[0.7rem] leading-5 text-[#a8b4c8] sm:text-xs phone-land:hidden">
@@ -284,7 +284,7 @@ export function ClosetApp() {
                     meebitNumber={savedMeebit}
                     sizeClassName="h-24 w-24 rounded-[1.1rem] border border-white/15 bg-[#10182a] sm:h-28 sm:w-28 lg:h-40 lg:w-40 lg:rounded-[1.25rem] phone-land:!h-16 phone-land:!w-16"
                   />
-                  <p className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-sm text-[#a8b4c8]">
+                  <p className="mt-1.5 text-sm text-[#a8b4c8]">
                     #{savedMeebit}
                   </p>
                 </div>
@@ -306,8 +306,8 @@ export function ClosetApp() {
                 <div className="flex min-w-0 flex-1 flex-col items-center">
                   <p
                     className={`mb-1.5 text-[0.55rem] font-bold uppercase tracking-[0.2em] ${
-                      isWearingPreview ? 'text-[#8a96aa]' : 'text-[#f1d48c]'
-                    }`}
+ isWearingPreview ? 'text-[#8a96aa]' : 'text-[#f1d48c]'
+ }`}
                   >
                     {t.newLook}
                   </p>
@@ -319,7 +319,7 @@ export function ClosetApp() {
                         : 'border-[#f1d48c]/55 shadow-[0_0_0_1px_rgba(241,212,140,0.25)]'
                     }`}
                   />
-                  <p className="mt-1.5 font-[family-name:Georgia,Times_New_Roman,serif] text-sm text-[#e8f0ff]">
+                  <p className="mt-1.5 text-sm text-[#e8f0ff]">
                     #{previewId}
                   </p>
                 </div>
@@ -358,10 +358,10 @@ export function ClosetApp() {
               {/* Step 1 */}
               <div
                 className={`rounded-[1.25rem] border bg-[#0c1528]/85 p-2.5 sm:p-3 ${
-                  hasTypeSelected
-                    ? 'border-[#6a9ee8]/30'
-                    : 'border-[#8eb4e8]/55 ring-1 ring-[#8eb4e8]/20'
-                }`}
+ hasTypeSelected
+ ? 'border-[#6a9ee8]/30'
+ : 'border-[#8eb4e8]/55 ring-1 ring-[#8eb4e8]/20'
+ }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#8eb4e8]">
@@ -386,8 +386,8 @@ export function ClosetApp() {
               {/* Step 2 — 高さは中身任せ、max だけ制限 */}
               <div
                 className={`rounded-[1.25rem] border bg-[#0c1528]/85 p-2.5 sm:p-3 ${
-                  hasTypeSelected ? 'border-[#6a9ee8]/30' : 'border-white/10 opacity-60'
-                }`}
+ hasTypeSelected ? 'border-[#6a9ee8]/30' : 'border-white/10 opacity-60'
+ }`}
               >
                 <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#8eb4e8]">
                   {t.looksStep}
@@ -411,12 +411,12 @@ export function ClosetApp() {
                               setActiveLookType(type)
                             }}
                             className={`shrink-0 rounded-full px-2.5 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.1em] transition sm:px-3 ${
-                              active
-                                ? 'bg-[#6a9ee8] text-[#070914]'
-                                : hasPick
-                                  ? 'border border-[#f1d48c]/50 bg-[#f1d48c]/15 text-[#f1d48c]'
-                                  : 'border border-white/10 bg-white/5 text-[#c8d4e8] hover:border-white/25'
-                            }`}
+ active
+ ? 'bg-[#6a9ee8] text-[#070914]'
+ : hasPick
+ ? 'border border-[#f1d48c]/50 bg-[#f1d48c]/15 text-[#f1d48c]'
+ : 'border border-white/10 bg-white/5 text-[#c8d4e8] hover:border-white/25'
+ }`}
                           >
                             {label}
                           </button>
@@ -467,10 +467,10 @@ export function ClosetApp() {
                           type="button"
                           onClick={() => selectMatch(id)}
                           className={`shrink-0 rounded-2xl border p-1.5 transition ${
-                            active
-                              ? 'border-[#f1d48c] bg-[#f1d48c]/15'
-                              : 'border-white/10 bg-black/25 hover:border-[#8eb4e8]/40'
-                          }`}
+ active
+ ? 'border-[#f1d48c] bg-[#f1d48c]/15'
+ : 'border-white/10 bg-black/25 hover:border-[#8eb4e8]/40'
+ }`}
                         >
                           <TargetPreview
                             meebitNumber={id}

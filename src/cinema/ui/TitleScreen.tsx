@@ -70,7 +70,7 @@ export function CinemaTitleScreen() {
     <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#07090f] px-5 phone-land:px-3">
       <div className="w-full max-w-lg border border-cyan-200/20 bg-black/80 px-7 py-8 text-center text-white shadow-2xl backdrop-blur-md phone-land:max-h-[calc(100dvh-2.4rem)] phone-land:overflow-y-auto phone-land:px-4 phone-land:py-4">
         <p className="text-[0.65rem] font-bold uppercase tracking-[0.28em] text-cyan-100/50">{t.eyebrow}</p>
-        <h1 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl tracking-[0.04em] text-white sm:text-4xl phone-land:mt-1 phone-land:text-2xl">
+        <h1 className="mt-3 text-3xl tracking-[0.04em] text-white sm:text-4xl phone-land:mt-1 phone-land:text-2xl">
           {t.title}
         </h1>
 

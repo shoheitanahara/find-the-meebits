@@ -26,8 +26,7 @@ const QR_SIZE = 76
 const QR_PAD = 5
 const QR_SRC = '/photo-booth/visit-pass-qr.png'
 
-const SERIF = 'Georgia, "Times New Roman", Times, serif'
-const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
+const SANS = 'Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
 
 let visitPassQrImage: HTMLImageElement | null = null
@@ -409,7 +408,7 @@ function paintHeader(
   ctx.fillText(brand.toUpperCase(), MARGIN + 4, 52)
 
   ctx.fillStyle = theme.ink
-  ctx.font = `italic 40px ${SERIF}`
+  ctx.font = `600 40px ${SANS}`
   ctx.fillText(pass, MARGIN + 4, 92)
 
   const passWidth = ctx.measureText(pass).width

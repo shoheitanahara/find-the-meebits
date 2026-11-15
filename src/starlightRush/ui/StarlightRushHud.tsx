@@ -50,11 +50,11 @@ export function StarlightRushHud() {
               {launching ? t.storyLaunching : t.storyDepart}
             </p>
             {launching ? (
-              <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-4xl font-black text-[#dff8ff] drop-shadow-xl sm:text-5xl">
+              <p className="text-4xl font-black text-[#dff8ff] drop-shadow-xl sm:text-5xl">
                 {t.storyDepart}
               </p>
             ) : (
-              <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-7xl font-black text-[#dff8ff] drop-shadow-xl">
+              <p className="text-7xl font-black text-[#dff8ff] drop-shadow-xl">
                 {t.countdown(countdownValue)}
               </p>
             )}
@@ -68,7 +68,7 @@ export function StarlightRushHud() {
             <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-[#ff6ad5]/85">
               {t.storyApproach}
             </p>
-            <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-4xl font-black text-[#ffe0f4] drop-shadow-xl sm:text-5xl">
+            <p className="text-4xl font-black text-[#ffe0f4] drop-shadow-xl sm:text-5xl">
               {t.storyDocking}
             </p>
           </div>
@@ -81,10 +81,10 @@ export function StarlightRushHud() {
             <div className="pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top)+3.25rem)] z-30 -translate-x-1/2">
               <div
                 className={`min-w-32 rounded-2xl border px-5 py-2 text-center shadow-2xl backdrop-blur-md ${
-                  urgent
-                    ? 'border-fuchsia-300/70 bg-fuchsia-950/85 text-fuchsia-100'
-                    : 'border-[#5ce0ff]/45 bg-black/65 text-[#dff8ff]'
-                }`}
+ urgent
+ ? 'border-fuchsia-300/70 bg-fuchsia-950/85 text-fuchsia-100'
+ : 'border-[#5ce0ff]/45 bg-black/65 text-[#dff8ff]'
+ }`}
               >
                 <p className="text-[0.55rem] font-bold uppercase tracking-[0.24em] text-current opacity-65">
                   {t.time}
@@ -125,12 +125,12 @@ export function StarlightRushHud() {
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
           <div
             className={`h-7 w-7 rounded-full border-2 transition ${
-              aimOnTarget
-                ? 'border-[#ffe66d] bg-[#ffe66d]/20 shadow-[0_0_18px_rgba(255,230,109,0.55)]'
-                : firing
-                  ? 'border-white bg-white/30'
-                  : 'border-white/70 bg-transparent'
-            }`}
+ aimOnTarget
+ ? 'border-[#ffe66d] bg-[#ffe66d]/20 shadow-[0_0_18px_rgba(255,230,109,0.55)]'
+ : firing
+ ? 'border-white bg-white/30'
+ : 'border-white/70 bg-transparent'
+ }`}
           />
         </div>
       ) : null}

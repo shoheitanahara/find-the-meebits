@@ -44,7 +44,7 @@ export function MeetSergitoLoadingOverlay() {
         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.32em] text-[#d4a060]/80">
           {t.eyebrow}
         </p>
-        <h2 className="mt-3 font-[family-name:Georgia,Times_New_Roman,serif] text-3xl">{t.title}</h2>
+        <h2 className="mt-3 text-3xl">{t.title}</h2>
         <p className="mt-2 text-sm text-[#c8b898]">{t.tagline}</p>
         <p className="mt-4 text-sm text-[#c8b898]">{assetsReady ? t.finishing : t.loading}</p>
         {!assetsReady ? (
@@ -55,8 +55,8 @@ export function MeetSergitoLoadingOverlay() {
         <div className="mx-auto mt-5 h-1.5 w-44 overflow-hidden rounded-full bg-[#3a3028]">
           <div
             className={`h-full rounded-full bg-[#d4a060] transition-[width] duration-300 ease-out ${
-              assetsReady ? 'animate-pulse' : ''
-            }`}
+ assetsReady ? 'animate-pulse' : ''
+ }`}
             style={{ width: `${Math.max(8, ratio * 100)}%` }}
           />
         </div>

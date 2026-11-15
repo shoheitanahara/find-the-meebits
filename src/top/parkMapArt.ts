@@ -8,9 +8,9 @@ export const PARK_MAP_TEX_W = 1600
 export const PARK_MAP_TEX_H = 860
 
 const JP_SANS =
-  '"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif'
-const EN_DISPLAY = 'Georgia, "Palatino Linotype", Palatino, "Times New Roman", Times, serif'
-const EN_SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
+  'Montserrat, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif'
+const EN_DISPLAY = 'Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
+const EN_SANS = 'Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif'
 
 type Locale = 'en' | 'ja'
 

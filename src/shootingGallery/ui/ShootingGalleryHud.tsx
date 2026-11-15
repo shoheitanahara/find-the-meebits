@@ -22,7 +22,7 @@ export function ShootingGalleryHud() {
     <>
       {phase === 'countdown' ? (
         <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
-          <p className="font-[family-name:Georgia,Times_New_Roman,serif] text-7xl font-black text-amber-100 drop-shadow-xl">
+          <p className="text-7xl font-black text-amber-100 drop-shadow-xl">
             {t.countdown(countdownValue)}
           </p>
         </div>
@@ -33,10 +33,10 @@ export function ShootingGalleryHud() {
           <div className="pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top)+3.25rem)] z-30 -translate-x-1/2">
             <div
               className={`min-w-32 rounded-2xl border px-5 py-2 text-center shadow-2xl backdrop-blur-md ${
-                urgent
-                  ? 'border-rose-300/70 bg-rose-950/85 text-rose-100 shadow-rose-500/25'
-                  : 'border-amber-200/45 bg-black/65 text-amber-100'
-              }`}
+ urgent
+ ? 'border-rose-300/70 bg-rose-950/85 text-rose-100 shadow-rose-500/25'
+ : 'border-amber-200/45 bg-black/65 text-amber-100'
+ }`}
             >
               <p className="text-[0.55rem] font-bold uppercase tracking-[0.24em] text-current opacity-65">
                 {t.time}
@@ -71,10 +71,10 @@ export function ShootingGalleryHud() {
           >
             <div
               className={`h-8 w-8 rounded-full border-2 ${
-                aimOnTarget
-                  ? 'border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.7)]'
-                  : 'border-white/80'
-              }`}
+ aimOnTarget
+ ? 'border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.7)]'
+ : 'border-white/80'
+ }`}
             />
             <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
           </div>
