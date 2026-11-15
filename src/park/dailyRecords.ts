@@ -31,6 +31,7 @@ const KEYS = {
   neon: 'meebits-jerry-mountain-progress-v1',
   cinema: 'meebits-cinema-daily-v1',
   podcast: 'meebits-podcast-daily-v1',
+  hiphop: 'meebits-hiphop-daily-v1',
 } as const
 
 type DailyEnvelope = { dateKey: string }
@@ -45,6 +46,7 @@ type SergitoPayload = DailyEnvelope & { talked: true }
 type OpenSeaPayload = DailyEnvelope & { visited: true }
 type CinemaPayload = DailyEnvelope & { visited: true }
 type PodcastPayload = DailyEnvelope & { visited: true }
+type HiphopPayload = DailyEnvelope & { visited: true }
 
 export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
   if (typeof window === 'undefined') return null
@@ -159,6 +161,11 @@ export function recordPodcastVisit() {
   writeDailyJson(KEYS.podcast, { dateKey: getUtcDateKey(), visited: true })
 }
 
+/** Hip Hop Club: 入場。 */
+export function recordHiphopVisit() {
+  writeDailyJson(KEYS.hiphop, { dateKey: getUtcDateKey(), visited: true })
+}
+
 function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
@@ -230,6 +237,7 @@ export function collectVisitPassLines(): VisitPassLine[] {
   const opensea = readDailyJson<OpenSeaPayload>(KEYS.opensea)
   const cinema = readDailyJson<CinemaPayload>(KEYS.cinema)
   const podcast = readDailyJson<PodcastPayload>(KEYS.podcast)
+  const hiphop = readDailyJson<HiphopPayload>(KEYS.hiphop)
 
   const line = (
     id: string,
@@ -270,6 +278,11 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'podcast',
       locale === 'ja' ? 'ミービッツ・ポッドキャスト' : 'Meebits Podcast',
       podcast?.visited ? 'Visited · The Meebits Podcast' : null,
+    ),
+    line(
+      'hiphop',
+      locale === 'ja' ? 'ヒップホップクラブ' : 'Hip Hop Club',
+      hiphop?.visited ? 'Visited · Dance Floor' : null,
     ),
     line(
       'shooting',

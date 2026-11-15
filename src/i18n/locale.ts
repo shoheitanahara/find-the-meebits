@@ -74,6 +74,9 @@ export function getLocaleHomePath(
   if (segments.includes('meebits-podcast')) {
     return locale === 'ja' ? '/jp/meebits-podcast' : '/meebits-podcast'
   }
+  if (segments.includes('hiphop-club')) {
+    return locale === 'ja' ? '/jp/hiphop-club' : '/hiphop-club'
+  }
 
   if (segments.includes('shore-fishing')) {
     return locale === 'ja' ? '/jp/shore-fishing' : '/shore-fishing'

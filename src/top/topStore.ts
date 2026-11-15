@@ -25,6 +25,7 @@ export type AttractionId =
   | 'starlight'
   | 'cinema'
   | 'podcast'
+  | 'hiphop'
   | 'pfp'
   | 'fishing'
   | 'opensea'

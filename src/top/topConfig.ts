@@ -493,6 +493,36 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
   },
+  {
+    id: 'hiphop',
+    zoneId: 'musicArt',
+    title: 'HIP HOP CLUB',
+    subtitle: 'The Dance Floor',
+    description: {
+      en: 'No seats.\nJust the beat.',
+      ja: '椅子はない。\nビートだけ。',
+    },
+    storyTitle: {
+      en: 'ON THE FLOOR',
+      ja: 'フロアへ',
+    },
+    color: '#1c1228',
+    roofColor: '#e85cff',
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.west.entranceZ,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.4,
+      doorHalfWidth: 1.25,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
+        { x: 2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: infoBoardNearEntrance('left', 3.4),
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

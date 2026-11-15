@@ -559,7 +559,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   musicArt: {
     id: 'musicArt',
     title: { en: 'Music & Art District', ja: 'ミュージック＆アートエリア' },
-    attractionIds: [],
+    attractionIds: ['hiphop'],
     layout: MUSIC_ART_LAYOUT,
     perimeter: {
       theme: 'musicArt',
@@ -598,13 +598,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'musicArt',
         title: { en: 'SOUND STAGE', ja: 'サウンドステージ' },
         subtitle: { en: 'Listen · Feel · Share', ja: '聴く・感じる・分かち合う' },
-      },
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
-        theme: 'musicArt',
-        title: { en: 'VIDEO HALL', ja: 'ビデオホール' },
-        subtitle: { en: 'Art Films · Night Screen', ja: 'アート映像・夜のスクリーン' },
       },
       {
         x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,

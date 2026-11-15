@@ -59,6 +59,10 @@ const metadata = {
       title: 'Meebits Podcast | Meebits Park',
       description: 'Settle into the studio and play a random episode from The Meebits Podcast.',
     },
+    hiphop: {
+      title: 'Hip Hop Club | Meebits Park',
+      description: 'Hit the dance floor and play a random hip-hop playlist on the big screen.',
+    },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
       description: 'Spot fish shadows, cast from the shore, and reel in your catch in 90 seconds.',
@@ -124,6 +128,10 @@ const metadata = {
     podcast: {
       title: 'ミービッツ・ポッドキャスト | Meebits Park',
       description: 'スタジオで The Meebits Podcast の回をランダム再生。席について聞こう。',
+    },
+    hiphop: {
+      title: 'ヒップホップクラブ | Meebits Park',
+      description: 'ダンスフロアで Hip Hop プレイリストをランダム再生。正面スクリーンで楽しもう。',
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',

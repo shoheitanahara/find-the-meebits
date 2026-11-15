@@ -59,6 +59,7 @@ const copy = {
       starlight: 'Starlight Rush',
       cinema: 'Meebit Cinema',
       podcast: 'Meebits Podcast',
+      hiphop: 'Hip Hop Club',
       pfp: 'Photo Booth',
     },
   },
@@ -87,6 +88,7 @@ const copy = {
       starlight: 'スターライト・ラッシュ',
       cinema: 'ミービット・シネマ',
       podcast: 'ミービッツ・ポッドキャスト',
+      hiphop: 'ヒップホップクラブ',
       pfp: 'フォトブース',
     },
   },
@@ -107,6 +109,7 @@ function getAttractionPath(id: AttractionId) {
   if (id === 'starlight') return `${localePrefix}/starlight-rush`
   if (id === 'cinema') return `${localePrefix}/meebit-cinema`
   if (id === 'podcast') return `${localePrefix}/meebits-podcast`
+  if (id === 'hiphop') return `${localePrefix}/hiphop-club`
   if (id === 'pfp') return `${localePrefix}/photo-booth`
   return `${localePrefix}/mountain`
 }
@@ -129,6 +132,7 @@ function getReturningAttractionId(): AttractionId | null {
     from === 'starlight' ||
     from === 'cinema' ||
     from === 'podcast' ||
+    from === 'hiphop' ||
     from === 'pfp'
     ? from
     : null

@@ -59,6 +59,8 @@ export function ParkReturnButton() {
               ? 'cinema'
             : pathSegments.includes('meebits-podcast')
               ? 'podcast'
+            : pathSegments.includes('hiphop-club')
+              ? 'hiphop'
             : pathSegments.includes('photo-booth') || pathSegments.includes('pfp-studio')
               ? 'pfp'
           : pathSegments.includes('runway')

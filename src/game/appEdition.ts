@@ -14,6 +14,7 @@ export type AppEdition =
   | 'starlight'
   | 'cinema'
   | 'podcast'
+  | 'hiphop'
   | 'fishing'
   | 'pfp'
   | 'top'
@@ -35,6 +36,9 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   }
   if (segments.includes('meebits-podcast')) {
     return 'podcast'
+  }
+  if (segments.includes('hiphop-club')) {
+    return 'hiphop'
   }
   if (segments.includes('photo-booth') || segments.includes('pfp-studio')) {
     return 'pfp'

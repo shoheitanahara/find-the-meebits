@@ -60,6 +60,8 @@ export function AttractionBuilding({
                             ? '#5ce0ff'
                           : attraction.id === 'podcast'
                             ? '#ff9a3c'
+                          : attraction.id === 'hiphop'
+                            ? '#e85cff'
                           : attraction.id === 'pfp'
                             ? '#8eb4e8'
                             : '#c4a060'
@@ -97,6 +99,8 @@ export function AttractionBuilding({
         <CinemaLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'podcast' ? (
         <PodcastRadioLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'hiphop' ? (
+        <HipHopClubLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'pfp' ? (
         <PfpStudioLandmark color={attraction.color} accent={accent} />
       ) : (
@@ -907,6 +911,71 @@ function PodcastRadioLandmark({ color, accent }: { color: string; accent: string
       </mesh>
       <pointLight position={[0, 4.1, 2.7]} intensity={14} distance={12} color="#ff5060" />
       <pointLight position={[0, 2.3, 2.9]} intensity={9} distance={10} color={accent} />
+    </group>
+  )
+}
+
+/** Music & Art 西棟: ヒップホップクラブ（ネオン・スピーカー・フロア光） */
+function HipHopClubLandmark({ color, accent }: { color: string; accent: string }) {
+  const hull = '#140818'
+  const panel = '#2a1438'
+  const amber = '#ffc46a'
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.0, 0.28, 6.6]} />
+        <meshStandardMaterial color="#0c0610" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.85, -0.2]} castShadow receiveShadow>
+        <boxGeometry args={[5.8, 3.4, 5.4]} />
+        <meshStandardMaterial color={color} roughness={0.82} />
+      </mesh>
+      <mesh position={[0, 3.7, -0.1]} castShadow>
+        <boxGeometry args={[6.2, 0.35, 5.8]} />
+        <meshStandardMaterial color={panel} roughness={0.55} metalness={0.35} />
+      </mesh>
+      {/* HIP HOP 看板 */}
+      <mesh position={[0, 4.25, 2.15]} castShadow>
+        <boxGeometry args={[3.2, 0.7, 0.35]} />
+        <meshStandardMaterial color="#2a1030" emissive={accent} emissiveIntensity={0.55} />
+      </mesh>
+      <mesh position={[0, 4.25, 2.36]}>
+        <boxGeometry args={[2.7, 0.4, 0.08]} />
+        <meshStandardMaterial color={hull} emissive={amber} emissiveIntensity={0.35} />
+      </mesh>
+      {/* 正面ネオン枠 */}
+      <mesh position={[0, 2.0, 2.55]} castShadow>
+        <boxGeometry args={[3.6, 2.4, 0.2]} />
+        <meshStandardMaterial color={hull} roughness={0.4} metalness={0.4} />
+      </mesh>
+      <mesh position={[0, 2.0, 2.68]}>
+        <planeGeometry args={[3.1, 1.9]} />
+        <meshStandardMaterial color="#301848" emissive={accent} emissiveIntensity={0.28} />
+      </mesh>
+      {/* 入口脇スピーカー */}
+      {([-2.7, 2.7] as const).map((x) => (
+        <group key={`spk-${x}`} position={[x, 0.95, 2.2]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.85, 1.5, 0.7]} />
+            <meshStandardMaterial color="#1a1018" roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 0.3, 0.38]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.24, 0.24, 0.08, 12]} />
+            <meshStandardMaterial color="#111" roughness={0.7} />
+          </mesh>
+          <mesh position={[0, -0.3, 0.38]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.16, 0.16, 0.08, 12]} />
+            <meshStandardMaterial color="#111" roughness={0.7} />
+          </mesh>
+        </group>
+      ))}
+      {/* 足元フロア光 */}
+      <mesh position={[0, 0.08, 2.9]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[3.4, 0.7]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.45} />
+      </mesh>
+      <pointLight position={[0, 3.8, 2.6]} intensity={14} distance={12} color={accent} />
+      <pointLight position={[0, 2.2, 2.8]} intensity={8} distance={9} color={amber} />
     </group>
   )
 }

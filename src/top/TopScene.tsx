@@ -263,7 +263,7 @@ export function TopScene({
                   : activeZoneId === 'astro'
                     ? lineup.astroVisitors
                     : activeZoneId === 'musicArt'
-                      ? lineup.cultureVisitors
+                      ? lineup.musicArtVisitors
                       : lineup.visitors
           }
           featuredId={lineup.featuredId}

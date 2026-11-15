@@ -7,6 +7,7 @@
  * シーエリア: 15体（全員が上裸 / チューブトップ）
  * カルチャーエリア: 15体（スーツが半数）
  * アストロエリア: 15体（Robot / Visitor が約半数、残りは他 Type）
+ * ミュージック＆アート: 15体（ネックレスが半数）
  */
 
 import {
@@ -24,15 +25,18 @@ export const DAILY_MOUNTAIN_VISITOR_COUNT = 15
 export const DAILY_SEA_VISITOR_COUNT = 15
 export const DAILY_CULTURE_VISITOR_COUNT = 15
 export const DAILY_ASTRO_VISITOR_COUNT = 15
+export const DAILY_MUSIC_ART_VISITOR_COUNT = 15
 /** 15体中8体をRobot / Visitorにする（奇数なので半数切り上げ）。 */
 export const DAILY_ASTRO_TYPE_COUNT = Math.ceil(DAILY_ASTRO_VISITOR_COUNT / 2)
 /** シー来場者は全員ビーチ服 */
 export const SEA_BEACH_SHIRT_MIN_RATIO = 1
 /** カルチャー来場者のうちスーツを最低この割合にする */
 export const CULTURE_SUIT_MIN_RATIO = 0.5
+/** ミュージック＆アート来場者のうちネックレスを最低この割合にする */
+export const MUSIC_ART_NECKLACE_MIN_RATIO = 0.5
 export const MEEBIT_ID_MAX = 20000
 
-const STORAGE_KEY = 'meebits-park-daily-v13'
+const STORAGE_KEY = 'meebits-park-daily-v15'
 
 /** ビーチらしい上半身（上裸・チューブトップ） */
 const SEA_BEACH_SHIRTS = new Set(['Bare Chest', 'Tube Top', 'No Shirt'])
@@ -70,6 +74,8 @@ export type DailyParkLineup = {
   cultureVisitors: DailyVisitor[]
   /** アストロエリアの日替わり来場者（Robot / Visitor 約半数＋他Type）。 */
   astroVisitors: DailyVisitor[]
+  /** ミュージック＆アートの日替わり来場者（ネックレス持ち）。 */
+  musicArtVisitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
@@ -81,6 +87,7 @@ type StoredDailyLineup = {
   seaVisitors: DailyVisitor[]
   cultureVisitors: DailyVisitor[]
   astroVisitors: DailyVisitor[]
+  musicArtVisitors: DailyVisitor[]
 }
 
 let memoryCache: DailyParkLineup | null = null
@@ -129,6 +136,17 @@ export function isSeaBeachShirt(traits: MeebitTraitMap | null | undefined) {
 export function isCultureSuitShirt(traits: MeebitTraitMap | null | undefined) {
   const shirt = traits?.Shirt
   return typeof shirt === 'string' && CULTURE_SUIT_SHIRTS.has(shirt)
+}
+
+/** Music & Art エリアで優先するネックレス持ち。 */
+export function isMusicArtNecklace(traits: MeebitTraitMap | null | undefined) {
+  const necklace = traits?.Necklace
+  return (
+    typeof necklace === 'string' &&
+    necklace.length > 0 &&
+    necklace !== 'None' &&
+    necklace !== 'No Necklace'
+  )
 }
 
 /** Astro エリアで優先する Type。 */
@@ -205,6 +223,21 @@ function pickCultureVisitors(
     DAILY_CULTURE_VISITOR_COUNT,
     isCultureSuitShirt,
     CULTURE_SUIT_MIN_RATIO,
+  )
+}
+
+function pickMusicArtVisitors(
+  dataset: MeebitTraitsDataset,
+  availableIds: number[],
+  rng: () => number,
+): DailyVisitor[] {
+  return pickShirtBiasedVisitors(
+    dataset,
+    availableIds,
+    rng,
+    DAILY_MUSIC_ART_VISITOR_COUNT,
+    isMusicArtNecklace,
+    MUSIC_ART_NECKLACE_MIN_RATIO,
   )
 }
 
@@ -455,6 +488,12 @@ function buildLineupFromScratch(
   const astroVisitors = pickAstroVisitors(dataset, astroPreferred, allOtherIds, astroRng)
   for (const visitor of astroVisitors) used.add(visitor.meebitNumber)
 
+  // ミュージック＆アート: ネックレス持ち
+  const musicArtRng = createSeededRng(hashStringToSeed(`meebits-park-music-art:${dateKey}`))
+  const musicArtPool = allOtherIds.filter((id) => !used.has(id))
+  const musicArtVisitors = pickMusicArtVisitors(dataset, musicArtPool, musicArtRng)
+  for (const visitor of musicArtVisitors) used.add(visitor.meebitNumber)
+
   return {
     dateKey,
     featuredId,
@@ -465,6 +504,7 @@ function buildLineupFromScratch(
     seaVisitors,
     cultureVisitors,
     astroVisitors,
+    musicArtVisitors,
   }
 }
 
@@ -494,6 +534,8 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
       parsed.cultureVisitors.length !== DAILY_CULTURE_VISITOR_COUNT ||
       !Array.isArray(parsed.astroVisitors) ||
       parsed.astroVisitors.length !== DAILY_ASTRO_VISITOR_COUNT ||
+      !Array.isArray(parsed.musicArtVisitors) ||
+      parsed.musicArtVisitors.length !== DAILY_MUSIC_ART_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
     ) {
       return null
@@ -516,6 +558,7 @@ function writeStoredLineup(lineup: DailyParkLineup) {
       seaVisitors: lineup.seaVisitors,
       cultureVisitors: lineup.cultureVisitors,
       astroVisitors: lineup.astroVisitors,
+      musicArtVisitors: lineup.musicArtVisitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
@@ -544,6 +587,7 @@ function hydrateFromStored(
     seaVisitors: stored.seaVisitors,
     cultureVisitors: stored.cultureVisitors,
     astroVisitors: stored.astroVisitors,
+    musicArtVisitors: stored.musicArtVisitors,
   }
 }
 
