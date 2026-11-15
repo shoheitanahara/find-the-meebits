@@ -3,7 +3,13 @@
  * getVideoData() で現在エピソードのタイトルを取得できる。
  */
 
-import { disableYoutubeCaptions, loadYoutubeApi, type YtPlayer } from '../youtube/ytApi'
+import {
+  disableYoutubeCaptions,
+  ensureYoutubePlaying,
+  loadYoutubeApi,
+  waitForElement,
+  type YtPlayer,
+} from '../youtube/ytApi'
 import { PODCAST_YOUTUBE_PLAYLIST_ID, PODCAST_YOUTUBE_VIDEO_ID } from './config'
 
 export const PODCAST_YT_PLAYER_ELEMENT_ID = 'meebits-podcast-yt-player'
@@ -11,6 +17,7 @@ export const PODCAST_YT_PLAYER_ELEMENT_ID = 'meebits-podcast-yt-player'
 let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
 let titleListeners: Array<(title: string) => void> = []
+let mountGeneration = 0
 
 function readEpisodeTitle(target: YtPlayer): string | null {
   try {
@@ -44,6 +51,18 @@ function startRandomPlaylistVideo(target: YtPlayer) {
       target.playVideo()
     }
   }
+  // プレイリスト未準備だと playVideoAt が空振りすることがある
+  ensureYoutubePlaying(target, 6)
+}
+
+function destroyCurrentPlayer() {
+  if (!player) return
+  try {
+    player.destroy()
+  } catch {
+    // ignore
+  }
+  player = null
 }
 
 export function getPodcastYoutubePlayer(): YtPlayer | null {
@@ -62,63 +81,83 @@ export function onPodcastEpisodeTitle(listener: (title: string) => void) {
 
 /** Html 内のマウント先が用意できたら呼ぶ */
 export async function mountPodcastYoutubePlayer(size: { width: number; height: number }) {
-  const host = document.getElementById(PODCAST_YT_PLAYER_ELEMENT_ID)
-  if (!host) return null
+  const generation = ++mountGeneration
+  destroyCurrentPlayer()
 
-  if (player) {
-    try {
-      player.destroy()
-    } catch {
-      // ignore
-    }
-    player = null
-  }
+  const signal = { cancelled: false }
+  const watchCancel = window.setInterval(() => {
+    if (generation !== mountGeneration) signal.cancelled = true
+  }, 40)
 
-  const YT = await loadYoutubeApi('podcast')
-  const playing = YT.PlayerState?.PLAYING ?? 1
-  const cued = YT.PlayerState?.CUED ?? 5
+  try {
+    const host = await waitForElement(PODCAST_YT_PLAYER_ELEMENT_ID, { signal })
+    if (!host || generation !== mountGeneration) return null
 
-  return new Promise<YtPlayer>((resolve) => {
-    const next = new YT.Player(PODCAST_YT_PLAYER_ELEMENT_ID, {
-      videoId: PODCAST_YOUTUBE_VIDEO_ID,
-      width: size.width,
-      height: size.height,
-      playerVars: {
-        autoplay: 1,
-        mute: 1,
-        playsinline: 1,
-        rel: 0,
-        modestbranding: 1,
-        color: 'white',
-        cc_load_policy: 0,
-        iv_load_policy: 3,
-        listType: 'playlist',
-        list: PODCAST_YOUTUBE_PLAYLIST_ID,
-        origin: window.location.origin,
-      },
-      events: {
-        onReady: (event) => {
-          event.target.mute()
-          startRandomPlaylistVideo(event.target)
-          disableYoutubeCaptions(event.target)
-          publishEpisodeTitle(event.target)
-          window.setTimeout(() => publishEpisodeTitle(event.target), 400)
-          window.setTimeout(() => publishEpisodeTitle(event.target), 1200)
-          player = event.target
-          readyListeners.forEach((listener) => listener(event.target))
-          readyListeners = []
-          resolve(event.target)
+    const YT = await loadYoutubeApi('podcast')
+    if (generation !== mountGeneration) return null
+    if (!document.getElementById(PODCAST_YT_PLAYER_ELEMENT_ID)) return null
+
+    const playing = YT.PlayerState?.PLAYING ?? 1
+    const cued = YT.PlayerState?.CUED ?? 5
+
+    return await new Promise<YtPlayer | null>((resolve) => {
+      if (generation !== mountGeneration) {
+        resolve(null)
+        return
+      }
+
+      const next = new YT.Player(PODCAST_YT_PLAYER_ELEMENT_ID, {
+        videoId: PODCAST_YOUTUBE_VIDEO_ID,
+        width: size.width,
+        height: size.height,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          color: 'white',
+          cc_load_policy: 0,
+          iv_load_policy: 3,
+          listType: 'playlist',
+          list: PODCAST_YOUTUBE_PLAYLIST_ID,
+          origin: window.location.origin,
         },
-        onStateChange: (event) => {
-          if (event.data === playing || event.data === cued) {
+        events: {
+          onReady: (event) => {
+            if (generation !== mountGeneration) {
+              try {
+                event.target.destroy()
+              } catch {
+                // ignore
+              }
+              resolve(null)
+              return
+            }
+            event.target.mute()
+            startRandomPlaylistVideo(event.target)
             disableYoutubeCaptions(event.target)
             publishEpisodeTitle(event.target)
-          }
+            window.setTimeout(() => publishEpisodeTitle(event.target), 400)
+            window.setTimeout(() => publishEpisodeTitle(event.target), 1200)
+            player = event.target
+            readyListeners.forEach((listener) => listener(event.target))
+            readyListeners = []
+            resolve(event.target)
+          },
+          onStateChange: (event) => {
+            if (event.data === playing || event.data === cued) {
+              disableYoutubeCaptions(event.target)
+              publishEpisodeTitle(event.target)
+            }
+          },
         },
-      },
+      })
+      player = next
     })
-    player = next
-  })
+  } finally {
+    window.clearInterval(watchCancel)
+  }
 }
 
 export function unmutePodcastYoutube(): boolean {
@@ -162,11 +201,6 @@ export function seekPodcastYoutubeBy(deltaSeconds: number): boolean {
 }
 
 export function destroyPodcastYoutubePlayer() {
-  if (!player) return
-  try {
-    player.destroy()
-  } catch {
-    // ignore
-  }
-  player = null
+  mountGeneration += 1
+  destroyCurrentPlayer()
 }

@@ -38,13 +38,9 @@ export function PodcastScreen() {
     if (!playbackStarted) return
 
     let cancelled = false
-    const timer = window.setTimeout(() => {
-      void mountPodcastYoutubePlayer({ width: EMBED_W, height: EMBED_H }).then((player) => {
-        if (cancelled && player) {
-          destroyPodcastYoutubePlayer()
-        }
-      })
-    }, 80)
+    void mountPodcastYoutubePlayer({ width: EMBED_W, height: EMBED_H }).then((player) => {
+      if (cancelled && player) destroyPodcastYoutubePlayer()
+    })
 
     // blending は canvas を pointer-events:none にするので、視点操作用に戻す
     const canvas = gl.domElement
@@ -52,7 +48,6 @@ export function PodcastScreen() {
 
     return () => {
       cancelled = true
-      window.clearTimeout(timer)
       destroyPodcastYoutubePlayer()
     }
   }, [playbackStarted, gl])

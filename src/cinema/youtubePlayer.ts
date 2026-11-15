@@ -3,13 +3,20 @@
  * 自動再生は mute 必須。UI ボタンのユーザー操作で unmute する。
  */
 
-import { disableYoutubeCaptions, loadYoutubeApi, type YtPlayer } from '../youtube/ytApi'
+import {
+  disableYoutubeCaptions,
+  ensureYoutubePlaying,
+  loadYoutubeApi,
+  waitForElement,
+  type YtPlayer,
+} from '../youtube/ytApi'
 import { CINEMA_YOUTUBE_VIDEO_ID } from './config'
 
 export const CINEMA_YT_PLAYER_ELEMENT_ID = 'meebit-cinema-yt-player'
 
 let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
+let mountGeneration = 0
 
 export function getCinemaYoutubePlayer(): YtPlayer | null {
   return player
@@ -26,56 +33,87 @@ export function onCinemaYoutubeReady(listener: (p: YtPlayer) => void) {
   }
 }
 
+function destroyCurrentPlayer() {
+  if (!player) return
+  try {
+    player.destroy()
+  } catch {
+    // ignore
+  }
+  player = null
+}
+
 /** Html 内のマウント先が用意できたら呼ぶ */
 export async function mountCinemaYoutubePlayer(size: { width: number; height: number }) {
-  const host = document.getElementById(CINEMA_YT_PLAYER_ELEMENT_ID)
-  if (!host) return null
+  const generation = ++mountGeneration
+  destroyCurrentPlayer()
 
-  if (player) {
-    try {
-      player.destroy()
-    } catch {
-      // ignore
-    }
-    player = null
-  }
+  const signal = { cancelled: false }
+  const watchCancel = window.setInterval(() => {
+    if (generation !== mountGeneration) signal.cancelled = true
+  }, 40)
 
-  const YT = await loadYoutubeApi('cinema')
-  const playing = YT.PlayerState?.PLAYING ?? 1
+  try {
+    const host = await waitForElement(CINEMA_YT_PLAYER_ELEMENT_ID, { signal })
+    if (!host || generation !== mountGeneration) return null
 
-  return new Promise<YtPlayer>((resolve) => {
-    const next = new YT.Player(CINEMA_YT_PLAYER_ELEMENT_ID, {
-      videoId: CINEMA_YOUTUBE_VIDEO_ID,
-      width: size.width,
-      height: size.height,
-      playerVars: {
-        autoplay: 1,
-        mute: 1,
-        playsinline: 1,
-        rel: 0,
-        modestbranding: 1,
-        color: 'white',
-        cc_load_policy: 0,
-        iv_load_policy: 3,
-        origin: window.location.origin,
-      },
-      events: {
-        onReady: (event) => {
-          event.target.mute()
-          event.target.playVideo()
-          disableYoutubeCaptions(event.target)
-          player = event.target
-          readyListeners.forEach((listener) => listener(event.target))
-          readyListeners = []
-          resolve(event.target)
+    const YT = await loadYoutubeApi('cinema')
+    if (generation !== mountGeneration) return null
+    if (!document.getElementById(CINEMA_YT_PLAYER_ELEMENT_ID)) return null
+
+    const playing = YT.PlayerState?.PLAYING ?? 1
+
+    return await new Promise<YtPlayer | null>((resolve) => {
+      if (generation !== mountGeneration) {
+        resolve(null)
+        return
+      }
+
+      const next = new YT.Player(CINEMA_YT_PLAYER_ELEMENT_ID, {
+        videoId: CINEMA_YOUTUBE_VIDEO_ID,
+        width: size.width,
+        height: size.height,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          color: 'white',
+          cc_load_policy: 0,
+          iv_load_policy: 3,
+          origin: window.location.origin,
         },
-        onStateChange: (event) => {
-          if (event.data === playing) disableYoutubeCaptions(event.target)
+        events: {
+          onReady: (event) => {
+            if (generation !== mountGeneration) {
+              try {
+                event.target.destroy()
+              } catch {
+                // ignore
+              }
+              resolve(null)
+              return
+            }
+            event.target.mute()
+            event.target.playVideo()
+            ensureYoutubePlaying(event.target)
+            disableYoutubeCaptions(event.target)
+            player = event.target
+            readyListeners.forEach((listener) => listener(event.target))
+            readyListeners = []
+            resolve(event.target)
+          },
+          onStateChange: (event) => {
+            if (event.data === playing) disableYoutubeCaptions(event.target)
+          },
         },
-      },
+      })
+      player = next
     })
-    player = next
-  })
+  } finally {
+    window.clearInterval(watchCancel)
+  }
 }
 
 export function unmuteCinemaYoutube(): boolean {
@@ -119,11 +157,6 @@ export function seekCinemaYoutubeBy(deltaSeconds: number): boolean {
 }
 
 export function destroyCinemaYoutubePlayer() {
-  if (!player) return
-  try {
-    player.destroy()
-  } catch {
-    // ignore
-  }
-  player = null
+  mountGeneration += 1
+  destroyCurrentPlayer()
 }

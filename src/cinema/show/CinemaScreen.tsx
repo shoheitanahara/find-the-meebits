@@ -36,13 +36,9 @@ export function CinemaScreen() {
     if (!playbackStarted) return
 
     let cancelled = false
-    const timer = window.setTimeout(() => {
-      void mountCinemaYoutubePlayer({ width: EMBED_W, height: EMBED_H }).then((player) => {
-        if (cancelled && player) {
-          destroyCinemaYoutubePlayer()
-        }
-      })
-    }, 80)
+    void mountCinemaYoutubePlayer({ width: EMBED_W, height: EMBED_H }).then((player) => {
+      if (cancelled && player) destroyCinemaYoutubePlayer()
+    })
 
     // blending は canvas を pointer-events:none にするので、視点操作用に戻す
     const canvas = gl.domElement
@@ -50,7 +46,6 @@ export function CinemaScreen() {
 
     return () => {
       cancelled = true
-      window.clearTimeout(timer)
       destroyCinemaYoutubePlayer()
     }
   }, [playbackStarted, gl])

@@ -20,6 +20,7 @@ export type YtPlayer = {
   nextVideo: () => void
   getCurrentTime: () => number
   getDuration: () => number
+  getPlayerState: () => number
   seekTo: (seconds: number, allowSeekAhead: boolean) => void
   getVideoData: () => YtVideoData
   unloadModule: (module: string) => void
@@ -40,7 +41,7 @@ export type YtNamespace = {
       }
     },
   ) => YtPlayer
-  PlayerState?: { PLAYING: number; CUED: number }
+  PlayerState?: { UNSTARTED: number; ENDED: number; PLAYING: number; PAUSED: number; BUFFERING: number; CUED: number }
 }
 
 declare global {
@@ -51,6 +52,23 @@ declare global {
 }
 
 let apiLoadPromise: Promise<YtNamespace> | null = null
+
+function resolveWhenReady(
+  resolve: (yt: YtNamespace) => void,
+  reject: (error: Error) => void,
+  tag: string,
+  attemptsLeft: number,
+) {
+  if (window.YT?.Player) {
+    resolve(window.YT)
+    return
+  }
+  if (attemptsLeft <= 0) {
+    reject(new Error(`[${tag}] YT API missing Player`))
+    return
+  }
+  window.setTimeout(() => resolveWhenReady(resolve, reject, tag, attemptsLeft - 1), 50)
+}
 
 /** iframe_api スクリプトを1回だけ読み込む */
 export function loadYoutubeApi(tag: string): Promise<YtNamespace> {
@@ -64,11 +82,15 @@ export function loadYoutubeApi(tag: string): Promise<YtNamespace> {
     const prev = window.onYouTubeIframeAPIReady
     window.onYouTubeIframeAPIReady = () => {
       prev?.()
-      if (window.YT?.Player) resolve(window.YT)
-      else reject(new Error(`[${tag}] YT API missing Player`))
+      resolveWhenReady(resolve, reject, tag, 40)
     }
 
-    if (document.querySelector('script[data-meebits-yt-api]')) return
+    const existing = document.querySelector('script[data-meebits-yt-api]')
+    if (existing) {
+      // ready コールバックを取り逃している場合があるのでポーリングも併用
+      resolveWhenReady(resolve, reject, tag, 80)
+      return
+    }
 
     const script = document.createElement('script')
     script.src = 'https://www.youtube.com/iframe_api'
@@ -79,6 +101,60 @@ export function loadYoutubeApi(tag: string): Promise<YtNamespace> {
   })
 
   return apiLoadPromise
+}
+
+/** drei Html の DOM 反映待ち（固定 setTimeout だとたまに間に合わない） */
+export function waitForElement(
+  elementId: string,
+  options: { timeoutMs?: number; intervalMs?: number; signal?: { cancelled: boolean } } = {},
+): Promise<HTMLElement | null> {
+  const timeoutMs = options.timeoutMs ?? 4000
+  const intervalMs = options.intervalMs ?? 50
+  const started = performance.now()
+
+  return new Promise((resolve) => {
+    const tick = () => {
+      if (options.signal?.cancelled) {
+        resolve(null)
+        return
+      }
+      const host = document.getElementById(elementId)
+      if (host) {
+        resolve(host)
+        return
+      }
+      if (performance.now() - started >= timeoutMs) {
+        resolve(null)
+        return
+      }
+      window.setTimeout(tick, intervalMs)
+    }
+    tick()
+  })
+}
+
+/** mute 自動再生が立たなかったときの再試行 */
+export function ensureYoutubePlaying(target: YtPlayer, attempts = 4) {
+  const tryPlay = (left: number) => {
+    try {
+      target.mute()
+      target.playVideo()
+    } catch {
+      // ignore
+    }
+    if (left <= 1) return
+    window.setTimeout(() => {
+      try {
+        const state = target.getPlayerState()
+        // -1 unstarted, 0 ended, 2 paused, 5 cued
+        if (state === 1 || state === 3) return
+      } catch {
+        // getPlayerState 未準備でも再試行
+      }
+      tryPlay(left - 1)
+    }, 350)
+  }
+  tryPlay(attempts)
 }
 
 export function disableYoutubeCaptions(target: YtPlayer) {
