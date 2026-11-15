@@ -32,6 +32,7 @@ const KEYS = {
   cinema: 'meebits-cinema-daily-v1',
   podcast: 'meebits-podcast-daily-v1',
   hiphop: 'meebits-hiphop-daily-v1',
+  learnArt: 'meebits-learn-art-daily-v1',
 } as const
 
 type DailyEnvelope = { dateKey: string }
@@ -47,6 +48,7 @@ type OpenSeaPayload = DailyEnvelope & { visited: true }
 type CinemaPayload = DailyEnvelope & { visited: true }
 type PodcastPayload = DailyEnvelope & { visited: true }
 type HiphopPayload = DailyEnvelope & { visited: true }
+type LearnArtPayload = DailyEnvelope & { visited: true }
 
 export function readDailyJson<T extends DailyEnvelope>(key: string): T | null {
   if (typeof window === 'undefined') return null
@@ -166,6 +168,11 @@ export function recordHiphopVisit() {
   writeDailyJson(KEYS.hiphop, { dateKey: getUtcDateKey(), visited: true })
 }
 
+/** Learn Art: 入場。 */
+export function recordLearnArtVisit() {
+  writeDailyJson(KEYS.learnArt, { dateKey: getUtcDateKey(), visited: true })
+}
+
 function scoreDetail(score: number, locale: 'en' | 'ja') {
   return score.toLocaleString(locale === 'ja' ? 'ja-JP' : 'en-US')
 }
@@ -238,6 +245,7 @@ export function collectVisitPassLines(): VisitPassLine[] {
   const cinema = readDailyJson<CinemaPayload>(KEYS.cinema)
   const podcast = readDailyJson<PodcastPayload>(KEYS.podcast)
   const hiphop = readDailyJson<HiphopPayload>(KEYS.hiphop)
+  const learnArt = readDailyJson<LearnArtPayload>(KEYS.learnArt)
 
   const line = (
     id: string,
@@ -283,6 +291,11 @@ export function collectVisitPassLines(): VisitPassLine[] {
       'hiphop',
       locale === 'ja' ? 'ヒップホップクラブ' : 'Hip Hop Club',
       hiphop?.visited ? 'Visited · Dance Floor' : null,
+    ),
+    line(
+      'learnArt',
+      'Learn Art',
+      learnArt?.visited ? 'Visited · Street Art Boy' : null,
     ),
     line(
       'shooting',

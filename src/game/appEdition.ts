@@ -15,6 +15,7 @@ export type AppEdition =
   | 'cinema'
   | 'podcast'
   | 'hiphop'
+  | 'learnArt'
   | 'fishing'
   | 'pfp'
   | 'top'
@@ -39,6 +40,9 @@ export function getAppEdition(pathname = typeof window !== 'undefined' ? window.
   }
   if (segments.includes('hiphop-club')) {
     return 'hiphop'
+  }
+  if (segments.includes('learn-art')) {
+    return 'learnArt'
   }
   if (segments.includes('photo-booth') || segments.includes('pfp-studio')) {
     return 'pfp'

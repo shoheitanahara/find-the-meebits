@@ -23,6 +23,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - shooting: マウンテンエリアの木造射的場
  * - starlight: アストロ中央のスターライトラッシュ
  * - cinema: アストロ西のドキュメンタリー映画館
+ * - learnArt: Music & Art 中央の現代アート上映
  * - podcast: プラザ西のポッドキャストスタジオ
  * - pfp: カルチャー東のフォトブース
  */
@@ -61,6 +62,8 @@ export function AttractionBuilding({
                           : attraction.id === 'podcast'
                             ? '#ff9a3c'
                           : attraction.id === 'hiphop'
+                            ? '#e85cff'
+                          : attraction.id === 'learnArt'
                             ? '#e85cff'
                           : attraction.id === 'pfp'
                             ? '#8eb4e8'
@@ -101,6 +104,8 @@ export function AttractionBuilding({
         <PodcastRadioLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'hiphop' ? (
         <HipHopClubLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'learnArt' ? (
+        <LearnArtLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'pfp' ? (
         <PfpStudioLandmark color={attraction.color} accent={accent} />
       ) : (
@@ -911,6 +916,74 @@ function PodcastRadioLandmark({ color, accent }: { color: string; accent: string
       </mesh>
       <pointLight position={[0, 4.1, 2.7]} intensity={14} distance={12} color="#ff5060" />
       <pointLight position={[0, 2.3, 2.9]} intensity={9} distance={10} color={accent} />
+    </group>
+  )
+}
+
+/** Music & Art 中央: Learn Art（ギャラリー劇場・エリアのマゼンタ系） */
+function LearnArtLandmark({ color, accent }: { color: string; accent: string }) {
+  const hull = '#140818'
+  const panel = '#2a1438'
+  const bulb = '#f0c0ff'
+  const amber = '#ffc46a'
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.4, 0.28, 6.6]} />
+        <meshStandardMaterial color="#0c0610" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 2.0, -0.4]} castShadow receiveShadow>
+        <boxGeometry args={[6.2, 3.7, 5.5]} />
+        <meshStandardMaterial color={color} roughness={0.82} />
+      </mesh>
+      <mesh position={[0, 4.05, -0.35]} castShadow>
+        <boxGeometry args={[6.7, 0.4, 5.9]} />
+        <meshStandardMaterial color={panel} roughness={0.55} metalness={0.35} />
+      </mesh>
+      {/* ギャラリー額縁 3連 */}
+      {[-1.55, 0, 1.55].map((x, i) => (
+        <group key={`frame-${x}`} position={[x, 2.35, 2.45]}>
+          <mesh castShadow>
+            <boxGeometry args={[1.15, 1.7, 0.16]} />
+            <meshStandardMaterial color="#181018" roughness={0.4} metalness={0.45} />
+          </mesh>
+          <mesh position={[0, 0, 0.09]}>
+            <planeGeometry args={[0.9, 1.4]} />
+            <meshStandardMaterial
+              color={i === 1 ? '#301848' : '#241030'}
+              emissive={accent}
+              emissiveIntensity={0.14 + i * 0.05}
+            />
+          </mesh>
+        </group>
+      ))}
+      {/* 入口キャノピー */}
+      <mesh position={[0, 3.2, 2.75]} castShadow>
+        <boxGeometry args={[5.8, 0.16, 1.5]} />
+        <meshStandardMaterial color="#100818" roughness={0.5} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, 3.55, 2.45]} castShadow>
+        <boxGeometry args={[5.2, 0.55, 1.2]} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} roughness={0.3} />
+      </mesh>
+      <mesh position={[0, 3.55, 3.08]}>
+        <boxGeometry args={[4.4, 0.28, 0.08]} />
+        <meshStandardMaterial color={hull} emissive={amber} emissiveIntensity={0.28} />
+      </mesh>
+      {/* 入口アーチ */}
+      <mesh position={[0, 1.4, 2.65]} castShadow>
+        <boxGeometry args={[2.45, 2.4, 0.35]} />
+        <meshStandardMaterial color="#08060a" roughness={0.8} />
+      </mesh>
+      {[0, 1, 2].map((step) => (
+        <mesh key={step} position={[0, 0.12 + step * 0.14, 3.0 - step * 0.24]} castShadow receiveShadow>
+          <boxGeometry args={[4.4 - step * 0.28, 0.14, 0.48]} />
+          <meshStandardMaterial color="#1c141c" roughness={0.85} />
+        </mesh>
+      ))}
+      <ChaseLights xs={[-2.4, -1.95, -1.5]} y={2.9} z={3.4} color={bulb} />
+      <ChaseLights xs={[1.5, 1.95, 2.4]} y={2.9} z={3.4} color={bulb} />
+      <pointLight position={[0, 3.8, 2.6]} intensity={12} distance={11} color={accent} />
     </group>
   )
 }

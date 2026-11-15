@@ -61,6 +61,8 @@ export function ParkReturnButton() {
               ? 'podcast'
             : pathSegments.includes('hiphop-club')
               ? 'hiphop'
+            : pathSegments.includes('learn-art')
+              ? 'learnArt'
             : pathSegments.includes('photo-booth') || pathSegments.includes('pfp-studio')
               ? 'pfp'
           : pathSegments.includes('runway')

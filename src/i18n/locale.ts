@@ -77,6 +77,9 @@ export function getLocaleHomePath(
   if (segments.includes('hiphop-club')) {
     return locale === 'ja' ? '/jp/hiphop-club' : '/hiphop-club'
   }
+  if (segments.includes('learn-art')) {
+    return locale === 'ja' ? '/jp/learn-art' : '/learn-art'
+  }
 
   if (segments.includes('shore-fishing')) {
     return locale === 'ja' ? '/jp/shore-fishing' : '/shore-fishing'

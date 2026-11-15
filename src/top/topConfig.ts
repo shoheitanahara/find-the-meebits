@@ -523,6 +523,36 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     },
     infoBoardLocal: infoBoardNearEntrance('left', 3.4),
   },
+  {
+    id: 'learnArt',
+    zoneId: 'musicArt',
+    title: 'LEARN ART',
+    subtitle: 'Contemporary Docs',
+    description: {
+      en: 'Sit down.\nWatch art documentaries.',
+      ja: '席について。\n現代アートのドキュメンタリーを観よう。',
+    },
+    storyTitle: {
+      en: 'GALLERY SCREEN',
+      ja: 'ギャラリースクリーン',
+    },
+    color: '#1c1228',
+    roofColor: '#e85cff',
+    x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+    z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+    entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.center.entranceZ,
+    footprint: {
+      halfWidth: 3.2,
+      halfDepth: 3.5,
+      doorHalfWidth: 1.15,
+      alcoveDepth: 2.2,
+      extraBoxes: [
+        { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
+        { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+      ],
+    },
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
+  },
 ]
 
 export function getAttractionsForZone(zoneId: ParkZoneId) {

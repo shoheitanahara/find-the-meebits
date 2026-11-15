@@ -34,6 +34,8 @@
     { "source": "/meebits-podcast/(.*)", "destination": "/index.html" },
     { "source": "/hiphop-club", "destination": "/index.html" },
     { "source": "/hiphop-club/(.*)", "destination": "/index.html" },
+    { "source": "/learn-art", "destination": "/index.html" },
+    { "source": "/learn-art/(.*)", "destination": "/index.html" },
     { "source": "/shore-fishing", "destination": "/index.html" },
     { "source": "/shore-fishing/(.*)", "destination": "/index.html" },
     { "source": "/photo-booth", "destination": "/index.html" },

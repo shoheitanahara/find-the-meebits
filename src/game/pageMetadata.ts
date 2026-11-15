@@ -63,6 +63,10 @@ const metadata = {
       title: 'Hip Hop Club | Meebits Park',
       description: 'Hit the dance floor and play a random hip-hop playlist on the big screen.',
     },
+    learnArt: {
+      title: 'Learn Art | Meebits Park',
+      description: 'Sit in a gallery theater and watch contemporary art documentaries on the big screen.',
+    },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
       description: 'Spot fish shadows, cast from the shore, and reel in your catch in 90 seconds.',
@@ -132,6 +136,10 @@ const metadata = {
     hiphop: {
       title: 'ヒップホップクラブ | Meebits Park',
       description: 'ダンスフロアで Hip Hop プレイリストをランダム再生。正面スクリーンで楽しもう。',
+    },
+    learnArt: {
+      title: 'Learn Art | Meebits Park',
+      description: 'ギャラリー劇場で現代アートのドキュメンタリーを観よう。席について大きなスクリーンで。',
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',

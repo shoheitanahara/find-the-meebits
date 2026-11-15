@@ -16,6 +16,7 @@ import { StarlightRushApp } from './starlightRush/StarlightRushApp'
 import { CinemaApp } from './cinema/CinemaApp'
 import { PodcastApp } from './podcast/PodcastApp'
 import { ClubApp } from './hiphopClub/ClubApp'
+import { LearnArtApp } from './learnArt/LearnArtApp'
 import { ShoreFishingApp } from './shoreFishing/ShoreFishingApp'
 import { PhotoStudioApp } from './photoStudio/PhotoStudioApp'
 import { TopApp } from './top/TopApp'
@@ -221,6 +222,15 @@ export default function App() {
     return (
       <>
         <ClubApp />
+        <Analytics />
+      </>
+    )
+  }
+
+  if (edition === 'learnArt') {
+    return (
+      <>
+        <LearnArtApp />
         <Analytics />
       </>
     )
