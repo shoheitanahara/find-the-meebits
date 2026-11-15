@@ -1,4 +1,7 @@
 import { Text, useTexture } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
+import type { Mesh } from 'three'
 import type { Attraction } from './topConfig'
 import { VisitPassPromoBoard } from './VisitPassPromoBoard'
 import { VoxelBlockMat } from './VoxelBlockMat'
@@ -556,6 +559,102 @@ function ShoreFishingLandmark({
   )
 }
 
+/**
+ * 電球が一列に流れるチェイスライト。
+ * 材質は各電球で1つずつ・ジオメトリは共有して軽さを保つ。
+ */
+function ChaseLights({
+  xs,
+  y,
+  z,
+  color,
+}: {
+  xs: number[]
+  y: number
+  z: number
+  color: string
+}) {
+  const refs = useRef<Array<Mesh | null>>([])
+
+  useFrame((state) => {
+    const step = Math.floor(state.clock.elapsedTime * 7)
+    refs.current.forEach((mesh, i) => {
+      const mat = mesh?.material as { emissiveIntensity?: number } | undefined
+      if (!mat) return
+      // 3つおきに明るい「流れ」を作る
+      mat.emissiveIntensity = (step + i) % 3 === 0 ? 1.9 : 0.35
+    })
+  })
+
+  return (
+    <>
+      {xs.map((x, i) => (
+        <mesh
+          key={`chase-${x}`}
+          ref={(el) => {
+            refs.current[i] = el
+          }}
+          position={[x, y, z]}
+        >
+          <sphereGeometry args={[0.075, 8, 8]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.35} />
+        </mesh>
+      ))}
+    </>
+  )
+}
+
+/**
+ * ラジオの波形メーター。バーの底を揃えたまま高さだけ揺らす（箱は1つのジオメトリを共有）。
+ */
+function WaveMeter({
+  x,
+  y,
+  z,
+  count,
+  spacing,
+  color,
+}: {
+  x: number
+  y: number
+  z: number
+  count: number
+  spacing: number
+  color: string
+}) {
+  const bars = useRef<Array<Mesh | null>>([])
+  const BASE_H = 0.55
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    bars.current.forEach((bar, i) => {
+      if (!bar) return
+      const level = 0.25 + Math.abs(Math.sin(t * 4.2 + i * 0.9)) * 0.9
+      bar.scale.y = level
+      // 底（y=0）を基準にする
+      bar.position.y = (BASE_H * level) / 2
+    })
+  })
+
+  return (
+    <group position={[x, y, z]}>
+      {Array.from({ length: count }, (_, i) => (
+        <mesh
+          key={`bar-${i}`}
+          ref={(el) => {
+            bars.current[i] = el
+          }}
+          position={[i * spacing, BASE_H / 2, 0]}
+          castShadow
+        >
+          <boxGeometry args={[0.18, BASE_H, 0.06]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.55} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 /** Astro 西棟: クラシック映画館（キャノピー・マーキー文字・チケット・ポスター列）— 宇宙地区の青シアン */
 function CinemaLandmark({ color, accent }: { color: string; accent: string }) {
   const hull = '#0e1422'
@@ -647,13 +746,9 @@ function CinemaLandmark({ color, accent }: { color: string; accent: string }) {
           />
         </mesh>
       ))}
-      {/* 下縁の球電球 */}
-      {[-2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7].map((x) => (
-        <mesh key={`bulb-${x}`} position={[x, 3.22, 3.55]}>
-          <sphereGeometry args={[0.075, 8, 8]} />
-          <meshStandardMaterial color={bulb} emissive={bulb} emissiveIntensity={1.35} />
-        </mesh>
-      ))}
+      {/* 下縁の球電球（順番に流れるチェイスライト）。入口の真上は空けて左右に寄せる */}
+      <ChaseLights xs={[-2.7, -2.25, -1.8]} y={2.85} z={3.55} color={bulb} />
+      <ChaseLights xs={[1.8, 2.25, 2.7]} y={2.85} z={3.55} color={bulb} />
       {/* 入口アーチ＋枠 */}
       <mesh position={[0, 1.45, 2.7]} castShadow>
         <boxGeometry args={[2.55, 2.5, 0.4]} />
@@ -688,7 +783,6 @@ function PodcastRadioLandmark({ color, accent }: { color: string; accent: string
   const foam = '#2a221c'
   const metal = '#8a9098'
   const desk = '#3a2818'
-  const waveform = [0.35, 0.7, 1.15, 0.55, 0.95, 0.4, 0.8, 0.5]
   return (
     <group>
       <mesh position={[0, 0.14, 0]} receiveShadow>
@@ -767,17 +861,8 @@ function PodcastRadioLandmark({ color, accent }: { color: string; accent: string
           </mesh>
         </group>
       ))}
-      {/* 波形メーター */}
-      {waveform.map((h, i) => (
-        <mesh
-          key={`wave-${i}`}
-          position={[-1.05 + i * 0.3, 2.55 + h * 0.2, 2.56]}
-          castShadow
-        >
-          <boxGeometry args={[0.18, h * 0.55, 0.06]} />
-          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} />
-        </mesh>
-      ))}
+      {/* 波形メーター（音に合わせて揺れる）。入口・窓の前を避けて左端に置く */}
+      <WaveMeter x={-2.75} y={2.45} z={2.6} count={5} spacing={0.2} color={accent} />
       {/* 吸音パネル列 */}
       {[-2.45, -1.65, 1.65, 2.45].map((x, i) => (
         <mesh key={`foam-${x}`} position={[x, 2.05 + (i % 2) * 0.12, 2.25]} castShadow>
