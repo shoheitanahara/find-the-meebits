@@ -3,6 +3,8 @@ import { ui } from '../../i18n/ui'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
 import { PHONE_LAND_DIALOGUE } from '../../ui/phoneLandscape'
+import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
+import { usePlayerStore } from '../../stores/playerStore'
 import { SoldCornerRibbon } from '../ui/SoldCornerRibbon'
 import { getLocale } from '../../i18n/locale'
 import { isSoldMeebit, openseaAssetUrl } from '../../opensea/types'
@@ -14,6 +16,8 @@ export function MarketDialogueBox() {
   const activeNpcId = useDialogueStore((state) => state.activeNpcId)
   const lines = useDialogueStore((state) => state.lines)
   const currentIndex = useDialogueStore((state) => state.currentIndex)
+  const playerMeebitNumber = usePlayerStore((state) => state.meebitNumber)
+  const setPlayerMeebitNumber = usePlayerStore((state) => state.setMeebitNumber)
   const t = ui()
   const locale = getLocale()
   const sessionPedestalListings = useOpenSeaMarketStore((s) => s.sessionPedestalListings)
@@ -31,6 +35,7 @@ export function MarketDialogueBox() {
   if (!currentLine || !Number.isFinite(tokenId)) return null
 
   const isLastLine = currentIndex >= lines.length - 1
+  const isCurrentAvatar = playerMeebitNumber === tokenId
   const name = `Meebit #${tokenId}`
   const sold = listing != null && isSoldMeebit(listing)
   const role = isGuide
@@ -43,6 +48,12 @@ export function MarketDialogueBox() {
         : 'Recently Sold'
       : 'Digital Sculpture'
   const viewLabel = locale === 'ja' ? 'OpenSeaで見る' : 'View on OpenSea'
+
+  const handleUseAvatar = () => {
+    if (isCurrentAvatar) return
+    void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
+    setPlayerMeebitNumber(tokenId)
+  }
 
   return (
     <div className={`pointer-events-auto absolute inset-x-0 z-[35] mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)] ${PHONE_LAND_DIALOGUE}`}>
@@ -59,11 +70,15 @@ export function MarketDialogueBox() {
           <MarketDialogueContent
             role={role}
             name={name}
+            isCurrentAvatar={isCurrentAvatar}
             currentLine={currentLine.text}
             currentIndex={currentIndex}
             linesLength={lines.length}
             onClose={closeMarketDialogue}
             onNext={advanceMarketDialogue}
+            onUseAvatar={handleUseAvatar}
+            yourAvatarLabel={t.yourAvatar}
+            useAvatarLabel={t.useThisAvatar}
             closeLabel={t.close}
             nextLabel={isLastLine ? t.done : t.nextLine}
             viewLabel={viewLabel}
@@ -75,11 +90,15 @@ export function MarketDialogueBox() {
           <MarketDialogueContent
             role={role}
             name={name}
+            isCurrentAvatar={isCurrentAvatar}
             currentLine={currentLine.text}
             currentIndex={currentIndex}
             linesLength={lines.length}
             onClose={closeMarketDialogue}
             onNext={advanceMarketDialogue}
+            onUseAvatar={handleUseAvatar}
+            yourAvatarLabel={t.yourAvatar}
+            useAvatarLabel={t.useThisAvatar}
             closeLabel={t.close}
             nextLabel={isLastLine ? t.done : t.nextLine}
             viewLabel={viewLabel}
@@ -111,11 +130,15 @@ function emphasizePriceInLine(text: string): ReactNode {
 function MarketDialogueContent({
   role,
   name,
+  isCurrentAvatar,
   currentLine,
   currentIndex,
   linesLength,
   onClose,
   onNext,
+  onUseAvatar,
+  yourAvatarLabel,
+  useAvatarLabel,
   closeLabel,
   nextLabel,
   viewLabel,
@@ -125,11 +148,15 @@ function MarketDialogueContent({
 }: {
   role: string
   name: string
+  isCurrentAvatar: boolean
   currentLine: string
   currentIndex: number
   linesLength: number
   onClose: () => void
   onNext: () => void
+  onUseAvatar: () => void
+  yourAvatarLabel: string
+  useAvatarLabel: string
   closeLabel: string
   nextLabel: string
   viewLabel: string
@@ -156,6 +183,27 @@ function MarketDialogueContent({
           <h2 className={`mt-0.5 font-black text-[#e8f4ff] ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
             {name}
           </h2>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            {isCurrentAvatar ? (
+              <span
+                className={`rounded-full bg-white/10 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-sky-100/70 ${
+                  compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                }`}
+              >
+                {yourAvatarLabel}
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={`rounded-full border border-sky-300/40 bg-sky-400/10 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-sky-100 transition hover:bg-sky-400/20 ${
+                  compact ? 'text-[0.55rem]' : 'text-[0.6rem]'
+                }`}
+                onClick={onUseAvatar}
+              >
+                {useAvatarLabel}
+              </button>
+            )}
+          </div>
         </div>
         <button
           type="button"
