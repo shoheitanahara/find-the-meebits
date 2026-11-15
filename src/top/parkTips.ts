@@ -20,7 +20,7 @@ const copy = {
       },
       {
         title: 'Districts',
-        body: 'Use gates to reach the plaza, mountain, culture, sea — and more areas to come.',
+        body: 'Use gates to reach the plaza, mountain, culture, music & art, sea — and more areas to come.',
       },
     ] as ParkTip[],
   },
@@ -38,7 +38,7 @@ const copy = {
       },
       {
         title: 'エリアを移動',
-        body: 'ゲートから広場・登山・カルチャー・シーなど、ほかのエリアへも行けます（今後も増え予定）。',
+        body: 'ゲートから広場・登山・カルチャー・ミュージック＆アート・シーなど、ほかのエリアへも行けます（今後も増え予定）。',
       },
     ] as ParkTip[],
   },

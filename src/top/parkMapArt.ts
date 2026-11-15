@@ -77,6 +77,16 @@ const ZONES: Record<string, ZonePaint> = {
     labelEn: 'Astro District',
     labelJa: 'アストロエリア',
   },
+  musicArt: {
+    id: 'musicArt',
+    fill: '#6a3a88',
+    fillDeep: '#1c1228',
+    rim: '#e85cff',
+    banner: '#ffc46a',
+    ink: '#140818',
+    labelEn: 'Music & Art District',
+    labelJa: 'ミュージック＆アートエリア',
+  },
 }
 
 type Blob = { x: number; y: number; w: number; h: number }
@@ -97,19 +107,25 @@ export function drawParkMap(
   const mapW = mapRight - mapLeft
   const mapH = mapBottom - mapTop
 
-  // 上 Culture / 左 Sea / 中央 Plaza / 右 Mountain / 右上 Astro
+  // 上 Culture / その奥 Music & Art / 左 Sea / 中央 Plaza / 右 Mountain / 右上 Astro
   // 少し寄せて余白を詰める（重ならない程度）
   const plaza: Blob = {
     x: mapLeft + mapW * 0.5,
-    y: mapTop + mapH * 0.58,
-    w: mapW * 0.32,
-    h: mapH * 0.4,
+    y: mapTop + mapH * 0.6,
+    w: mapW * 0.3,
+    h: mapH * 0.36,
   }
   const culture: Blob = {
     x: mapLeft + mapW * 0.4,
-    y: mapTop + mapH * 0.2,
-    w: mapW * 0.3,
-    h: mapH * 0.3,
+    y: mapTop + mapH * 0.28,
+    w: mapW * 0.28,
+    h: mapH * 0.24,
+  }
+  const musicArt: Blob = {
+    x: mapLeft + mapW * 0.34,
+    y: mapTop + mapH * 0.1,
+    w: mapW * 0.24,
+    h: mapH * 0.2,
   }
   const sea: Blob = {
     x: mapLeft + mapW * 0.15,
@@ -125,9 +141,9 @@ export function drawParkMap(
   }
   const astro: Blob = {
     x: mapLeft + mapW * 0.78,
-    y: mapTop + mapH * 0.2,
+    y: mapTop + mapH * 0.22,
     w: mapW * 0.24,
-    h: mapH * 0.26,
+    h: mapH * 0.24,
   }
 
   const paper = ctx.createLinearGradient(0, 0, 0, height)
@@ -196,8 +212,13 @@ export function drawParkMap(
     [mountain.x - mountain.w * 0.2, mapTop + mapH * 0.36],
     [astro.x + astro.w * 0.05, astro.y + astro.h * 0.42],
   ])
+  strokePath(ctx, [
+    [culture.x - culture.w * 0.05, culture.y - culture.h * 0.42],
+    [musicArt.x + musicArt.w * 0.08, musicArt.y + musicArt.h * 0.42],
+  ])
 
   drawZoneBlob(ctx, culture, ZONES.culture)
+  drawZoneBlob(ctx, musicArt, ZONES.musicArt)
   drawZoneBlob(ctx, sea, ZONES.sea)
   drawZoneBlob(ctx, mountain, ZONES.mountain)
   drawZoneBlob(ctx, astro, ZONES.astro)
@@ -206,11 +227,13 @@ export function drawParkMap(
   // エリアごとのランドマーク（ラベルより上）
   drawLandmarkPlaza(ctx, plaza.x, plaza.y - plaza.h * 0.18)
   drawLandmarkCulture(ctx, culture.x, culture.y - culture.h * 0.22)
+  drawLandmarkMusicArt(ctx, musicArt.x, musicArt.y - musicArt.h * 0.1)
   drawLandmarkMountain(ctx, mountain.x, mountain.y - mountain.h * 0.18)
   drawLandmarkSea(ctx, sea.x, sea.y - sea.h * 0.12)
   drawLandmarkAstro(ctx, astro.x, astro.y - astro.h * 0.18)
 
-  paintZoneLabel(ctx, culture.x, culture.y + culture.h * 0.18, ZONES.culture, locale)
+  paintZoneLabel(ctx, culture.x, culture.y + culture.h * 0.2, ZONES.culture, locale)
+  paintZoneLabel(ctx, musicArt.x, musicArt.y + musicArt.h * 0.22, ZONES.musicArt, locale)
   paintZoneLabel(ctx, sea.x, sea.y + sea.h * 0.2, ZONES.sea, locale)
   paintZoneLabel(ctx, mountain.x, mountain.y + mountain.h * 0.2, ZONES.mountain, locale)
   paintZoneLabel(ctx, astro.x, astro.y + astro.h * 0.2, ZONES.astro, locale)
@@ -608,5 +631,30 @@ function drawLandmarkAstro(ctx: CanvasRenderingContext2D, x: number, y: number) 
     ctx.arc(x + dx, y + dy, 2.4, 0, Math.PI * 2)
     ctx.fill()
   }
+}
+
+function drawLandmarkMusicArt(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  // ステージ床
+  ctx.fillStyle = 'rgba(58, 36, 72, 0.85)'
+  ctx.beginPath()
+  ctx.ellipse(x, y + 10, 34, 14, 0, 0, Math.PI * 2)
+  ctx.fill()
+  // スクリーン
+  ctx.fillStyle = 'rgba(232, 92, 255, 0.35)'
+  ctx.fillRect(x - 26, y - 22, 52, 28)
+  ctx.strokeStyle = 'rgba(232, 92, 255, 0.9)'
+  ctx.lineWidth = 3
+  ctx.strokeRect(x - 26, y - 22, 52, 28)
+  // 波形
+  ctx.strokeStyle = 'rgba(255, 196, 106, 0.9)'
+  ctx.lineWidth = 2.5
+  ctx.beginPath()
+  for (let i = 0; i <= 8; i += 1) {
+    const px = x - 24 + i * 6
+    const py = y + 2 - (i % 2 === 0 ? 8 : 2)
+    if (i === 0) ctx.moveTo(px, py)
+    else ctx.lineTo(px, py)
+  }
+  ctx.stroke()
 }
 

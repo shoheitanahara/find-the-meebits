@@ -1081,6 +1081,46 @@ const JA_THEME_ASTRO = [
   'ここまで来ても、今日の {value} は多い。',
 ]
 
+const JA_MUSIC_ART_GREET = [
+  '音、聞こえる？',
+  'マゼンタの床、いい色。',
+  'ステージの前、立ち止まった。',
+  '映像、もう始まってる？',
+  'ヘッドホン、外したくない夜。',
+  'ビートに合わせて歩いてた。',
+  'ここ、ちょっと落ち着く。',
+  'スクリーンの光、きれい。',
+]
+
+const EN_MUSIC_ART_GREET = [
+  'You hear that?',
+  'Love this magenta floor.',
+  'Paused by the stage.',
+  'Did the screening start?',
+  'Hard to take the headphones off.',
+  'Walking to the beat.',
+  'Feels calm here.',
+  'Screen glow looks good.',
+]
+
+const JA_MUSIC_ART_FLAVOR = [
+  '工事中のホール、気になる。',
+  'サウンドと映像、同じ場所にあるの好き。',
+  'カルチャーの奥って、空気が変わる。',
+  'アンバーの灯り、ステージっぽい。',
+  'いつかここで上映会やりたい。',
+  '波形の床、踏むだけで気分が出る。',
+]
+
+const EN_MUSIC_ART_FLAVOR = [
+  'Curious about those halls under construction.',
+  'Like sound and picture sharing one plaza.',
+  'Past Culture, the air changes.',
+  'Amber lights feel like a stage.',
+  'Want a screening night here someday.',
+  'Wave floor alone sets the mood.',
+]
+
 const EN_THEME_ASTRO = [
   '{value} looks a little blue under these lights.',
   'Saw {value} by the gate a minute ago.',
@@ -1108,6 +1148,7 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isCu = zone === 'culture'
   const isSea = zone === 'sea'
   const isAstro = zone === 'astro'
+  const isMusicArt = zone === 'musicArt'
 
   const greetings = isMt
     ? isJa
@@ -1125,9 +1166,13 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
           ? isJa
             ? JA_ASTRO_GREET
             : EN_ASTRO_GREET
-          : isJa
-            ? JA_PLAZA_GREET
-            : EN_PLAZA_GREET
+          : isMusicArt
+            ? isJa
+              ? JA_MUSIC_ART_GREET
+              : EN_MUSIC_ART_GREET
+            : isJa
+              ? JA_PLAZA_GREET
+              : EN_PLAZA_GREET
 
   const flavor = isMt
     ? isJa
@@ -1145,9 +1190,13 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
           ? isJa
             ? JA_ASTRO_FLAVOR
             : EN_ASTRO_FLAVOR
-          : isJa
-            ? JA_PLAZA_FLAVOR
-            : EN_PLAZA_FLAVOR
+          : isMusicArt
+            ? isJa
+              ? JA_MUSIC_ART_FLAVOR
+              : EN_MUSIC_ART_FLAVOR
+            : isJa
+              ? JA_PLAZA_FLAVOR
+              : EN_PLAZA_FLAVOR
 
   return {
     greetings,

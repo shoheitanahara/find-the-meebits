@@ -50,6 +50,7 @@ import {
 import { ComingSoonPad, ParkZoneGate } from './ParkZoneGate'
 import { AstroDistrictGround } from './AstroDistrictGround'
 import { CultureDistrictGround } from './CultureDistrictGround'
+import { MusicArtDistrictGround } from './MusicArtDistrictGround'
 import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { ParkSnowCover } from './ParkSnowCover'
@@ -161,7 +162,7 @@ export function TopScene({
         layout={layout}
         trees={zone.trees}
         treeStyle={
-          activeZoneId === 'sea' || activeZoneId === 'astro'
+          activeZoneId === 'sea' || activeZoneId === 'astro' || activeZoneId === 'musicArt'
             ? 'none'
             : activeZoneId === 'mountain' || look.christmas
               ? 'pine'
@@ -171,6 +172,7 @@ export function TopScene({
         cultureGround={activeZoneId === 'culture'}
         seaGround={activeZoneId === 'sea'}
         astroGround={activeZoneId === 'astro'}
+        musicArtGround={activeZoneId === 'musicArt'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -196,7 +198,13 @@ export function TopScene({
         look={look}
         lamps={zone.lamps}
         style={
-          activeZoneId === 'sea' ? 'beach' : activeZoneId === 'astro' ? 'astro' : 'classic'
+          activeZoneId === 'sea'
+            ? 'beach'
+            : activeZoneId === 'astro'
+              ? 'astro'
+              : activeZoneId === 'musicArt'
+                ? 'musicArt'
+                : 'classic'
         }
       />
       <ParkDetails
@@ -234,7 +242,9 @@ export function TopScene({
                   ? 'sea'
                   : zone.id === 'astro'
                     ? 'astro'
-                    : 'classic')
+                    : zone.id === 'musicArt'
+                      ? 'musicArt'
+                      : 'classic')
           }
           title={slot.title}
           subtitle={slot.subtitle}
@@ -252,7 +262,9 @@ export function TopScene({
                   ? lineup.cultureVisitors
                   : activeZoneId === 'astro'
                     ? lineup.astroVisitors
-                    : lineup.visitors
+                    : activeZoneId === 'musicArt'
+                      ? lineup.cultureVisitors
+                      : lineup.visitors
           }
           featuredId={lineup.featuredId}
           themeTrait={lineup.themeTrait}
@@ -362,6 +374,7 @@ function HubGround({
   cultureGround = false,
   seaGround = false,
   astroGround = false,
+  musicArtGround = false,
   showFountain,
 }: {
   featuredId: number
@@ -373,6 +386,7 @@ function HubGround({
   cultureGround?: boolean
   seaGround?: boolean
   astroGround?: boolean
+  musicArtGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -400,6 +414,8 @@ function HubGround({
         <SeaDistrictGround layout={layout} />
       ) : astroGround ? (
         <AstroDistrictGround layout={layout} christmas={look.christmas} />
+      ) : musicArtGround ? (
+        <MusicArtDistrictGround layout={layout} christmas={look.christmas} />
       ) : (
         <>
           {/* エリア床（海・砂浜は置かない。外周は将来の崖・川） */}
@@ -670,7 +686,7 @@ function ParkLamps({
 }: {
   look: ParkLook
   lamps: ReadonlyArray<readonly [number, number]>
-  style?: 'classic' | 'beach' | 'astro'
+  style?: 'classic' | 'beach' | 'astro' | 'musicArt'
 }) {
   return (
     <group>
@@ -679,10 +695,59 @@ function ParkLamps({
           <BeachLamp key={`${x}-${z}`} look={look} x={x} z={z} />
         ) : style === 'astro' ? (
           <AstroLamp key={`${x}-${z}`} look={look} x={x} z={z} />
+        ) : style === 'musicArt' ? (
+          <MusicArtLamp key={`${x}-${z}`} look={look} x={x} z={z} />
         ) : (
           <ClassicLamp key={`${x}-${z}`} look={look} x={x} z={z} />
         ),
       )}
+    </group>
+  )
+}
+
+/** Music & Art向け：深紫ポール＋マゼンタ／アンバーの先端ライト。 */
+function MusicArtLamp({
+  look,
+  x,
+  z,
+}: {
+  look: ParkLook
+  x: number
+  z: number
+}) {
+  const tipEmissive = look.christmas ? look.lampEmissiveColor : '#e85cff'
+  const tipColor = look.christmas ? look.lampBulbColor : '#ffd0f0'
+  const glow = look.christmas ? look.lampPointColor : '#ff9ae0'
+
+  return (
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.28, 0.36, 0.24, 10]} />
+        <meshStandardMaterial color="#120818" metalness={0.55} roughness={0.42} />
+      </mesh>
+      <mesh position={[0, 1.55, 0]} castShadow>
+        <cylinderGeometry args={[0.08, 0.11, 2.8, 8]} />
+        <meshStandardMaterial color="#241830" metalness={0.45} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 3.05, 0]} castShadow>
+        <boxGeometry args={[0.42, 0.16, 0.42]} />
+        <meshStandardMaterial color="#e85cff" emissive="#e85cff" emissiveIntensity={0.35} />
+      </mesh>
+      <mesh position={[0, 3.35, 0]} castShadow>
+        <sphereGeometry args={[0.26, 14, 12]} />
+        <meshStandardMaterial
+          color={tipColor}
+          emissive={tipEmissive}
+          emissiveIntensity={look.lampEmissiveIntensity * 1.1}
+          roughness={0.3}
+        />
+      </mesh>
+      <pointLight
+        position={[0, 3.4, 0]}
+        intensity={look.lampLightIntensity}
+        distance={14}
+        color={glow}
+      />
     </group>
   )
 }

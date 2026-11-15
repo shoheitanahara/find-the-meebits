@@ -68,6 +68,16 @@ const AS_WATER_DEEP = '#0c2038'
 const AS_WATER_FOAM = '#6ac8e8'
 const AS_PURPLE = '#a878ff'
 
+/** Music & Art（AVラウンジ）パレット */
+const MA_STONE = '#1c1228'
+const MA_STONE_DARK = '#120818'
+const MA_STONE_LIGHT = '#3a2448'
+const MA_ACCENT = '#e85cff'
+const MA_ACCENT_DIM = '#a040a8'
+const MA_WATER = '#3a1a58'
+const MA_WATER_DEEP = '#1c0c30'
+const MA_WATER_FOAM = '#d080e8'
+
 function isMountainTheme(spec: PerimeterSpec) {
   return spec.theme === 'mountain'
 }
@@ -84,9 +94,13 @@ function isAstroTheme(spec: PerimeterSpec) {
   return spec.theme === 'astro'
 }
 
+function isMusicArtTheme(spec: PerimeterSpec) {
+  return spec.theme === 'musicArt'
+}
+
 /**
  * エリア外周: 崖・壁・川・滝・橋・封印門。
- * classic / mountain / culture / sea / astro
+ * classic / mountain / culture / sea / astro / musicArt
  */
 export function ParkPerimeter({
   layout,
@@ -208,6 +222,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                     culture={isCultureTheme(spec)}
                     sea={isSeaTheme(spec)}
                     astro={isAstroTheme(spec)}
+                    musicArt={isMusicArtTheme(spec)}
                   />
                 </group>
               )
@@ -240,6 +255,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                   axis={sideDef.axis}
                   culture={isCultureTheme(spec)}
                   astro={isAstroTheme(spec)}
+                  musicArt={isMusicArtTheme(spec)}
                 />
               )
             })}
@@ -266,6 +282,7 @@ function RiverSegment({
   culture = false,
   sea = false,
   astro = false,
+  musicArt = false,
 }: {
   position: [number, number, number]
   size: [number, number, number]
@@ -273,34 +290,41 @@ function RiverSegment({
   culture?: boolean
   sea?: boolean
   astro?: boolean
+  musicArt?: boolean
 }) {
   const deep = mountain
     ? MT_WATER_DEEP
-    : culture
-      ? CU_WATER_DEEP
-      : sea
-        ? SEA_WATER_DEEP
-        : astro
-          ? AS_WATER_DEEP
-          : WATER_DEEP
+    : musicArt
+      ? MA_WATER_DEEP
+      : culture
+        ? CU_WATER_DEEP
+        : sea
+          ? SEA_WATER_DEEP
+          : astro
+            ? AS_WATER_DEEP
+            : WATER_DEEP
   const mid = mountain
     ? MT_WATER
-    : culture
-      ? CU_WATER
-      : sea
-        ? SEA_WATER
-        : astro
-          ? AS_WATER
-          : WATER
+    : musicArt
+      ? MA_WATER
+      : culture
+        ? CU_WATER
+        : sea
+          ? SEA_WATER
+          : astro
+            ? AS_WATER
+            : WATER
   const foam = mountain
     ? MT_WATER_FOAM
-    : culture
-      ? CU_WATER_FOAM
-      : sea
-        ? SEA_WATER_FOAM
-        : astro
-          ? AS_WATER_FOAM
-          : WATER_FOAM
+    : musicArt
+      ? MA_WATER_FOAM
+      : culture
+        ? CU_WATER_FOAM
+        : sea
+          ? SEA_WATER_FOAM
+          : astro
+            ? AS_WATER_FOAM
+            : WATER_FOAM
   // 海は少し浅く・広く見せる（Y を下げて砂浜に溶ける感じ）
   const seaY = sea ? -0.12 : 0
   return (
@@ -353,17 +377,19 @@ function ClassicWall({
   axis,
   culture = false,
   astro = false,
+  musicArt = false,
 }: {
   position: [number, number, number]
   size: [number, number, number]
   axis: 'x' | 'z'
   culture?: boolean
   astro?: boolean
+  musicArt?: boolean
 }) {
   const [sx, sy, sz] = size
-  const body = astro ? AS_STONE : culture ? CU_STONE : STONE
-  const top = astro ? AS_STONE_DARK : culture ? CU_STONE_DARK : STONE_DARK
-  const cap = astro ? AS_ACCENT : culture ? CU_ACCENT : GOLD
+  const body = musicArt ? MA_STONE : astro ? AS_STONE : culture ? CU_STONE : STONE
+  const top = musicArt ? MA_STONE_DARK : astro ? AS_STONE_DARK : culture ? CU_STONE_DARK : STONE_DARK
+  const cap = musicArt ? MA_ACCENT : astro ? AS_ACCENT : culture ? CU_ACCENT : GOLD
   return (
     <group position={position}>
       <mesh castShadow receiveShadow>
@@ -530,6 +556,7 @@ function GateWallReveal({
   const culture = isCultureTheme(spec)
   const sea = isSeaTheme(spec)
   const astro = isAstroTheme(spec)
+  const musicArt = isMusicArtTheme(spec)
   const wing = mountain ? 1.55 : sea ? 1.4 : astro ? 1.25 : 1.15
   const h = mountain
     ? Math.min(spec.wallHeight * 0.85, 3.1)
@@ -542,12 +569,22 @@ function GateWallReveal({
   const edge = spec.wallOpeningHalf * 0.92
   const wingColor = sea
     ? SEA_SAND
-    : culture
-      ? CU_STONE_LIGHT
-      : astro
-        ? AS_STONE_LIGHT
-        : STONE_LIGHT
-  const capColor = sea ? SEA_WOOD : culture ? CU_ACCENT : astro ? AS_ACCENT : GOLD
+    : musicArt
+      ? MA_STONE_LIGHT
+      : culture
+        ? CU_STONE_LIGHT
+        : astro
+          ? AS_STONE_LIGHT
+          : STONE_LIGHT
+  const capColor = sea
+    ? SEA_WOOD
+    : musicArt
+      ? MA_ACCENT
+      : culture
+        ? CU_ACCENT
+        : astro
+          ? AS_ACCENT
+          : GOLD
 
   return (
     <group>
@@ -671,19 +708,21 @@ function BridgeGateApproach({
   const culture = isCultureTheme(spec)
   const sea = isSeaTheme(spec)
   const astro = isAstroTheme(spec)
+  const musicArt = isMusicArtTheme(spec)
   // エリア世界観に合わせたデッキ材
   // Plaza=レンガ / Mountain=木道 / Sea=桟橋材 / Culture=紺タイル / Astro=金属パネル
   const deckKind = mountain
     ? 'path'
     : sea
       ? 'pierWood'
-      : culture
+      : culture || musicArt
         ? 'gallery'
         : astro
           ? 'panel'
           : 'brick'
   const railKind = deckKind
-  const postKind = mountain || sea ? 'dirt' : culture ? 'darkStone' : astro ? 'darkStone' : 'stone'
+  const postKind =
+    mountain || sea ? 'dirt' : culture || musicArt || astro ? 'darkStone' : 'stone'
   const deckW = w * 0.96
   // 崖ボクセルと同じく「約1ワールド単位＝1タイル」でリピート（引き伸ばし防止）
   const deckRepeatX = Math.max(1, Math.round(length))
@@ -729,11 +768,29 @@ function BridgePassageLights({
 }) {
   const railZ = deckWidth * 0.52
   const bulbColor =
-    theme === 'astro' ? '#dff8ff' : theme === 'culture' ? '#c8dcff' : look.lampBulbColor
+    theme === 'musicArt'
+      ? '#ffd0f0'
+      : theme === 'astro'
+        ? '#dff8ff'
+        : theme === 'culture'
+          ? '#c8dcff'
+          : look.lampBulbColor
   const emissiveColor =
-    theme === 'astro' ? '#5ce0ff' : theme === 'culture' ? '#6a9ee8' : look.lampEmissiveColor
+    theme === 'musicArt'
+      ? '#e85cff'
+      : theme === 'astro'
+        ? '#5ce0ff'
+        : theme === 'culture'
+          ? '#6a9ee8'
+          : look.lampEmissiveColor
   const lightColor =
-    theme === 'astro' ? '#9ae8ff' : theme === 'culture' ? '#a8c8ff' : look.lampPointColor
+    theme === 'musicArt'
+      ? '#ff9ae0'
+      : theme === 'astro'
+        ? '#9ae8ff'
+        : theme === 'culture'
+          ? '#a8c8ff'
+          : look.lampPointColor
   const lightIntensity = Math.max(5.5, look.lampLightIntensity * 0.65)
   const emissiveIntensity = Math.max(1.4, look.lampEmissiveIntensity * 0.7)
 
@@ -774,117 +831,43 @@ function sealedGateCopy(
   culture = false,
   sea = false,
   astro = false,
+  musicArt = false,
 ) {
+  const pick = (mountainLabel: string, cultureLabel: string, seaLabel: string, astroLabel: string, musicLabel: string, fallback: string) =>
+    mountain
+      ? mountainLabel
+      : musicArt
+        ? musicLabel
+        : culture
+          ? cultureLabel
+          : sea
+            ? seaLabel
+            : astro
+              ? astroLabel
+              : fallback
+
   if (locale === 'ja') {
     if (side === 'e') {
-      return {
-        label: mountain
-          ? '東の峰'
-          : culture
-            ? '東ギャラリー'
-            : sea
-              ? '東桟橋'
-              : astro
-                ? '東ドッキング'
-                : '東の庭園',
-        sub: '準備中',
-      }
+      return { label: pick('東の峰', '東ギャラリー', '東桟橋', '東ドッキング', '東ホール', '東の庭園'), sub: '準備中' }
     }
     if (side === 'w') {
-      return {
-        label: mountain
-          ? '西坑道'
-          : culture
-            ? '西アトリエ'
-            : sea
-              ? '西の入り江'
-              : astro
-                ? '西ベイ'
-                : '西の翼',
-        sub: '準備中',
-      }
+      return { label: pick('西坑道', '西アトリエ', '西の入り江', '西ベイ', '西ラウンジ', '西の翼'), sub: '準備中' }
     }
     if (side === 'n') {
-      return {
-        label: mountain
-          ? '北の谷'
-          : culture
-            ? '北フォワイエ'
-            : sea
-              ? '北ビーチ'
-              : astro
-                ? '北エアロック'
-                : '北門',
-        sub: '準備中',
-      }
+      return { label: pick('北の谷', '北フォワイエ', '北ビーチ', '北エアロック', '北フォワイエ', '北門'), sub: '準備中' }
     }
-    return {
-      label: mountain
-        ? '坑道入口'
-        : culture
-          ? '南サロン'
-          : sea
-            ? '南ラグーン'
-            : astro
-              ? '南ハッチ'
-              : '南の回廊',
-      sub: '準備中',
-    }
+    return { label: pick('坑道入口', '南サロン', '南ラグーン', '南ハッチ', '南ステージ', '南の回廊'), sub: '準備中' }
   }
   if (side === 'e') {
-    return {
-      label: mountain
-        ? 'EAST PEAK'
-        : culture
-          ? 'EAST GALLERY'
-          : sea
-            ? 'EAST PIER'
-            : astro
-              ? 'EAST DOCK'
-              : 'EAST GARDEN',
-      sub: 'Coming Soon',
-    }
+    return { label: pick('EAST PEAK', 'EAST GALLERY', 'EAST PIER', 'EAST DOCK', 'EAST HALL', 'EAST GARDEN'), sub: 'Coming Soon' }
   }
   if (side === 'w') {
-    return {
-      label: mountain
-        ? 'WEST MINE'
-        : culture
-          ? 'WEST ATELIER'
-          : sea
-            ? 'WEST COVE'
-            : astro
-              ? 'WEST BAY'
-              : 'WEST WING',
-      sub: 'Coming Soon',
-    }
+    return { label: pick('WEST MINE', 'WEST ATELIER', 'WEST COVE', 'WEST BAY', 'WEST LOUNGE', 'WEST WING'), sub: 'Coming Soon' }
   }
   if (side === 'n') {
-    return {
-      label: mountain
-        ? 'NORTH VALE'
-        : culture
-          ? 'NORTH FOYER'
-          : sea
-            ? 'NORTH BEACH'
-            : astro
-              ? 'NORTH AIRLOCK'
-              : 'NORTH GATE',
-      sub: 'Coming Soon',
-    }
+    return { label: pick('NORTH VALE', 'NORTH FOYER', 'NORTH BEACH', 'NORTH AIRLOCK', 'NORTH FOYER', 'NORTH GATE'), sub: 'Coming Soon' }
   }
-  return {
-    label: mountain
-      ? 'MINE SHAFT'
-      : culture
-        ? 'SOUTH SALON'
-        : sea
-          ? 'SOUTH LAGOON'
-          : astro
-            ? 'SOUTH HATCH'
-            : 'SOUTH COURT',
-    sub: 'Coming Soon',
-  }
+  return { label: pick('MINE ENTRY', 'SOUTH SALON', 'SOUTH LAGOON', 'SOUTH HATCH', 'SOUTH STAGE', 'SOUTH COURT'), sub: 'Coming Soon' }
 }
 
 /**
@@ -904,8 +887,9 @@ function SealedPortal({
   const culture = isCultureTheme(spec)
   const sea = isSeaTheme(spec)
   const astro = isAstroTheme(spec)
+  const musicArt = isMusicArtTheme(spec)
   const { x, z, rotationY } = getCardinalGatePlacement(spec, side)
-  const { label, sub } = sealedGateCopy(side, locale, mountain, culture, sea, astro)
+  const { label, sub } = sealedGateCopy(side, locale, mountain, culture, sea, astro, musicArt)
   const halfW = spec.openingHalf
 
   return (
@@ -915,7 +899,14 @@ function SealedPortal({
       ) : sea ? (
         <BeachSealedGate halfW={halfW} label={label} sub={sub} />
       ) : (
-        <ClassicSealedGate halfW={halfW} label={label} sub={sub} culture={culture} astro={astro} />
+        <ClassicSealedGate
+          halfW={halfW}
+          label={label}
+          sub={sub}
+          culture={culture}
+          astro={astro}
+          musicArt={musicArt}
+        />
       )}
     </group>
   )
@@ -977,22 +968,42 @@ function ClassicSealedGate({
   sub,
   culture = false,
   astro = false,
+  musicArt = false,
 }: {
   halfW: number
   label: string
   sub: string
   culture?: boolean
   astro?: boolean
+  musicArt?: boolean
 }) {
   const pillarZ = halfW * 0.92
-  const pillar = astro ? AS_STONE_DARK : culture ? CU_STONE_DARK : '#3a3530'
-  const base = astro ? AS_STONE_LIGHT : culture ? CU_STONE_LIGHT : STONE_LIGHT
-  const step = astro ? '#121824' : culture ? '#1a2844' : '#7a7268'
-  const accent = astro ? AS_ACCENT : culture ? CU_ACCENT : GOLD
-  const accentDim = astro ? AS_ACCENT_DIM : culture ? CU_ACCENT_DIM : GOLD_DIM
-  const arch = astro ? '#0a101c' : culture ? '#0c1528' : '#2a2520'
-  const door = astro ? '#080c16' : culture ? '#0a1424' : '#1e1a1c'
-  const doorPanel = astro ? '#141c2c' : culture ? '#152038' : '#2a2428'
+  const pillar = musicArt
+    ? MA_STONE_DARK
+    : astro
+      ? AS_STONE_DARK
+      : culture
+        ? CU_STONE_DARK
+        : '#3a3530'
+  const base = musicArt
+    ? MA_STONE_LIGHT
+    : astro
+      ? AS_STONE_LIGHT
+      : culture
+        ? CU_STONE_LIGHT
+        : STONE_LIGHT
+  const step = musicArt ? '#1a1020' : astro ? '#121824' : culture ? '#1a2844' : '#7a7268'
+  const accent = musicArt ? MA_ACCENT : astro ? AS_ACCENT : culture ? CU_ACCENT : GOLD
+  const accentDim = musicArt
+    ? MA_ACCENT_DIM
+    : astro
+      ? AS_ACCENT_DIM
+      : culture
+        ? CU_ACCENT_DIM
+        : GOLD_DIM
+  const arch = musicArt ? '#100814' : astro ? '#0a101c' : culture ? '#0c1528' : '#2a2520'
+  const door = musicArt ? '#0e0814' : astro ? '#080c16' : culture ? '#0a1424' : '#1e1a1c'
+  const doorPanel = musicArt ? '#241830' : astro ? '#141c2c' : culture ? '#152038' : '#2a2428'
   return (
     <group>
       {/* 足元敷石 */}

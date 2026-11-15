@@ -21,7 +21,7 @@ export type PerimeterOpening =
   | { side: CardinalSide; kind: 'bridge-gate'; gateId: string }
   | { side: CardinalSide; kind: 'sealed' }
 
-export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
+export type ParkPerimeterTheme = 'classic' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt'
 
 export type ParkPerimeterDef = {
   theme: ParkPerimeterTheme

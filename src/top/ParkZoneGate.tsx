@@ -53,6 +53,8 @@ export function ParkZoneGate({
         <SeaPortalGate gate={gate} locale={locale} />
       ) : gate.theme === 'astro' ? (
         <AstroPortalGate gate={gate} locale={locale} />
+      ) : gate.theme === 'musicArt' ? (
+        <MusicArtPortalGate gate={gate} locale={locale} />
       ) : (
         <PlazaReturnGate gate={gate} locale={locale} />
       )}
@@ -443,11 +445,12 @@ function CulturePortalGate({
   gate: ParkGateDef
   locale: 'en' | 'ja'
 }) {
-  // Astro 西門はエリア内側（+X）から近づくので看板だけ反転（Mountain 門と同パターン）
+  // 接近側がローカル +X になる門は看板だけ反転（Astro 西門・Music & Art 手前門）
   const faceSign = -1
-  const fromAstro = gate.id === 'astro-to-culture'
-  const signFaceSign = fromAstro ? -faceSign : faceSign
-  const signRotationY = fromAstro ? Math.PI / 2 : -Math.PI / 2
+  const flipSignTowardApproach =
+    gate.id === 'astro-to-culture' || gate.id === 'musicArt-to-culture'
+  const signFaceSign = flipSignTowardApproach ? -faceSign : faceSign
+  const signRotationY = flipSignTowardApproach ? Math.PI / 2 : -Math.PI / 2
   const pillarZ = gate.halfWidth * 0.88
   const accent = '#6a9ee8'
   const marble = '#2a4068'
@@ -513,7 +516,7 @@ function CulturePortalGate({
         decay={2}
       />
 
-      {/* 看板：通常は −X（接近側）。Astro 西門は +X（エリア内側）向き */}
+      {/* 看板：通常は −X（接近側）。一部門は +X（エリア内側からの接近）向き */}
       <group position={[signFaceSign * 0.45, 0, 0]} rotation={[0, signRotationY, 0]}>
         <Text position={[0, 4.85, 0]} fontSize={0.24} color="#e8f0ff" anchorX="center" anchorY="middle">
           {gate.label[locale]}
@@ -716,6 +719,116 @@ function AstroPortalGate({
   )
 }
 
+/** Music & Art 側：マゼンタのアーチ＋アンバー球 */
+function MusicArtPortalGate({
+  gate,
+  locale,
+}: {
+  gate: ParkGateDef
+  locale: 'en' | 'ja'
+}) {
+  const faceSign = -1
+  const pillarZ = gate.halfWidth * 0.88
+  const accent = '#e85cff'
+  const amber = '#ffc46a'
+  const hull = '#241830'
+  const hullDark = '#140818'
+  const panel = '#3a2448'
+
+  return (
+    <group>
+      <ApproachPath faceSign={faceSign} length={1.05} width={gate.halfWidth * 1.05} />
+
+      {[-pillarZ, pillarZ].map((z) => (
+        <group key={z} position={[0, 0, z]}>
+          <mesh position={[0, 1.9, 0]} castShadow receiveShadow>
+            <boxGeometry args={[0.68, 3.8, 0.68]} />
+            <meshStandardMaterial color={hullDark} roughness={0.55} metalness={0.35} />
+          </mesh>
+          <mesh position={[0, 0.14, faceSign * 0.06]} castShadow>
+            <boxGeometry args={[0.9, 0.28, 0.9]} />
+            <meshStandardMaterial color={panel} roughness={0.5} metalness={0.3} />
+          </mesh>
+          <mesh position={[0, 3.95, 0]} castShadow>
+            <boxGeometry args={[0.82, 0.24, 0.82]} />
+            <meshStandardMaterial
+              color={accent}
+              emissive={accent}
+              emissiveIntensity={0.45}
+              metalness={0.4}
+              roughness={0.35}
+            />
+          </mesh>
+          <mesh position={[0, 4.35, 0]} castShadow>
+            <sphereGeometry args={[0.16, 12, 12]} />
+            <meshStandardMaterial
+              color={amber}
+              emissive={amber}
+              emissiveIntensity={0.85}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      <mesh position={[0, 3.6, 0]} castShadow>
+        <boxGeometry args={[0.48, 0.34, gate.halfWidth * 2.05]} />
+        <meshStandardMaterial color={hull} roughness={0.5} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, 3.88, 0]} castShadow>
+        <boxGeometry args={[0.32, 0.14, gate.halfWidth * 1.9]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.5}
+          metalness={0.4}
+          roughness={0.3}
+        />
+      </mesh>
+
+      <mesh position={[0, 1.8, 0]}>
+        <boxGeometry args={[0.12, 3.3, gate.halfWidth * 1.55]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={0.7}
+          transparent
+          opacity={0.34}
+        />
+      </mesh>
+      <pointLight
+        position={[faceSign * 0.7, 2.2, 0]}
+        color="#ff9ae0"
+        intensity={1.45}
+        distance={9}
+        decay={2}
+      />
+
+      <group position={[faceSign * 0.5, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh position={[0, 5.05, 0]} castShadow>
+          <boxGeometry args={[3.5, 0.95, 0.14]} />
+          <meshStandardMaterial color="#120814" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 5.05, 0.09]}>
+          <boxGeometry args={[3.25, 0.75, 0.04]} />
+          <meshStandardMaterial
+            color={accent}
+            emissive={accent}
+            emissiveIntensity={0.22}
+            roughness={0.45}
+          />
+        </mesh>
+        <Text position={[0, 5.18, 0.14]} fontSize={0.22} color="#180818" anchorX="center" anchorY="middle">
+          {gate.label[locale]}
+        </Text>
+        <Text position={[0, 4.88, 0.14]} fontSize={0.14} color="#2a1020" anchorX="center" anchorY="middle">
+          {gate.subtitle[locale]}
+        </Text>
+      </group>
+    </group>
+  )
+}
+
 /** マウンテン側：広場へ戻る門 */
 function PlazaReturnGate({
   gate,
@@ -795,7 +908,7 @@ export function ComingSoonPad({
 }: {
   position: [number, number, number]
   locale: 'en' | 'ja'
-  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
+  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }) {
@@ -804,6 +917,7 @@ export function ComingSoonPad({
   const culture = theme === 'culture'
   const sea = theme === 'sea'
   const astro = theme === 'astro'
+  const musicArt = theme === 'musicArt'
   const titleText = title?.[locale]
   const subtitleText = subtitle?.[locale]
   const variant =
@@ -819,25 +933,44 @@ export function ComingSoonPad({
         <SeaComingSoonShell />
       ) : astro ? (
         <AstroComingSoonShell variant={variant} />
+      ) : musicArt ? (
+        <MusicArtComingSoonShell />
       ) : (
         <ClassicComingSoonShell />
       )}
-      <ComingSoonBarricade mountain={mountain} culture={culture} sea={sea} astro={astro} />
+      <ComingSoonBarricade
+        mountain={mountain}
+        culture={culture}
+        sea={sea}
+        astro={astro}
+        musicArt={musicArt}
+      />
       <ComingSoonSignboard
         heading={heading}
         mountain={mountain}
         culture={culture}
         sea={sea}
         astro={astro}
+        musicArt={musicArt}
         title={titleText}
         subtitle={subtitleText}
       />
       {astro ? null : (
         <pointLight
           position={[0, 3.2, 2.8]}
-          intensity={sea ? 10 : culture ? 11 : mountain ? 8 : 10}
+          intensity={sea ? 10 : culture || musicArt ? 11 : mountain ? 8 : 10}
           distance={11}
-          color={sea ? '#c8e8f8' : culture ? '#a8c8f0' : mountain ? '#ffb060' : '#ffd080'}
+          color={
+            sea
+              ? '#c8e8f8'
+              : musicArt
+                ? '#ff9ae0'
+                : culture
+                  ? '#a8c8f0'
+                  : mountain
+                    ? '#ffb060'
+                    : '#ffd080'
+          }
         />
       )}
     </group>
@@ -1194,35 +1327,87 @@ function AstroComingSoonShell({ variant }: { variant: 'dome' | 'lab' | 'port' })
   )
 }
 
+function MusicArtComingSoonShell() {
+  const hull = '#1c1228'
+  const panel = '#3a2448'
+  const accent = '#e85cff'
+  const amber = '#ffc46a'
+  return (
+    <group>
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[6.2, 0.32, 5.6]} />
+        <meshStandardMaterial color="#120818" roughness={0.85} />
+      </mesh>
+      <mesh position={[0, 1.55, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[4.8, 2.8, 4.2]} />
+        <meshStandardMaterial color={hull} roughness={0.78} />
+      </mesh>
+      {/* スクリーン枠 */}
+      <mesh position={[0, 2.15, 1.85]} castShadow>
+        <boxGeometry args={[3.4, 1.9, 0.18]} />
+        <meshStandardMaterial color={panel} roughness={0.45} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, 2.15, 1.96]}>
+        <planeGeometry args={[2.9, 1.45]} />
+        <meshStandardMaterial color="#2a1030" emissive={accent} emissiveIntensity={0.28} />
+      </mesh>
+      {/* 波形バー（静的シルエット） */}
+      {[-1.0, -0.6, -0.2, 0.2, 0.6, 1.0].map((x, i) => (
+        <mesh key={x} position={[x, 1.05 + (i % 3) * 0.12, 2.05]}>
+          <boxGeometry args={[0.22, 0.35 + (i % 4) * 0.18, 0.08]} />
+          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.4} />
+        </mesh>
+      ))}
+      {/* 屋上ライト */}
+      <mesh position={[0, 3.2, -0.2]} castShadow>
+        <boxGeometry args={[5.1, 0.28, 4.5]} />
+        <meshStandardMaterial color="#241830" roughness={0.7} />
+      </mesh>
+      {[-1.6, 1.6].map((x) => (
+        <mesh key={`bulb-${x}`} position={[x, 3.55, 1.4]}>
+          <sphereGeometry args={[0.14, 10, 10]} />
+          <meshStandardMaterial color={amber} emissive={amber} emissiveIntensity={1.0} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 function ComingSoonBarricade({
   mountain,
   culture = false,
   sea = false,
   astro = false,
+  musicArt = false,
 }: {
   mountain: boolean
   culture?: boolean
   sea?: boolean
   astro?: boolean
+  musicArt?: boolean
 }) {
-  const stripe = astro
-    ? '#5ce0ff'
-    : sea
-      ? '#f0c878'
-      : culture
-        ? '#6a9ee8'
-        : mountain
-          ? '#c4a060'
-          : '#c9a24a'
-  const post = astro
-    ? '#1a2234'
-    : sea
-      ? '#5a4030'
-      : culture
-        ? '#1a2a48'
-        : mountain
-          ? '#5a4030'
-          : '#3a3530'
+  const stripe = musicArt
+    ? '#e85cff'
+    : astro
+      ? '#5ce0ff'
+      : sea
+        ? '#f0c878'
+        : culture
+          ? '#6a9ee8'
+          : mountain
+            ? '#c4a060'
+            : '#c9a24a'
+  const post = musicArt
+    ? '#1c1228'
+    : astro
+      ? '#1a2234'
+      : sea
+        ? '#5a4030'
+        : culture
+          ? '#1a2a48'
+          : mountain
+            ? '#5a4030'
+            : '#3a3530'
   return (
     <group position={[0, 0, 2.85]}>
       {[-2.4, -0.8, 0.8, 2.4].map((x) => (
@@ -1230,8 +1415,8 @@ function ComingSoonBarricade({
           <boxGeometry args={[0.12, 1.1, 0.12]} />
           <meshStandardMaterial
             color={post}
-            roughness={astro ? 0.45 : 0.85}
-            metalness={astro ? 0.55 : 0}
+            roughness={astro || musicArt ? 0.45 : 0.85}
+            metalness={astro || musicArt ? 0.55 : 0}
           />
         </mesh>
       ))}
@@ -1239,8 +1424,8 @@ function ComingSoonBarricade({
         <boxGeometry args={[5.2, 0.22, 0.1]} />
         <meshStandardMaterial
           color={stripe}
-          emissive={astro ? stripe : '#000000'}
-          emissiveIntensity={astro ? 0.25 : 0}
+          emissive={astro || musicArt ? stripe : '#000000'}
+          emissiveIntensity={astro || musicArt ? 0.25 : 0}
           roughness={0.7}
         />
       </mesh>
@@ -1258,6 +1443,7 @@ function ComingSoonSignboard({
   culture = false,
   sea = false,
   astro = false,
+  musicArt = false,
   title,
   subtitle,
 }: {
@@ -1266,27 +1452,30 @@ function ComingSoonSignboard({
   culture?: boolean
   sea?: boolean
   astro?: boolean
+  musicArt?: boolean
   title?: string
   subtitle?: string
 }) {
-  const accent = astro
-    ? '#5ce0ff'
-    : sea
-      ? '#f0c878'
-      : culture
-        ? '#6a9ee8'
-        : mountain
-          ? '#c4a060'
-          : '#c9a24a'
+  const accent = musicArt
+    ? '#e85cff'
+    : astro
+      ? '#5ce0ff'
+      : sea
+        ? '#f0c878'
+        : culture
+          ? '#6a9ee8'
+          : mountain
+            ? '#c4a060'
+            : '#c9a24a'
   const hasDetail = Boolean(title)
   return (
     <group position={[0, 0, 3.35]}>
       <mesh position={[0, 1.15, 0]} castShadow>
         <cylinderGeometry args={[0.07, 0.09, 2.2, 8]} />
         <meshStandardMaterial
-          color={astro ? '#1a2234' : '#8a7050'}
-          roughness={astro ? 0.45 : 0.85}
-          metalness={astro ? 0.55 : 0}
+          color={musicArt ? '#1c1228' : astro ? '#1a2234' : '#8a7050'}
+          roughness={astro || musicArt ? 0.45 : 0.85}
+          metalness={astro || musicArt ? 0.55 : 0}
         />
       </mesh>
       <mesh position={[0, hasDetail ? 2.65 : 2.45, 0.05]} castShadow>

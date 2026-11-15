@@ -143,5 +143,38 @@ export function applyZoneLook(zoneId: ParkZoneId, baseLook: ParkLook): ParkLook 
     }
   }
 
+  if (zoneId === 'musicArt') {
+    return {
+      ...baseLook,
+      // AV ラウンジ：深紫の空、マゼンタ導線、アンバーのステージ光
+      backgroundColor: '#140818',
+      fogColor: '#1c1028',
+      fogNear: 30,
+      fogFar: 120,
+      showStars: true,
+      hemisphereSky: '#8860a8',
+      hemisphereGround: '#241028',
+      ambientColor: '#c8a8d8',
+      ambientIntensity: baseLook.ambientIntensity * 0.95,
+      hemisphereIntensity: baseLook.hemisphereIntensity,
+      directionalIntensity: baseLook.directionalIntensity * 0.78,
+      directionalColor: '#f0d0ff',
+      accentPointColor: '#ffc46a',
+      accentPointIntensity: Math.min(baseLook.accentPointIntensity * 1.08, 30),
+      environmentPreset: 'night',
+      environmentIntensity: Math.min(baseLook.environmentIntensity, 0.5),
+      districtColor: '#1c1228',
+      plazaColor: '#241830',
+      pathColor: '#3a2448',
+      paverColorA: '#422850',
+      paverColorB: '#2e1a38',
+      pathEdgeColor: '#e85cff',
+      fountainRingColor: '#6a3a88',
+      lampLightIntensity: baseLook.lampLightIntensity * 1.15,
+      lampEmissiveIntensity: baseLook.lampEmissiveIntensity * 1.12,
+      benchProp: 'flowers',
+    }
+  }
+
   return baseLook
 }

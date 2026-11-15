@@ -6,7 +6,7 @@ import { SEA_PALM_TREE_XZ } from './seaPalms'
 export { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X }
 
 /** Park のエリア ID。1エリア最大3ゲーム。 */
-export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea' | 'astro'
+export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt'
 
 export type ParkZoneBounds = {
   boundsX: number
@@ -42,8 +42,8 @@ export type ParkGateDef = {
   halfWidth: number
   /** 通過アルコーブ深さ */
   alcoveDepth: number
-  /** mountain / culture / sea / astro = 行き先意匠、plaza = 広場へ戻る門 */
-  theme: 'mountain' | 'plaza' | 'culture' | 'sea' | 'astro'
+  /** mountain / culture / sea / astro / musicArt = 行き先意匠、plaza = 広場へ戻る門 */
+  theme: 'mountain' | 'plaza' | 'culture' | 'sea' | 'astro' | 'musicArt'
   /**
    * Yaw（ラジアン）。0 で東西通過。
    * カージナル橋では基本 0（軸平行）。
@@ -61,7 +61,7 @@ export type ComingSoonSlot = {
   x: number
   z: number
   /** 省略時はゾーン外周テーマに追従 */
-  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro'
+  theme?: 'classic' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt'
   title?: { en: string; ja: string }
   subtitle?: { en: string; ja: string }
 }
@@ -160,6 +160,17 @@ const ASTRO_LAYOUT: ParkZoneLayout = {
   railingZ: 1,
   railingHalfLength: 15.5,
   pathEdgeX: 13,
+  treeX: 22.5,
+}
+
+/** Music & Art: 同じ床幅。マゼンタ導線のラウンジ縁 */
+const MUSIC_ART_LAYOUT: ParkZoneLayout = {
+  ...SHARED_PARK_GROUND,
+  railingX: 26,
+  railingHalfThickness: 0.22,
+  railingZ: 1,
+  railingHalfLength: 15.5,
+  pathEdgeX: 15,
   treeX: 22.5,
 }
 
@@ -340,7 +351,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // 東 → Astro
         { side: 'e', kind: 'bridge-gate', gateId: 'culture-to-astro' },
         { side: 'w', kind: 'sealed' },
-        { side: 's', kind: 'sealed' },
+        // 奥（北 / −Z）→ Music & Art
+        { side: 's', kind: 'bridge-gate', gateId: 'culture-to-musicArt' },
       ],
     },
     spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
@@ -399,6 +411,20 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'ASTRO DISTRICT', ja: 'アストロエリア' },
         subtitle: { en: 'Robots · Visitors · Orbit', ja: 'ロボ・ビジター・軌道' },
+      },
+      {
+        id: 'culture-to-musicArt',
+        x: PARK_FAR_SIDE_GATE_X,
+        z: -18.4,
+        halfWidth: 2.55,
+        alcoveDepth: 2.6,
+        theme: 'musicArt',
+        yaw: Math.PI / 2,
+        targetZone: 'musicArt',
+        // Music & Art 手前入口センター・奥向き
+        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
+        label: { en: 'MUSIC & ART DISTRICT', ja: 'ミュージック＆アートエリア' },
+        subtitle: { en: 'Sound · Screen · Stage', ja: 'サウンド・スクリーン・ステージ' },
       },
     ],
   },
@@ -526,6 +552,85 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       },
     ],
   },
+  /**
+   * Music & Art: Culture の奥（−Z）。
+   * 音楽と映像アートを楽しむ AV ラウンジ。当面は Coming Soon 3枠。
+   */
+  musicArt: {
+    id: 'musicArt',
+    title: { en: 'Music & Art District', ja: 'ミュージック＆アートエリア' },
+    attractionIds: [],
+    layout: MUSIC_ART_LAYOUT,
+    perimeter: {
+      theme: 'musicArt',
+      frontClearSides: ['n'],
+      openings: [
+        { side: 'e', kind: 'sealed' },
+        { side: 'w', kind: 'sealed' },
+        { side: 's', kind: 'sealed' },
+      ],
+    },
+    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
+    hasFountain: false,
+    hasFeaturedBoard: false,
+    hasNpcCrowd: true,
+    benches: [
+      [-6.5, 5.0, Math.PI / 2],
+      [6.5, 5.0, -Math.PI / 2],
+    ],
+    planters: [
+      [-6.5, 3.45],
+      [6.5, 3.45],
+    ],
+    lamps: [
+      [-9, 6.5],
+      [9, 6.5],
+      [-9, 0.5],
+      [9, 0.5],
+      [-9, -5.5],
+      [9, -5.5],
+    ],
+    trees: [],
+    comingSoonSlots: [
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
+        theme: 'musicArt',
+        title: { en: 'SOUND STAGE', ja: 'サウンドステージ' },
+        subtitle: { en: 'Listen · Feel · Share', ja: '聴く・感じる・分かち合う' },
+      },
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+        theme: 'musicArt',
+        title: { en: 'VIDEO HALL', ja: 'ビデオホール' },
+        subtitle: { en: 'Art Films · Night Screen', ja: 'アート映像・夜のスクリーン' },
+      },
+      {
+        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
+        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
+        theme: 'musicArt',
+        title: { en: 'MIX LOUNGE', ja: 'ミックスラウンジ' },
+        subtitle: { en: 'Beats · Visuals · Chill', ja: 'ビート・映像・チル' },
+      },
+    ],
+    gates: [
+      {
+        id: 'musicArt-to-culture',
+        x: PARK_NEAR_SIDE_GATE_X,
+        z: 16.0,
+        halfWidth: 2.55,
+        alcoveDepth: 2.4,
+        theme: 'culture',
+        yaw: -Math.PI / 2,
+        targetZone: 'culture',
+        // Culture 北門（左寄り）すぐ内側・エリア奥向き
+        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
+        subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
+      },
+    ],
+  },
 }
 
 export const DEFAULT_PARK_ZONE: ParkZoneId = 'plaza'
@@ -547,7 +652,14 @@ export function readStoredParkZone(): ParkZoneId {
   if (typeof window === 'undefined') return DEFAULT_PARK_ZONE
   try {
     const raw = sessionStorage.getItem(ZONE_STORAGE_KEY)
-    if (raw === 'plaza' || raw === 'mountain' || raw === 'culture' || raw === 'sea' || raw === 'astro') {
+    if (
+      raw === 'plaza' ||
+      raw === 'mountain' ||
+      raw === 'culture' ||
+      raw === 'sea' ||
+      raw === 'astro' ||
+      raw === 'musicArt'
+    ) {
       return raw
     }
   } catch {
