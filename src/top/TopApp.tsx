@@ -403,17 +403,12 @@ export function TopApp() {
           <div
             className={`pointer-events-none absolute left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 rounded-lg border border-[#d4b46a]/30 bg-[#080912]/80 px-4 py-3 text-[#f4ead2] shadow-2xl backdrop-blur-md ${dialogueChromeDimClass(isDialogueOpen || aboutBrowserOpen)}`}
           >
-            <p className="text-xs uppercase tracking-[0.2em] text-[#e2c77f]">
+            <p className="text-lg font-semibold tracking-[0.04em] text-[#e2c77f]">
               Meebits Park
             </p>
             <p className="mt-1 text-[0.62rem] uppercase tracking-[0.16em] text-[#caa75b]/90">
               {getParkZone(activeZoneId).title[locale]}
             </p>
-            {christmasCopy ? (
-              <p className="mt-1.5 text-[0.55rem] uppercase tracking-[0.14em] text-[#e8c878]/85">
-                {christmasCopy.hudTag}
-              </p>
-            ) : null}
             {isDev ? (
               <div
                 className="pointer-events-auto mt-2.5 flex gap-1"

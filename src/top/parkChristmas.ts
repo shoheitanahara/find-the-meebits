@@ -17,19 +17,17 @@ export function isParkChristmasActive(zoneId: ParkZoneId, now = new Date()): boo
   return zoneId !== 'sea' && isParkChristmasSeason(now)
 }
 
-/** UI 用の短い季節コピー（オープニング／左上HUD）。 */
+/** UI 用の短い季節コピー（オープニング／ヒント）。 */
 export function getParkChristmasCopy(locale: Locale) {
   if (locale === 'ja') {
     return {
       badge: 'Christmas Season',
-      hudTag: 'Christmas Season',
       openingNote: 'クリスマスシーズン開催中。雪とイルミをお楽しみください。',
       tipsNote: 'クリスマスシーズン中です。広場や山に雪が積もっています。',
     } as const
   }
   return {
     badge: 'Christmas Season',
-    hudTag: 'Christmas Season',
     openingNote: 'Christmas Season is on. Enjoy the snow and lights.',
     tipsNote: 'Christmas Season is on — snow covers the plaza and mountain.',
   } as const
