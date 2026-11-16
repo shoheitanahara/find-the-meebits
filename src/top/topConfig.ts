@@ -52,7 +52,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     subtitle: 'The Museum',
     description: {
       en: 'A packed gallery.\nFind the odd face.',
-      ja: '人でいっぱいの美術館。\nほかと違う顔を探す。',
+      ja: '人でいっぱいの美術館。\nまぎれた一人を探す。',
     },
     storyTitle: {
       en: 'FIND ONE',
@@ -82,7 +82,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     subtitle: 'The Studio',
     description: {
       en: 'Sit by the mic.\nListen to the show.',
-      ja: 'マイク前の席に座る。\n番組を観て聴く。',
+      ja: 'マイクの前の席。\n番組を観て聴ける。',
     },
     storyTitle: {
       en: 'ON AIR',
@@ -108,7 +108,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     subtitle: 'The Night Alley',
     description: {
       en: 'The same alley.\nSpot what’s changed.',
-      ja: '同じ路地、同じ夜。\n変わったものを探す。',
+      ja: '同じ路地、同じ夜。\nどこか一つ、おかしい。',
     },
     storyTitle: {
       en: 'WRONG FACE',
@@ -135,7 +135,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     subtitle: 'The Summit',
     description: {
       en: 'New route each day.\nClimb to the summit.',
-      ja: '毎日、ルートが変わる。\n足場を跳んで頂上へ。',
+      ja: '毎日、ルートが変わる。\n跳んで登って、頂上へ。',
     },
     storyTitle: {
       en: 'CLIMB TODAY',
@@ -226,7 +226,7 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     subtitle: 'The Catwalk',
     description: {
       en: 'Color of the day.\nSit back and watch.',
-      ja: '今日の色のランウェイ。\n客席から見届ける。',
+      ja: '今日の色のランウェイ。\n客席からゆっくり見る。',
     },
     storyTitle: {
       en: "TODAY'S COLOR",
@@ -286,12 +286,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'PHOTO BOOTH',
     subtitle: 'Visit Pass',
     description: {
-      en: 'Strike a pose.\nSquare shot to keep.',
-      ja: 'スタジオでポーズ。\n正方形の一枚を残す。',
+      en: 'Pose in the studio.\nGet your visit pass.',
+      ja: 'スタジオで撮ろう！\n来場者パスを受けよう！',
     },
     storyTitle: {
-      en: 'ONE SQUARE SHOT',
-      ja: '正方形一枚',
+      en: 'PROFILE PIC',
+      ja: 'プロフィール画像をつくろう',
     },
     color: '#1a2438',
     roofColor: '#8eb4e8',

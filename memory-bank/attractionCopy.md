@@ -122,7 +122,7 @@
 | shooting | AIM & FIRE / 的を狙え | 動く的、金と赤 |
 | runway | TODAY'S COLOR / 今日の色 | 今夜の色、Meebitが歩く |
 | closet | TRY IT ON / きせ替え | 帽子も髪も変えられる |
-| pfp | ONE SQUARE SHOT / 正方形一枚 | スタジオで一枚、来場証明書付き |
+| pfp | PROFILE PIC / プロフ画像をつくろう | スタジオで撮って、来場者パスを受け取る |
 | fishing | FISH ON! / 魚影を狙え | 岸辺の魚影、一振り |
 | opensea | MEEBIT GALLERY / 彫刻ギャラリー | 台座に並ぶ彫刻、一体ずつ眺める |
 | sergito | SERGITO AWAITS / Sergitoが待つ | 海辺の木の工房。見た目に一言くれる。MeebCo・役職・創業者は入口に出さない |
