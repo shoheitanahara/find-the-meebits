@@ -3,6 +3,9 @@ import {
   DEFAULT_PARK_ATTRACTION_SLOTS,
   infoBoardNearEntrance,
 } from './parkAttractionSlots'
+import { HIP_HOP_ICON } from './landmarks/hipHopClubModel'
+import { JAZZ_BAR_ICON } from './landmarks/jazzBarModel'
+import { LEARN_ART_ICON } from './landmarks/learnArtModel'
 import type { AttractionId } from './topStore'
 import type { ParkZoneId } from './parkZones'
 
@@ -519,6 +522,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
         { x: 2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
+        // 建物横の巨大ラジカセ彫刻
+        HIP_HOP_ICON,
       ],
     },
     infoBoardLocal: infoBoardNearEntrance('left', 3.4),
@@ -549,6 +554,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+        // 建物横のイーゼル彫刻
+        LEARN_ART_ICON,
       ],
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
@@ -579,6 +586,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+        // 建物横のサックス彫刻
+        JAZZ_BAR_ICON,
       ],
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
