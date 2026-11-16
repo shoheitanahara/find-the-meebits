@@ -1,5 +1,6 @@
 import { Text } from '@react-three/drei'
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
+import { InstancedMesh, Object3D } from 'three'
 import type { ParkLook } from './parkLook'
 import type { ParkGateDef, ParkZoneLayout } from './parkZones'
 import { TiledVoxelMat, VoxelBlockMat } from './VoxelBlockMat'
@@ -17,6 +18,13 @@ import {
   type ParkPerimeterDef,
   type PerimeterSpec,
 } from './parkPerimeterSpec'
+
+const snowScratch = new Object3D()
+
+function snowHash(x: number, z: number) {
+  const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453
+  return n - Math.floor(n)
+}
 
 /** クラシック園の境界パレット */
 const STONE = '#4a4552'
@@ -124,8 +132,88 @@ export function ParkPerimeter({
     <group>
       {/* シーは広大な海＋砂浜を SeaDistrictGround が担う。ここは桟橋ゲートだけ */}
       {!isSeaTheme(spec) ? <RiverAndWalls spec={spec} /> : null}
+      {!isSeaTheme(spec) && look.christmas ? <RiverBankSnowCover spec={spec} /> : null}
       <CardinalFeatures spec={spec} locale={locale} look={look} />
     </group>
+  )
+}
+
+/**
+ * 川の外側（川〜壁の立ち入れない帯）だけ雪ブロック。
+ * 内岸〜川手前は ParkSnowCover（Mountain と同じ床グリッド）が担当。
+ * 高さ均一・川面なし。橋デッキ幅だけ空けて岸は連続。
+ */
+function RiverBankSnowCover({ spec }: { spec: PerimeterSpec }) {
+  const { cx, cz, riverInnerX, riverInnerZN, riverInnerZS, riverWidth, wallThickness } = spec
+  const halfSpanZ =
+    Math.max(riverInnerZN, riverInnerZS) + riverWidth + wallThickness * 0.5
+  const halfSpanX = riverInnerX + riverWidth + wallThickness * 0.5
+  const snowH = 0.08
+
+  const patches = useMemo(() => {
+    const list: Array<{ x: number; z: number }> = []
+    const step = 1
+    const riverOuterX = riverInnerX + riverWidth
+    const riverOuterZS = riverInnerZS + riverWidth
+
+    const onBridgeDeck = (side: CardinalSide, along: number) => {
+      const opening = getOpening(spec, side)
+      if (!isPerimeterGateOpening(opening)) return false
+      const center = openCenterOnSide(spec, side)
+      return Math.abs(along - center) <= spec.bridgeDeckWidth * 0.52
+    }
+
+    const push = (x: number, z: number) => {
+      const snowPatch = snowHash(Math.floor(x * 10) + 17, Math.floor(z * 10) - 9)
+      if (snowPatch > 0.58) return
+      list.push({ x, z })
+    }
+
+    for (const sign of [-1, 1] as const) {
+      const side: CardinalSide = sign > 0 ? 'e' : 'w'
+      if (!shouldBuildPerimeterSide(spec, side)) continue
+      const x0 = sign > 0 ? riverOuterX : -riverOuterX - 1
+      for (let z = Math.floor(cz - halfSpanZ); z <= Math.floor(cz + halfSpanZ); z += step) {
+        if (onBridgeDeck(side, z + 0.5)) continue
+        push(x0, z)
+        if (wallThickness > 1.05) push(x0 + sign, z)
+      }
+    }
+
+    if (shouldBuildPerimeterSide(spec, 's')) {
+      const z0 = cz - riverOuterZS - 1
+      for (let x = Math.floor(cx - halfSpanX); x <= Math.floor(cx + halfSpanX); x += step) {
+        if (onBridgeDeck('s', x + 0.5)) continue
+        push(x, z0)
+        if (wallThickness > 1.05) push(x, z0 - 1)
+      }
+    }
+
+    return list
+  }, [cx, cz, halfSpanX, halfSpanZ, riverInnerX, riverInnerZS, riverWidth, spec, wallThickness])
+
+  const meshRef = useRef<InstancedMesh>(null)
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    patches.forEach((p, i) => {
+      snowScratch.position.set(p.x + 0.5, snowH * 0.5, p.z + 0.5)
+      snowScratch.scale.set(0.98, snowH, 0.98)
+      snowScratch.updateMatrix()
+      mesh.setMatrixAt(i, snowScratch.matrix)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    mesh.computeBoundingSphere()
+  }, [patches, snowH])
+
+  if (patches.length === 0) return null
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, patches.length]} receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#e8eef4" roughness={0.92} metalness={0.02} />
+    </instancedMesh>
   )
 }
 

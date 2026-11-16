@@ -56,6 +56,9 @@ import { MountainVoxelGround } from './MountainVoxelGround'
 import { ParkSnowCover } from './ParkSnowCover'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp } from './ParkBenchProp'
+import { ParkBackdrop } from './ParkBackdrop'
+import { buildParkGroveTreeModel, buildParkPineTreeModel } from './landmarks/parkTreeModel'
+import { VoxelModelMesh } from './voxel/VoxelModelMesh'
 import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
 import { useTopStore, type AttractionId } from './topStore'
 
@@ -118,6 +121,14 @@ export function TopScene({
     <>
       <color attach="background" args={[look.backgroundColor]} />
       <fog attach="fog" args={[look.fogColor, look.fogNear, look.fogFar]} />
+      <ParkBackdrop
+        zoneId={activeZoneId}
+        layout={layout}
+        perimeter={zone.perimeter}
+        gates={zone.gates}
+        look={look}
+        timeOfDay={timeOfDay}
+      />
       {look.showStars ? (
         <Stars radius={72} depth={28} count={900} factor={2.2} saturation={0.15} fade speed={0.25} />
       ) : null}
@@ -164,7 +175,7 @@ export function TopScene({
         treeStyle={
           activeZoneId === 'sea' || activeZoneId === 'astro' || activeZoneId === 'musicArt'
             ? 'none'
-            : activeZoneId === 'mountain' || look.christmas
+            : activeZoneId === 'mountain'
               ? 'pine'
               : 'grove'
         }
@@ -454,8 +465,8 @@ function HubGround({
           {look.christmas ? (
             <ParkSnowCover
               layout={layout}
-              clearRadius={plazaRadius + 0.35}
-              density={0.62}
+              clearRadius={3.1}
+              clearCenterZ={FOUNTAIN_CENTER_Z}
               y={0.085}
             />
           ) : null}
@@ -534,147 +545,20 @@ function FountainStatue({ featuredId }: { featuredId: number }) {
   )
 }
 
-/** ツリー頂上の星（八面体・縦長） */
-function TreeStar({
-  y,
-  radius = 0.22,
-  stretchY = 1.45,
-}: {
-  y: number
-  radius?: number
-  stretchY?: number
-}) {
-  return (
-    <mesh position={[0, y, 0]} scale={[1, stretchY, 1]} castShadow>
-      <octahedronGeometry args={[radius, 0]} />
-      <meshStandardMaterial
-        color="#ffe090"
-        emissive="#ffd060"
-        emissiveIntensity={1}
-        metalness={0.45}
-        roughness={0.28}
-      />
-    </mesh>
-  )
-}
-
 function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
-  const ornaments = [
-    { x: 0.55, y: 2.85, z: 0.2, color: '#e04040' },
-    { x: -0.5, y: 3.05, z: -0.15, color: '#f0d040' },
-    { x: 0.15, y: 3.35, z: 0.45, color: '#e04040' },
-    { x: -0.35, y: 2.7, z: 0.4, color: '#40c878' },
-    { x: 0.4, y: 3.5, z: -0.25, color: '#f0d040' },
-  ] as const
-
+  const model = useMemo(() => buildParkGroveTreeModel(z, christmas), [z, christmas])
   return (
     <group position={[0, 0, z]}>
-      <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.72, 0.82, 0.56, 16]} />
-        <meshStandardMaterial color={christmas ? '#c8d4e0' : '#79654f'} roughness={0.68} />
-      </mesh>
-      <mesh position={[0, 1.2, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.35, 2.4, 10]} />
-        <meshStandardMaterial color="#5b4030" roughness={0.92} />
-      </mesh>
-      {[
-        [0, 3.05, 0, 1.2],
-        [-0.72, 2.75, 0.12, 0.82],
-        [0.68, 2.82, -0.08, 0.9],
-        [0, 3.65, 0.02, 0.78],
-      ].map(([x, y, treeZ, scale], index) => (
-        <mesh key={`crown-${index}`} position={[x, y, treeZ]} scale={scale} castShadow>
-          <dodecahedronGeometry args={[1, 1]} />
-          <meshStandardMaterial
-            color={index % 2 === 0 ? '#1e5a38' : '#2a7048'}
-            roughness={0.94}
-          />
-        </mesh>
-      ))}
-      {christmas
-        ? ornaments.map((orb, index) => (
-            <mesh key={`orb-${index}`} position={[orb.x, orb.y, orb.z]} castShadow>
-              <sphereGeometry args={[0.12, 10, 8]} />
-              <meshStandardMaterial
-                color={orb.color}
-                emissive={orb.color}
-                emissiveIntensity={0.55}
-                roughness={0.35}
-              />
-            </mesh>
-          ))
-        : null}
-      {christmas ? (
-        <>
-          <TreeStar y={4.55} radius={0.28} />
-          <pointLight position={[0, 3.2, 0]} color="#ffc878" intensity={1.4} distance={5} />
-        </>
-      ) : null}
+      <VoxelModelMesh model={model} />
     </group>
   )
 }
 
-/** マインクラフト風の針葉樹（段々のボクセル葉） */
 function PineTree({ z, christmas = false }: { z: number; christmas?: boolean }) {
-  const tiers = [
-    { y: 2.1, s: 1.55 },
-    { y: 2.75, s: 1.2 },
-    { y: 3.3, s: 0.9 },
-    { y: 3.75, s: 0.55 },
-  ] as const
-  const ornaments = [
-    { x: 0.55, y: 2.25, z: 0.35, color: '#e04040' },
-    { x: -0.5, y: 2.35, z: -0.3, color: '#f0d040' },
-    { x: 0.4, y: 2.9, z: -0.35, color: '#40c878' },
-    { x: -0.45, y: 2.95, z: 0.3, color: '#e04040' },
-    { x: 0.28, y: 3.4, z: 0.22, color: '#f0d040' },
-    { x: -0.22, y: 3.45, z: -0.2, color: '#e04040' },
-  ] as const
-
+  const model = useMemo(() => buildParkPineTreeModel(z, christmas), [z, christmas])
   return (
     <group position={[0, 0, z]}>
-      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.7, 0.4, 0.7]} />
-        <meshStandardMaterial color={christmas ? '#d0dae6' : '#5a4a38'} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.3, 0]} castShadow>
-        <boxGeometry args={[0.28, 2.2, 0.28]} />
-        <meshStandardMaterial color="#4a3a28" roughness={0.92} />
-      </mesh>
-      {tiers.map((tier) => (
-        <group key={tier.y}>
-          <mesh position={[0, tier.y, 0]} castShadow>
-            <boxGeometry args={[tier.s, 0.55, tier.s]} />
-            <meshStandardMaterial color={tier.y > 3 ? '#1e5a30' : '#2a6a38'} roughness={0.93} />
-          </mesh>
-          {christmas ? (
-            <mesh position={[0, tier.y + 0.32, 0]} castShadow>
-              <boxGeometry args={[tier.s * 0.92, 0.12, tier.s * 0.92]} />
-              <meshStandardMaterial color="#e8eef4" roughness={0.92} />
-            </mesh>
-          ) : null}
-        </group>
-      ))}
-      {christmas
-        ? ornaments.map((orb, index) => (
-            <mesh key={`pine-orb-${index}`} position={[orb.x, orb.y, orb.z]} castShadow>
-              <boxGeometry args={[0.16, 0.16, 0.16]} />
-              <meshStandardMaterial
-                color={orb.color}
-                emissive={orb.color}
-                emissiveIntensity={0.65}
-                roughness={0.35}
-              />
-            </mesh>
-          ))
-        : null}
-      {christmas ? (
-        <>
-          {/* 元サイズ 0.22 + 縦伸ばし。位置はやや高め */}
-          <TreeStar y={4.35} radius={0.22} />
-          <pointLight position={[0, 3.0, 0]} color="#ffc070" intensity={1.6} distance={5.5} />
-        </>
-      ) : null}
+      <VoxelModelMesh model={model} />
     </group>
   )
 }
