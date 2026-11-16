@@ -69,11 +69,12 @@ export function JazzBarTitleScreen() {
           audienceIds: show.audienceIds,
           emptySeatIndices: show.emptySeatIndices,
         })
+        // Enter = 音声オン（UI も即反映。実プレイヤーは ready / 曲ジャンプ後に追従）
+        useJazzBarStore.getState().setSoundMuted(false)
         playSfx('timerStart')
         const unsubscribe = onJazzBarYoutubeReady(() => {
-          if (unmuteJazzBarYoutube()) {
-            useJazzBarStore.getState().setSoundMuted(false)
-          }
+          unmuteJazzBarYoutube()
+          useJazzBarStore.getState().setSoundMuted(false)
           unsubscribe()
         })
       })

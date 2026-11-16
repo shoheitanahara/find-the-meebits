@@ -21,13 +21,38 @@ let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
 let titleListeners: Array<(title: string) => void> = []
 let mountGeneration = 0
-/** Enter クリック時に立て、onReady で unmute する */
-let soundOnEnterArmed = false
+/**
+ * Enter で音声オンにしたあと、playVideoAt のリトライで再び mute されないよう維持する。
+ * 明示的な muteJazzBarYoutube / destroy で解除。
+ */
+let preferUnmuted = false
 /** 入場ごとに決める開始インデックス */
 let pendingStartIndex = 0
 
 export function armJazzBarSoundOnEnter() {
-  soundOnEnterArmed = true
+  preferUnmuted = true
+}
+
+/** プレイリストジャンプ後も、入場時の希望ミュート状態を再適用する */
+function applyPreferredMute(target: YtPlayer) {
+  if (preferUnmuted) {
+    try {
+      target.unMute()
+      target.setVolume(100)
+    } catch {
+      try {
+        target.mute()
+      } catch {
+        // ignore
+      }
+    }
+    return
+  }
+  try {
+    target.mute()
+  } catch {
+    // ignore
+  }
 }
 
 function readEpisodeTitle(target: YtPlayer): string | null {
@@ -92,9 +117,11 @@ function startRandomPlaylistVideo(target: YtPlayer, preferredIndex: number, atte
   const index = ((preferredIndex % max) + max) % max
 
   jumpToPlaylistIndex(target, index)
+  applyPreferredMute(target)
 
   if (attempt >= 10) {
     ensureYoutubePlaying(target, 4)
+    applyPreferredMute(target)
     return
   }
 
@@ -117,6 +144,7 @@ function startRandomPlaylistVideo(target: YtPlayer, preferredIndex: number, atte
     }
 
     ensureYoutubePlaying(target, 4)
+    applyPreferredMute(target)
   }, 350 + attempt * 120)
 }
 
@@ -204,17 +232,7 @@ export async function mountJazzBarYoutubePlayer(size: { width: number; height: n
               resolve(null)
               return
             }
-            if (soundOnEnterArmed) {
-              soundOnEnterArmed = false
-              try {
-                event.target.unMute()
-                event.target.setVolume(100)
-              } catch {
-                event.target.mute()
-              }
-            } else {
-              event.target.mute()
-            }
+            applyPreferredMute(event.target)
             startRandomPlaylistVideo(event.target, startIndex)
             disableYoutubeCaptions(event.target)
             publishEpisodeTitle(event.target)
@@ -228,6 +246,8 @@ export async function mountJazzBarYoutubePlayer(size: { width: number; height: n
           onStateChange: (event) => {
             if (event.data === playing || event.data === cued) {
               disableYoutubeCaptions(event.target)
+              // playVideoAt 後に mute に戻ることがあるので、入場時の希望を再適用
+              applyPreferredMute(event.target)
               publishEpisodeTitle(event.target)
             }
             // シャッフル有効時も曲間で止まったとき用
@@ -250,6 +270,7 @@ export async function mountJazzBarYoutubePlayer(size: { width: number; height: n
 }
 
 export function unmuteJazzBarYoutube(): boolean {
+  preferUnmuted = true
   if (!player) return false
   try {
     player.unMute()
@@ -263,6 +284,7 @@ export function unmuteJazzBarYoutube(): boolean {
 }
 
 export function muteJazzBarYoutube(): boolean {
+  preferUnmuted = false
   if (!player) return false
   try {
     player.mute()
@@ -290,5 +312,6 @@ export function seekJazzBarYoutubeBy(deltaSeconds: number): boolean {
 
 export function destroyJazzBarYoutubePlayer() {
   mountGeneration += 1
+  preferUnmuted = false
   destroyCurrentPlayer()
 }
