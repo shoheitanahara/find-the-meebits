@@ -6,15 +6,15 @@ import { onClubEpisodeTitle } from '../youtubePlayer'
 const copy = {
   en: {
     label: 'Now playing',
-    waiting: 'Tuning in…',
+    waiting: 'Cueing the next track…',
   },
   ja: {
-    label: '放送中',
-    waiting: '選局中…',
+    label: '再生中',
+    waiting: '次の曲を準備中…',
   },
 } as const
 
-/** 再生中エピソードの YouTube タイトル（IFrame API getVideoData） */
+/** 再生中トラックの YouTube タイトル（IFrame API getVideoData） */
 export function ClubNowPlaying() {
   const episodeTitle = useClubStore((state) => state.episodeTitle)
   const locale = getLocale()

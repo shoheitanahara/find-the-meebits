@@ -130,25 +130,35 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const keyboard = keys.current
     const touch = useTouchControlsStore.getState()
 
-    if (!isSitting) {
-      movement.set(0, 0)
+    const wantsMove =
+      keyboard.forward ||
+      keyboard.backward ||
+      keyboard.left ||
+      keyboard.right ||
+      touch.joystickActive
+
+    if (isSitting && wantsMove) {
+      useRunwayStore.getState().standUp()
+    }
+
+    movement.set(0, 0)
+    if (!isSitting || wantsMove) {
       if (keyboard.forward) movement.y -= 1
       if (keyboard.backward) movement.y += 1
       if (keyboard.left) movement.x -= 1
       if (keyboard.right) movement.x += 1
-
       if (touch.joystickActive) {
         movement.x = touch.joystickX
         movement.y = touch.joystickY
       }
-
       if (movement.lengthSq() > 1) movement.normalize()
     } else {
-      movement.set(0, 0)
       useTouchControlsStore.getState().resetJoystick()
     }
 
-    const moving = !isSitting && movement.lengthSq() > 0.01
+    // 今フレームで立ち上がった場合も移動を許可
+    const effectivelySitting = isSitting && !wantsMove
+    const moving = !effectivelySitting && movement.lengthSq() > 0.01
     const lookYaw = lookYawRef.current
     // カメラが向いている水平方向に合わせて移動（W = 画面奥）
     const forwardX = -Math.sin(lookYaw)
@@ -156,7 +166,7 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const rightX = Math.cos(lookYaw)
     const rightZ = -Math.sin(lookYaw)
 
-    if (isSitting) {
+    if (effectivelySitting) {
       const seat = getRunwaySeatSlot(playerSeatIndex)
       if (seat) {
         xRef.current = seat.x
@@ -193,16 +203,16 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const group = groupRef.current
     if (group) {
       const groundY = RUNWAY.playerGroundY
-      group.position.set(xRef.current, isSitting ? RUNWAY_SEAT_Y : groundY, zRef.current)
+      group.position.set(xRef.current, effectivelySitting ? RUNWAY_SEAT_Y : groundY, zRef.current)
       group.rotation.y = rotationYRef.current
-      if (!isSitting) {
+      if (!effectivelySitting) {
         group.position.y =
           groundY +
           (moving ? Math.abs(Math.sin(localTimeRef.current * WALK_BOB_FREQUENCY)) * 0.022 : 0)
       }
     }
 
-    if (isSitting) {
+    if (effectivelySitting) {
       applyVRMSitPose(vrmRef.current, {
         elapsedTime: localTimeRef.current,
         ...breathParams,

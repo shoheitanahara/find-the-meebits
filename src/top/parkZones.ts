@@ -554,12 +554,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
   },
   /**
    * Music & Art: Culture の奥（−Z）。
-   * 西=Hip Hop Club、中央=Learn Art。東は Coming Soon。
+   * 西=Hip Hop Club、中央=Learn Art、東=Jazz Bar。
    */
   musicArt: {
     id: 'musicArt',
     title: { en: 'Music & Art District', ja: 'ミュージック＆アートエリア' },
-    attractionIds: ['hiphop', 'learnArt'],
+    attractionIds: ['hiphop', 'learnArt', 'jazzBar'],
     layout: MUSIC_ART_LAYOUT,
     perimeter: {
       theme: 'musicArt',
@@ -591,15 +591,7 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       [9, -5.5],
     ],
     trees: [],
-    comingSoonSlots: [
-      {
-        x: DEFAULT_PARK_ATTRACTION_SLOTS.east.x,
-        z: DEFAULT_PARK_ATTRACTION_SLOTS.east.z,
-        theme: 'musicArt',
-        title: { en: 'MIX LOUNGE', ja: 'ミックスラウンジ' },
-        subtitle: { en: 'Beats · Visuals · Chill', ja: 'ビート・映像・チル' },
-      },
-    ],
+    comingSoonSlots: [],
     gates: [
       {
         id: 'musicArt-to-culture',

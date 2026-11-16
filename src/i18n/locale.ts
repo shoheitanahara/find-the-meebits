@@ -80,6 +80,9 @@ export function getLocaleHomePath(
   if (segments.includes('learn-art')) {
     return locale === 'ja' ? '/jp/learn-art' : '/learn-art'
   }
+  if (segments.includes('jazz-bar')) {
+    return locale === 'ja' ? '/jp/jazz-bar' : '/jazz-bar'
+  }
 
   if (segments.includes('shore-fishing')) {
     return locale === 'ja' ? '/jp/shore-fishing' : '/shore-fishing'

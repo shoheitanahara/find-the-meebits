@@ -1,8 +1,11 @@
 /** Learn Art — 現代アート系ドキュメンタリー上映室（スクリーン向き客席）。 */
 
+/** Art プレイリスト https://www.youtube.com/watch?v=XxVo7wE9LJA&list=PLc1kOgyIbAmA */
+export const LEARN_ART_YOUTUBE_PLAYLIST_ID = 'PLc1kOgyIbAmA'
+/** プレイリスト先頭の代表動画（ロード時のシード） */
 export const LEARN_ART_YOUTUBE_VIDEO_ID = 'XxVo7wE9LJA'
-export const LEARN_ART_FILM_TITLE = 'Keith Haring — Street Art Boy'
-export const LEARN_ART_FILM_CREDIT = 'Documentary'
+export const LEARN_ART_FILM_TITLE = 'Art Documentary Playlist'
+export const LEARN_ART_FILM_CREDIT = 'Playlist'
 
 /** 客席の目標占有率（日替わりで前後に振る） */
 export const LEARN_ART_OCCUPANCY = 0.6

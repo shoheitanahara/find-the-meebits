@@ -67,6 +67,10 @@ const metadata = {
       title: 'Learn Art | Meebits Park',
       description: 'Sit in a gallery theater and watch contemporary art documentaries on the big screen.',
     },
+    jazzBar: {
+      title: 'Jazz Bar | Meebits Park',
+      description: 'Take a Blue Note-style seat and listen to a random jazz playlist on the stage screen.',
+    },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
       description: 'Spot fish shadows, cast from the shore, and reel in your catch in 90 seconds.',
@@ -140,6 +144,10 @@ const metadata = {
     learnArt: {
       title: 'Learn Art | Meebits Park',
       description: 'ギャラリー劇場で現代アートのドキュメンタリーを観よう。席について大きなスクリーンで。',
+    },
+    jazzBar: {
+      title: 'Jazz Bar | Meebits Park',
+      description: 'Blue Note風の席に座って、ジャズのプレイリストをランダム再生。',
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',

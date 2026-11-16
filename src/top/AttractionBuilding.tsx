@@ -24,6 +24,7 @@ import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
  * - starlight: アストロ中央のスターライトラッシュ
  * - cinema: アストロ西のドキュメンタリー映画館
  * - learnArt: Music & Art 中央の現代アート上映
+ * - jazzBar: Music & Art 東のジャズバー
  * - podcast: プラザ西のポッドキャストスタジオ
  * - pfp: カルチャー東のフォトブース
  */
@@ -65,6 +66,8 @@ export function AttractionBuilding({
                             ? '#e85cff'
                           : attraction.id === 'learnArt'
                             ? '#e85cff'
+                          : attraction.id === 'jazzBar'
+                            ? '#4a8cff'
                           : attraction.id === 'pfp'
                             ? '#8eb4e8'
                             : '#c4a060'
@@ -106,6 +109,8 @@ export function AttractionBuilding({
         <HipHopClubLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'learnArt' ? (
         <LearnArtLandmark color={attraction.color} accent={accent} />
+      ) : attraction.id === 'jazzBar' ? (
+        <JazzBarLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'pfp' ? (
         <PfpStudioLandmark color={attraction.color} accent={accent} />
       ) : (
@@ -984,6 +989,68 @@ function LearnArtLandmark({ color, accent }: { color: string; accent: string }) 
       <ChaseLights xs={[-2.4, -1.95, -1.5]} y={2.9} z={3.4} color={bulb} />
       <ChaseLights xs={[1.5, 1.95, 2.4]} y={2.9} z={3.4} color={bulb} />
       <pointLight position={[0, 3.8, 2.6]} intensity={12} distance={11} color={accent} />
+    </group>
+  )
+}
+
+/** Music & Art 東棟: Jazz Bar（ブルーノート風・暖色ランプ） */
+function JazzBarLandmark({ color, accent }: { color: string; accent: string }) {
+  const hull = '#0c1018'
+  const panel = '#1a2438'
+  const amber = '#e8a060'
+  return (
+    <group>
+      <mesh position={[0, 0.14, 0]} receiveShadow>
+        <boxGeometry args={[7.2, 0.28, 6.6]} />
+        <meshStandardMaterial color="#080c14" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.95, -0.25]} castShadow receiveShadow>
+        <boxGeometry args={[6.0, 3.5, 5.4]} />
+        <meshStandardMaterial color={color} roughness={0.82} />
+      </mesh>
+      <mesh position={[0, 3.9, -0.2]} castShadow>
+        <boxGeometry args={[6.5, 0.38, 5.8]} />
+        <meshStandardMaterial color={panel} roughness={0.55} metalness={0.35} />
+      </mesh>
+      {/* JAZZ 看板 */}
+      <mesh position={[0, 4.4, 2.15]} castShadow>
+        <boxGeometry args={[2.8, 0.65, 0.32]} />
+        <meshStandardMaterial color="#152030" emissive={accent} emissiveIntensity={0.5} />
+      </mesh>
+      <mesh position={[0, 4.4, 2.34]}>
+        <boxGeometry args={[2.3, 0.36, 0.08]} />
+        <meshStandardMaterial color={hull} emissive={amber} emissiveIntensity={0.32} />
+      </mesh>
+      {/* 正面の丸窓（クラブっぽさ） */}
+      {[-1.55, 1.55].map((x) => (
+        <mesh key={`round-${x}`} position={[x, 2.2, 2.48]} castShadow>
+          <cylinderGeometry args={[0.55, 0.55, 0.18, 24]} />
+          <meshStandardMaterial
+            color="#101820"
+            emissive={accent}
+            emissiveIntensity={0.2}
+            roughness={0.35}
+            metalness={0.4}
+          />
+        </mesh>
+      ))}
+      <mesh position={[0, 3.15, 2.7]} castShadow>
+        <boxGeometry args={[5.4, 0.14, 1.35]} />
+        <meshStandardMaterial color="#0a1018" roughness={0.5} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, 1.35, 2.6]} castShadow>
+        <boxGeometry args={[2.35, 2.3, 0.32]} />
+        <meshStandardMaterial color="#06080c" roughness={0.8} />
+      </mesh>
+      {[0, 1, 2].map((step) => (
+        <mesh key={step} position={[0, 0.12 + step * 0.14, 2.95 - step * 0.22]} castShadow receiveShadow>
+          <boxGeometry args={[4.2 - step * 0.26, 0.14, 0.46]} />
+          <meshStandardMaterial color="#141c28" roughness={0.85} />
+        </mesh>
+      ))}
+      <ChaseLights xs={[-2.2, -1.8, -1.4]} y={2.85} z={3.3} color={amber} />
+      <ChaseLights xs={[1.4, 1.8, 2.2]} y={2.85} z={3.3} color={amber} />
+      <pointLight position={[0, 3.7, 2.5]} intensity={11} distance={11} color={accent} />
     </group>
   )
 }

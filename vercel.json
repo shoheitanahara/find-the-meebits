@@ -36,6 +36,8 @@
     { "source": "/hiphop-club/(.*)", "destination": "/index.html" },
     { "source": "/learn-art", "destination": "/index.html" },
     { "source": "/learn-art/(.*)", "destination": "/index.html" },
+    { "source": "/jazz-bar", "destination": "/index.html" },
+    { "source": "/jazz-bar/(.*)", "destination": "/index.html" },
     { "source": "/shore-fishing", "destination": "/index.html" },
     { "source": "/shore-fishing/(.*)", "destination": "/index.html" },
     { "source": "/photo-booth", "destination": "/index.html" },
