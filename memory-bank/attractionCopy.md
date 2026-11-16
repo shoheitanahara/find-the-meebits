@@ -117,15 +117,15 @@
 | find | FIND ONE / ひとり探せ | 美術館の群衆、ひとりだけ違う |
 | traits | SAME TRAIT / 同じ特徴 | 帽子・髪・服、同じ顔を探す |
 | street | WRONG FACE / 見知らぬ顔 | 同じ路地の夜、見知らぬ顔 |
-| mountain | CLIMB TODAY / 今日の山 | 毎朝変わる道、頂まで跳ぶ |
+| mountain | CLIMB TODAY / 今日の山に挑む | 毎日変わるルート、頂まで跳ぶ |
 | neon | JELLY CLIMB / ゼリー登れ | ネオンのゼリーを積んで登る |
 | shooting | AIM & FIRE / 的を狙え | 動く的、金と赤 |
 | runway | TODAY'S COLOR / 今日の色 | 今夜の色、Meebitが歩く |
 | closet | TRY IT ON / きせ替え | 帽子も髪も変えられる |
 | pfp | ONE SQUARE SHOT / 正方形一枚 | スタジオで一枚、来場証明書付き |
 | fishing | FISH ON! / 魚影を狙え | 岸辺の魚影、一振り |
-| opensea | LIVE GALLERY / 彫刻ギャラリー | 台座の彫刻、売れた体も |
-| sergito | Sergito Awaits / Sergitoが待つ | 海辺の木の工房、棚の人形。本人に会う約束。MeebCo・役職・創業者は入口に出さない |
+| opensea | MEEBIT GALLERY / 彫刻ギャラリー | 台座に並ぶ彫刻、一体ずつ眺める |
+| sergito | SERGITO AWAITS / Sergitoが待つ | 海辺の木の工房。見た目に一言くれる。MeebCo・役職・創業者は入口に出さない |
 | starlight | STAR RAILS / 星のレール | レールに乗り、流れ星を撃つ |
-| cinema | ORIGINS / オリジンズ | はじまりの Meebits、大きなスクリーン |
+| cinema | FIRST MEEBITS / はじまりの映画 | はじまりの Meebits、大きなスクリーン |
 | podcast | ON AIR / オンエア | 席について再生、The Meebits Podcast |
