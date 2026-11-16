@@ -62,7 +62,16 @@ export function iconBesideEntrance(
 export type EntranceColors = {
   wall: string
   trim: string
+  /** chaseBulbs が true のときの電球色 */
   bulb: string
+}
+
+export type EntranceOptions = {
+  /**
+   * マーキー下縁の流れる電球。
+   * Music & Art 向けは true、Plaza など上質寄りは false（静かなレールだけ）。
+   */
+  chaseBulbs?: boolean
 }
 
 /** 本体シェルの中心とサイズ（高さだけ建物ごとに変える） */
@@ -88,7 +97,9 @@ export function addEntrance(
   builder: VoxelBuilder,
   { doorHalfWidth, frontZ }: LandmarkEntrance,
   colors: EntranceColors,
+  options: EntranceOptions = {},
 ) {
+  const chaseBulbs = options.chaseBulbs ?? true
   const { baseY, bodyFrontZ, doorHeight, bannerY, bannerHeight } = LANDMARK_LAYOUT
   const vestibuleTop = doorHeight + DOOR_LINTEL_HEIGHT
   const vestibuleHalfWidth = doorHalfWidth + DOOR_JAMB_WIDTH
@@ -112,6 +123,16 @@ export function addEntrance(
     [MARQUEE_HALF_WIDTH * 2, marqueeTop - vestibuleTop, marqueeFrontZ - bodyFrontZ],
     colors.trim,
   )
+
+  if (!chaseBulbs) {
+    // 上質寄り: 動く電球の代わりに細いレール
+    builder.box(
+      [0, vestibuleTop - 0.04, frontZ + 0.06],
+      [MARQUEE_HALF_WIDTH * 2 - 0.4, 0.06, 0.05],
+      colors.trim,
+    )
+    return
+  }
 
   // マーキー下縁の電球（入口の真上は空けて左右に流す）
   let chaseIndex = 0

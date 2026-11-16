@@ -3,6 +3,7 @@ import {
   DEFAULT_PARK_ATTRACTION_SLOTS,
   infoBoardNearEntrance,
 } from './parkAttractionSlots'
+import { EIGHTH_STREET_ICON } from './landmarks/eighthStreetModel'
 import { HIP_HOP_ICON } from './landmarks/hipHopClubModel'
 import { JAZZ_BAR_ICON } from './landmarks/jazzBarModel'
 import { LEARN_ART_ICON } from './landmarks/learnArtModel'
@@ -127,7 +128,11 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       halfDepth: 3.5,
       doorHalfWidth: 1.15,
       alcoveDepth: 2.3,
-      extraBoxes: [{ x: -3.4, z: -0.6, halfX: 2.0, halfZ: 2.4 }],
+      extraBoxes: [
+        { x: -3.4, z: -0.6, halfX: 2.0, halfZ: 2.4 },
+        // 建物横の街灯彫刻
+        EIGHTH_STREET_ICON,
+      ],
     },
     infoBoardLocal: infoBoardNearEntrance('left', 3.5),
   },
