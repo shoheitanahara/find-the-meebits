@@ -139,6 +139,19 @@ const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
     roadB: '#263042',
     roadCurb: '#4b86b4',
   },
+  jungle: {
+    ground: '#1e3020',
+    winterGround: '#1e3020',
+    // 外周も広葉樹の深い森
+    scenery: 'quietForest',
+    trunk: '#3e2c1e',
+    foliage: ['#163a1c', '#1e4a22', '#28582a', '#336834'],
+    bridgeColor: '#8c6f4b',
+    roadA: '#6c5a44',
+    roadB: '#63523d',
+    roadCurb: '#4b453e',
+    grass: { greens: ['#1f3a1c', '#274722', '#2f5428', '#386030'], tuft: '#447036', dirt: '#463826' },
+  },
   sea: {
     ground: '#081420',
     winterGround: '#081420',

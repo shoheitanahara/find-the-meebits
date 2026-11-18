@@ -57,6 +57,8 @@ import { ParkSnowCover } from './ParkSnowCover'
 import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
 import { ParkBenchProp } from './ParkBenchProp'
 import { ParkBackdrop } from './ParkBackdrop'
+import { JungleDistrictGround } from './JungleDistrictGround'
+import { JungleAnimals } from './jungle/JungleAnimals'
 import { buildParkGroveTreeModel, buildParkPineTreeModel } from './landmarks/parkTreeModel'
 import { VoxelModelMesh } from './voxel/VoxelModelMesh'
 import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
@@ -184,6 +186,7 @@ export function TopScene({
         seaGround={activeZoneId === 'sea'}
         astroGround={activeZoneId === 'astro'}
         musicArtGround={activeZoneId === 'musicArt'}
+        jungleGround={activeZoneId === 'jungle'}
         showFountain={zone.hasFountain}
       />
       {zone.perimeter ? (
@@ -228,6 +231,7 @@ export function TopScene({
         gates={zone.gates}
         showRailings={!zone.perimeter}
       />
+      {activeZoneId === 'jungle' ? <JungleAnimals /> : null}
       {zoneAttractions.map((attraction) => (
         <AttractionBuilding
           key={attraction.id}
@@ -275,7 +279,9 @@ export function TopScene({
                     ? lineup.astroVisitors
                     : activeZoneId === 'musicArt'
                       ? lineup.musicArtVisitors
-                      : lineup.visitors
+                      : activeZoneId === 'jungle'
+                        ? lineup.jungleVisitors
+                        : lineup.visitors
           }
           featuredId={lineup.featuredId}
           themeTrait={lineup.themeTrait}
@@ -386,6 +392,7 @@ function HubGround({
   seaGround = false,
   astroGround = false,
   musicArtGround = false,
+  jungleGround = false,
   showFountain,
 }: {
   featuredId: number
@@ -398,6 +405,7 @@ function HubGround({
   seaGround?: boolean
   astroGround?: boolean
   musicArtGround?: boolean
+  jungleGround?: boolean
   showFountain: boolean
 }) {
   const {
@@ -427,6 +435,8 @@ function HubGround({
         <AstroDistrictGround layout={layout} christmas={look.christmas} />
       ) : musicArtGround ? (
         <MusicArtDistrictGround layout={layout} christmas={look.christmas} />
+      ) : jungleGround ? (
+        <JungleDistrictGround layout={layout} christmas={look.christmas} />
       ) : (
         <>
           {/* エリア床（海・砂浜は置かない。外周は将来の崖・川） */}

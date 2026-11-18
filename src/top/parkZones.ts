@@ -2,11 +2,12 @@ import type { AttractionId } from './topStore'
 import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
 import { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
 import { SEA_PALM_TREE_XZ } from './seaPalms'
+import { JUNGLE_TREE_XZ } from './jungle/jungleConfig'
 
 export { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X }
 
 /** Park のエリア ID。1エリア最大3ゲーム。 */
-export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt'
+export type ParkZoneId = 'plaza' | 'mountain' | 'culture' | 'sea' | 'astro' | 'musicArt' | 'jungle'
 
 export type ParkZoneBounds = {
   boundsX: number
@@ -93,11 +94,14 @@ export type ParkZoneDef = {
  * 全区共通の床・園路スケルトン。
  * ゾーン差はテーマ（色・デコ・ゲート意匠）だけ。床の横幅は揃える。
  */
+/** 全ゾーン共通の床の中心 Z（ゲート看板の向き判定などで使う） */
+export const PARK_GROUND_Z = 1
+
 const SHARED_PARK_GROUND = {
   boundsX: 29,
   minZ: -20,
   maxZ: 16,
-  groundZ: 1,
+  groundZ: PARK_GROUND_Z,
   districtHalfX: 24,
   districtHalfZ: 24,
   plazaRadius: 22,
@@ -171,6 +175,17 @@ const MUSIC_ART_LAYOUT: ParkZoneLayout = {
   railingZ: 1,
   railingHalfLength: 15.5,
   pathEdgeX: 15,
+  treeX: 22.5,
+}
+
+/** Jungle: 同じ床幅。建物なし・柵の囲いに動物 */
+const JUNGLE_LAYOUT: ParkZoneLayout = {
+  ...SHARED_PARK_GROUND,
+  railingX: 26,
+  railingHalfThickness: 0.22,
+  railingZ: 1,
+  railingHalfLength: 15.5,
+  pathEdgeX: 21,
   treeX: 22.5,
 }
 
@@ -350,7 +365,8 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       openings: [
         // 東 → Astro
         { side: 'e', kind: 'bridge-gate', gateId: 'culture-to-astro' },
-        { side: 'w', kind: 'sealed' },
+        // 西 → Jungle
+        { side: 'w', kind: 'bridge-gate', gateId: 'culture-to-jungle' },
         // 奥（北 / −Z）→ Music & Art
         { side: 's', kind: 'bridge-gate', gateId: 'culture-to-musicArt' },
       ],
@@ -425,6 +441,21 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'MUSIC & ART DISTRICT', ja: 'ミュージック＆アートエリア' },
         subtitle: { en: 'Sound · Screen · Stage', ja: 'サウンド・スクリーン・ステージ' },
+      },
+      {
+        id: 'culture-to-jungle',
+        x: -26.4,
+        z: 1,
+        halfWidth: 2.55,
+        alcoveDepth: 2.8,
+        // 自然の岩門（Mountain の意匠を流用）
+        theme: 'mountain',
+        yaw: Math.PI,
+        targetZone: 'jungle',
+        // Jungle 東門すぐ内側・西向き
+        targetSpawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
+        label: { en: 'JUNGLE DISTRICT', ja: 'ジャングルエリア' },
+        subtitle: { en: 'Pigs · Cows · Sheep', ja: 'ブタ・ウシ・ヒツジ' },
       },
     ],
   },
@@ -609,6 +640,56 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       },
     ],
   },
+  /**
+   * Jungle: Culture の西。建物なしの動物園。
+   * 柵の囲いの中をボクセルの豚・牛・羊が歩き回る。
+   */
+  jungle: {
+    id: 'jungle',
+    title: { en: 'Jungle District', ja: 'ジャングルエリア' },
+    attractionIds: [],
+    layout: JUNGLE_LAYOUT,
+    perimeter: {
+      // 自然の崖・川（Mountain の外周キットを流用）
+      theme: 'mountain',
+      frontClearSides: ['n'],
+      openings: [
+        // 東 → Culture
+        { side: 'e', kind: 'bridge-gate', gateId: 'jungle-to-culture' },
+        { side: 'w', kind: 'sealed' },
+        { side: 's', kind: 'sealed' },
+      ],
+    },
+    spawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
+    hasFountain: false,
+    hasFeaturedBoard: false,
+    hasNpcCrowd: true,
+    benches: [],
+    planters: [],
+    lamps: [
+      [-9, -1.5],
+      [9, -1.5],
+      [-9, 3.5],
+      [9, 3.5],
+    ],
+    trees: JUNGLE_TREE_XZ,
+    gates: [
+      {
+        id: 'jungle-to-culture',
+        x: 25.6,
+        z: 1,
+        halfWidth: 2.6,
+        alcoveDepth: 2.0,
+        theme: 'culture',
+        yaw: Math.PI,
+        targetZone: 'culture',
+        // Culture 西門すぐ内側・東向き
+        targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
+        label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
+        subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
+      },
+    ],
+  },
 }
 
 export const DEFAULT_PARK_ZONE: ParkZoneId = 'plaza'
@@ -636,7 +717,8 @@ export function readStoredParkZone(): ParkZoneId {
       raw === 'culture' ||
       raw === 'sea' ||
       raw === 'astro' ||
-      raw === 'musicArt'
+      raw === 'musicArt' ||
+      raw === 'jungle'
     ) {
       return raw
     }

@@ -76,6 +76,8 @@ export function selectParkDialogueLines(
   const isSea = zoneId === 'sea'
   const isAstro = zoneId === 'astro'
   const isMusicArt = zoneId === 'musicArt'
+  /** 噴水や Plaza のゲームから遠いエリア（話題を雑談に回す） */
+  const isFarZone = isAstro || isMusicArt || zoneId === 'jungle'
 
   // クリスマスシーズンは通常挨拶に季節パターンを足す（必ず出るわけではない）
   const greetPool = isParkChristmasSeason()
@@ -95,12 +97,12 @@ export function selectParkDialogueLines(
   if (npc.isFeatured) {
     second =
       locale === 'ja'
-        ? isAstro || isMusicArt
+        ? isFarZone
           ? `広場の銅像、#${featuredId}。ぼく。ここまで来ると、別の人の話みたい。`
           : isMountain || isCulture || isSea
           ? `噴水の銅像、#${featuredId}。ぼく。遠くからだと信じにくいよね。`
           : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
-        : isAstro || isMusicArt
+        : isFarZone
           ? `Plaza statue’s #${featuredId}. That’s me. Feels like they’re talking about someone else out here.`
           : isMountain || isCulture || isSea
             ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
@@ -117,7 +119,7 @@ export function selectParkDialogueLines(
         ? pickLine(pools.gameRunway, seed, talkCount, 31)
         : isSea
           ? pickLine(pools.gameSergito, seed, talkCount, 31)
-          : isAstro || isMusicArt
+          : isFarZone
             ? pickLine(pools.flavor, seed, talkCount, 31)
             : pickLine(pools.gameFind, seed, talkCount, 31)
   } else if (branch === 4) {
@@ -127,13 +129,13 @@ export function selectParkDialogueLines(
         ? pickLine(pools.gameLookLocker, seed, talkCount, 37)
         : isSea
           ? pickLine(pools.gameSergito, seed, talkCount, 37)
-          : isAstro || isMusicArt
+          : isFarZone
             ? pickLine(pools.flavor, seed, talkCount, 37)
             : pickLine(pools.gameTraits, seed, talkCount, 37)
   } else if (branch === 5) {
     second = isMountain
       ? pickLine(pools.gameShooting, seed, talkCount, 41)
-      : isCulture || isSea || isAstro || isMusicArt
+      : isCulture || isSea || isFarZone
         ? pickLine(pools.flavor, seed, talkCount, 41)
         : pickLine(pools.gameStreet, seed, talkCount, 41)
   } else {

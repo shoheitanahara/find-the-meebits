@@ -26,6 +26,7 @@ export const DAILY_SEA_VISITOR_COUNT = 15
 export const DAILY_CULTURE_VISITOR_COUNT = 15
 export const DAILY_ASTRO_VISITOR_COUNT = 15
 export const DAILY_MUSIC_ART_VISITOR_COUNT = 15
+export const DAILY_JUNGLE_VISITOR_COUNT = 15
 /** 15体中8体をRobot / Visitorにする（奇数なので半数切り上げ）。 */
 export const DAILY_ASTRO_TYPE_COUNT = Math.ceil(DAILY_ASTRO_VISITOR_COUNT / 2)
 /** シー来場者は全員ビーチ服 */
@@ -34,6 +35,8 @@ export const SEA_BEACH_SHIRT_MIN_RATIO = 1
 export const CULTURE_SUIT_MIN_RATIO = 0.5
 /** ミュージック＆アート来場者のうちネックレスを最低この割合にする */
 export const MUSIC_ART_NECKLACE_MIN_RATIO = 0.5
+/** Jungle の迷彩柄の割合（残りは他の服装でばらつかせる） */
+export const JUNGLE_CAMO_MIN_RATIO = 0.7
 export const MEEBIT_ID_MAX = 20000
 
 const STORAGE_KEY = 'meebits-park-daily-v15'
@@ -76,6 +79,8 @@ export type DailyParkLineup = {
   astroVisitors: DailyVisitor[]
   /** ミュージック＆アートの日替わり来場者（ネックレス持ち）。 */
   musicArtVisitors: DailyVisitor[]
+  /** ジャングルの日替わり来場者（迷彩柄が多め）。 */
+  jungleVisitors: DailyVisitor[]
 }
 
 type StoredDailyLineup = {
@@ -88,6 +93,7 @@ type StoredDailyLineup = {
   cultureVisitors: DailyVisitor[]
   astroVisitors: DailyVisitor[]
   musicArtVisitors: DailyVisitor[]
+  jungleVisitors: DailyVisitor[]
 }
 
 let memoryCache: DailyParkLineup | null = null
@@ -147,6 +153,12 @@ export function isMusicArtNecklace(traits: MeebitTraitMap | null | undefined) {
     necklace !== 'None' &&
     necklace !== 'No Necklace'
   )
+}
+
+/** Jungle エリアで優先する迷彩柄（服・ズボン・帽子などの色が Camo 系）。 */
+export function isJungleCamo(traits: MeebitTraitMap | null | undefined) {
+  if (!traits) return false
+  return Object.values(traits).some((value) => typeof value === 'string' && /camo/i.test(value))
 }
 
 /** Astro エリアで優先する Type。 */
@@ -238,6 +250,21 @@ function pickMusicArtVisitors(
     DAILY_MUSIC_ART_VISITOR_COUNT,
     isMusicArtNecklace,
     MUSIC_ART_NECKLACE_MIN_RATIO,
+  )
+}
+
+function pickJungleVisitors(
+  dataset: MeebitTraitsDataset,
+  availableIds: number[],
+  rng: () => number,
+): DailyVisitor[] {
+  return pickShirtBiasedVisitors(
+    dataset,
+    availableIds,
+    rng,
+    DAILY_JUNGLE_VISITOR_COUNT,
+    isJungleCamo,
+    JUNGLE_CAMO_MIN_RATIO,
   )
 }
 
@@ -494,6 +521,12 @@ function buildLineupFromScratch(
   const musicArtVisitors = pickMusicArtVisitors(dataset, musicArtPool, musicArtRng)
   for (const visitor of musicArtVisitors) used.add(visitor.meebitNumber)
 
+  // ジャングル: 迷彩柄が多め
+  const jungleRng = createSeededRng(hashStringToSeed(`meebits-park-jungle:${dateKey}`))
+  const junglePool = allOtherIds.filter((id) => !used.has(id))
+  const jungleVisitors = pickJungleVisitors(dataset, junglePool, jungleRng)
+  for (const visitor of jungleVisitors) used.add(visitor.meebitNumber)
+
   return {
     dateKey,
     featuredId,
@@ -505,6 +538,7 @@ function buildLineupFromScratch(
     cultureVisitors,
     astroVisitors,
     musicArtVisitors,
+    jungleVisitors,
   }
 }
 
@@ -536,6 +570,8 @@ function readStoredLineup(dateKey: string): StoredDailyLineup | null {
       parsed.astroVisitors.length !== DAILY_ASTRO_VISITOR_COUNT ||
       !Array.isArray(parsed.musicArtVisitors) ||
       parsed.musicArtVisitors.length !== DAILY_MUSIC_ART_VISITOR_COUNT ||
+      !Array.isArray(parsed.jungleVisitors) ||
+      parsed.jungleVisitors.length !== DAILY_JUNGLE_VISITOR_COUNT ||
       !parsed.visitors.some((visitor) => visitor.meebitNumber === parsed.featuredId)
     ) {
       return null
@@ -559,6 +595,7 @@ function writeStoredLineup(lineup: DailyParkLineup) {
       cultureVisitors: lineup.cultureVisitors,
       astroVisitors: lineup.astroVisitors,
       musicArtVisitors: lineup.musicArtVisitors,
+      jungleVisitors: lineup.jungleVisitors,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   } catch {
@@ -588,6 +625,7 @@ function hydrateFromStored(
     cultureVisitors: stored.cultureVisitors,
     astroVisitors: stored.astroVisitors,
     musicArtVisitors: stored.musicArtVisitors,
+    jungleVisitors: stored.jungleVisitors,
   }
 }
 

@@ -87,6 +87,16 @@ const ZONES: Record<string, ZonePaint> = {
     labelEn: 'Music & Art District',
     labelJa: 'ミュージック＆アートエリア',
   },
+  jungle: {
+    id: 'jungle',
+    fill: '#3e7a38',
+    fillDeep: '#1e3a1c',
+    rim: '#8ab860',
+    banner: '#e8c870',
+    ink: '#101a0c',
+    labelEn: 'Jungle District',
+    labelJa: 'ジャングルエリア',
+  },
 }
 
 type Blob = { x: number; y: number; w: number; h: number }
@@ -107,7 +117,7 @@ export function drawParkMap(
   const mapW = mapRight - mapLeft
   const mapH = mapBottom - mapTop
 
-  // 上 Culture / その奥 Music & Art / 左 Sea / 中央 Plaza / 右 Mountain / 右上 Astro
+  // 上 Culture / その奥 Music & Art / Culture の左 Jungle / 左 Sea / 中央 Plaza / 右 Mountain / 右上 Astro
   // 全体を下げつつ、Music & Art ↔ Culture の間隔を空ける
   const yShift = mapH * 0.1
   const plaza: Blob = {
@@ -127,6 +137,13 @@ export function drawParkMap(
     y: mapTop + mapH * 0.08 + yShift,
     w: mapW * 0.24,
     h: mapH * 0.18,
+  }
+  // Culture の左（西）。Sea の上に置く
+  const jungle: Blob = {
+    x: mapLeft + mapW * 0.13,
+    y: mapTop + mapH * 0.2 + yShift,
+    w: mapW * 0.22,
+    h: mapH * 0.2,
   }
   const sea: Blob = {
     x: mapLeft + mapW * 0.15,
@@ -218,6 +235,12 @@ export function drawParkMap(
     [musicArt.x + musicArt.w * 0.08, musicArt.y + musicArt.h * 0.42],
   ])
 
+  strokePath(ctx, [
+    [culture.x - culture.w * 0.42, culture.y],
+    [jungle.x + jungle.w * 0.42, jungle.y + jungle.h * 0.1],
+  ])
+
+  drawZoneBlob(ctx, jungle, ZONES.jungle)
   drawZoneBlob(ctx, culture, ZONES.culture)
   drawZoneBlob(ctx, musicArt, ZONES.musicArt)
   drawZoneBlob(ctx, sea, ZONES.sea)
@@ -228,12 +251,14 @@ export function drawParkMap(
   // エリアごとのランドマーク（ラベルより上）
   drawLandmarkPlaza(ctx, plaza.x, plaza.y - plaza.h * 0.18)
   drawLandmarkCulture(ctx, culture.x, culture.y - culture.h * 0.22)
+  drawLandmarkJungle(ctx, jungle.x, jungle.y - jungle.h * 0.12)
   drawLandmarkMusicArt(ctx, musicArt.x, musicArt.y - musicArt.h * 0.1)
   drawLandmarkMountain(ctx, mountain.x, mountain.y - mountain.h * 0.18)
   drawLandmarkSea(ctx, sea.x, sea.y - sea.h * 0.12)
   drawLandmarkAstro(ctx, astro.x, astro.y - astro.h * 0.18)
 
   paintZoneLabel(ctx, culture.x, culture.y + culture.h * 0.2, ZONES.culture, locale)
+  paintZoneLabel(ctx, jungle.x, jungle.y + jungle.h * 0.24, ZONES.jungle, locale)
   paintZoneLabel(ctx, musicArt.x, musicArt.y + musicArt.h * 0.22, ZONES.musicArt, locale)
   paintZoneLabel(ctx, sea.x, sea.y + sea.h * 0.2, ZONES.sea, locale)
   paintZoneLabel(ctx, mountain.x, mountain.y + mountain.h * 0.2, ZONES.mountain, locale)
@@ -514,6 +539,39 @@ function drawLandmarkCulture(ctx: CanvasRenderingContext2D, x: number, y: number
     ctx.arc(x + 14, y + 10 + i * 7, 2, 0, Math.PI * 2)
     ctx.fill()
   }
+}
+
+/** Jungle: 丸い木2本と柵 */
+function drawLandmarkJungle(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  const trees: Array<[number, number, number]> = [
+    [-26, -4, 22],
+    [20, -10, 26],
+  ]
+  for (const [dx, dy, r] of trees) {
+    ctx.fillStyle = '#5a3e28'
+    ctx.fillRect(x + dx - 4, y + dy, 8, r + 8)
+    ctx.fillStyle = 'rgba(48, 110, 52, 0.95)'
+    ctx.beginPath()
+    ctx.arc(x + dx, y + dy - r * 0.2, r, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = 'rgba(90, 150, 78, 0.9)'
+    ctx.beginPath()
+    ctx.arc(x + dx - r * 0.3, y + dy - r * 0.45, r * 0.45, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  // 手前の柵
+  ctx.strokeStyle = '#c8a06a'
+  ctx.lineWidth = 3
+  ctx.beginPath()
+  ctx.moveTo(x - 46, y + 30)
+  ctx.lineTo(x + 46, y + 30)
+  ctx.moveTo(x - 46, y + 40)
+  ctx.lineTo(x + 46, y + 40)
+  for (let px = -44; px <= 44; px += 22) {
+    ctx.moveTo(x + px, y + 24)
+    ctx.lineTo(x + px, y + 46)
+  }
+  ctx.stroke()
 }
 
 function drawLandmarkMountain(ctx: CanvasRenderingContext2D, x: number, y: number) {

@@ -1,7 +1,7 @@
 import { Text } from '@react-three/drei'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { InstancedMesh, Object3D } from 'three'
-import type { ParkGateDef } from './parkZones'
+import { PARK_GROUND_Z, type ParkGateDef } from './parkZones'
 import {
   blockKindFromTint,
   createBlockMaterial,
@@ -31,6 +31,24 @@ type VoxelCell = {
   y: number
   z: number
   color: string
+}
+
+/**
+ * 看板を裏返す（ローカル +X 向きにする）か。
+ * 既定の看板はローカル −X を向く。読ませたい向きは
+ * - 東西の門: エリアの内側（プレイヤーが近づいてくる側）
+ * - 手前・奥の門: カメラ側（+Z）
+ * 門の位置と yaw から判定するので、新しい門を足しても個別指定は要らない。
+ */
+export function shouldFlipGateSign(gate: Pick<ParkGateDef, 'x' | 'z' | 'yaw'>) {
+  const yaw = gate.yaw ?? 0
+  // ローカル −X をワールドへ（Three.js の Y 回転）
+  const faceX = -Math.cos(yaw)
+  const faceZ = Math.sin(yaw)
+  const isSideGate = Math.abs(gate.x) > Math.abs(gate.z - PARK_GROUND_Z)
+  const wantX = isSideGate ? -Math.sign(gate.x) : 0
+  const wantZ = isSideGate ? 0 : 1
+  return faceX * wantX + faceZ * wantZ < 0
 }
 
 /** ゾーン間ゲート（門柱＋アーチ＋看板） */
@@ -77,9 +95,9 @@ function MountainPortalGate({
   const faceSign = -1
   const corridorHalf = gate.halfWidth * 0.52
   const rockZ = gate.halfWidth * 0.98
-  const keepsExistingSignDirection = gate.id === 'astro-to-mountain'
-  const signFaceSign = keepsExistingSignDirection ? -faceSign : faceSign
-  const signRotationY = keepsExistingSignDirection ? Math.PI / 2 : -Math.PI / 2
+  const flipSign = shouldFlipGateSign(gate)
+  const signFaceSign = flipSign ? -faceSign : faceSign
+  const signRotationY = flipSign ? Math.PI / 2 : -Math.PI / 2
 
   return (
     <group>
@@ -92,17 +110,7 @@ function MountainPortalGate({
       {/* アーチ梁（単位ボクセル） */}
       <VoxelArch halfSpan={gate.halfWidth * 0.72} height={3.35} />
 
-      {/* ポータル面 */}
-      <mesh position={[0, 1.65, 0]}>
-        <boxGeometry args={[0.1, 3.1, corridorHalf * 2]} />
-        <meshStandardMaterial
-          color={ACCENT}
-          emissive={ACCENT}
-          emissiveIntensity={0.55}
-          transparent
-          opacity={0.3}
-        />
-      </mesh>
+      {/* 通路の先が見通せるよう、門の中に膜（半透明の板）は張らない */}
       <pointLight
         position={[faceSign * 0.7, 2.1, 0]}
         color="#ffe2a8"
@@ -129,8 +137,8 @@ function MountainPortalGate({
         </Text>
       </group>
 
-      {/* 背後の尾根シルエット（エリア側） */}
-      <VoxelRidge position={[-faceSign * 1.35, 0, 0]} />
+      {/* 背後の尾根シルエット（エリア側）。通路の幅だけ谷にして先を見通せるようにする */}
+      <VoxelRidge position={[-faceSign * 1.35, 0, 0]} gapHalf={corridorHalf + 0.15} />
     </group>
   )
 }
@@ -291,7 +299,17 @@ function VoxelArch({ halfSpan, height }: { halfSpan: number; height: number }) {
   return <VoxelMesh cells={cells} />
 }
 
-function VoxelRidge({ position }: { position: [number, number, number] }) {
+/**
+ * 門の背後の尾根。gapHalf（m）より内側は空けて、通路の先が見える谷間にする。
+ * 谷の縁がいちばん高く、外へ行くほど低くなる。
+ */
+function VoxelRidge({
+  position,
+  gapHalf,
+}: {
+  position: [number, number, number]
+  gapHalf: number
+}) {
   const cells: VoxelCell[] = []
   const push = (ix: number, iy: number, iz: number, color: string) => {
     cells.push({
@@ -302,16 +320,20 @@ function VoxelRidge({ position }: { position: [number, number, number] }) {
     })
   }
 
-  for (let iz = -5; iz <= 5; iz++) {
-    const peak = 4 + (Math.abs(iz) < 2 ? 2 : Math.abs(iz) < 4 ? 1 : 0)
+  for (let iz = -6; iz <= 5; iz++) {
+    const z = Math.abs((iz + 0.5) * VOX)
+    if (z < gapHalf) continue
+    const fromGap = z - gapHalf
+    const peak = 4 + (fromGap < 0.5 ? 2 : fromGap < 1.0 ? 1 : 0)
     for (let iy = 0; iy < peak; iy++) {
       const color =
         iy >= peak - 1 ? SNOW : iy >= peak - 2 ? STONE_LIGHT : iy < 2 ? DIRT_DARK : STONE
       push(0, iy, iz, color)
-      if (Math.abs(iz) < 4 && iy < peak - 1) {
+      // 谷の縁ほど厚く
+      if (fromGap < 1.0 && iy < peak - 1) {
         push(1, iy, iz, iy < 2 ? DIRT : GRAVEL)
       }
-      if (Math.abs(iz) < 3 && iy < 3) {
+      if (fromGap < 0.5 && iy < 3) {
         push(-1, iy, iz, MOSS_DARK)
       }
     }
@@ -445,12 +467,11 @@ function CulturePortalGate({
   gate: ParkGateDef
   locale: 'en' | 'ja'
 }) {
-  // 接近側がローカル +X になる門は看板だけ反転（Astro 西門・Music & Art 手前門）
   const faceSign = -1
-  const flipSignTowardApproach =
-    gate.id === 'astro-to-culture' || gate.id === 'musicArt-to-culture'
-  const signFaceSign = flipSignTowardApproach ? -faceSign : faceSign
-  const signRotationY = flipSignTowardApproach ? Math.PI / 2 : -Math.PI / 2
+  // 看板の向きは門の位置と yaw から自動で決める
+  const flipSign = shouldFlipGateSign(gate)
+  const signFaceSign = flipSign ? -faceSign : faceSign
+  const signRotationY = flipSign ? Math.PI / 2 : -Math.PI / 2
   const pillarZ = gate.halfWidth * 0.88
   const accent = '#6a9ee8'
   const marble = '#2a4068'
@@ -885,7 +906,8 @@ function PlazaReturnGate({
 
       <group
         position={[faceSign * 0.45, 0, 0]}
-        rotation={[0, gate.id === 'culture-to-plaza' ? -Math.PI / 2 : Math.PI / 2, 0]}
+        // 看板の向きは門の位置と yaw から自動で決める（東西＝エリア内側、手前・奥＝カメラ側）
+        rotation={[0, shouldFlipGateSign(gate) ? Math.PI / 2 : -Math.PI / 2, 0]}
       >
         <Text position={[0, 4.25, 0]} fontSize={0.26} color="#f5e6c8" anchorX="center" anchorY="middle">
           {gate.label[locale]}

@@ -41,6 +41,39 @@ export function applyZoneLook(zoneId: ParkZoneId, baseLook: ParkLook): ParkLook 
     }
   }
 
+  if (zoneId === 'jungle') {
+    return {
+      ...baseLook,
+      // 森の夜：深い緑の霧と、焚き火のような暖色
+      backgroundColor: '#0c1a16',
+      fogColor: '#13261e',
+      fogNear: baseLook.fogNear,
+      fogFar: baseLook.fogFar,
+      showStars: true,
+      hemisphereSky: '#7a9a88',
+      hemisphereGround: '#22301c',
+      ambientColor: '#b8ccb0',
+      ambientIntensity: baseLook.ambientIntensity,
+      hemisphereIntensity: baseLook.hemisphereIntensity,
+      directionalIntensity: baseLook.directionalIntensity * 0.95,
+      directionalColor: '#d8e4c8',
+      accentPointColor: '#ffb868',
+      accentPointIntensity: Math.min(baseLook.accentPointIntensity, 26),
+      environmentPreset: 'night',
+      environmentIntensity: Math.min(baseLook.environmentIntensity, 0.48),
+      districtColor: '#2f5a2a',
+      plazaColor: '#3a6a32',
+      pathColor: '#7a6448',
+      paverColorA: '#6c583e',
+      paverColorB: '#5c4a34',
+      pathEdgeColor: '#8ab860',
+      fountainRingColor: '#5a6848',
+      lampLightIntensity: baseLook.lampLightIntensity,
+      lampEmissiveIntensity: baseLook.lampEmissiveIntensity,
+      benchProp: 'campRock' satisfies ParkBenchPropKind,
+    }
+  }
+
   if (zoneId === 'culture') {
     return {
       ...baseLook,

@@ -23,7 +23,8 @@ function isParkZoneId(value: unknown): value is ParkZoneId {
     value === 'culture' ||
     value === 'sea' ||
     value === 'astro' ||
-    value === 'musicArt'
+    value === 'musicArt' ||
+    value === 'jungle'
   )
 }
 

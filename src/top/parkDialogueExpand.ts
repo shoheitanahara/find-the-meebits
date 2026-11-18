@@ -582,6 +582,26 @@ const JA_MUSIC_ART_FLAVOR = [
   '波形の床、踏むだけで気分が出る。',
 ]
 
+const JA_JUNGLE_GREET = [
+  'ブタ、こっち見てた。',
+  '牛って、近くで見ると大きい。',
+  '羊、ずっと草食べてる？',
+  'この柵、つい覗きたくなる。',
+  '迷彩で来たら、森にとけた。',
+  '土の道、歩きやすい。',
+  'あの羊、さっきから動かない。',
+  '夜の牧場、静かでいい。',
+]
+
+const JA_JUNGLE_FLAVOR = [
+  '豚の囲い、ちょっと泥っぽい。',
+  'ここ、迷彩の人が多くない？',
+  'いつか餌やりできたらいいな。',
+  '牛が歩き出すと、つい目で追う。',
+  'カルチャーの隣に森があるの、意外。',
+  '羊の毛、さわってみたい。',
+]
+
 // ─── English（場面は共有。直訳しない・口語で書く）──────────────────────
 
 const EN_PLAZA_GREET = [
@@ -1121,6 +1141,26 @@ const EN_THEME_ASTRO = [
   'Came all this way. Still seeing plenty of {value}.',
 ]
 
+const EN_JUNGLE_GREET = [
+  'That pig was staring at me.',
+  'Cows are bigger up close.',
+  'Do the sheep ever stop eating?',
+  'Can’t help peeking over the fence.',
+  'Wore camo. Kind of blend in here.',
+  'Nice to walk on dirt for once.',
+  'That sheep hasn’t moved in ages.',
+  'Quiet night at the farm.',
+]
+
+const EN_JUNGLE_FLAVOR = [
+  'The pig pen’s a little muddy.',
+  'Lot of camo out here, right?',
+  'Hope they let us feed them someday.',
+  'Once a cow starts walking, I just watch.',
+  'Didn’t expect a forest next to Culture.',
+  'I kind of want to pet the sheep.',
+]
+
 const EN_MUSIC_ART_GREET = [
   'You hear that?',
   'Love this magenta floor.',
@@ -1150,8 +1190,13 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
   const isSea = zone === 'sea'
   const isAstro = zone === 'astro'
   const isMusicArt = zone === 'musicArt'
+  const isJungle = zone === 'jungle'
 
-  const greetings = isMt
+  const greetings = isJungle
+    ? isJa
+      ? JA_JUNGLE_GREET
+      : EN_JUNGLE_GREET
+    : isMt
     ? isJa
       ? JA_MT_GREET
       : EN_MT_GREET
@@ -1175,7 +1220,11 @@ function buildPools(lang: Lang, zone: ParkZoneId): ParkDialoguePools {
               ? JA_PLAZA_GREET
               : EN_PLAZA_GREET
 
-  const flavor = isMt
+  const flavor = isJungle
+    ? isJa
+      ? JA_JUNGLE_FLAVOR
+      : EN_JUNGLE_FLAVOR
+    : isMt
     ? isJa
       ? JA_MT_FLAVOR
       : EN_MT_FLAVOR
