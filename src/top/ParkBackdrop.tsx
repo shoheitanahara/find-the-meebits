@@ -1,6 +1,6 @@
 /**
  * パーク外側の背景（グラデ空・地続きの大地・壁外すぐ近くを囲む森シルエット）。
- * すべて InstancedMesh（影なし・アニメなし）で 4 ドローコールに抑え、
+ * すべて InstancedMesh（影なし・アニメなし）で数ドローコールに抑え、
  * 密度を上げても軽く保つ。
  */
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
@@ -60,7 +60,24 @@ type BackdropTheme = {
   roadA: string
   roadB: string
   roadCurb: string
+  /**
+   * 壁の外の地面を草地にする（森のゾーンだけ）。
+   * 1m タイルを緩やかなノイズで塗り分け、草むら・土・冬の雪だまりを散らす。
+   */
+  grass?: GrassTheme
 }
+
+type GrassTheme = {
+  /** 暗い〜明るい草色（ノイズで塗り分ける） */
+  greens: readonly string[]
+  /** 草むらの葉先 */
+  tuft: string
+  /** 所々に出る土 */
+  dirt: string
+}
+
+/** 夜の雪だまり（白すぎると浮くので少し沈める） */
+const SNOW_COLORS = ['#b8c4d0', '#a8b4c2'] as const
 
 const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
   plaza: {
@@ -73,6 +90,7 @@ const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
     roadA: '#645c60',
     roadB: '#5c5458',
     roadCurb: '#a68c54',
+    grass: { greens: ['#24391f', '#2c4524', '#34512a', '#3d5c30'], tuft: '#4a6e36', dirt: '#4a3b2a' },
   },
   mountain: {
     ground: '#263125',
@@ -84,6 +102,7 @@ const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
     roadA: '#6c5a44',
     roadB: '#63523d',
     roadCurb: '#4b453e',
+    grass: { greens: ['#203520', '#284126', '#2f4c2c', '#375633'], tuft: '#43663a', dirt: '#463a2c' },
   },
   culture: {
     ground: '#162030',
@@ -95,6 +114,7 @@ const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
     roadA: '#2a3d5f',
     roadB: '#263756',
     roadCurb: '#5c82b8',
+    grass: { greens: ['#22371f', '#2a4225', '#324d2b', '#3a5730'], tuft: '#466a38', dirt: '#46392a' },
   },
   musicArt: {
     ground: '#161120',
@@ -106,6 +126,7 @@ const THEME_BY_ZONE: Record<ParkZoneId, BackdropTheme> = {
     roadA: '#352242',
     roadB: '#2f1e3b',
     roadCurb: '#7a458e',
+    grass: { greens: ['#1a2820', '#203026', '#26382c', '#2c3f31'], tuft: '#344a3a', dirt: '#2e2630' },
   },
   astro: {
     ground: '#111520',
@@ -177,7 +198,11 @@ export function ParkBackdrop({
         <OuterGround
           layout={layout}
           spec={spec}
-          color={tintOuterGround(look.christmas ? theme.winterGround : theme.ground, timeOfDay)}
+          color={tintOuterGround(
+            // 草地のゾーンは冬でも地面は緑（雪は草地タイルの吹きだまりで表す）
+            theme.grass ? theme.grass.greens[0] : look.christmas ? theme.winterGround : theme.ground,
+            timeOfDay,
+          )}
         />
       ) : null}
       <OuterScenery
@@ -295,8 +320,6 @@ type GateRoadSpec = {
   startZ: number
   dirX: number
   dirZ: number
-  /** カーブ方向の符号（画面中央側へ寄らず外側へ自然に逃がす） */
-  curveSign: number
   side: CardinalSide
 }
 
@@ -315,7 +338,6 @@ function getGateRoadSpecs(spec: PerimeterSpec | null): GateRoadSpec[] {
         startZ: placement.z,
         dirX: 1,
         dirZ: 0,
-        curveSign: -1,
         side: 'e',
       })
     } else if (opening.side === 'w') {
@@ -324,7 +346,6 @@ function getGateRoadSpecs(spec: PerimeterSpec | null): GateRoadSpec[] {
         startZ: placement.z,
         dirX: -1,
         dirZ: 0,
-        curveSign: -1,
         side: 'w',
       })
     } else if (opening.side === 's') {
@@ -334,7 +355,6 @@ function getGateRoadSpecs(spec: PerimeterSpec | null): GateRoadSpec[] {
         dirX: 0,
         dirZ: -1,
         // 左寄り北門からそのままさらに少し左奥へ曲がる
-        curveSign: -1,
         side: 's',
       })
     } else if (opening.side === 'n') {
@@ -343,7 +363,6 @@ function getGateRoadSpecs(spec: PerimeterSpec | null): GateRoadSpec[] {
         startZ: placement.z + halfLen,
         dirX: 0,
         dirZ: 1,
-        curveSign: 1,
         side: 'n',
       })
     }
@@ -351,27 +370,22 @@ function getGateRoadSpecs(spec: PerimeterSpec | null): GateRoadSpec[] {
   return roads
 }
 
-/** 道沿い距離 d(m) における緩やかなカーブの横ずれ */
-function gateRoadLateralOffset(road: GateRoadSpec, d: number) {
-  if (d <= 6.0) return 0
-  const t = Math.min(1, (d - 6.0) / 22)
-  return road.curveSign * t * t * 3.8
-}
+/** 橋の先の道は真っ直ぐ伸ばす（曲げると作り物っぽく見える） */
+const GATE_ROAD_REACH = 28
 
-/** 道の延長線・カーブに沿って木を置かない判定 */
-function isOnGateRoad(x: number, z: number, roads: GateRoadSpec[]) {
+/** 道の延長線上（halfWidth 以内）か。木は 3.1、草地は道幅ぶんだけ避ける */
+function isOnGateRoad(x: number, z: number, roads: GateRoadSpec[], halfWidth = 3.1) {
   for (const road of roads) {
     const dx = x - road.startX
     const dz = z - road.startZ
     // 進行方向距離 d、横方向距離 perp
     const d = dx * road.dirX + dz * road.dirZ
-    if (d < -1.5 || d > 28) continue
-    const curve = gateRoadLateralOffset(road, Math.max(0, d))
+    if (d < -1.5 || d > GATE_ROAD_REACH) continue
     // 進行方向に対し左／右の法線
     const perpX = -road.dirZ
     const perpZ = road.dirX
-    const lateral = dx * perpX + dz * perpZ - curve
-    if (Math.abs(lateral) < 3.1) return true
+    const lateral = dx * perpX + dz * perpZ
+    if (Math.abs(lateral) < halfWidth) return true
   }
   return false
 }
@@ -397,9 +411,8 @@ function pushGateRoads(
 
     // 橋のデッキ端の内側（-0.45m）から重ねて開始し、隙間をゼロにする
     for (let d = -0.45; d <= totalLen; d += step) {
-      const lat = isSea ? 0 : gateRoadLateralOffset(road, Math.max(0, d))
-      const cx = road.startX + road.dirX * d + perpX * lat
-      const cz = road.startZ + road.dirZ * d + perpZ * lat
+      const cx = road.startX + road.dirX * d
+      const cz = road.startZ + road.dirZ * d
 
       if (isSea) {
         // 海へ伸びる木製桟橋（橋デッキに連続させる）
@@ -500,8 +513,8 @@ function pushBroadleafTree(
   theme: BackdropTheme,
   christmas: boolean,
 ) {
-  // 低い木でも塀（2.85〜3.6m）から葉が覗き、高い木は塀を十分に超える高さにする
-  const trunkH = (2.35 + n1 * 0.65) * scale
+  // 幹は短め（背が高すぎると作り物っぽい）。樹冠の上部が塀から覗く程度
+  const trunkH = (1.18 + n1 * 0.33) * scale
   const trunkW = 0.36 * scale
   const leafDark = theme.foliage[0]
   const leafMid = theme.foliage[Math.floor(n1 * 2) + 1] ?? theme.foliage[1]
@@ -593,8 +606,11 @@ function pushBroadleafTree(
   }
 }
 
+/** 幹を短くしたぶん、針葉樹の葉の段を下げる量 */
+const PINE_TRUNK_DROP = 0.8
+
 /**
- * 針葉樹（塀をしっかり超える 5 段シルエット）。
+ * 針葉樹（5 段シルエット）。
  */
 function pushPineTree(
   trunks: BoxInstance[],
@@ -607,7 +623,8 @@ function pushPineTree(
   theme: BackdropTheme,
   christmas: boolean,
 ) {
-  const trunkH = (2.5 + n1 * 0.65) * scale
+  // 幹は短め。葉の段も同じだけ下げる
+  const trunkH = (1.25 + n1 * 0.33) * scale
   const trunkW = 0.34 * scale
   trunks.push({
     x,
@@ -619,7 +636,7 @@ function pushPineTree(
     color: theme.trunk,
   })
 
-  const lift = n1 * 0.55
+  const lift = n1 * 0.55 - PINE_TRUNK_DROP
   const tiers = [
     { dy: 1.45 + lift, w: 2.0, h: 0.68, color: theme.foliage[0] },
     { dy: 2.02 + lift, w: 1.68, h: 0.66, color: theme.foliage[0] },
@@ -658,6 +675,89 @@ function pushPineTree(
   })
 }
 
+/** 0〜1 の滑らかな値ノイズ（格子点ハッシュを双線形補間） */
+function valueNoise(x: number, z: number) {
+  const x0 = Math.floor(x)
+  const z0 = Math.floor(z)
+  const fx = x - x0
+  const fz = z - z0
+  const sx = fx * fx * (3 - 2 * fx)
+  const sz = fz * fz * (3 - 2 * fz)
+  const a = hash2(x0, z0)
+  const b = hash2(x0 + 1, z0)
+  const c = hash2(x0, z0 + 1)
+  const d = hash2(x0 + 1, z0 + 1)
+  return (a * (1 - sx) + b * sx) * (1 - sz) + (c * (1 - sx) + d * sx) * sz
+}
+
+/** 草むら1つ（細い葉を数本、高さ違いで束ねる） */
+function pushTuft(out: BoxInstance[], x: number, z: number, n: number, grass: GrassTheme) {
+  const blades = 2 + Math.floor(n * 3)
+  for (let i = 0; i < blades; i += 1) {
+    const a = n * 17 + i * 2.1
+    const r = 0.08 + ((i * 0.37 + n) % 1) * 0.14
+    const h = 0.18 + ((n * 7 + i * 0.29) % 1) * 0.26
+    out.push({
+      x: x + Math.cos(a) * r,
+      y: GROUND_BASE_Y + h * 0.5,
+      z: z + Math.sin(a) * r,
+      sx: 0.05,
+      sy: h,
+      sz: 0.05,
+      color: i % 2 === 0 ? grass.tuft : grass.greens[grass.greens.length - 1],
+    })
+  }
+}
+
+/**
+ * 壁の外の草地。1m タイルで隙間なく敷き、緩やかなノイズで濃淡・土・雪を塗り分ける。
+ * タイル同士は重ならない（同じ高さの面が重なると z-fighting になる）。
+ */
+function pushGrassGround(
+  ground: BoxInstance[],
+  bounds: { minX: number; maxX: number; minZ: number; maxZ: number },
+  isInside: (x: number, z: number) => boolean,
+  roadSpecs: GateRoadSpec[],
+  grass: GrassTheme,
+  christmas: boolean,
+) {
+  for (let gx = Math.floor(bounds.minX); gx < bounds.maxX; gx += 1) {
+    for (let gz = Math.floor(bounds.minZ); gz < bounds.maxZ; gz += 1) {
+      const x = gx + 0.5
+      const z = gz + 0.5
+      if (isInside(x, z)) continue
+      // 道の舗装の下は空ける（縁石の外から草）
+      if (isOnGateRoad(x, z, roadSpecs, 2.4)) continue
+
+      // 大きな濃淡のうねり＋小さなむら
+      const broad = valueNoise(x * 0.18, z * 0.18)
+      const fine = hash2(gx * 1.7, gz * 2.3)
+      const shade = broad * 0.75 + fine * 0.25
+      const dirtNoise = valueNoise(x * 0.33 + 40, z * 0.33 - 12)
+      const snowNoise = valueNoise(x * 0.26 - 9, z * 0.26 + 31)
+
+      let color: string
+      let height = 0.02 + fine * 0.025
+      if (christmas && snowNoise < 0.3) {
+        color = SNOW_COLORS[fine < 0.5 ? 0 : 1]
+        height += 0.03
+      } else if (dirtNoise > 0.82) {
+        color = grass.dirt
+        height = 0.015
+      } else {
+        const index = Math.min(grass.greens.length - 1, Math.floor(shade * grass.greens.length))
+        color = grass.greens[index]
+      }
+      ground.push({ x, y: GROUND_BASE_Y + height * 0.5, z, sx: 1, sy: height, sz: 1, color })
+
+      // 草むら（雪の上には出さない）
+      if (color !== SNOW_COLORS[0] && color !== SNOW_COLORS[1] && fine > 0.68) {
+        pushTuft(ground, x + (fine - 0.84) * 0.6, z + (broad - 0.5) * 0.6, fine, grass)
+      }
+    }
+  }
+}
+
 function buildSceneryInstances({
   layout,
   spec,
@@ -668,10 +768,16 @@ function buildSceneryInstances({
   spec: PerimeterSpec | null
   theme: BackdropTheme
   christmas: boolean
-}): { trunks: BoxInstance[]; crowns: BoxInstance[]; roads: BoxInstance[] } {
+}): {
+  trunks: BoxInstance[]
+  crowns: BoxInstance[]
+  roads: BoxInstance[]
+  ground: BoxInstance[]
+} {
   const trunks: BoxInstance[] = []
   const crowns: BoxInstance[] = []
   const roads: BoxInstance[] = []
+  const ground: BoxInstance[] = []
   const cz = layout.groundZ
   const roadSpecs = getGateRoadSpecs(spec)
 
@@ -679,7 +785,7 @@ function buildSceneryInstances({
 
   // Sea: 外周の森・島シルエットは置かない（桟橋道だけ）
   if (theme.scenery === 'seaIslets') {
-    return { trunks, crowns, roads }
+    return { trunks, crowns, roads, ground }
   }
 
   const wallOuterX = spec
@@ -697,6 +803,24 @@ function buildSceneryInstances({
   // 左右の壁外はカメラに映る手前側（cz + 14）まで寄せる
   const maxZ = cz + 14
   const step = theme.scenery === 'craterRocks' ? 5.2 : 2.75
+
+  if (theme.grass) {
+    // 森の帯より少し外まで草地を敷く（その先は霧と単色の地面に溶かす）
+    const grassBand = maxBand + 4
+    pushGrassGround(
+      ground,
+      {
+        minX: -(wallOuterX + grassBand),
+        maxX: wallOuterX + grassBand,
+        minZ: wallOuterBackZ - grassBand,
+        maxZ: maxZ + 4,
+      },
+      (x, z) => Math.abs(x) < wallOuterX + 0.2 && z > wallOuterBackZ - 0.2,
+      roadSpecs,
+      theme.grass,
+      christmas,
+    )
+  }
 
   for (let gx = minX; gx <= maxX; gx += step) {
     for (let gz = minZ; gz <= maxZ; gz += step) {
@@ -753,10 +877,15 @@ function buildSceneryInstances({
       } else {
         pushBroadleafTree(trunks, crowns, x, z, scale, n1, n2, n3, theme, christmas)
       }
+      // 根元の下草（幹がいきなり地面から生えて見えないように）
+      if (theme.grass) {
+        pushTuft(ground, x + 0.35 * scale, z + 0.2, n2, theme.grass)
+        pushTuft(ground, x - 0.3 * scale, z - 0.25, n3, theme.grass)
+      }
     }
   }
 
-  return { trunks, crowns, roads }
+  return { trunks, crowns, roads, ground }
 }
 
 function OuterScenery({
@@ -770,13 +899,14 @@ function OuterScenery({
   theme: BackdropTheme
   christmas: boolean
 }) {
-  const { trunks, crowns, roads } = useMemo(
+  const { trunks, crowns, roads, ground } = useMemo(
     () => buildSceneryInstances({ layout, spec, theme, christmas }),
     [layout, spec, theme, christmas],
   )
 
   return (
     <group>
+      <StaticVoxelBatch boxes={ground} />
       <StaticVoxelBatch boxes={roads} />
       <StaticVoxelBatch boxes={trunks} />
       <StaticVoxelBatch boxes={crowns} />

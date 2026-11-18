@@ -1,6 +1,6 @@
 import { Text, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, type ReactNode } from 'react'
 import type { Mesh } from 'three'
 import type { Attraction } from './topConfig'
 import { VisitPassPromoBoard } from './VisitPassPromoBoard'
@@ -8,15 +8,28 @@ import { VoxelBlockMat } from './VoxelBlockMat'
 import type { BlockKind } from '../mountain/config'
 import { getNeonBlockMaterial } from '../mountain/neonBlockMaterials'
 import { buildEighthStreetModel, EIGHTH_STREET_ICON } from './landmarks/eighthStreetModel'
-import { buildHipHopClubModel, HIP_HOP_ICON } from './landmarks/hipHopClubModel'
-import { buildJazzBarModel, JAZZ_BAR_ICON } from './landmarks/jazzBarModel'
+import { buildHipHopClubModel } from './landmarks/hipHopClubModel'
+import { buildJazzBarModel } from './landmarks/jazzBarModel'
 import { buildPodcastStudioModel } from './landmarks/podcastStudioModel'
 import {
   LANDMARK_LAYOUT,
   type LandmarkEntrance,
   type LandmarkIconPlacement,
 } from './landmarks/landmarkParts'
-import { buildLearnArtModel, LEARN_ART_ICON } from './landmarks/learnArtModel'
+import { buildLearnArtModel } from './landmarks/learnArtModel'
+import {
+  buildMeetSergitoModel,
+  SERGITO_ICON,
+  SERGITO_STATUE_BASE_Y,
+} from './landmarks/meetSergitoModel'
+import { buildOpenSeaMarketModel, OPEN_SEA_LOGO } from './landmarks/openSeaMarketModel'
+import { buildShoreFishingModel, SHORE_FISHING_ICON } from './landmarks/shoreFishingModel'
+import { buildShootingGalleryModel } from './landmarks/shootingGalleryModel'
+import { buildRunwayModel } from './landmarks/runwayModel'
+import { buildLookLockerModel } from './landmarks/lookLockerModel'
+import { buildPhotoBoothModel } from './landmarks/photoBoothModel'
+import { SERGITO_MEEBIT_ID } from '../meetSergito/config'
+import { VrmSculpture } from '../world/VrmSculpture'
 import type { VoxelModel } from './voxel/voxelBuilder'
 import { VoxelModelMesh } from './voxel/VoxelModelMesh'
 
@@ -77,7 +90,7 @@ export function AttractionBuilding({
                           : attraction.id === 'hiphop'
                             ? '#e85cff'
                           : attraction.id === 'learnArt'
-                            ? '#e85cff'
+                            ? '#d8c8a8'
                           : attraction.id === 'jazzBar'
                             ? '#4a8cff'
                           : attraction.id === 'pfp'
@@ -103,19 +116,41 @@ export function AttractionBuilding({
           iconLightColor="#ffd2a8"
         />
       ) : attraction.id === 'neon' ? (
-        <JerryMountainLandmark accent={accent} />
+        <JerryMountainLandmark accent={accent} footprint={attraction.footprint} />
       ) : attraction.id === 'runway' ? (
-        <RunwayLandmark color={attraction.color} accent={accent} />
+        <VoxelLandmark build={buildRunwayModel} footprint={attraction.footprint} />
       ) : attraction.id === 'closet' ? (
-        <TraitMuseumLandmark color={attraction.color} accent={accent} />
+        <VoxelLandmark build={buildLookLockerModel} footprint={attraction.footprint} />
       ) : attraction.id === 'sergito' ? (
-        <MeetSergitoLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+        <VoxelLandmark
+          build={buildMeetSergitoModel}
+          footprint={attraction.footprint}
+          icon={SERGITO_ICON}
+          iconLightColor="#ffd8a8"
+        >
+          {/* 切り株の台座に立つ木彫りの Sergito（正面を向かせる） */}
+          <VrmSculpture
+            meebitId={SERGITO_MEEBIT_ID}
+            position={[SERGITO_ICON.x, SERGITO_STATUE_BASE_Y, SERGITO_ICON.z]}
+            pedestal="light"
+            facingY={0}
+            sculptureTone="wood"
+            hidePedestal
+          />
+        </VoxelLandmark>
       ) : attraction.id === 'fishing' ? (
-        <ShoreFishingLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+        <VoxelLandmark
+          build={buildShoreFishingModel}
+          footprint={attraction.footprint}
+          icon={SHORE_FISHING_ICON}
+          iconLightColor="#bfe8ff"
+        />
       ) : attraction.id === 'opensea' ? (
-        <OpenSeaMarketLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+        <VoxelLandmark build={buildOpenSeaMarketModel} footprint={attraction.footprint}>
+          <OpenSeaLogoSign />
+        </VoxelLandmark>
       ) : attraction.id === 'shooting' ? (
-        <ShootingGalleryLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
+        <VoxelLandmark build={buildShootingGalleryModel} footprint={attraction.footprint} />
       ) : attraction.id === 'starlight' ? (
         <StarlightDomeLandmark color={attraction.color} accent={accent} />
       ) : attraction.id === 'cinema' ? (
@@ -123,30 +158,20 @@ export function AttractionBuilding({
       ) : attraction.id === 'podcast' ? (
         <VoxelLandmark build={buildPodcastStudioModel} footprint={attraction.footprint} />
       ) : attraction.id === 'hiphop' ? (
-        <VoxelLandmark
-          build={buildHipHopClubModel}
-          footprint={attraction.footprint}
-          icon={HIP_HOP_ICON}
-          iconLightColor="#ffd0f4"
-        />
+        <VoxelLandmark build={buildHipHopClubModel} footprint={attraction.footprint} />
       ) : attraction.id === 'learnArt' ? (
-        <VoxelLandmark
-          build={buildLearnArtModel}
-          footprint={attraction.footprint}
-          icon={LEARN_ART_ICON}
-          iconLightColor="#fff2e0"
-        />
+        <VoxelLandmark build={buildLearnArtModel} footprint={attraction.footprint} />
       ) : attraction.id === 'jazzBar' ? (
-        <VoxelLandmark
-          build={buildJazzBarModel}
-          footprint={attraction.footprint}
-          icon={JAZZ_BAR_ICON}
-          iconLightColor="#ffd9a0"
-        />
+        <VoxelLandmark build={buildJazzBarModel} footprint={attraction.footprint} />
       ) : attraction.id === 'pfp' ? (
-        <PfpStudioLandmark color={attraction.color} accent={accent} />
+        <VoxelLandmark build={buildPhotoBoothModel} footprint={attraction.footprint} />
       ) : (
-        <MountainLandmark color={attraction.color} snowColor={attraction.roofColor} accent={accent} />
+        <MountainLandmark
+          color={attraction.color}
+          snowColor={attraction.roofColor}
+          accent={accent}
+          footprint={attraction.footprint}
+        />
       )}
 
       <EntrancePortal
@@ -187,10 +212,12 @@ function MountainLandmark({
   color: _color,
   snowColor: _snowColor,
   accent,
+  footprint,
 }: {
   color: string
   snowColor: string
   accent: string
+  footprint: Attraction['footprint']
 }) {
   const tiers: Array<{
     y: number
@@ -233,12 +260,23 @@ function MountainLandmark({
         <boxGeometry args={[0.9, 0.55, 0.06]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} />
       </mesh>
+      <MountainTrailPortal
+        frontZ={footprint.halfDepth}
+        doorHalfWidth={footprint.doorHalfWidth}
+        accent={accent}
+      />
     </group>
   )
 }
 
 /** テトリス風ネオン積み塔 — コースと同じゼリーブロック質感 */
-function JerryMountainLandmark({ accent }: { accent: string }) {
+function JerryMountainLandmark({
+  accent,
+  footprint,
+}: {
+  accent: string
+  footprint: Attraction['footprint']
+}) {
   const blocks: Array<{
     x: number
     y: number
@@ -307,6 +345,105 @@ function JerryMountainLandmark({ accent }: { accent: string }) {
       </mesh>
       <pointLight position={[0, 3.2, 1.2]} intensity={7} distance={10} color="#a04090" />
       <pointLight position={[-1.5, 2.4, 0.8]} intensity={4.5} distance={8} color="#3a8068" />
+      <JellyGatePillars frontZ={footprint.halfDepth} doorHalfWidth={footprint.doorHalfWidth} />
+    </group>
+  )
+}
+
+/**
+ * Mt. Meeb の入口: 石の柱とまぐさ石の坑道ゲート。
+ * 扉板が山の手前に浮いて見えないよう、扉の左右と上を石で囲む。
+ */
+function MountainTrailPortal({
+  frontZ,
+  doorHalfWidth,
+  accent,
+}: {
+  frontZ: number
+  doorHalfWidth: number
+  accent: string
+}) {
+  const pillarWidth = 0.7
+  const depth = 1.3
+  const height = 3.3
+  const x = doorHalfWidth + pillarWidth / 2
+  const z = frontZ - depth / 2
+  return (
+    <group>
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh position={[side * x, height / 2, z]} castShadow receiveShadow>
+            <boxGeometry args={[pillarWidth, height, depth]} />
+            <VoxelBlockMat kind="stone" />
+          </mesh>
+          {/* 柱の足元の石 */}
+          <mesh position={[side * (x + 0.35), 0.3, z + 0.1]} castShadow receiveShadow>
+            <boxGeometry args={[0.6, 0.6, 0.8]} />
+            <VoxelBlockMat kind="stone" />
+          </mesh>
+          {/* 柱のランタン（点滅なし） */}
+          <mesh position={[side * (x + pillarWidth / 2 + 0.08), 2.55, frontZ - 0.2]}>
+            <boxGeometry args={[0.2, 0.28, 0.2]} />
+            <meshStandardMaterial
+              color="#ffd8a0"
+              emissive="#ffb860"
+              emissiveIntensity={1.2}
+              roughness={0.5}
+            />
+          </mesh>
+        </group>
+      ))}
+      {/* まぐさ石と木の梁 */}
+      <mesh position={[0, height + 0.25, z]} castShadow receiveShadow>
+        <boxGeometry args={[doorHalfWidth * 2 + pillarWidth * 2 + 0.3, 0.5, depth]} />
+        <VoxelBlockMat kind="stone" />
+      </mesh>
+      <mesh position={[0, height - 0.1, frontZ - 0.02]} castShadow>
+        <boxGeometry args={[doorHalfWidth * 2 + 0.1, 0.2, 0.2]} />
+        <meshStandardMaterial color="#5a4030" roughness={0.85} />
+      </mesh>
+      <pointLight position={[0, 2.6, frontZ + 0.8]} intensity={4} distance={6} color={accent} />
+    </group>
+  )
+}
+
+const LINTEL_STEPS = [0, 1, 2, 3, 4, 5] as const
+
+/** Jerry Mountain の入口: ゼリーブロックを積んだ門柱とまぐさ */
+function JellyGatePillars({ frontZ, doorHalfWidth }: { frontZ: number; doorHalfWidth: number }) {
+  const cube = 0.62
+  const x = doorHalfWidth + cube / 2 + 0.02
+  const z = frontZ - cube / 2 - 0.05
+  const columns: Array<{ side: -1 | 1; kinds: BlockKind[] }> = [
+    { side: -1, kinds: ['stone', 'grass', 'darkStone', 'sand', 'gravel'] },
+    { side: 1, kinds: ['dirt', 'sand', 'stone', 'grass', 'darkStone'] },
+  ]
+  return (
+    <group>
+      {columns.map(({ side, kinds }) =>
+        kinds.map((kind, i) => (
+          <mesh
+            key={`${side}-${i}`}
+            position={[side * x, cube / 2 + i * cube, z]}
+            castShadow
+            receiveShadow
+            material={getNeonBlockMaterial(kind, i === kinds.length - 1 ? 'top' : 'shaft')}
+          >
+            <boxGeometry args={[cube - 0.02, cube - 0.02, cube - 0.02]} />
+          </mesh>
+        )),
+      )}
+      {/* まぐさ: 左右の柱の中心どうしを等間隔のブロックでつなぐ */}
+      {LINTEL_STEPS.map((t) => (
+        <mesh
+          key={`lintel-${t}`}
+          position={[-x + (2 * x * t) / (LINTEL_STEPS.length - 1), cube * 5 + cube / 2, z]}
+          castShadow
+          material={getNeonBlockMaterial(t % 2 === 0 ? 'path' : 'gravel', 'top')}
+        >
+          <boxGeometry args={[cube - 0.04, cube - 0.02, cube - 0.02]} />
+        </mesh>
+      ))}
     </group>
   )
 }
@@ -407,201 +544,14 @@ function MuseumLandmark({
   )
 }
 
-/** Meebits Runway: 暗いパビリオン＋発光の白ランウェイ */
-function RunwayLandmark({ color, accent }: { color: string; accent: string }) {
+/** OpenSea Market 屋根上のロゴ看板（透過 PNG を紺の看板板に貼る） */
+function OpenSeaLogoSign() {
+  const map = useTexture('/brand-opensea-floor.png')
   return (
-    <group>
-      <mesh position={[0, 0.12, 0]} receiveShadow>
-        <boxGeometry args={[7.2, 0.24, 7.4]} />
-        <meshStandardMaterial color="#0a0a0a" roughness={0.92} />
-      </mesh>
-      <mesh position={[0, 0.18, 0.4]} receiveShadow>
-        <boxGeometry args={[1.35, 0.08, 5.8]} />
-        <meshStandardMaterial
-          color={accent}
-          emissive={accent}
-          emissiveIntensity={0.85}
-          roughness={0.35}
-        />
-      </mesh>
-      <mesh position={[-0.72, 0.2, 0.4]}>
-        <boxGeometry args={[0.06, 0.04, 5.8]} />
-        <meshStandardMaterial color="#111" emissive="#ffffff" emissiveIntensity={0.35} />
-      </mesh>
-      <mesh position={[0.72, 0.2, 0.4]}>
-        <boxGeometry args={[0.06, 0.04, 5.8]} />
-        <meshStandardMaterial color="#111" emissive="#ffffff" emissiveIntensity={0.35} />
-      </mesh>
-
-      <mesh position={[-3.1, 1.7, -0.4]} castShadow>
-        <boxGeometry args={[0.55, 3.4, 6.2]} />
-        <meshStandardMaterial color={color} roughness={0.88} />
-      </mesh>
-      <mesh position={[3.1, 1.7, -0.4]} castShadow>
-        <boxGeometry args={[0.55, 3.4, 6.2]} />
-        <meshStandardMaterial color={color} roughness={0.88} />
-      </mesh>
-      <mesh position={[0, 3.55, -0.6]} castShadow>
-        <boxGeometry args={[6.8, 0.35, 6.6]} />
-        <meshStandardMaterial color="#111" metalness={0.2} roughness={0.7} />
-      </mesh>
-      <mesh position={[0, 2.4, -3.35]} castShadow>
-        <boxGeometry args={[6.2, 4.6, 0.4]} />
-        <meshStandardMaterial color="#050505" roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 2.55, -3.12]}>
-        <boxGeometry args={[4.2, 2.4, 0.08]} />
-        <meshStandardMaterial color="#f8f8f8" emissive="#ffffff" emissiveIntensity={0.55} />
-      </mesh>
-      <mesh position={[0, 0.95, 3.35]} castShadow>
-        <boxGeometry args={[2.8, 1.9, 0.28]} />
-        <meshStandardMaterial color="#101010" roughness={0.9} />
-      </mesh>
-    </group>
-  )
-}
-
-/** Sea 右上: Meet Sergito 工房（小さなコテージ＋作業窓） */
-function MeetSergitoLandmark({
-  color,
-  roofColor,
-  accent,
-}: {
-  color: string
-  roofColor: string
-  accent: string
-}) {
-  return (
-    <group>
-      <mesh position={[0, 0.14, 0]} receiveShadow>
-        <boxGeometry args={[7.0, 0.28, 7.2]} />
-        <meshStandardMaterial color="#8a7060" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
-        <boxGeometry args={[6.0, 3.5, 5.8]} />
-        <meshStandardMaterial color={color} roughness={0.88} />
-      </mesh>
-      <mesh position={[0, 3.75, -0.35]} castShadow>
-        <boxGeometry args={[6.4, 0.35, 6.2]} />
-        <meshStandardMaterial color={roofColor} roughness={0.55} metalness={0.15} />
-      </mesh>
-      <mesh position={[0, 2.2, -3.05]} castShadow>
-        <boxGeometry args={[5.2, 3.0, 0.35]} />
-        <meshStandardMaterial color="#a89078" roughness={0.92} />
-      </mesh>
-      {[-1.4, 1.4].map((x) => (
-        <mesh key={x} position={[x, 2.35, -2.88]}>
-          <boxGeometry args={[1.0, 1.2, 0.08]} />
-          <meshStandardMaterial
-            color="#fff4d8"
-            emissive={accent}
-            emissiveIntensity={0.35}
-            roughness={0.45}
-          />
-        </mesh>
-      ))}
-      <mesh position={[2.4, 1.6, 2.6]} castShadow>
-        <boxGeometry args={[1.4, 0.9, 1.0]} />
-        <meshStandardMaterial color="#9a8068" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 0.9, 3.35]} castShadow>
-        <boxGeometry args={[2.6, 1.8, 0.28]} />
-        <meshStandardMaterial color="#806850" roughness={0.88} />
-      </mesh>
-      <pointLight position={[0, 2.6, 1.2]} intensity={9} distance={10} color={accent} />
-    </group>
-  )
-}
-
-/** Sea 中央: OpenSea Market（青系・帆船ロゴ） */
-function OpenSeaMarketLandmark({
-  color,
-  roofColor,
-  accent,
-}: {
-  color: string
-  roofColor: string
-  accent: string
-}) {
-  return (
-    <group>
-      <mesh position={[0, 0.12, 0]} receiveShadow>
-        <boxGeometry args={[7.0, 0.24, 6.8]} />
-        <meshStandardMaterial color="#2a4058" roughness={0.88} />
-      </mesh>
-      <mesh position={[0, 1.65, -0.15]} castShadow receiveShadow>
-        <boxGeometry args={[5.8, 3.1, 5.2]} />
-        <meshStandardMaterial color={color} roughness={0.72} metalness={0.12} />
-      </mesh>
-      <mesh position={[0, 3.35, -0.15]} castShadow>
-        <boxGeometry args={[6.2, 0.28, 5.5]} />
-        <meshStandardMaterial color={roofColor} roughness={0.4} metalness={0.22} />
-      </mesh>
-      {/* 円形ロゴ板 + OpenSea ブランド画像（入口タイトルは TitleBanner に任せる） */}
-      <mesh position={[0, 1.55, 2.52]} castShadow>
-        <cylinderGeometry args={[0.72, 0.72, 0.1, 24]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} roughness={0.4} />
-      </mesh>
-      <OpenSeaLogoBillboard />
-      <pointLight position={[0, 2.8, 2.2]} intensity={10} distance={12} color={accent} />
-      <pointLight position={[-2.2, 2.4, 1.2]} intensity={4} distance={8} color="#9ad0ff" />
-    </group>
-  )
-}
-
-function OpenSeaLogoBillboard() {
-  const map = useTexture('/brand-opensea.png')
-  return (
-    <mesh position={[0, 1.55, 2.585]}>
-      <planeGeometry args={[1.28, 0.45]} />
+    <mesh position={[OPEN_SEA_LOGO.x, OPEN_SEA_LOGO.y, OPEN_SEA_LOGO.z]}>
+      <planeGeometry args={[OPEN_SEA_LOGO.width, OPEN_SEA_LOGO.height]} />
       <meshBasicMaterial map={map} transparent toneMapped={false} />
     </mesh>
-  )
-}
-
-/** Sea 西棟: 波打ち際の釣り小屋 */
-function ShoreFishingLandmark({
-  color,
-  roofColor,
-  accent,
-}: {
-  color: string
-  roofColor: string
-  accent: string
-}) {
-  return (
-    <group>
-      <mesh position={[0, 0.12, 0]} receiveShadow>
-        <boxGeometry args={[6.8, 0.24, 6.6]} />
-        <meshStandardMaterial color="#a89068" roughness={0.92} />
-      </mesh>
-      <mesh position={[0, 1.55, -0.2]} castShadow receiveShadow>
-        <boxGeometry args={[5.4, 2.9, 5.0]} />
-        <meshStandardMaterial color={color} roughness={0.88} />
-      </mesh>
-      {/* 片流れ屋根 */}
-      <mesh position={[0, 3.2, -0.15]} rotation={[0.12, 0, 0]} castShadow>
-        <boxGeometry args={[5.9, 0.22, 5.5]} />
-        <meshStandardMaterial color={roofColor} roughness={0.5} metalness={0.12} />
-      </mesh>
-      {/* 竿立て（入口中央を空けて左右へ） */}
-      {([-2.35, -1.75] as const).map((x) => (
-        <mesh key={x} position={[x, 1.7, 2.15]} rotation={[0.35, 0, 0.08]} castShadow>
-          <cylinderGeometry args={[0.035, 0.04, 2.4, 6]} />
-          <meshStandardMaterial color="#5a4030" roughness={0.8} />
-        </mesh>
-      ))}
-      <mesh position={[2.15, 1.1, 2.1]} castShadow>
-        <boxGeometry args={[1.5, 0.7, 1.1]} />
-        <meshStandardMaterial color="#8a7058" roughness={0.85} />
-      </mesh>
-      {/* 浮きバケツ */}
-      <mesh position={[-2.45, 0.55, 2.35]} castShadow>
-        <cylinderGeometry args={[0.35, 0.3, 0.55, 10]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.2} roughness={0.55} />
-      </mesh>
-      <pointLight position={[0, 2.5, 1.4]} intensity={8} distance={10} color={accent} />
-    </group>
   )
 }
 
@@ -784,12 +734,15 @@ function VoxelLandmark({
   footprint,
   icon,
   iconLightColor,
+  children,
 }: {
   build: (entrance: LandmarkEntrance) => VoxelModel
   footprint: Attraction['footprint']
   /** 建物横のテーマ彫刻（省略可） */
   icon?: LandmarkIconPlacement
   iconLightColor?: string
+  /** ボクセル以外の付属物（ロゴ画像・VRM 像など） */
+  children?: ReactNode
 }) {
   const { doorHalfWidth, halfDepth } = footprint
   const model = useMemo(
@@ -800,6 +753,7 @@ function VoxelLandmark({
   return (
     <group>
       <VoxelModelMesh model={model} />
+      {children}
       {icon ? (
         <pointLight
           position={[icon.x, ICON_LIGHT.height, icon.z + ICON_LIGHT.forward]}
@@ -849,180 +803,6 @@ function StarlightDomeLandmark({ color, accent }: { color: string; accent: strin
         <torusGeometry args={[0.55, 0.06, 8, 20]} />
         <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.65} />
       </mesh>
-    </group>
-  )
-}
-
-function ShootingGalleryLandmark({
-  color,
-  roofColor,
-  accent,
-}: {
-  color: string
-  roofColor: string
-  accent: string
-}) {
-  return (
-    <group>
-      <mesh position={[0, 0.12, 0]} receiveShadow>
-        <boxGeometry args={[7.0, 0.24, 7.2]} />
-        <meshStandardMaterial color="#4a3a28" roughness={0.92} />
-      </mesh>
-      <mesh position={[0, 1.7, -0.4]} castShadow receiveShadow>
-        <boxGeometry args={[6.2, 3.2, 5.6]} />
-        <meshStandardMaterial color={color} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 3.55, -0.45]} castShadow>
-        <boxGeometry args={[6.8, 0.4, 6.2]} />
-        <meshStandardMaterial color={roofColor} roughness={0.7} metalness={0.08} />
-      </mesh>
-      {/* 正面カウンター */}
-      <mesh position={[0, 0.85, 2.85]} castShadow>
-        <boxGeometry args={[4.6, 1.1, 0.55]} />
-        <meshStandardMaterial color="#5a4030" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 1.45, 2.85]} castShadow>
-        <boxGeometry args={[4.8, 0.12, 0.7]} />
-        <meshStandardMaterial color="#7a5840" roughness={0.78} />
-      </mesh>
-      {/* 的レーン看板 */}
-      <mesh position={[0, 2.55, -2.95]} castShadow>
-        <boxGeometry args={[4.2, 1.6, 0.18]} />
-        <meshStandardMaterial color="#2a2018" roughness={0.88} />
-      </mesh>
-      {[-1.2, 0, 1.2].map((x) => (
-        <mesh key={x} position={[x, 2.55, -2.82]}>
-          <circleGeometry args={[0.32, 16]} />
-          <meshStandardMaterial
-            color={x === 0 ? '#e8b060' : '#c45a4a'}
-            emissive={x === 0 ? accent : '#c45a4a'}
-            emissiveIntensity={0.45}
-            roughness={0.5}
-          />
-        </mesh>
-      ))}
-      {/* 樽 */}
-      {[-2.6, 2.6].map((x) => (
-        <mesh key={`barrel-${x}`} position={[x, 0.55, 2.4]} castShadow>
-          <cylinderGeometry args={[0.42, 0.48, 1.0, 12]} />
-          <meshStandardMaterial color="#6a4a30" roughness={0.88} />
-        </mesh>
-      ))}
-      {/* 木箱 */}
-      <mesh position={[-2.5, 0.4, 1.2]} castShadow>
-        <boxGeometry args={[0.9, 0.8, 0.9]} />
-        <meshStandardMaterial color="#7a5a38" roughness={0.9} />
-      </mesh>
-      <mesh position={[2.5, 0.35, 1.0]} castShadow>
-        <boxGeometry args={[0.85, 0.7, 0.85]} />
-        <meshStandardMaterial color="#6a5030" roughness={0.9} />
-      </mesh>
-      <pointLight position={[0, 2.8, 1.5]} intensity={10} distance={11} color={accent} />
-    </group>
-  )
-}
-
-/** Culture 東棟: フォトブース（カラーパネル＋カメラブース） */
-function PfpStudioLandmark({ color, accent }: { color: string; accent: string }) {
-  const swatches = ['#638596', '#f2c94c', '#8550a0', '#e07a6a', '#3d6bb3']
-  return (
-    <group>
-      <mesh position={[0, 0.14, 0]} receiveShadow>
-        <boxGeometry args={[7.0, 0.28, 7.2]} />
-        <meshStandardMaterial color="#121820" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
-        <boxGeometry args={[6.2, 3.5, 5.8]} />
-        <meshStandardMaterial color={color} roughness={0.82} metalness={0.14} />
-      </mesh>
-      <mesh position={[0, 3.75, -0.35]} castShadow>
-        <boxGeometry args={[6.6, 0.32, 6.2]} />
-        <meshStandardMaterial color="#0a1018" metalness={0.3} roughness={0.5} />
-      </mesh>
-      {/* 背景カラーウォール */}
-      <mesh position={[0, 2.1, -3.05]} castShadow>
-        <boxGeometry args={[5.4, 2.8, 0.2]} />
-        <meshStandardMaterial color="#638596" roughness={0.7} />
-      </mesh>
-      {swatches.map((hex, index) => (
-        <mesh key={hex} position={[-2.0 + index * 1.0, 3.45, 2.95]} castShadow>
-          <boxGeometry args={[0.72, 0.55, 0.12]} />
-          <meshStandardMaterial color={hex} roughness={0.55} metalness={0.1} />
-        </mesh>
-      ))}
-      {/* カメラ三脚風 */}
-      <mesh position={[2.1, 1.35, 2.55]} castShadow>
-        <cylinderGeometry args={[0.06, 0.1, 2.2, 8]} />
-        <meshStandardMaterial color="#2a3038" metalness={0.55} roughness={0.4} />
-      </mesh>
-      <mesh position={[2.1, 2.55, 2.55]} castShadow>
-        <boxGeometry args={[0.55, 0.35, 0.7]} />
-        <meshStandardMaterial color="#1a1e24" metalness={0.45} roughness={0.35} />
-      </mesh>
-      <mesh position={[2.1, 2.55, 2.95]}>
-        <circleGeometry args={[0.18, 16]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.55} />
-      </mesh>
-      <pointLight position={[0, 2.9, 1.2]} intensity={11} distance={12} color={accent} />
-    </group>
-  )
-}
-
-/** Culture 左棟: ルックロッカー（額縁ウォール＋青いスクリーン） */
-function TraitMuseumLandmark({ color, accent }: { color: string; accent: string }) {
-  const frames: Array<[number, number]> = [
-    [-1.7, 2.35],
-    [0, 2.35],
-    [1.7, 2.35],
-    [-1.7, 1.15],
-    [0, 1.15],
-    [1.7, 1.15],
-  ]
-
-  return (
-    <group>
-      <mesh position={[0, 0.14, 0]} receiveShadow>
-        <boxGeometry args={[7.0, 0.28, 7.2]} />
-        <meshStandardMaterial color="#121c30" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.85, -0.3]} castShadow receiveShadow>
-        <boxGeometry args={[6.2, 3.5, 5.8]} />
-        <meshStandardMaterial color={color} roughness={0.86} metalness={0.12} />
-      </mesh>
-      <mesh position={[0, 3.75, -0.35]} castShadow>
-        <boxGeometry args={[6.6, 0.32, 6.2]} />
-        <meshStandardMaterial color="#0a1424" metalness={0.25} roughness={0.55} />
-      </mesh>
-      <mesh position={[0, 2.2, -3.15]} castShadow>
-        <boxGeometry args={[5.6, 3.0, 0.35]} />
-        <meshStandardMaterial color="#0c1528" roughness={0.92} />
-      </mesh>
-      <mesh position={[0, 2.25, -2.95]}>
-        <boxGeometry args={[4.4, 2.2, 0.08]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.45} />
-      </mesh>
-      {frames.map(([x, y], index) => (
-        <group key={index} position={[x, y, 2.95]}>
-          <mesh>
-            <boxGeometry args={[1.15, 0.95, 0.1]} />
-            <meshStandardMaterial color="#0a1424" roughness={0.8} />
-          </mesh>
-          <mesh position={[0, 0, 0.06]}>
-            <boxGeometry args={[0.88, 0.7, 0.04]} />
-            <meshStandardMaterial
-              color="#f4f6fa"
-              emissive={accent}
-              emissiveIntensity={0.18}
-              roughness={0.55}
-            />
-          </mesh>
-        </group>
-      ))}
-      <mesh position={[0, 0.9, 3.4]} castShadow>
-        <boxGeometry args={[2.6, 1.8, 0.28]} />
-        <meshStandardMaterial color="#152038" roughness={0.88} />
-      </mesh>
-      <pointLight position={[0, 2.6, 1.2]} intensity={10} distance={10} color={accent} />
     </group>
   )
 }

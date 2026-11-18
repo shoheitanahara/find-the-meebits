@@ -9,6 +9,12 @@ import type { ParkZoneLayout } from './parkZones'
 const scratch = new Object3D()
 const TILE = 1
 const TILE_H = 0.12
+/**
+ * 園路縁レール。上面を一番高いタイル（TILE_H × 1.22 ≈ 0.146）より上に出す。
+ * タイル上面と同じ高さだと z-fighting でちらつき、高いタイルの中では埋もれて途切れて見える。
+ */
+const RAIL_HEIGHT = 0.1
+const RAIL_CENTER_Y = 0.175 - RAIL_HEIGHT / 2
 
 type FloorRole =
   | 'velvet'
@@ -227,8 +233,8 @@ export function MusicArtDistrictGround({
 
       {/* 園路縁のマゼンタレール */}
       {([-1, 1] as const).map((side) => (
-        <mesh key={`edge-${side}`} position={[side * pathEdgeX, 0.08, groundZ]} castShadow>
-          <boxGeometry args={[0.12, 0.08, pathEdgeLength]} />
+        <mesh key={`edge-${side}`} position={[side * pathEdgeX, RAIL_CENTER_Y, groundZ]} castShadow>
+          <boxGeometry args={[0.12, RAIL_HEIGHT, pathEdgeLength]} />
           <meshStandardMaterial
             color="#e85cff"
             emissive="#e85cff"

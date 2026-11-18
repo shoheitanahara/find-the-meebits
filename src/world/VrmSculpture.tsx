@@ -11,7 +11,7 @@ import {
 } from './vrmSculptureCache'
 import type { VrmSculpturePedestal } from './worldLandmarks'
 
-export type SculptureTone = 'museum' | 'club' | 'copper'
+export type SculptureTone = 'museum' | 'club' | 'copper' | 'wood'
 
 const CLUB_SCULPTURE_MATERIAL = new MeshStandardMaterial({
   color: '#52525b',
@@ -32,18 +32,27 @@ const COPPER_SCULPTURE_MATERIAL = new MeshStandardMaterial({
   envMapIntensity: 1.35,
 })
 
-function applyClubSculptureTone(root: Object3D) {
-  root.traverse((object) => {
-    if (object instanceof Mesh) {
-      object.material = CLUB_SCULPTURE_MATERIAL
-    }
-  })
+/** 工房の木彫り像向け — 艶を抑えたウォールナット。 */
+const WOOD_SCULPTURE_MATERIAL = new MeshStandardMaterial({
+  color: '#a8703e',
+  roughness: 0.62,
+  metalness: 0,
+  // 夜でも木肌の色が沈みすぎないよう少しだけ自己発光
+  emissive: '#3a2210',
+  emissiveIntensity: 0.25,
+})
+
+/** 単色素材に置き換えるトーン（museum は元の色のまま） */
+const TONE_MATERIALS: Partial<Record<SculptureTone, MeshStandardMaterial>> = {
+  club: CLUB_SCULPTURE_MATERIAL,
+  copper: COPPER_SCULPTURE_MATERIAL,
+  wood: WOOD_SCULPTURE_MATERIAL,
 }
 
-function applyCopperSculptureTone(root: Object3D) {
+function applySculptureMaterial(root: Object3D, material: MeshStandardMaterial) {
   root.traverse((object) => {
     if (object instanceof Mesh) {
-      object.material = COPPER_SCULPTURE_MATERIAL
+      object.material = material
     }
   })
 }
@@ -135,13 +144,10 @@ export function VrmSculpture({
         return
       }
 
-      if (sculptureTone === 'club' || sculptureTone === 'copper') {
+      const toneMaterial = TONE_MATERIALS[sculptureTone]
+      if (toneMaterial) {
         const clone = cloneSkeleton(acquired) as Group
-        if (sculptureTone === 'club') {
-          applyClubSculptureTone(clone)
-        } else {
-          applyCopperSculptureTone(clone)
-        }
+        applySculptureMaterial(clone, toneMaterial)
         releaseVrmSculptureScene(meebitId, acquired)
         activeScene = clone
         ownsPoolRef = false

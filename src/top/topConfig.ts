@@ -4,9 +4,8 @@ import {
   infoBoardNearEntrance,
 } from './parkAttractionSlots'
 import { EIGHTH_STREET_ICON } from './landmarks/eighthStreetModel'
-import { HIP_HOP_ICON } from './landmarks/hipHopClubModel'
-import { JAZZ_BAR_ICON } from './landmarks/jazzBarModel'
-import { LEARN_ART_ICON } from './landmarks/learnArtModel'
+import { SERGITO_ICON } from './landmarks/meetSergitoModel'
+import { SHORE_FISHING_ICON } from './landmarks/shoreFishingModel'
 import type { AttractionId } from './topStore'
 import type { ParkZoneId } from './parkZones'
 
@@ -345,9 +344,11 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+        // 建物横の跳ねる魚の彫刻（右）
+        SHORE_FISHING_ICON,
       ],
     },
-    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
+    infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.left,
   },
   {
     id: 'opensea',
@@ -407,6 +408,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
+        // 建物横の木彫り Sergito 像
+        SERGITO_ICON,
       ],
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
@@ -527,8 +530,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
         { x: 2.7, z: -1.0, halfX: 0.9, halfZ: 1.3 },
-        // 建物横の巨大ラジカセ彫刻
-        HIP_HOP_ICON,
       ],
     },
     infoBoardLocal: infoBoardNearEntrance('left', 3.4),
@@ -546,8 +547,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       en: 'GALLERY SCREEN',
       ja: 'ギャラリースクリーン',
     },
-    color: '#1c1228',
-    roofColor: '#e85cff',
+    color: '#2a2826',
+    roofColor: '#d8c8a8',
     x: DEFAULT_PARK_ATTRACTION_SLOTS.center.x,
     z: DEFAULT_PARK_ATTRACTION_SLOTS.center.z,
     entranceZ: DEFAULT_PARK_ATTRACTION_SLOTS.center.entranceZ,
@@ -559,8 +560,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
-        // 建物横のイーゼル彫刻
-        LEARN_ART_ICON,
       ],
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
@@ -591,8 +590,6 @@ export const TOP_ATTRACTIONS: Attraction[] = [
       extraBoxes: [
         { x: -2.6, z: -1.2, halfX: 1.0, halfZ: 1.4 },
         { x: 2.6, z: -1.0, halfX: 1.0, halfZ: 1.3 },
-        // 建物横のサックス彫刻
-        JAZZ_BAR_ICON,
       ],
     },
     infoBoardLocal: DEFAULT_INFO_BOARD_LOCAL.right,
