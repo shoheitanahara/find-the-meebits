@@ -13,6 +13,7 @@ import { LearnArtTouchLookPad } from './player/LearnArtTouchLookPad'
 import { LearnArtAudience } from './show/LearnArtAudience'
 import { LearnArtScreen } from './show/LearnArtScreen'
 import { useLearnArtStore } from './store'
+import { LearnArtNowPlaying } from './ui/LearnArtNowPlaying'
 import { LearnArtTitleScreen } from './ui/TitleScreen'
 import { useLearnArtSeekKeyboard } from './ui/LearnArtSeekButtons'
 import { useLearnArtMuteKeyboard } from './ui/LearnArtUnmuteButton'
@@ -105,6 +106,7 @@ export function LearnArtApp() {
       {phase === 'playing' ? (
         // canvas(blending) より前面。Sit / Sound on が隠れないようにする
         <div className="pointer-events-none absolute inset-0 z-50">
+          <LearnArtNowPlaying />
           <LookControlsHint key="learn-art-look-hint" />
           <LearnArtTouchLookPad />
           <LearnArtMobileControls />

@@ -19,14 +19,67 @@ const PLAYLIST_INDEX_FALLBACK = 80
 
 let player: YtPlayer | null = null
 let readyListeners: Array<(p: YtPlayer) => void> = []
+let titleListeners: Array<(title: string) => void> = []
 let mountGeneration = 0
-/** Enter クリック時に立て、onReady で unmute する */
-let soundOnEnterArmed = false
+/**
+ * Enter で音声オンにしたあと、playVideoAt のリトライで再び mute されないよう維持する。
+ * （プレイヤーは mute: 1 で作るので、曲を移動すると YouTube 側でミュートに戻ることがある）
+ * 明示的な muteLearnArtYoutube で解除。
+ */
+let preferUnmuted = false
 /** 入場ごとに決める開始インデックス */
 let pendingStartIndex = 0
 
 export function armLearnArtSoundOnEnter() {
-  soundOnEnterArmed = true
+  preferUnmuted = true
+}
+
+/** プレイリストジャンプ後も、入場時の希望ミュート状態を再適用する */
+function applyPreferredMute(target: YtPlayer) {
+  if (preferUnmuted) {
+    try {
+      target.unMute()
+      target.setVolume(100)
+    } catch {
+      try {
+        target.mute()
+      } catch {
+        // ignore
+      }
+    }
+    return
+  }
+  try {
+    target.mute()
+  } catch {
+    // ignore
+  }
+}
+
+function readEpisodeTitle(target: YtPlayer): string | null {
+  try {
+    const data = target.getVideoData()
+    const title = data?.title?.trim()
+    return title ? title : null
+  } catch {
+    return null
+  }
+}
+
+function publishEpisodeTitle(target: YtPlayer) {
+  const title = readEpisodeTitle(target)
+  if (!title) return
+  titleListeners.forEach((listener) => listener(title))
+}
+
+/** 上映中の動画タイトルを購読（いま分かっていれば即座に1回呼ぶ） */
+export function onLearnArtEpisodeTitle(listener: (title: string) => void) {
+  titleListeners.push(listener)
+  const current = player ? readEpisodeTitle(player) : null
+  if (current) listener(current)
+  return () => {
+    titleListeners = titleListeners.filter((item) => item !== listener)
+  }
 }
 
 function playlistLength(target: YtPlayer): number {
@@ -66,9 +119,11 @@ function startRandomPlaylistVideo(target: YtPlayer, preferredIndex: number, atte
   const index = ((preferredIndex % max) + max) % max
 
   jumpToPlaylistIndex(target, index)
+  applyPreferredMute(target)
 
   if (attempt >= 10) {
     ensureYoutubePlaying(target, 4)
+    applyPreferredMute(target)
     return
   }
 
@@ -91,6 +146,7 @@ function startRandomPlaylistVideo(target: YtPlayer, preferredIndex: number, atte
     }
 
     ensureYoutubePlaying(target, 4)
+    applyPreferredMute(target)
   }, 350 + attempt * 120)
 }
 
@@ -140,6 +196,7 @@ export async function mountLearnArtYoutubePlayer(size: { width: number; height: 
 
     const playing = YT.PlayerState?.PLAYING ?? 1
     const ended = YT.PlayerState?.ENDED ?? 0
+    const cued = YT.PlayerState?.CUED ?? 5
 
     return await new Promise<YtPlayer | null>((resolve) => {
       if (generation !== mountGeneration) {
@@ -178,26 +235,26 @@ export async function mountLearnArtYoutubePlayer(size: { width: number; height: 
               resolve(null)
               return
             }
-            if (soundOnEnterArmed) {
-              soundOnEnterArmed = false
-              try {
-                event.target.unMute()
-                event.target.setVolume(100)
-              } catch {
-                event.target.mute()
-              }
-            } else {
-              event.target.mute()
-            }
+            applyPreferredMute(event.target)
             startRandomPlaylistVideo(event.target, startIndex)
             disableYoutubeCaptions(event.target)
+            publishEpisodeTitle(event.target)
+            // 曲ジャンプ直後はタイトルが前の動画のことがあるので、少し遅れて取り直す
+            window.setTimeout(() => publishEpisodeTitle(event.target), 400)
+            window.setTimeout(() => publishEpisodeTitle(event.target), 1200)
             player = event.target
             readyListeners.forEach((listener) => listener(event.target))
             readyListeners = []
             resolve(event.target)
           },
           onStateChange: (event) => {
-            if (event.data === playing) disableYoutubeCaptions(event.target)
+            if (event.data === playing || event.data === cued) {
+              disableYoutubeCaptions(event.target)
+              // playVideoAt 後に mute に戻ることがあるので、入場時の希望を再適用
+              applyPreferredMute(event.target)
+              publishEpisodeTitle(event.target)
+            }
+            // シャッフル有効時も曲間で止まったとき用
             if (event.data === ended) {
               try {
                 event.target.setShuffle(true)
@@ -217,6 +274,7 @@ export async function mountLearnArtYoutubePlayer(size: { width: number; height: 
 }
 
 export function unmuteLearnArtYoutube(): boolean {
+  preferUnmuted = true
   if (!player) return false
   try {
     player.unMute()
@@ -230,6 +288,7 @@ export function unmuteLearnArtYoutube(): boolean {
 }
 
 export function muteLearnArtYoutube(): boolean {
+  preferUnmuted = false
   if (!player) return false
   try {
     player.mute()

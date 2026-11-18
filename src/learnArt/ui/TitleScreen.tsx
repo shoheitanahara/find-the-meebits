@@ -69,11 +69,12 @@ export function LearnArtTitleScreen() {
           audienceIds: show.audienceIds,
           emptySeatIndices: show.emptySeatIndices,
         })
+        // Enter = 音声オン（UI も即反映。実プレイヤーは ready / 曲ジャンプ後に追従）
+        useLearnArtStore.getState().setSoundMuted(false)
         playSfx('timerStart')
         const unsubscribe = onLearnArtYoutubeReady(() => {
-          if (unmuteLearnArtYoutube()) {
-            useLearnArtStore.getState().setSoundMuted(false)
-          }
+          unmuteLearnArtYoutube()
+          useLearnArtStore.getState().setSoundMuted(false)
           unsubscribe()
         })
       })
