@@ -9,7 +9,6 @@ import { isClubPositionWalkable } from '../collisions'
 import { createClubNpcSpawns, type ClubNpcSpawn } from '../clubDancers'
 import { CLUB } from '../config'
 import { useClubStore } from '../store'
-import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 const NPC_WALK_SPEED = 1.05
 
@@ -115,7 +114,6 @@ function FloorWalker({ spawn, index }: { spawn: ClubNpcSpawn; index: number }) {
 
   return (
     <group
-      userData={OCCLUDER_USER_DATA}
       ref={groupRef}
       position={[spawn.x, CLUB.playerGroundY + 0.06, spawn.z]}
       rotation={[0, spawn.rotationY, 0]}

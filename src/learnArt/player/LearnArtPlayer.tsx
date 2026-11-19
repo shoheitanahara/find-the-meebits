@@ -20,6 +20,7 @@ import {
   resolveLearnArtStandUpPosition,
 } from '../learnArtSeats'
 import { useLearnArtStore } from '../store'
+import { createSitStandGuard } from '../../game/sitStandGuard'
 
 const movement = new Vector2()
 const cameraPosition = new Vector3()
@@ -45,6 +46,9 @@ export function LearnArtPlayer({ enabled }: { enabled: boolean }) {
   const setNearestEmptySeatIndex = useLearnArtStore((state) => state.setNearestEmptySeatIndex)
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
   const prevSeatRef = useRef<number | null>(null)
+  /** 座った直後の残り入力で立ち上がらないためのガード */
+  const sitGuardRef = useRef(createSitStandGuard())
+  const wasSittingRef = useRef(false)
   const breathParams = useMemo(() => getAudienceBreathParams(meebitNumber), [meebitNumber])
 
   useEffect(() => {
@@ -109,6 +113,9 @@ export function LearnArtPlayer({ enabled }: { enabled: boolean }) {
     const dt = Math.min(delta, 0.05)
     localTimeRef.current += dt
     const isSitting = playerSeatIndex !== null
+    const nowMs = performance.now()
+    if (isSitting && !wasSittingRef.current) sitGuardRef.current.onSit(nowMs)
+    wasSittingRef.current = isSitting
 
     const look = useLearnArtControlsStore.getState().consumeLookDelta()
     if (look.lookDeltaX !== 0 || look.lookDeltaY !== 0) {
@@ -131,12 +138,14 @@ export function LearnArtPlayer({ enabled }: { enabled: boolean }) {
       keyboard.right ||
       touch.joystickActive
 
-    if (isSitting && wantsMove) {
+    // 座った直後（0.7秒以内）や、座ってから入力を一度も離していないときは立ち上がらない
+    const canStandFromMove = isSitting && sitGuardRef.current.canStandFromMove(nowMs, wantsMove)
+    if (canStandFromMove) {
       useLearnArtStore.getState().standUp()
     }
 
     movement.set(0, 0)
-    if (!isSitting || wantsMove) {
+    if (!isSitting || canStandFromMove) {
       if (keyboard.forward) movement.y -= 1
       if (keyboard.backward) movement.y += 1
       if (keyboard.left) movement.x -= 1

@@ -7,7 +7,6 @@ import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { getOccupiedSeatIndices, getRunwaySeatSlot, RUNWAY_SEAT_Y } from '../runwaySeats'
 import { useRunwayStore } from '../store'
-import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** 客席ベンチに座る観客 Meebit（日替わり空席はスキップ） */
 export function RunwayAudience() {
@@ -77,7 +76,7 @@ function SeatedAudience({
   })
 
   return (
-    <group userData={OCCLUDER_USER_DATA} ref={groupRef} position={[x, RUNWAY_SEAT_Y, z]} rotation={[0, rotationY, 0]}>
+    <group ref={groupRef} position={[x, RUNWAY_SEAT_Y, z]} rotation={[0, rotationY, 0]}>
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

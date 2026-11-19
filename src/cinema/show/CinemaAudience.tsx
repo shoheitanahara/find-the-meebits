@@ -7,7 +7,6 @@ import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { CINEMA_SEAT_Y, getCinemaSeatSlot, getOccupiedSeatIndices } from '../cinemaSeats'
 import { useCinemaStore } from '../store'
-import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** スクリーン向き客席の観客（約60%占有） */
 export function CinemaAudience() {
@@ -77,7 +76,7 @@ function SeatedAudience({
   })
 
   return (
-    <group userData={OCCLUDER_USER_DATA} ref={groupRef} position={[x, CINEMA_SEAT_Y, z]} rotation={[0, rotationY, 0]}>
+    <group ref={groupRef} position={[x, CINEMA_SEAT_Y, z]} rotation={[0, rotationY, 0]}>
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

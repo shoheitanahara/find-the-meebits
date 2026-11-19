@@ -42,7 +42,7 @@ function useTabFrameloop() {
 }
 
 /**
- * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁を透かす（アバターは重いので対象外）。
  * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
  */
 const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
