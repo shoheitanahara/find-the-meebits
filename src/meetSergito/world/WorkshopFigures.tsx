@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo } from 'react'
-import { applyVRMFigurePose } from '../../avatar/VRMLocomotion'
+import { applyVRMAttentionPose } from '../../avatar/VRMLocomotion'
 import { alignVrmFigureFeet } from '../../avatar/VRMLoader'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
@@ -49,7 +49,8 @@ function WorkshopFigure({
     const vrm = vrmRef.current
     if (!vrm || status !== 'ready' || !vrmScene) return
 
-    applyVRMFigurePose(vrm)
+    // Photo Booth・OpenSea Market の彫刻と同じ完全な直立（気をつけ）
+    applyVRMAttentionPose(vrm)
     applyWorkshopFigureVrmQuality(vrm)
     alignVrmFigureFeet(vrm)
     vrm.update(0)

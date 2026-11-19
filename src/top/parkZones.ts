@@ -2,7 +2,8 @@ import type { AttractionId } from './topStore'
 import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
 import { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
 import { SEA_PALM_TREE_XZ } from './seaPalms'
-import { JUNGLE_TREE_XZ } from './jungle/jungleConfig'
+import { JUNGLE_LAMP_XZ, JUNGLE_TREE_XZ } from './jungle/jungleConfig'
+import { getGateArrivalPoint, type GateSpawn } from './parkGateRules'
 
 export { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X }
 
@@ -50,9 +51,8 @@ export type ParkGateDef = {
    * カージナル橋では基本 0（軸平行）。
    */
   yaw?: number
+  /** 行き先。到着位置は行き先の「戻り門」から自動で決める（getGateArrivalSpawn） */
   targetZone: ParkZoneId
-  /** 到着ゾーンでのスポーン */
-  targetSpawn: { x: number; z: number; rotationY: number }
   label: { en: string; ja: string }
   subtitle: { en: string; ja: string }
 }
@@ -75,7 +75,10 @@ export type ParkZoneDef = {
   gates: ParkGateDef[]
   /** 外周キット（崖・川・橋）。あるゾーンは旧メタル柵を出さない */
   perimeter?: ParkPerimeterDef
-  /** ゾーン入場時（スタート／ゲート到着）の既定スポーン */
+  /**
+   * ゾーンの既定スポーン（スタート時など）。
+   * Plaza 以外は省略し、最初の門の前に自動で置く（門の判定内に出ないように）。
+   */
   spawn: { x: number; z: number; rotationY: number }
   /** 噴水・本日の主役看板などプラザ専用デコ */
   hasFountain: boolean
@@ -189,7 +192,9 @@ const JUNGLE_LAYOUT: ParkZoneLayout = {
   treeX: 22.5,
 }
 
-export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
+type RawParkZoneDef = Omit<ParkZoneDef, 'spawn'> & { spawn?: ParkZoneDef['spawn'] }
+
+const RAW_PARK_ZONES: Record<ParkZoneId, RawParkZoneDef> = {
   plaza: {
     id: 'plaza',
     title: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
@@ -247,8 +252,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'mountain',
         yaw: 0,
         targetZone: 'mountain',
-        // 西川のすぐ内側（橋を降りた直後）
-        targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテンエリア' },
         subtitle: { en: 'Mt. Meeb', ja: 'Mt. Meeb' },
       },
@@ -261,8 +264,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         yaw: Math.PI / 2,
         targetZone: 'culture',
-        // 北門は左寄り → 着地は Culture 入口センター・手前すぐ内側
-        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
@@ -275,8 +276,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'sea',
         yaw: Math.PI,
         targetZone: 'sea',
-        // 東の海際すぐ内側（橋を降りた直後）・西向き
-        targetSpawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
         label: { en: 'SEA DISTRICT', ja: 'シーエリア' },
         subtitle: { en: 'Beach · Tide · Pier', ja: 'ビーチ・潮だまり・桟橋' },
       },
@@ -298,7 +297,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       ],
     },
     // 西門・橋の内側（川 ≈ -22 より東）
-    spawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -334,7 +332,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'plaza',
         yaw: 0,
         targetZone: 'plaza',
-        targetSpawn: { x: 20.5, z: 1, rotationY: -Math.PI / 2 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
       },
@@ -347,8 +344,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'astro',
         yaw: Math.PI / 2,
         targetZone: 'astro',
-        // Astro 手前入口センター・奥向き
-        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'ASTRO DISTRICT', ja: 'アストロエリア' },
         subtitle: { en: 'Robots · Visitors · Orbit', ja: 'ロボ・ビジター・軌道' },
       },
@@ -371,7 +366,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         { side: 's', kind: 'bridge-gate', gateId: 'culture-to-musicArt' },
       ],
     },
-    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -409,8 +403,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // Three.js: yaw=π/2 でローカル +X → 南(-Z)。接近・敷石がエリア側を向く
         yaw: Math.PI / 2,
         targetZone: 'plaza',
-        // 対向のプラザ北門（左寄り）すぐ内側・噴水方向へ
-        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
       },
@@ -423,8 +415,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'astro',
         yaw: 0,
         targetZone: 'astro',
-        // Astro 西門すぐ内側・東向き
-        targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'ASTRO DISTRICT', ja: 'アストロエリア' },
         subtitle: { en: 'Robots · Visitors · Orbit', ja: 'ロボ・ビジター・軌道' },
       },
@@ -437,8 +427,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'musicArt',
         yaw: Math.PI / 2,
         targetZone: 'musicArt',
-        // Music & Art 手前入口センター・奥向き
-        targetSpawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
         label: { en: 'MUSIC & ART DISTRICT', ja: 'ミュージック＆アートエリア' },
         subtitle: { en: 'Sound · Screen · Stage', ja: 'サウンド・スクリーン・ステージ' },
       },
@@ -452,8 +440,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'mountain',
         yaw: Math.PI,
         targetZone: 'jungle',
-        // Jungle 東門すぐ内側・西向き
-        targetSpawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
         label: { en: 'JUNGLE DISTRICT', ja: 'ジャングルエリア' },
         subtitle: { en: 'Pigs · Cows · Sheep', ja: 'ブタ・ウシ・ヒツジ' },
       },
@@ -472,7 +458,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         { side: 'e', kind: 'bridge-gate', gateId: 'sea-to-plaza' },
       ],
     },
-    spawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -503,7 +488,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'plaza',
         yaw: Math.PI,
         targetZone: 'plaza',
-        targetSpawn: { x: -20.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'BACK TO PLAZA', ja: '広場へ戻る' },
         subtitle: { en: 'Meebits Plaza', ja: 'ミービッツ広場' },
       },
@@ -530,7 +514,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
       ],
     },
     // Mountain 北門からの到着を既定スポーンに
-    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -562,8 +545,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         // Astro エリア内（−Z側）から近づく向きに門正面を合わせる。
         yaw: -Math.PI / 2,
         targetZone: 'mountain',
-        // Mountain 北門（左寄り）すぐ内側・エリア奥向き
-        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
         label: { en: 'MOUNTAIN DISTRICT', ja: 'マウンテンエリア' },
         subtitle: { en: 'Peaks · Neon · Gallery', ja: '山頂・ネオン・射撃' },
       },
@@ -576,8 +557,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         yaw: 0,
         targetZone: 'culture',
-        // Culture 東門すぐ内側・西向き
-        targetSpawn: { x: 20.5, z: 1, rotationY: -Math.PI / 2 },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
@@ -601,7 +580,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         { side: 's', kind: 'sealed' },
       ],
     },
-    spawn: { x: PARK_NEAR_SIDE_GATE_X, z: 13.5, rotationY: Math.PI },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
@@ -633,8 +611,6 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         yaw: -Math.PI / 2,
         targetZone: 'culture',
-        // Culture 北門（左寄り）すぐ内側・エリア奥向き
-        targetSpawn: { x: PARK_FAR_SIDE_GATE_X, z: -14.5, rotationY: 0 },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
@@ -660,18 +636,12 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         { side: 's', kind: 'sealed' },
       ],
     },
-    spawn: { x: 19.5, z: 1, rotationY: -Math.PI / 2 },
     hasFountain: false,
     hasFeaturedBoard: false,
     hasNpcCrowd: true,
     benches: [],
     planters: [],
-    lamps: [
-      [-9, -1.5],
-      [9, -1.5],
-      [-9, 3.5],
-      [9, 3.5],
-    ],
+    lamps: JUNGLE_LAMP_XZ,
     trees: JUNGLE_TREE_XZ,
     gates: [
       {
@@ -683,13 +653,29 @@ export const PARK_ZONES: Record<ParkZoneId, ParkZoneDef> = {
         theme: 'culture',
         yaw: Math.PI,
         targetZone: 'culture',
-        // Culture 西門すぐ内側・東向き
-        targetSpawn: { x: -19.5, z: 1, rotationY: Math.PI / 2 },
         label: { en: 'CULTURE DISTRICT', ja: 'カルチャーエリア' },
         subtitle: { en: 'Runway · Locker · Booth', ja: 'ランウェイ・ロッカー・ブース' },
       },
     ],
   },
+}
+
+/** spawn 省略のゾーンは、最初の門（元のエリアへ戻る門）の前を既定スポーンにする */
+export const PARK_ZONES = Object.fromEntries(
+  Object.entries(RAW_PARK_ZONES).map(([id, zone]) => [
+    id,
+    { ...zone, spawn: zone.spawn ?? getGateArrivalPoint(zone.gates[0]) },
+  ]),
+) as Record<ParkZoneId, ParkZoneDef>
+
+/**
+ * fromZone の門 gate を通ったときの到着位置。
+ * 行き先ゾーンの「fromZone へ戻る門」の前に、ゾーンの内側を向いて立つ。
+ */
+export function getGateArrivalSpawn(fromZone: ParkZoneId, gate: ParkGateDef): GateSpawn {
+  const target = PARK_ZONES[gate.targetZone]
+  const backGate = target.gates.find((g) => g.targetZone === fromZone)
+  return backGate ? getGateArrivalPoint(backGate) : target.spawn
 }
 
 export const DEFAULT_PARK_ZONE: ParkZoneId = 'plaza'

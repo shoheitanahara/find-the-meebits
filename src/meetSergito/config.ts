@@ -67,9 +67,29 @@ export type WorkshopObstacle = {
   halfZ: number
 }
 
+/**
+ * 工房の作業場（見た目は WorkshopStations）。
+ * 中央の通路と Sergito のまわりは空け、手前左右と奥の角に置く。
+ */
+export const WORKSHOP_STATIONS = {
+  /** 手前左: 塗装台（塗料・筆・ターンテーブルの塗りかけフィギュア）。フィギュア棚から 2m 以上離す */
+  paint: { x: -5.4, z: 4.5 },
+  /** 手前右: 3D プリンター作業台。フィギュア棚から 2m 以上離す */
+  printer: { x: 5.6, z: 5.0 },
+  /** 奥左の角: 材木の束 */
+  lumber: { x: -8.6, z: -9.4 },
+  /** 奥右の角: 木箱の山 */
+  crates: { x: 8.6, z: -9.4 },
+  /** 奥左: 木挽き台と板 */
+  sawhorse: { x: -5.6, z: -9.3 },
+} as const
+
 /** 歩行不可の家具・台座（棚は collisions 側で見た目長さに合わせて追加） */
 export const WORKSHOP_OBSTACLES: WorkshopObstacle[] = [
   { x: -1.2, z: -8.2, halfX: 1.55, halfZ: 0.65 },
-  { x: -6.8, z: 4.5, halfX: 0.65, halfZ: 0.55 },
-  { x: 7.8, z: 5.2, halfX: 0.6, halfZ: 0.55 },
+  { x: WORKSHOP_STATIONS.paint.x, z: WORKSHOP_STATIONS.paint.z, halfX: 0.95, halfZ: 0.55 },
+  { x: WORKSHOP_STATIONS.printer.x, z: WORKSHOP_STATIONS.printer.z, halfX: 1.1, halfZ: 0.55 },
+  { x: WORKSHOP_STATIONS.lumber.x, z: WORKSHOP_STATIONS.lumber.z, halfX: 1.15, halfZ: 0.9 },
+  { x: WORKSHOP_STATIONS.crates.x, z: WORKSHOP_STATIONS.crates.z, halfX: 0.95, halfZ: 0.9 },
+  { x: WORKSHOP_STATIONS.sawhorse.x, z: WORKSHOP_STATIONS.sawhorse.z, halfX: 1.05, halfZ: 0.4 },
 ]

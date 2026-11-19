@@ -235,16 +235,10 @@ export function RunwayPlayer({ enabled }: { enabled: boolean }) {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = RUNWAY.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -RUNWAY.roomHalfX + 1.2,
-      RUNWAY.roomHalfX - 1.2,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      RUNWAY.roomMinZ + 2.5,
-      RUNWAY.roomMaxZ - 0.8,
-    )
+    // カメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    const camX = xRef.current + offsetX
+    const camZ = zRef.current + offsetZ
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, RUNWAY.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

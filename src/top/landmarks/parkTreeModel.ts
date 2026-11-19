@@ -59,24 +59,44 @@ function addVoxelStar(b: VoxelBuilder, x: number, y: number, z: number, phaseOff
 }
 
 /**
+ * 植木鉢の代わりに、地面から幹を立ち上げて根元を張らせる（森の木）。
+ * topY までを幹でつなぐ（鉢があった高さ）。
+ */
+function addWildRoots(b: VoxelBuilder, topY: number) {
+  b.box([0, topY / 2, 0], [0.34, topY, 0.34], PALETTE.bark)
+  b.box([0, 0.09, 0], [0.62, 0.18, 0.62], PALETTE.barkDark)
+  b.box([0.28, 0.05, 0.05], [0.3, 0.1, 0.2], PALETTE.barkDark)
+  b.box([-0.22, 0.05, -0.2], [0.24, 0.1, 0.28], PALETTE.barkDark)
+}
+
+/**
  * Plaza 向けのボクセル街路樹。
  * christmas 時は葉塊の外周ぐるりに多色オーナメント＋フェアリーライト＋頂上の星を載せる。
  */
-export function buildParkGroveTreeModel(seed: number, christmas: boolean): VoxelModel {
+export function buildParkGroveTreeModel(
+  seed: number,
+  christmas: boolean,
+  /** 森の木（Jungle）: 植木鉢なしで地面から生やす（冬のイルミネーションは付ける） */
+  wild = false,
+): VoxelModel {
   const b = new VoxelBuilder()
   const dir = Math.sin(seed * 1.7) >= 0 ? 1 : -1
 
-  // 石のプランター＋土
-  b.box(
-    [0, 0.18, 0],
-    [1.32, 0.36, 1.32],
-    christmas ? PALETTE.planterStoneWinter : PALETTE.planterStone,
-  )
-  b.box([0, 0.38, 0], [1.4, 0.06, 1.4], PALETTE.planterTrim)
-  b.box([0, 0.4, 0], [1.14, 0.06, 1.14], PALETTE.planterSoil)
-  if (christmas) {
-    b.box([-0.48, 0.44, 0.45], [0.42, 0.07, 0.38], PALETTE.snowTop)
-    b.box([0.42, 0.43, -0.42], [0.46, 0.06, 0.4], PALETTE.snowShade)
+  if (wild) {
+    addWildRoots(b, 0.36)
+  } else {
+    // 石のプランター＋土
+    b.box(
+      [0, 0.18, 0],
+      [1.32, 0.36, 1.32],
+      christmas ? PALETTE.planterStoneWinter : PALETTE.planterStone,
+    )
+    b.box([0, 0.38, 0], [1.4, 0.06, 1.4], PALETTE.planterTrim)
+    b.box([0, 0.4, 0], [1.14, 0.06, 1.14], PALETTE.planterSoil)
+    if (christmas) {
+      b.box([-0.48, 0.44, 0.45], [0.42, 0.07, 0.38], PALETTE.snowTop)
+      b.box([0.42, 0.43, -0.42], [0.46, 0.06, 0.4], PALETTE.snowShade)
+    }
   }
 
   // 根張り＋幹
@@ -184,13 +204,22 @@ export function buildParkGroveTreeModel(seed: number, christmas: boolean): Voxel
 }
 
 /** Mountain 向けの自然な針葉樹（雪板ではなく枝ごとの積雪＋たっぷりイルミ＋オーナメント＋星） */
-export function buildParkPineTreeModel(seed: number, christmas: boolean): VoxelModel {
+export function buildParkPineTreeModel(
+  seed: number,
+  christmas: boolean,
+  /** 森の木（Jungle）: 植木鉢なしで地面から生やし、冬も飾りは付けない（雪だけ） */
+  wild = false,
+): VoxelModel {
   const b = new VoxelBuilder()
   const swayX = Math.sin(seed * 2.1) * 0.08
   const swayZ = Math.cos(seed * 1.3) * 0.08
 
-  b.box([0, 0.16, 0], [1.0, 0.32, 1.0], christmas ? PALETTE.planterStoneWinter : PALETTE.planterStone)
-  b.box([0, 0.34, 0], [0.82, 0.08, 0.82], PALETTE.planterSoil)
+  if (wild) {
+    addWildRoots(b, 0.32)
+  } else {
+    b.box([0, 0.16, 0], [1.0, 0.32, 1.0], christmas ? PALETTE.planterStoneWinter : PALETTE.planterStone)
+    b.box([0, 0.34, 0], [0.82, 0.08, 0.82], PALETTE.planterSoil)
+  }
   b.box([0, 1.25, 0], [0.3, 1.85, 0.3], PALETTE.bark)
 
   const tiers = [
@@ -220,7 +249,7 @@ export function buildParkPineTreeModel(seed: number, christmas: boolean): VoxelM
     }
 
     // 各段の4辺にオーナメント＋イルミ電球を螺旋状に配置
-    if (christmas && index <= 5) {
+    if (christmas && !wild && index <= 5) {
       const r = tier.w * 0.5 + 0.06
       const offsets: Array<readonly [number, number]> = [
         [r, r * 0.45],
@@ -249,7 +278,7 @@ export function buildParkPineTreeModel(seed: number, christmas: boolean): VoxelM
 
   if (christmas) {
     b.box([swayX * 0.6, 4.37, swayZ * 0.6], [0.26, 0.12, 0.26], PALETTE.snowTop)
-    addVoxelStar(b, swayX * 0.6, 4.66, swayZ * 0.6, seed)
+    if (!wild) addVoxelStar(b, swayX * 0.6, 4.66, swayZ * 0.6, seed)
   }
 
   return b.build()

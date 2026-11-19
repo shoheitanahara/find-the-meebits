@@ -4,6 +4,7 @@ import { OPEN_SEA_MARKET } from '../config'
 import { useOpenSeaMarketStore } from '../store'
 import { MarketPedestals } from './MarketPedestals'
 import { MarketWalkers } from './MarketWalkers'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** 青系 Digital Sculpture 展示ホール */
 export function MarketRoom() {
@@ -14,7 +15,8 @@ export function MarketRoom() {
 
   return (
     <group>
-      <color attach="background" args={['#102030']} />
+      {/* 部屋の外（カメラが壁の裏に回り込んだとき）は真っ黒 */}
+      <color attach="background" args={['#000000']} />
       <fog attach="fog" args={['#102030', 70, 155]} />
 
       <ambientLight intensity={0.55} color="#dceeff" />
@@ -59,7 +61,7 @@ export function MarketRoom() {
 
       <OpenSeaFloorLogo />
 
-      <mesh position={[0, wallHeight / 2, roomMinZ]} castShadow receiveShadow>
+      <mesh userData={OCCLUDER_USER_DATA} position={[0, wallHeight / 2, roomMinZ]} castShadow receiveShadow>
         <boxGeometry args={[roomHalfX * 2 + 0.4, wallHeight, 0.35]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
@@ -130,7 +132,7 @@ function EntranceWall() {
 
   if (!isMain) {
     return (
-      <mesh position={[0, wallHeight / 2, roomMaxZ]} castShadow receiveShadow>
+      <mesh userData={OCCLUDER_USER_DATA} position={[0, wallHeight / 2, roomMaxZ]} castShadow receiveShadow>
         <boxGeometry args={[roomHalfX * 2 + 0.4, wallHeight, 0.35]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
@@ -139,7 +141,7 @@ function EntranceWall() {
 
   return (
     <group>
-      <mesh
+      <mesh userData={OCCLUDER_USER_DATA}
         position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
         castShadow
         receiveShadow
@@ -147,7 +149,7 @@ function EntranceWall() {
         <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.35]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
-      <mesh
+      <mesh userData={OCCLUDER_USER_DATA}
         position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}
         castShadow
         receiveShadow
@@ -178,7 +180,7 @@ function SideWallWithGate({ side }: { side: 'west' | 'east' }) {
 
   if (!open) {
     return (
-      <mesh position={[wallX, wallHeight / 2, centerZ]} castShadow receiveShadow>
+      <mesh userData={OCCLUDER_USER_DATA} position={[wallX, wallHeight / 2, centerZ]} castShadow receiveShadow>
         <boxGeometry args={[0.35, wallHeight, depth]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
@@ -192,16 +194,16 @@ function SideWallWithGate({ side }: { side: 'west' | 'east' }) {
 
   return (
     <group>
-      <mesh position={[wallX, wallHeight / 2, backCenter]} castShadow receiveShadow>
+      <mesh userData={OCCLUDER_USER_DATA} position={[wallX, wallHeight / 2, backCenter]} castShadow receiveShadow>
         <boxGeometry args={[0.35, wallHeight, backLen]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
-      <mesh position={[wallX, wallHeight / 2, frontCenter]} castShadow receiveShadow>
+      <mesh userData={OCCLUDER_USER_DATA} position={[wallX, wallHeight / 2, frontCenter]} castShadow receiveShadow>
         <boxGeometry args={[0.35, wallHeight, frontLen]} />
         <meshStandardMaterial color={colors.wall} roughness={0.78} />
       </mesh>
       {/* 開口上のまぐさ */}
-      <mesh
+      <mesh userData={OCCLUDER_USER_DATA}
         position={[wallX, wallHeight - 0.4, galleryGate.z]}
         castShadow
         receiveShadow

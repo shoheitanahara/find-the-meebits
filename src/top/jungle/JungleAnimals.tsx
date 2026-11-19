@@ -10,6 +10,7 @@ import { useMemo, useRef } from 'react'
 import type { Group } from 'three'
 import { collidesWithParkObstacles } from '../topCollisions'
 import { VoxelModelMesh } from '../voxel/VoxelModelMesh'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 import { buildAnimalModel, type AnimalLeg, type AnimalModel } from './jungleAnimalModels'
 import { JUNGLE_HERDS, JUNGLE_ROAM_BOUNDS, type AnimalSpecies } from './jungleConfig'
 
@@ -198,6 +199,7 @@ export function JungleAnimals() {
           }}
           position={[spawn.x, GROUND_Y, spawn.z]}
           rotation={[0, spawn.yaw, 0]}
+          userData={OCCLUDER_USER_DATA}
         >
           <group
             ref={(el) => {

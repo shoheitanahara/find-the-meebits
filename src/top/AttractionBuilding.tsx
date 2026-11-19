@@ -32,6 +32,7 @@ import { SERGITO_MEEBIT_ID } from '../meetSergito/config'
 import { VrmSculpture } from '../world/VrmSculpture'
 import type { VoxelModel } from './voxel/voxelBuilder'
 import { VoxelModelMesh } from './voxel/VoxelModelMesh'
+import { OCCLUDER_USER_DATA } from '../world/CameraOcclusionFader'
 
 /**
  * Park アトラクションのランドマーク入口。
@@ -99,7 +100,7 @@ export function AttractionBuilding({
   const frontZ = attraction.footprint.halfDepth
 
   return (
-    <group position={[attraction.x, 0, attraction.z]}>
+    <group position={[attraction.x, 0, attraction.z]} userData={OCCLUDER_USER_DATA}>
       {attraction.id === 'find' ? (
         <MuseumLandmark color={attraction.color} roofColor={attraction.roofColor} accent={accent} />
       ) : attraction.id === 'traits' ? (

@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { runwayPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import {
@@ -42,6 +45,18 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getOcclusionTargets(): Vector3[] {
+  if (!runwayPlayerWorld.ready) return []
+  occlusionTargets[0].set(runwayPlayerWorld.x, 1.0, runwayPlayerWorld.z)
+  occlusionTargets[1].set(runwayPlayerWorld.x, 1.5, runwayPlayerWorld.z)
+  return occlusionTargets.slice(0, 2)
+}
+
 function RunwayScene() {
   const phase = useRunwayStore((state) => state.phase)
   const enabled = phase === 'playing'
@@ -56,13 +71,11 @@ function RunwayScene() {
         position={[
           RUNWAY.playerStart.x + RUNWAY.cameraFollow.x,
           RUNWAY.cameraFollow.y,
-          Math.min(
-            RUNWAY.playerStart.z + RUNWAY.cameraFollow.z,
-            RUNWAY.roomMaxZ - 0.8,
-          ),
+          RUNWAY.playerStart.z + RUNWAY.cameraFollow.z,
         ]}
       />
       <RunwayRoom />
+      <CameraOcclusionFader getTargets={getOcclusionTargets} />
       <RunwayExitPad enabled={enabled} />
       <RunwayScreen />
       <RunwayCatwalkShow />
@@ -78,8 +91,9 @@ export function RunwayApp() {
   const showWorld = phase !== 'title'
   useRunwaySitKeyboard()
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#050505] text-slate-100">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-slate-100">
       <RunwayBgmSystem />
       {showWorld ? (
         <Canvas

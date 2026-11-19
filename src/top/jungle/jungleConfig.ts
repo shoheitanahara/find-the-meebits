@@ -58,20 +58,6 @@ export const JUNGLE_ROAM_BOUNDS = {
   maxZ: 14.5,
 } as const
 
-/** 木（大通り・小道を避けた位置） */
-export const JUNGLE_TREE_XZ: ReadonlyArray<readonly [number, number]> = [
-  [-20, 4.5],
-  [-20, -2.5],
-  [-12, -14.4],
-  [10, -14.4],
-  [19.5, -3.5],
-  [19, 8],
-  [-3.5, 9],
-  [8, 12.5],
-  [-20.5, 13],
-  [13.5, 5.5],
-]
-
 /** 東西の大通り（z の中心と半幅）と、中央の南北の小道（x の中心と半幅） */
 export const JUNGLE_PATHS = {
   mainZ: 1,
@@ -79,3 +65,69 @@ export const JUNGLE_PATHS = {
   crossX: -1,
   crossHalf: 1.1,
 } as const
+
+/** 街灯の位置（parkZones の jungle.lamps と同じ）。木はここを避ける */
+export const JUNGLE_LAMP_XZ: ReadonlyArray<readonly [number, number]> = [
+  [-9, -1.5],
+  [9, -1.5],
+  [-9, 3.5],
+  [9, 3.5],
+]
+
+function hash2(x: number, z: number) {
+  const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453
+  return n - Math.floor(n)
+}
+
+/** 0〜1 の滑らかな値ノイズ（木立のかたまりを作る） */
+function valueNoise(x: number, z: number) {
+  const x0 = Math.floor(x)
+  const z0 = Math.floor(z)
+  const fx = x - x0
+  const fz = z - z0
+  const sx = fx * fx * (3 - 2 * fx)
+  const sz = fz * fz * (3 - 2 * fz)
+  const a = hash2(x0, z0)
+  const b = hash2(x0 + 1, z0)
+  const c = hash2(x0, z0 + 1)
+  const d = hash2(x0 + 1, z0 + 1)
+  return (a * (1 - sx) + b * sx) * (1 - sz) + (c * (1 - sx) + d * sx) * sz
+}
+
+/** 針葉樹にするか（8割）。位置から決めるので毎回同じ */
+export function isJungleConifer(x: number, z: number) {
+  return hash2(x * 3.1 + 7, z * 2.3 - 5) < 0.8
+}
+
+/**
+ * 森の木の配置。ノイズで木立と開けた草地を作り、外周寄りは密な森の壁にする。
+ * 大通り・小道・街灯・東門の到着地点のまわりは空ける。
+ */
+function buildJungleTrees(): Array<readonly [number, number]> {
+  const STEP = 2.5
+  const MIN_GAP = 4.4
+  const trees: Array<[number, number]> = []
+  for (let gx = -20.5; gx <= 20.5; gx += STEP) {
+    for (let gz = -13.5; gz <= 14.5; gz += STEP) {
+      const x = gx + (hash2(gx, gz) - 0.5) * 1.6
+      const z = gz + (hash2(gx + 13, gz - 7) - 0.5) * 1.6
+      if (Math.abs(x) > 20.6 || z < -13.8 || z > 14.6) continue
+      // 道（大通り・小道）から幹の半径ぶん以上離す
+      if (Math.abs(z - JUNGLE_PATHS.mainZ) < JUNGLE_PATHS.mainHalf + 1.4) continue
+      if (Math.abs(x - JUNGLE_PATHS.crossX) < JUNGLE_PATHS.crossHalf + 1.4) continue
+      // 東門から入ってすぐの場所は空ける
+      if (x > 15 && Math.abs(z - JUNGLE_PATHS.mainZ) < 5.5) continue
+      if (JUNGLE_LAMP_XZ.some(([lx, lz]) => Math.hypot(x - lx, z - lz) < 1.8)) continue
+      // 外周寄りは密、中ほどは木立と草地のまだら
+      const edge = Math.abs(x) > 16 || z < -9.5 || z > 11
+      const noise = valueNoise(x * 0.14 + 3, z * 0.14 - 8)
+      if (noise < (edge ? 0.42 : 0.66)) continue
+      if (trees.some(([tx, tz]) => Math.hypot(tx - x, tz - z) < MIN_GAP)) continue
+      trees.push([Math.round(x * 10) / 10, Math.round(z * 10) / 10])
+    }
+  }
+  return trees
+}
+
+/** 木（自動配置。parkZones の jungle.trees と当たり判定で使う） */
+export const JUNGLE_TREE_XZ: ReadonlyArray<readonly [number, number]> = buildJungleTrees()

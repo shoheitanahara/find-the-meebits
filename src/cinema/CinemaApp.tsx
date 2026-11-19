@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { cinemaPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import {
@@ -41,6 +44,18 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getOcclusionTargets(): Vector3[] {
+  if (!cinemaPlayerWorld.ready) return []
+  occlusionTargets[0].set(cinemaPlayerWorld.x, 1.0, cinemaPlayerWorld.z)
+  occlusionTargets[1].set(cinemaPlayerWorld.x, 1.5, cinemaPlayerWorld.z)
+  return occlusionTargets.slice(0, 2)
+}
+
 function CinemaScene() {
   const phase = useCinemaStore((state) => state.phase)
   const enabled = phase === 'playing'
@@ -55,10 +70,11 @@ function CinemaScene() {
         position={[
           CINEMA.playerStart.x + CINEMA.cameraFollow.x,
           CINEMA.cameraFollow.y,
-          Math.min(CINEMA.playerStart.z + CINEMA.cameraFollow.z, CINEMA.roomMaxZ - 0.8),
+          CINEMA.playerStart.z + CINEMA.cameraFollow.z,
         ]}
       />
       <CinemaRoom />
+      <CameraOcclusionFader getTargets={getOcclusionTargets} />
       <CinemaExitPad enabled={enabled} />
       <CinemaScreen />
       <CinemaAudience />
@@ -75,8 +91,9 @@ export function CinemaApp() {
   useCinemaMuteKeyboard()
   useCinemaSeekKeyboard()
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#07090f] text-slate-100">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-slate-100">
       {showWorld ? (
         <Canvas
           frameloop={frameloop}

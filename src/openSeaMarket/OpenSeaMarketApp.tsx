@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { marketNpcPositions, openSeaMarketPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import {
@@ -53,6 +57,29 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getOcclusionTargets(): Vector3[] {
+  if (!openSeaMarketPlayerWorld.ready) return []
+  occlusionTargets[0].set(openSeaMarketPlayerWorld.x, 1.0, openSeaMarketPlayerWorld.z)
+  occlusionTargets[1].set(openSeaMarketPlayerWorld.x, 1.5, openSeaMarketPlayerWorld.z)
+  // 会話中は相手（案内の歩行 NPC・台座の作品）も見たい相手に加える
+  const dialogue = useDialogueStore.getState()
+  const activeId = dialogue.activeNpcId
+  if (dialogue.isOpen && typeof activeId === 'string' && activeId.startsWith('opensea-')) {
+    const npc = marketNpcPositions.get(Number(activeId.replace('opensea-', '')))
+    if (npc) {
+      occlusionTargets[2].set(npc.x, 1.1, npc.z)
+      occlusionTargets[3].set(npc.x, 1.7, npc.z)
+      return occlusionTargets
+    }
+  }
+  return occlusionTargets.slice(0, 2)
+}
+
 function MarketScene() {
   return (
     <>
@@ -65,13 +92,11 @@ function MarketScene() {
         position={[
           OPEN_SEA_MARKET.playerStart.x + OPEN_SEA_MARKET.cameraFollow.x,
           OPEN_SEA_MARKET.cameraFollow.y,
-          Math.min(
-            OPEN_SEA_MARKET.playerStart.z + OPEN_SEA_MARKET.cameraFollow.z,
-            OPEN_SEA_MARKET.roomMaxZ - 1.0,
-          ),
+          OPEN_SEA_MARKET.playerStart.z + OPEN_SEA_MARKET.cameraFollow.z,
         ]}
       />
       <MarketRoom />
+      <CameraOcclusionFader getTargets={getOcclusionTargets} />
       <MarketExitPad />
       <MarketGalleryPortals />
       <MarketPlayer />
@@ -172,8 +197,9 @@ export function OpenSeaMarketApp() {
     }
   }, [])
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#0c1522] text-[#e8f4ff]">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-[#e8f4ff]">
       <Canvas
         frameloop={frameloop}
         dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}

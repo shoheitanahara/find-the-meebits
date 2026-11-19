@@ -3,25 +3,52 @@ import { VRM_WORLD_SCALE } from '../game/gameConfig'
 /** OpenSea Market 室内定数 — Digital Sculpture 展示ホール */
 const ROOM_SCALE = 2.7
 
+const ENTRANCE_HALF = 2.4 * ROOM_SCALE
+const PLAYER_RADIUS = 0.42
+/**
+ * 出口・ギャラリー移動口に着いたとき、判定の端からさらに内側へ離す距離。
+ * パークの橋の門（GATE_ARRIVAL_CLEARANCE）と同じ考え方で、入口・移動口のすぐ内側に立たせる。
+ */
+const ARRIVAL_CLEARANCE = 1.2
+
+/**
+ * 出口（公園へ戻る）。入口の開口幅いっぱいに取り、
+ * パッドの手前端（z - halfZ）から入口の壁際までのどこを歩いても出られる（isInMarketExitZone）。
+ */
+const ROOM_MAX_Z = 9.5 * ROOM_SCALE
+/** 出口パッドを入口の壁からどれだけ内側に置くか（入口のすぐ内側） */
+const EXIT_INSET_FROM_ENTRANCE = 1.6
+
+const PLAYER_EXIT = {
+  x: 0,
+  z: ROOM_MAX_Z - EXIT_INSET_FROM_ENTRANCE,
+  // 入口の開口（±ENTRANCE_HALF）と同じ幅。開口の端は壁にぶつからず壁際まで歩けるため
+  halfX: ENTRANCE_HALF,
+  halfZ: 0.55,
+} as const
+
+/** 左右ギャラリー接続ゲートの入室判定の深さ（壁から） */
+const GALLERY_GATE_TRIGGER_DEPTH = 1.15
+
 export const OPEN_SEA_MARKET = {
   roomHalfX: 9.5 * ROOM_SCALE,
   roomMinZ: -9.5 * ROOM_SCALE,
-  roomMaxZ: 9.5 * ROOM_SCALE,
+  roomMaxZ: ROOM_MAX_Z,
   wallHeight: 5.8,
   ceilingY: 5.6,
-  entranceHalf: 2.4 * ROOM_SCALE,
+  entranceHalf: ENTRANCE_HALF,
 
-  playerStart: { x: 0, z: 6.2 * ROOM_SCALE, rotationY: Math.PI },
+  /** 入場位置: 出口判定の手前端から ARRIVAL_CLEARANCE 内側（入口のすぐ内側）、奥を向く */
+  playerStart: {
+    x: 0,
+    z: PLAYER_EXIT.z - PLAYER_EXIT.halfZ - ARRIVAL_CLEARANCE,
+    rotationY: Math.PI,
+  },
   moveSpeed: 7.5,
-  playerRadius: 0.42,
+  playerRadius: PLAYER_RADIUS,
   playerGroundY: -0.05,
 
-  playerExit: {
-    x: 0,
-    z: 8.4 * ROOM_SCALE,
-    halfX: 2.6,
-    halfZ: 0.55,
-  },
+  playerExit: PLAYER_EXIT,
 
   cameraFollow: { x: 0, y: 3.4, z: 6.8 },
   cameraLookY: 1.55,
@@ -50,9 +77,9 @@ export const OPEN_SEA_MARKET = {
   galleryGate: {
     z: 6.2 * ROOM_SCALE,
     halfWidth: 2.35,
-    triggerDepth: 1.15,
-    /** 到着スポーン: 壁から内側へ */
-    spawnInsetX: 3.4,
+    triggerDepth: GALLERY_GATE_TRIGGER_DEPTH,
+    /** 到着スポーン: 入室判定の端から ARRIVAL_CLEARANCE 内側（移動口のすぐ内側） */
+    spawnInsetX: GALLERY_GATE_TRIGGER_DEPTH + ARRIVAL_CLEARANCE,
     spawnZ: 6.2 * ROOM_SCALE,
   },
 
@@ -134,3 +161,12 @@ export type MarketObstacle = {
 
 /** 装飾用の低い障害物（台座以外）。現状なし */
 export const MARKET_OBSTACLES: MarketObstacle[] = []
+
+/**
+ * 出口の判定。横は入口の開口幅いっぱい、奥行きはパッドの手前端から入口の壁際まで。
+ * 入口の端寄りを歩いても、パッドを飛び越えて壁際まで進んでも出られる。
+ */
+export function isInMarketExitZone(x: number, z: number) {
+  const { playerExit } = OPEN_SEA_MARKET
+  return Math.abs(x - playerExit.x) <= playerExit.halfX && z >= playerExit.z - playerExit.halfZ
+}

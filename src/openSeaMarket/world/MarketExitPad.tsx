@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { getLocale } from '../../i18n/locale'
 import { playSfx } from '../../ui/sfx'
-import { OPEN_SEA_MARKET } from '../config'
+import { isInMarketExitZone, OPEN_SEA_MARKET } from '../config'
 import { openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
 
@@ -20,9 +20,7 @@ export function MarketExitPad() {
       return
     }
     if (triggeredRef.current || !openSeaMarketPlayerWorld.ready) return
-    const dx = Math.abs(openSeaMarketPlayerWorld.x - playerExit.x)
-    const dz = Math.abs(openSeaMarketPlayerWorld.z - playerExit.z)
-    if (dx <= playerExit.halfX && dz <= playerExit.halfZ) {
+    if (isInMarketExitZone(openSeaMarketPlayerWorld.x, openSeaMarketPlayerWorld.z)) {
       triggeredRef.current = true
       playSfx('uiConfirm')
       const locale = getLocale()

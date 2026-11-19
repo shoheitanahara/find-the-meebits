@@ -1,4 +1,5 @@
 import { RUNWAY } from '../config'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** 暗い部屋＋輝く白黒ランウェイ＋背面スクリーン枠 */
 export function RunwayRoom() {
@@ -25,7 +26,8 @@ export function RunwayRoom() {
 
   return (
     <group>
-      <color attach="background" args={['#080808']} />
+      {/* 部屋の外（カメラが壁の裏に回り込んだとき）は真っ黒 */}
+      <color attach="background" args={['#000000']} />
       {/* 暗室だが奥側も顔が読めるよう、ランウェイ全体を均一に照らす */}
       <fog attach="fog" args={['#080808', 28, 55]} />
 
@@ -79,26 +81,26 @@ export function RunwayRoom() {
       </mesh>
 
       {/* 奥壁（スクリーン側） */}
-      <mesh position={[0, wallHeight / 2, roomMinZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[0, wallHeight / 2, roomMinZ]}>
         <boxGeometry args={[roomHalfX * 2, wallHeight, 0.4]} />
         <meshStandardMaterial color={colors.wall} roughness={0.92} />
       </mesh>
 
       {/* 手前壁は入口を開ける（カメラが外に出ても黒壁で塞がれない） */}
-      <mesh position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
         <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.4]} />
         <meshStandardMaterial color={colors.wall} roughness={0.92} />
       </mesh>
-      <mesh position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
         <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.4]} />
         <meshStandardMaterial color={colors.wall} roughness={0.92} />
       </mesh>
 
-      <mesh position={[-roomHalfX, wallHeight / 2, roomCenterZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[-roomHalfX, wallHeight / 2, roomCenterZ]}>
         <boxGeometry args={[0.4, wallHeight, roomDepth]} />
         <meshStandardMaterial color={colors.wall} roughness={0.92} />
       </mesh>
-      <mesh position={[roomHalfX, wallHeight / 2, roomCenterZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[roomHalfX, wallHeight / 2, roomCenterZ]}>
         <boxGeometry args={[0.4, wallHeight, roomDepth]} />
         <meshStandardMaterial color={colors.wall} roughness={0.92} />
       </mesh>

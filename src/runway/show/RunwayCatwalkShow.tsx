@@ -12,6 +12,7 @@ import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { getRunwayModelTraits } from '../dailyRunway'
 import { RUNWAY } from '../config'
 import { useRunwayStore } from '../store'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 type WalkPhase = 'approach' | 'pause' | 'retreat'
 
@@ -140,6 +141,7 @@ function CatwalkModel({
 
   return (
     <group
+      userData={OCCLUDER_USER_DATA}
       ref={groupRef}
       position={[0, RUNWAY.runwayY + 0.02, RUNWAY.runwayStartZ]}
       rotation={[0, 0, 0]}

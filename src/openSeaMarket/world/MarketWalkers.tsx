@@ -15,6 +15,7 @@ import {
 import { OPEN_SEA_MARKET } from '../config'
 import { marketNpcPositions, openSeaMarketPlayerWorld } from '../playerWorld'
 import { useOpenSeaMarketStore } from '../store'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 const WALKER_RADIUS = 0.4
 const PLAYER_STOP_DISTANCE = 2.7
@@ -324,6 +325,7 @@ function MarketWalker({
 
   return (
     <group
+      userData={OCCLUDER_USER_DATA}
       ref={groupRef}
       position={[spawn.x, OPEN_SEA_MARKET.playerGroundY, spawn.z]}
       rotation={[0, spawn.rotationY, 0]}

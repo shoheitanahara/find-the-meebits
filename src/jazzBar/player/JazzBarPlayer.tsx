@@ -235,16 +235,11 @@ export function JazzBarPlayer({ enabled }: { enabled: boolean }) {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = JAZZ_BAR.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -JAZZ_BAR.roomHalfX + 1.2,
-      JAZZ_BAR.roomHalfX - 1.2,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      JAZZ_BAR.roomMinZ + 2.5,
-      JAZZ_BAR.roomMaxZ - 0.8,
-    )
+    // 左右・入口側の壁ではカメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    // 奥（スクリーン側）だけは、映像の重ね合わせがずれないよう手前に留める。
+    const camX = xRef.current + offsetX
+    const camZ = Math.max(zRef.current + offsetZ, JAZZ_BAR.roomMinZ + 2.5)
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, JAZZ_BAR.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

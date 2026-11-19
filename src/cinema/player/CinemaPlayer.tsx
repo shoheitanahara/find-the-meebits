@@ -226,16 +226,11 @@ export function CinemaPlayer({ enabled }: { enabled: boolean }) {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = CINEMA.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -CINEMA.roomHalfX + 1.2,
-      CINEMA.roomHalfX - 1.2,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      CINEMA.roomMinZ + 2.5,
-      CINEMA.roomMaxZ - 0.8,
-    )
+    // 左右・入口側の壁ではカメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    // 奥（スクリーン側）だけは、映像の重ね合わせがずれないよう手前に留める。
+    const camX = xRef.current + offsetX
+    const camZ = Math.max(zRef.current + offsetZ, CINEMA.roomMinZ + 2.5)
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, CINEMA.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

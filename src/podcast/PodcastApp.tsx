@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { podcastPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import {
@@ -42,6 +45,19 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と観客（NPC）を透かす。
+ * ベンチ（椅子）は透かさない。
+ * 座ると体が低くなるので、高さは座った姿勢にも合う値にしている。
+ */
+const occlusionTargets = [new Vector3(), new Vector3()]
+function getPodcastOcclusionTargets(): Vector3[] {
+  if (!podcastPlayerWorld.ready) return []
+  occlusionTargets[0].set(podcastPlayerWorld.x, 1.0, podcastPlayerWorld.z)
+  occlusionTargets[1].set(podcastPlayerWorld.x, 1.5, podcastPlayerWorld.z)
+  return occlusionTargets
+}
+
 function PodcastScene() {
   const phase = usePodcastStore((state) => state.phase)
   const enabled = phase === 'playing'
@@ -56,10 +72,11 @@ function PodcastScene() {
         position={[
           PODCAST.playerStart.x + PODCAST.cameraFollow.x,
           PODCAST.cameraFollow.y,
-          Math.min(PODCAST.playerStart.z + PODCAST.cameraFollow.z, PODCAST.roomMaxZ - 0.8),
+          PODCAST.playerStart.z + PODCAST.cameraFollow.z,
         ]}
       />
       <PodcastRoom />
+      {enabled ? <CameraOcclusionFader getTargets={getPodcastOcclusionTargets} /> : null}
       <PodcastExitPad enabled={enabled} />
       <PodcastScreen />
       <PodcastAudience />
@@ -76,8 +93,9 @@ export function PodcastApp() {
   usePodcastMuteKeyboard()
   usePodcastSeekKeyboard()
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#120e0c] text-slate-100">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-slate-100">
       {showWorld ? (
         <Canvas
           frameloop={frameloop}

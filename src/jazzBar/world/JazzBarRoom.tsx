@@ -1,5 +1,6 @@
 import { JAZZ_BAR } from '../config'
 import { useJazzBarStore } from '../store'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** Jazz Bar：ステージスクリーン＋丸テーブル／丸椅子 */
 export function JazzBarRoom() {
@@ -79,37 +80,37 @@ export function JazzBarRoom() {
       </mesh>
 
       {/* 奥壁: スクリーン開口を空けて4枚に分割（映像が壁に張り付いて見える） */}
-      <mesh position={[0, bottomH / 2, wallZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[0, bottomH / 2, wallZ]}>
         <boxGeometry args={[roomHalfX * 2, bottomH, wallT]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
-      <mesh position={[0, screen.y + openHalfH + topH / 2, wallZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[0, screen.y + openHalfH + topH / 2, wallZ]}>
         <boxGeometry args={[roomHalfX * 2, topH, wallT]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
-      <mesh position={[-(openHalfW + sideW / 2), wallHeight / 2, wallZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[-(openHalfW + sideW / 2), wallHeight / 2, wallZ]}>
         <boxGeometry args={[sideW, wallHeight, wallT]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
-      <mesh position={[openHalfW + sideW / 2, wallHeight / 2, wallZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[openHalfW + sideW / 2, wallHeight / 2, wallZ]}>
         <boxGeometry args={[sideW, wallHeight, wallT]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
 
-      <mesh position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[-(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
         <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.4]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
-      <mesh position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[(roomHalfX + entranceHalf) / 2, wallHeight / 2, roomMaxZ]}>
         <boxGeometry args={[roomHalfX - entranceHalf, wallHeight, 0.4]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
 
-      <mesh position={[-roomHalfX, wallHeight / 2, roomCenterZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[-roomHalfX, wallHeight / 2, roomCenterZ]}>
         <boxGeometry args={[0.4, wallHeight, roomDepth]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>
-      <mesh position={[roomHalfX, wallHeight / 2, roomCenterZ]}>
+      <mesh userData={OCCLUDER_USER_DATA} position={[roomHalfX, wallHeight / 2, roomCenterZ]}>
         <boxGeometry args={[0.4, wallHeight, roomDepth]} />
         <meshStandardMaterial color={colors.wall} roughness={0.9} />
       </mesh>

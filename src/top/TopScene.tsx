@@ -54,11 +54,20 @@ import { MusicArtDistrictGround } from './MusicArtDistrictGround'
 import { SeaDistrictGround } from './SeaDistrictGround'
 import { MountainVoxelGround } from './MountainVoxelGround'
 import { ParkSnowCover } from './ParkSnowCover'
-import { getParkZone, type ParkGateDef, type ParkZoneId, type ParkZoneLayout } from './parkZones'
+import {
+  getGateArrivalSpawn,
+  getParkZone,
+  type ParkGateDef,
+  type ParkZoneId,
+  type ParkZoneLayout,
+} from './parkZones'
+import { isInsideGateTrigger } from './parkGateRules'
 import { ParkBenchProp } from './ParkBenchProp'
 import { ParkBackdrop } from './ParkBackdrop'
+import { CameraOcclusionFader, OCCLUDER_USER_DATA } from '../world/CameraOcclusionFader'
 import { JungleDistrictGround } from './JungleDistrictGround'
 import { JungleAnimals } from './jungle/JungleAnimals'
+import { isJungleConifer } from './jungle/jungleConfig'
 import { buildParkGroveTreeModel, buildParkPineTreeModel } from './landmarks/parkTreeModel'
 import { VoxelModelMesh } from './voxel/VoxelModelMesh'
 import { parkPlayerWorld, setParkPlayerWorld } from './parkPlayerWorld'
@@ -67,7 +76,6 @@ import { useTopStore, type AttractionId } from './topStore'
 const MOVE_SPEED = 7
 const ENTRANCE_HALF_WIDTH = 1.45
 const ENTRANCE_TRIGGER_DEPTH = 0.55
-const GATE_TRIGGER_HALF = 1.35
 const ZONE_TRANSITION_MS = 280
 const TOP_NPC_WALK_SPEED = 1.15
 /** ミュージアム NPC と同じく、会話距離より少し手前で立ち止まる */
@@ -142,6 +150,7 @@ export function TopScene({
         far={activeZoneId === 'sea' ? 280 : 120}
       />
       <TopFollowCamera />
+      <CameraOcclusionFader getTargets={getParkOcclusionTargets} />
       <ambientLight intensity={look.ambientIntensity} color={look.ambientColor} />
       <hemisphereLight
         args={[look.hemisphereSky, look.hemisphereGround, look.hemisphereIntensity]}
@@ -179,7 +188,9 @@ export function TopScene({
             ? 'none'
             : activeZoneId === 'mountain'
               ? 'pine'
-              : 'grove'
+              : activeZoneId === 'jungle'
+                ? 'mixed'
+                : 'grove'
         }
         voxelGround={activeZoneId === 'mountain'}
         cultureGround={activeZoneId === 'culture'}
@@ -199,15 +210,25 @@ export function TopScene({
         />
       ) : null}
       {zone.hasFeaturedBoard ? (
-        <FeaturedInfoBoard
-          featuredId={lineup.featuredId}
-          featuredTraits={lineup.featuredTraits}
-          themeTrait={lineup.themeTrait}
-          locale={locale}
-        />
+        <group userData={OCCLUDER_USER_DATA}>
+          <FeaturedInfoBoard
+            featuredId={lineup.featuredId}
+            featuredTraits={lineup.featuredTraits}
+            themeTrait={lineup.themeTrait}
+            locale={locale}
+          />
+        </group>
       ) : null}
-      {activeZoneId === 'culture' ? <AboutMeebitsBoard locale={locale} /> : null}
-      {activeZoneId === 'plaza' ? <ParkMapBoard locale={locale} /> : null}
+      {activeZoneId === 'culture' ? (
+        <group userData={OCCLUDER_USER_DATA}>
+          <AboutMeebitsBoard locale={locale} />
+        </group>
+      ) : null}
+      {activeZoneId === 'plaza' ? (
+        <group userData={OCCLUDER_USER_DATA}>
+          <ParkMapBoard locale={locale} />
+        </group>
+      ) : null}
       <ParkLamps
         look={look}
         lamps={zone.lamps}
@@ -240,7 +261,9 @@ export function TopScene({
         />
       ))}
       {zone.gates.map((gate) => (
-        <ParkZoneGate key={gate.id} gate={gate} locale={locale} />
+        <group key={gate.id} userData={OCCLUDER_USER_DATA}>
+          <ParkZoneGate gate={gate} locale={locale} />
+        </group>
       ))}
       {(zone.comingSoonSlots ?? []).map((slot) => (
         <ComingSoonPad
@@ -308,6 +331,24 @@ function transitionToZone(
     useTopStore.getState().setActiveZone(zoneId, spawn)
     useTopStore.getState().setZoneTransitioning(false)
   }, ZONE_TRANSITION_MS)
+}
+
+/**
+ * 透かし判定でカメラから見たい相手。
+ * パークでは話しかけているときだけ（プレイヤーと NPC の胸・頭）。
+ * 歩いているあいだは空を返し、透けていた物は元に戻る。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getParkOcclusionTargets(): Vector3[] {
+  const dialogue = useDialogueStore.getState()
+  if (!dialogue.isOpen || !dialogue.activeNpcId) return []
+  const npc = useNpcStore.getState().npcPositions[dialogue.activeNpcId]
+  if (!npc) return []
+  occlusionTargets[0].set(parkPlayerWorld.x, 1.1, parkPlayerWorld.z)
+  occlusionTargets[1].set(parkPlayerWorld.x, 1.8, parkPlayerWorld.z)
+  occlusionTargets[2].set(npc[0], npc[1] + 1.1, npc[2])
+  occlusionTargets[3].set(npc[0], npc[1] + 1.8, npc[2])
+  return occlusionTargets
 }
 
 /** Hunt 本編と同じ固定オフセット追従。会話中は NPC との中間へ寄る。 */
@@ -399,7 +440,8 @@ function HubGround({
   look: ParkLook
   layout: ParkZoneLayout
   trees: ReadonlyArray<readonly [number, number]>
-  treeStyle?: 'grove' | 'pine' | 'none'
+  /** mixed = 針葉樹と広葉樹の混在（Jungle） */
+  treeStyle?: 'grove' | 'pine' | 'mixed' | 'none'
   voxelGround?: boolean
   cultureGround?: boolean
   seaGround?: boolean
@@ -494,11 +536,12 @@ function HubGround({
       ) : null}
       {treeStyle !== 'none'
         ? trees.map(([x, z]) => (
-            <group key={`${x}-${z}`} position={[x, 0, 0]}>
-              {treeStyle === 'pine' ? (
-                <PineTree z={z} christmas={look.christmas} />
+            <group key={`${x}-${z}`} position={[x, 0, 0]} userData={OCCLUDER_USER_DATA}>
+              {/* mixed（Jungle の森）は植木鉢なし。針葉樹は雪だけ、広葉樹は冬にイルミネーション */}
+              {treeStyle === 'pine' || (treeStyle === 'mixed' && isJungleConifer(x, z)) ? (
+                <PineTree z={z} christmas={look.christmas} wild={treeStyle === 'mixed'} />
               ) : (
-                <Tree z={z} christmas={look.christmas} />
+                <Tree z={z} christmas={look.christmas} wild={treeStyle === 'mixed'} />
               )}
             </group>
           ))
@@ -555,8 +598,8 @@ function FountainStatue({ featuredId }: { featuredId: number }) {
   )
 }
 
-function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
-  const model = useMemo(() => buildParkGroveTreeModel(z, christmas), [z, christmas])
+function Tree({ z, christmas = false, wild = false }: { z: number; christmas?: boolean; wild?: boolean }) {
+  const model = useMemo(() => buildParkGroveTreeModel(z, christmas, wild), [z, christmas, wild])
   return (
     <group position={[0, 0, z]}>
       <VoxelModelMesh model={model} />
@@ -564,8 +607,8 @@ function Tree({ z, christmas = false }: { z: number; christmas?: boolean }) {
   )
 }
 
-function PineTree({ z, christmas = false }: { z: number; christmas?: boolean }) {
-  const model = useMemo(() => buildParkPineTreeModel(z, christmas), [z, christmas])
+function PineTree({ z, christmas = false, wild = false }: { z: number; christmas?: boolean; wild?: boolean }) {
+  const model = useMemo(() => buildParkPineTreeModel(z, christmas, wild), [z, christmas, wild])
   return (
     <group position={[0, 0, z]}>
       <VoxelModelMesh model={model} />
@@ -584,17 +627,19 @@ function ParkLamps({
 }) {
   return (
     <group>
-      {lamps.map(([x, z]) =>
-        style === 'beach' ? (
-          <BeachLamp key={`${x}-${z}`} look={look} x={x} z={z} />
-        ) : style === 'astro' ? (
-          <AstroLamp key={`${x}-${z}`} look={look} x={x} z={z} />
-        ) : style === 'musicArt' ? (
-          <MusicArtLamp key={`${x}-${z}`} look={look} x={x} z={z} />
-        ) : (
-          <ClassicLamp key={`${x}-${z}`} look={look} x={x} z={z} />
-        ),
-      )}
+      {lamps.map(([x, z]) => (
+        <group key={`${x}-${z}`} userData={OCCLUDER_USER_DATA}>
+          {style === 'beach' ? (
+            <BeachLamp look={look} x={x} z={z} />
+          ) : style === 'astro' ? (
+            <AstroLamp look={look} x={x} z={z} />
+          ) : style === 'musicArt' ? (
+            <MusicArtLamp look={look} x={x} z={z} />
+          ) : (
+            <ClassicLamp look={look} x={x} z={z} />
+          )}
+        </group>
+      ))}
     </group>
   )
 }
@@ -879,21 +924,24 @@ function ParkDetails({
 
   return (
     <group>
-      {benches.map(([x, z, rotationY], index) =>
-        benchStyle === 'astro' ? (
-          <AstroBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
-        ) : (
-          <ClassicBench key={`bench-${index}`} position={[x, 0, z]} rotationY={rotationY} />
-        ),
-      )}
+      {benches.map(([x, z, rotationY], index) => (
+        <group key={`bench-${index}`} userData={OCCLUDER_USER_DATA}>
+          {benchStyle === 'astro' ? (
+            <AstroBench position={[x, 0, z]} rotationY={rotationY} />
+          ) : (
+            <ClassicBench position={[x, 0, z]} rotationY={rotationY} />
+          )}
+        </group>
+      ))}
       {planters.map(([x, z], index) => (
-        <ParkBenchProp
-          key={`bench-prop-${index}`}
-          kind={benchProp}
-          christmas={christmas}
-          position={[x, 0, z]}
-          index={index}
-        />
+        <group key={`bench-prop-${index}`} userData={OCCLUDER_USER_DATA}>
+          <ParkBenchProp
+            kind={benchProp}
+            christmas={christmas}
+            position={[x, 0, z]}
+            index={index}
+          />
+        </group>
       ))}
       {showRailings
         ? ([-1, 1] as const).map((side) => {
@@ -1807,18 +1855,12 @@ function TopPlayerController({ onEnter }: { onEnter: (id: AttractionId) => void 
     let insideGate = false
 
     for (const gate of zone.gates) {
-      const yaw = gate.yaw ?? 0
-      const dx = x - gate.x
-      const dz = z - gate.z
-      const localX = dx * Math.cos(-yaw) - dz * Math.sin(-yaw)
-      const localZ = dx * Math.sin(-yaw) + dz * Math.cos(-yaw)
-      const inCorridor =
-        Math.abs(localZ) <= GATE_TRIGGER_HALF && Math.abs(localX) <= gate.alcoveDepth + 0.5
-      if (inCorridor) {
+      // 判定幅は門の開口いっぱい（橋の端を歩いても移動できる）
+      if (isInsideGateTrigger(gate, x, z)) {
         insideGate = true
         if (!isGateCrossingRef.current) {
           isGateCrossingRef.current = true
-          transitionToZone(gate.targetZone, gate.targetSpawn)
+          transitionToZone(gate.targetZone, getGateArrivalSpawn(zone.id, gate))
           return
         }
       }

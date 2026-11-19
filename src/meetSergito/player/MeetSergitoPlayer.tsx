@@ -233,16 +233,10 @@ export function MeetSergitoPlayer() {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = MEET_SERGITO.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -MEET_SERGITO.roomHalfX + 1.0,
-      MEET_SERGITO.roomHalfX - 1.0,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      MEET_SERGITO.roomMinZ + 2.5,
-      MEET_SERGITO.roomMaxZ - 1.0,
-    )
+    // カメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    const camX = xRef.current + offsetX
+    const camZ = zRef.current + offsetZ
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, MEET_SERGITO.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

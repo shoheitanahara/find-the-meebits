@@ -9,6 +9,7 @@ import { distanceToSergito, isWorkshopPositionWalkable, isWorkshopWalkerPosition
 import { MEET_SERGITO } from '../config'
 import { useMeetSergitoStore } from '../store'
 import { getWorkshopWalkerMeebitIds } from './workshopFigureLayout'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 const WALKER_WALK_SPEED = 1.15
 const WALKER_RADIUS = 0.36
@@ -159,7 +160,7 @@ function WorkshopWalker({ spawn, index }: { spawn: WalkerSpawn; index: number })
   })
 
   return (
-    <group ref={groupRef} position={[spawn.x, groundY, spawn.z]} rotation={[0, spawn.rotationY, 0]}>
+    <group userData={OCCLUDER_USER_DATA} ref={groupRef} position={[spawn.x, groundY, spawn.z]} rotation={[0, spawn.rotationY, 0]}>
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

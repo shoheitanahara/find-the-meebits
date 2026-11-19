@@ -9,6 +9,7 @@ import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { MEET_SERGITO, SERGITO_MEEBIT_ID } from '../config'
 import { meetSergitoPlayerWorld } from '../playerWorld'
 import { useMeetSergitoStore } from '../store'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 export function SergitoNpc() {
   const groupRef = useRef<Group>(null)
@@ -64,7 +65,7 @@ export function SergitoNpc() {
   const { x, z } = MEET_SERGITO.sergito
 
   return (
-    <group ref={groupRef} position={[x, MEET_SERGITO.playerGroundY, z]} rotation={[0, MEET_SERGITO.sergito.rotationY, 0]}>
+    <group userData={OCCLUDER_USER_DATA} ref={groupRef} position={[x, MEET_SERGITO.playerGroundY, z]} rotation={[0, MEET_SERGITO.sergito.rotationY, 0]}>
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

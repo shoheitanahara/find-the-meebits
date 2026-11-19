@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { learnArtPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
 import {
@@ -42,6 +45,18 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getOcclusionTargets(): Vector3[] {
+  if (!learnArtPlayerWorld.ready) return []
+  occlusionTargets[0].set(learnArtPlayerWorld.x, 1.0, learnArtPlayerWorld.z)
+  occlusionTargets[1].set(learnArtPlayerWorld.x, 1.5, learnArtPlayerWorld.z)
+  return occlusionTargets.slice(0, 2)
+}
+
 function LearnArtScene() {
   const phase = useLearnArtStore((state) => state.phase)
   const enabled = phase === 'playing'
@@ -56,10 +71,11 @@ function LearnArtScene() {
         position={[
           LEARN_ART.playerStart.x + LEARN_ART.cameraFollow.x,
           LEARN_ART.cameraFollow.y,
-          Math.min(LEARN_ART.playerStart.z + LEARN_ART.cameraFollow.z, LEARN_ART.roomMaxZ - 0.8),
+          LEARN_ART.playerStart.z + LEARN_ART.cameraFollow.z,
         ]}
       />
       <LearnArtRoom />
+      <CameraOcclusionFader getTargets={getOcclusionTargets} />
       <LearnArtExitPad enabled={enabled} />
       <LearnArtScreen />
       <LearnArtAudience />
@@ -76,8 +92,9 @@ export function LearnArtApp() {
   useLearnArtMuteKeyboard()
   useLearnArtSeekKeyboard()
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#0c0610] text-slate-100">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-slate-100">
       {showWorld ? (
         <Canvas
           frameloop={frameloop}

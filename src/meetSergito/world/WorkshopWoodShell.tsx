@@ -1,5 +1,6 @@
 import { MEET_SERGITO } from '../config'
 import { WORKSHOP_SHELF } from './workshopFigureLayout'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 const WALL_T = 0.28
 
@@ -58,7 +59,7 @@ export function WorkshopWoodShell() {
       />
 
       {/* 左壁窓 */}
-      <group position={[-roomHalfX + WALL_T * 0.6, 2.5, 0]}>
+      <group position={[-roomHalfX + WALL_T * 0.6, 2.5, 0]} userData={OCCLUDER_USER_DATA}>
         <mesh>
           <boxGeometry args={[0.05, 1.9, 2.8]} />
           <meshStandardMaterial
@@ -120,7 +121,7 @@ function SimpleWall({
   const span = battenAxis === 'x' ? w : d
 
   return (
-    <group position={position}>
+    <group position={position} userData={OCCLUDER_USER_DATA}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={size} />
         <meshStandardMaterial color={colors.wallPlank} roughness={0.88} metalness={0.02} />
@@ -168,35 +169,15 @@ export function WorkshopShelves() {
         shelfSpanZ={shelfSpanZ}
         colors={colors}
       />
-
-      <group position={[-6.8, 0, 4.5]}>
-        <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.15, 0.44, 0.95]} />
-          <meshStandardMaterial color="#b8a888" roughness={0.92} />
-        </mesh>
-      </group>
-
-      <group position={[7.8, 0, 5.2]}>
-        <mesh position={[0, 0.65, 0]} castShadow>
-          <cylinderGeometry args={[0.035, 0.045, 1.3, 10]} />
-          <meshStandardMaterial color="#2a2828" roughness={0.45} metalness={0.55} />
-        </mesh>
-        <mesh position={[0, 1.35, 0]}>
-          <coneGeometry args={[0.28, 0.32, 12, 1, true]} />
-          <meshStandardMaterial
-            color="#fff4e0"
-            emissive="#ffc870"
-            emissiveIntensity={0.45}
-            roughness={0.4}
-            side={2}
-          />
-        </mesh>
-        <pointLight position={[0, 1.2, 0]} intensity={10} distance={7} decay={2} color="#ffd8a0" />
-      </group>
     </>
   )
 }
 
+/**
+ * 壁付けのフィギュア棚。
+ * 両端は奥行きいっぱいの側板、上に天板・下に台輪を付けて家具としてまとめる。
+ * 各段の前縁に見切り、棚板の裏にフィギュアを照らす静かな照明帯。
+ */
 function WallShelfUnit({
   wallX,
   side,
@@ -213,28 +194,62 @@ function WallShelfUnit({
   colors: (typeof MEET_SERGITO)['colors']
 }) {
   const intoRoom = side === 'left' ? 1 : -1
-  const backX = intoRoom * -0.04
   const boardX = intoRoom * (shelfDepth / 2 + 0.06)
-  const midY = boardTopY[1]
+  const frontX = intoRoom * (shelfDepth + 0.06)
+  const topBoardY = boardTopY[boardTopY.length - 1]
+  /** 一番上の段のフィギュアの頭上まで */
+  const unitHeight = topBoardY + 0.75
+  const sideT = 0.07
+  const halfSpan = shelfSpanZ / 2 + sideT / 2
 
   return (
     <group position={[wallX, 0, 0]}>
-      {boardTopY.map((y) => (
-        <mesh key={y} position={[boardX, y - 0.025, 0]} castShadow receiveShadow>
-          <boxGeometry args={[shelfDepth, 0.05, shelfSpanZ]} />
-          <meshStandardMaterial color={colors.wood} roughness={0.72} metalness={0.04} />
-        </mesh>
-      ))}
-      <mesh position={[backX, midY, 0]} castShadow>
-        <boxGeometry args={[0.08, 3.6, shelfSpanZ]} />
+      {/* 背板 */}
+      <mesh position={[intoRoom * 0.05, unitHeight / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.06, unitHeight, shelfSpanZ + sideT * 2]} />
         <meshStandardMaterial color={colors.woodDark} roughness={0.82} />
       </mesh>
-      {[-shelfSpanZ / 2 + 0.06, shelfSpanZ / 2 - 0.06].map((z) => (
-        <mesh key={z} position={[boardX * 0.6, midY, z]} castShadow>
-          <boxGeometry args={[0.08, 3.6, 0.08]} />
-          <meshStandardMaterial color={colors.woodDark} roughness={0.82} />
+      {/* 両端の側板（奥行きいっぱい） */}
+      {[-halfSpan, halfSpan].map((z) => (
+        <mesh key={z} position={[boardX, unitHeight / 2, z]} castShadow receiveShadow>
+          <boxGeometry args={[shelfDepth + 0.06, unitHeight, sideT]} />
+          <meshStandardMaterial color={colors.wood} roughness={0.7} metalness={0.04} />
         </mesh>
       ))}
+      {/* 天板と台輪 */}
+      <mesh position={[boardX, unitHeight + 0.03, 0]} castShadow>
+        <boxGeometry args={[shelfDepth + 0.14, 0.06, shelfSpanZ + sideT * 2 + 0.1]} />
+        <meshStandardMaterial color={colors.wood} roughness={0.7} metalness={0.04} />
+      </mesh>
+      <mesh position={[boardX, 0.06, 0]} receiveShadow>
+        <boxGeometry args={[shelfDepth + 0.02, 0.12, shelfSpanZ]} />
+        <meshStandardMaterial color={colors.woodDark} roughness={0.85} />
+      </mesh>
+      {boardTopY.map((y) => (
+        <group key={y}>
+          {/* 棚板 */}
+          <mesh position={[boardX, y - 0.025, 0]} castShadow receiveShadow>
+            <boxGeometry args={[shelfDepth, 0.05, shelfSpanZ]} />
+            <meshStandardMaterial color={colors.wood} roughness={0.72} metalness={0.04} />
+          </mesh>
+          {/* 前縁の見切り */}
+          <mesh position={[frontX, y - 0.035, 0]}>
+            <boxGeometry args={[0.03, 0.07, shelfSpanZ]} />
+            <meshStandardMaterial color={colors.woodDark} roughness={0.7} />
+          </mesh>
+        </group>
+      ))}
+      {/* 棚板の裏の照明帯（下の段のフィギュアを照らす。点滅なし） */}
+      {boardTopY.slice(1).map((y) => (
+        <mesh key={`led-${y}`} position={[intoRoom * (shelfDepth * 0.75), y - 0.055, 0]}>
+          <boxGeometry args={[0.04, 0.01, shelfSpanZ - 0.2]} />
+          <meshBasicMaterial color="#ffe2b0" toneMapped={false} />
+        </mesh>
+      ))}
+      <mesh position={[intoRoom * (shelfDepth * 0.75), unitHeight - 0.005, 0]}>
+        <boxGeometry args={[0.04, 0.01, shelfSpanZ - 0.2]} />
+        <meshBasicMaterial color="#ffe2b0" toneMapped={false} />
+      </mesh>
     </group>
   )
 }

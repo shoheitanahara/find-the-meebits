@@ -375,16 +375,10 @@ export function MarketPlayer() {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = OPEN_SEA_MARKET.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -OPEN_SEA_MARKET.roomHalfX + OPEN_SEA_MARKET.cameraRoomMarginX,
-      OPEN_SEA_MARKET.roomHalfX - OPEN_SEA_MARKET.cameraRoomMarginX,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      OPEN_SEA_MARKET.roomMinZ + OPEN_SEA_MARKET.cameraRoomMarginZNear,
-      OPEN_SEA_MARKET.roomMaxZ - OPEN_SEA_MARKET.cameraRoomMarginZFar,
-    )
+    // カメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    const camX = xRef.current + offsetX
+    const camZ = zRef.current + offsetZ
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, OPEN_SEA_MARKET.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

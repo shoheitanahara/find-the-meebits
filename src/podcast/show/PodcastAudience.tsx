@@ -7,6 +7,7 @@ import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { PODCAST_SEAT_Y, getPodcastSeatSlot, getOccupiedSeatIndices } from '../podcastSeats'
 import { usePodcastStore } from '../store'
+import { OCCLUDER_USER_DATA } from '../../world/CameraOcclusionFader'
 
 /** スクリーン向き客席の観客（約60%占有） */
 export function PodcastAudience() {
@@ -76,7 +77,13 @@ function SeatedAudience({
   })
 
   return (
-    <group ref={groupRef} position={[x, PODCAST_SEAT_Y, z]} rotation={[0, rotationY, 0]}>
+    // 観客がカメラとプレイヤーのあいだに入ったら消す（VRM は半透明にできないので表示の出し入れ）
+    <group
+      ref={groupRef}
+      position={[x, PODCAST_SEAT_Y, z]}
+      rotation={[0, rotationY, 0]}
+      userData={OCCLUDER_USER_DATA}
+    >
       {vrmScene ? (
         <primitive object={vrmScene} scale={VRM_WORLD_SCALE} />
       ) : (

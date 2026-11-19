@@ -226,16 +226,11 @@ export function LearnArtPlayer({ enabled }: { enabled: boolean }) {
     const offsetZ = Math.cos(lookYaw) * orbitDist
     const offsetY = LEARN_ART.cameraFollow.y + Math.sin(pitch) * flatDist
 
-    const camX = MathUtils.clamp(
-      xRef.current + offsetX,
-      -LEARN_ART.roomHalfX + 1.2,
-      LEARN_ART.roomHalfX - 1.2,
-    )
-    const camZ = MathUtils.clamp(
-      zRef.current + offsetZ,
-      LEARN_ART.roomMinZ + 2.5,
-      LEARN_ART.roomMaxZ - 0.8,
-    )
+    // 左右・入口側の壁ではカメラを部屋に押し込めない。壁の裏まで回り込み、
+    // 間に入った壁は CameraOcclusionFader が透かす（押し込めると向きが不自然になる）。
+    // 奥（スクリーン側）だけは、映像の重ね合わせがずれないよう手前に留める。
+    const camX = xRef.current + offsetX
+    const camZ = Math.max(zRef.current + offsetZ, LEARN_ART.roomMinZ + 2.5)
     cameraPosition.set(camX, offsetY, camZ)
     cameraTarget.set(xRef.current, LEARN_ART.cameraLookY, zRef.current)
     state.camera.position.lerp(cameraPosition, 1 - Math.exp(-dt * 8))

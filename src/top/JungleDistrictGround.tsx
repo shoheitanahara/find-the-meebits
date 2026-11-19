@@ -8,7 +8,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Color, InstancedMesh, Object3D } from 'three'
 import type { ParkZoneLayout } from './parkZones'
-import { JUNGLE_HERDS, JUNGLE_PATHS } from './jungle/jungleConfig'
+import { JUNGLE_HERDS, JUNGLE_PATHS, JUNGLE_TREE_XZ } from './jungle/jungleConfig'
 
 const scratch = new Object3D()
 const TILE = 1
@@ -181,6 +181,92 @@ function FloorBatch({
   )
 }
 
+/** 草むらを出してよい床（緑のマスだけ。道・泥・雪・外枠には出さない） */
+const TUFT_ROLES = new Set<FloorRole>(['grass', 'grassAlt', 'grassLight', 'pasture', 'pastureAlt'])
+const TUFT_COLORS = ['#4a7a3a', '#3e6a32', '#5a8a44', '#365e2c'] as const
+
+type TuftBlade = { x: number; y: number; z: number; h: number; color: string }
+
+/** 草むら1つ（細い葉を数本、高さ違いで束ねる）。外周の草地と同じ作り */
+function pushTuft(out: TuftBlade[], x: number, z: number, baseY: number, n: number) {
+  const blades = 2 + Math.floor(n * 3)
+  for (let i = 0; i < blades; i += 1) {
+    const angle = n * 17 + i * 2.1
+    const radius = 0.06 + ((i * 0.37 + n) % 1) * 0.14
+    const h = 0.18 + ((n * 7 + i * 0.29) % 1) * 0.28
+    out.push({
+      x: x + Math.cos(angle) * radius,
+      y: baseY + h / 2,
+      z: z + Math.sin(angle) * radius,
+      h,
+      color: TUFT_COLORS[(i + Math.floor(n * 4)) % TUFT_COLORS.length],
+    })
+  }
+}
+
+/**
+ * 床の草むら。緑のマスにまばらに、木の根元には多めに（下草）。
+ * 1つの InstancedMesh にまとめて描く。
+ */
+function buildTufts(roleOf: (x: number, z: number) => FloorRole, groundZ: number, halfX: number, halfZ: number) {
+  const blades: TuftBlade[] = []
+  const xMin = Math.floor(-halfX)
+  const xMax = Math.floor(halfX) - 1
+  const zMin = Math.floor(groundZ - halfZ)
+  const zMax = Math.floor(groundZ + halfZ) - 1
+  for (let x = xMin; x <= xMax; x += 1) {
+    for (let z = zMin; z <= zMax; z += 1) {
+      const role = roleOf(x, z)
+      if (!TUFT_ROLES.has(role)) continue
+      const n = hash2(x * 1.7 + 3, z * 2.9 - 11)
+      if (n > 0.42) continue
+      const top = ROLE_HEIGHT[role]
+      pushTuft(blades, x + 0.25 + n * 0.5, z + 0.3 + hash2(x, z + 5) * 0.4, top, n)
+      // 半分くらいは小さな草むらをもう1つ
+      if (n < 0.2) pushTuft(blades, x + 0.7 - n, z + 0.75 - n, top, 1 - n)
+    }
+  }
+  // 木の根元の下草
+  for (const [tx, tz] of JUNGLE_TREE_XZ) {
+    for (let k = 0; k < 4; k += 1) {
+      const angle = k * 1.7 + tx
+      const radius = 0.75 + hash2(tx + k, tz) * 0.5
+      const x = tx + Math.cos(angle) * radius
+      const z = tz + Math.sin(angle) * radius
+      const role = roleOf(Math.floor(x), Math.floor(z))
+      if (!TUFT_ROLES.has(role)) continue
+      pushTuft(blades, x, z, ROLE_HEIGHT[role], hash2(tx * 3 + k, tz * 5))
+    }
+  }
+  return blades
+}
+
+function TuftBatch({ blades }: { blades: TuftBlade[] }) {
+  const meshRef = useRef<InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) return
+    const color = new Color()
+    blades.forEach((blade, index) => {
+      scratch.position.set(blade.x, blade.y, blade.z)
+      scratch.scale.set(0.06, blade.h, 0.06)
+      scratch.updateMatrix()
+      mesh.setMatrixAt(index, scratch.matrix)
+      mesh.setColorAt(index, color.set(blade.color))
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    mesh.computeBoundingSphere()
+  }, [blades])
+  if (blades.length === 0) return null
+  return (
+    <instancedMesh key={blades.length} ref={meshRef} args={[undefined, undefined, blades.length]}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial roughness={0.9} metalness={0.02} />
+    </instancedMesh>
+  )
+}
+
 export function JungleDistrictGround({
   layout,
   christmas = false,
@@ -209,6 +295,20 @@ export function JungleDistrictGround({
     return byRole
   }, [christmas, districtHalfX, districtHalfZ, groundZ])
 
+  const tufts = useMemo(
+    () =>
+      buildTufts(
+        (x, z) => {
+          const base = roleAt(x, z, groundZ)
+          return christmas ? applySnow(base, x, z) : base
+        },
+        groundZ,
+        districtHalfX,
+        districtHalfZ,
+      ),
+    [christmas, districtHalfX, districtHalfZ, groundZ],
+  )
+
   return (
     <group>
       <mesh position={[0, -0.08, groundZ]} receiveShadow>
@@ -220,6 +320,7 @@ export function JungleDistrictGround({
           <FloorBatch key={role} role={role} positions={positions} />
         ),
       )}
+      <TuftBatch blades={tufts} />
     </group>
   )
 }

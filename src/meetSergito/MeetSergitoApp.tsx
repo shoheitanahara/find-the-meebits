@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { CameraOcclusionFader } from '../world/CameraOcclusionFader'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { meetSergitoPlayerWorld } from './playerWorld'
 import { getEnableAntialias, getMaxCanvasDpr } from '../game/perfConfig'
 import { loadMeebitTraitsDataset } from '../data/meebitTraits'
 import { ParkReturnButton } from '../ui/ParkReturnButton'
@@ -19,7 +23,7 @@ import { MeetSergitoExitPad } from './world/MeetSergitoExitPad'
 import { SergitoNpc } from './npc/SergitoNpc'
 import { SergitoDialogueBox } from './dialogue/SergitoDialogueBox'
 import { SergitoDialogueSystem, SergitoInteractionPrompt } from './dialogue/SergitoDialogueSystem'
-import { MEET_SERGITO } from './config'
+import { MEET_SERGITO, SERGITO_NPC_ID } from './config'
 import { useMeetSergitoStore } from './store'
 import { MeetSergitoLoadingOverlay } from './ui/MeetSergitoLoadingOverlay'
 import { getWorkshopFigurePlacements, WORKSHOP_WALKER_COUNT } from './world/workshopFigureLayout'
@@ -40,6 +44,25 @@ function useTabFrameloop() {
   return frameloop
 }
 
+/**
+ * 室内では常に、カメラとプレイヤー（胸・頭）のあいだにある壁と NPC を透かす。
+ * カメラは壁の裏まで回り込むので、間に入った壁が透けて中が見える。
+ */
+const occlusionTargets = [new Vector3(), new Vector3(), new Vector3(), new Vector3()]
+function getOcclusionTargets(): Vector3[] {
+  if (!meetSergitoPlayerWorld.ready) return []
+  occlusionTargets[0].set(meetSergitoPlayerWorld.x, 1.0, meetSergitoPlayerWorld.z)
+  occlusionTargets[1].set(meetSergitoPlayerWorld.x, 1.5, meetSergitoPlayerWorld.z)
+  // Sergito と話しているあいだは Sergito も見たい相手に加える
+  const dialogue = useDialogueStore.getState()
+  if (dialogue.isOpen && dialogue.activeNpcId === SERGITO_NPC_ID) {
+    occlusionTargets[2].set(MEET_SERGITO.sergito.x, 1.1, MEET_SERGITO.sergito.z)
+    occlusionTargets[3].set(MEET_SERGITO.sergito.x, 1.7, MEET_SERGITO.sergito.z)
+    return occlusionTargets
+  }
+  return occlusionTargets.slice(0, 2)
+}
+
 function MeetSergitoScene() {
   return (
     <>
@@ -51,13 +74,11 @@ function MeetSergitoScene() {
         position={[
           MEET_SERGITO.playerStart.x + MEET_SERGITO.cameraFollow.x,
           MEET_SERGITO.cameraFollow.y,
-          Math.min(
-            MEET_SERGITO.playerStart.z + MEET_SERGITO.cameraFollow.z,
-            MEET_SERGITO.roomMaxZ - 1.0,
-          ),
+          MEET_SERGITO.playerStart.z + MEET_SERGITO.cameraFollow.z,
         ]}
       />
       <WorkshopRoom />
+      <CameraOcclusionFader getTargets={getOcclusionTargets} />
       <MeetSergitoExitPad />
       <SergitoNpc />
       <MeetSergitoPlayer />
@@ -80,8 +101,9 @@ export function MeetSergitoApp() {
     void loadMeebitTraitsDataset()
   }, [])
 
+  // 部屋の外（カメラが壁の裏に回り込んだとき）は何も描かれないので、背景は真っ黒にする
   return (
-    <main className="relative h-dvh w-dvw overflow-hidden bg-[#1a140c] text-[#f4ead2]">
+    <main className="relative h-dvh w-dvw overflow-hidden bg-black text-[#f4ead2]">
       <Canvas
         frameloop={frameloop}
         dpr={[1, Math.min(getMaxCanvasDpr(), 1.5)]}

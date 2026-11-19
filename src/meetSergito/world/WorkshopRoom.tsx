@@ -5,14 +5,16 @@ import { WorkshopDesk } from './WorkshopProps'
 import { WorkshopFigures } from './WorkshopFigures'
 import { WorkshopShelves, WorkshopWoodShell } from './WorkshopWoodShell'
 import { WorkshopWalkers } from './WorkshopWalkers'
+import { WorkshopStations } from './WorkshopStations'
 
-/** 木造の制作工房 */
+/** 木造の制作工房（棚・作業デスク・塗装台・3D プリンター台・材木置き場） */
 export function WorkshopRoom() {
   const { desk } = MEET_SERGITO
 
   return (
     <group>
-      <color attach="background" args={['#1a120c']} />
+      {/* 部屋の外（カメラが壁の裏に回り込んだとき）は真っ黒 */}
+      <color attach="background" args={['#000000']} />
       <fog attach="fog" args={['#1a120c', 30, 55]} />
 
       <Environment preset="apartment" environmentIntensity={0.32} />
@@ -74,6 +76,7 @@ export function WorkshopRoom() {
       <WorkshopWoodShell />
       <WorkshopDesk />
       <WorkshopShelves />
+      <WorkshopStations />
       <WorkshopFigures />
       <WorkshopWalkers />
     </group>
