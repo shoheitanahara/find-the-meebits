@@ -39,6 +39,43 @@ const attentionArmZ = {
 const elbowBaseBend = 0.08
 const kneeBaseBend = -0.16
 
+/**
+ * 立ち止まっているときの自然な揺れ（ボクセルの世界観に合わせて控えめ）。
+ * - 呼吸: 約4秒周期で胸が上下し、肩（腕）が少し開く
+ * - 重心移動: 10秒前後でゆっくり左右の足に体重を乗せ替える（乗っていない側の膝が軽く曲がる）
+ * - 頭: 体の傾きに対して水平を保ち、ときどき見回す・小さくうなずく
+ * 周期の違う波を重ねて単調な繰り返しにならないようにし、seed で人ごとに周期と位相をずらす。
+ */
+type StandingIdle = {
+  /** -0.5..0.5 の呼吸（正 = 吸っている） */
+  breath: number
+  /** -1..1 の重心（正 = 右足に体重） */
+  sway: number
+  /** -1..1 の見回し */
+  look: number
+  /** -1..1 のうなずき */
+  nod: number
+}
+
+function fract(value: number) {
+  return value - Math.floor(value)
+}
+
+function sampleStandingIdle(elapsedTime: number, seed: number): StandingIdle {
+  // 人ごとに 0.85〜1.15 倍の速さ
+  const rate = 0.85 + fract(Math.sin(seed * 12.9898) * 43758.5453) * 0.3
+  const t = elapsedTime * rate
+  const tau = Math.PI * 2
+  return {
+    breath: -0.5 * Math.cos((tau * t) / 4.2 + seed),
+    sway:
+      Math.sin((tau * t) / 9.5 + seed * 1.7) * 0.65 + Math.sin((tau * t) / 5.3 + seed * 0.9) * 0.35,
+    look:
+      Math.sin((tau * t) / 7.1 + seed * 2.3) * 0.7 + Math.sin((tau * t) / 3.7 + seed * 1.1) * 0.3,
+    nod: Math.sin((tau * t) / 6.3 + seed * 0.7),
+  }
+}
+
 /** プレビュー／展示用の直立ポーズ（Photo Booth「直立」と同一） */
 export function applyVRMAttentionPose(vrm: VRM | null) {
   if (!vrm) {
@@ -169,25 +206,37 @@ export function applyVRMSitPose(vrm: VRM | null, breathing?: SitPoseBreathingOpt
   const head = getBone(vrm, VRMHumanBoneName.Head)
 
   const breath = breathing ? sampleSitBreath(breathing) : 0
-  const headIdle = breathing
-    ? Math.sin(breathing.elapsedTime * 0.62 + (breathing.headPhaseOffset ?? 0)) *
-      (breathing.breathAmplitude ?? 1) *
-      0.012
-    : 0
-  const headTurn = breathing
-    ? Math.sin(breathing.elapsedTime * 0.35 + (breathing.headPhaseOffset ?? 0) * 1.4) *
-      (breathing.breathAmplitude ?? 1) *
-      0.018
-    : 0
+  /**
+   * 立っているときと同じ自然な揺れを、座り姿勢向けに小さく重ねる
+   * （体はベンチに支えられているので、重心移動は上半身のわずかな傾きだけ）。
+   * 人ごとの呼吸の位相を種にして、揺れのタイミングもずらす。
+   */
+  const idle = breathing
+    ? sampleStandingIdle(
+        breathing.elapsedTime,
+        (breathing.breathPhaseOffset ?? 0) + (breathing.headPhaseOffset ?? 0) * 1.3,
+      )
+    : { breath: 0, sway: 0, look: 0, nod: 0 }
+  const amp = breathing?.breathAmplitude ?? 1
+  const sway = idle.sway * amp
+  const look = idle.look * amp
+  const nod = idle.nod * amp
   const setPose = breathing ? setRotation : setRotationImmediate
 
   // 腕は立位の自然下垂（ねじり・膝上置きなし）。脚だけ着席
-  setPose(hips, { x: 0.12 + breath * 0.35, y: 0, z: 0 })
-  setPose(spine, { x: -0.08 + breath * 0.75, y: 0, z: 0 })
-  setPose(chest, { x: -0.04 + breath * 1.15, y: 0, z: 0 })
-  setPose(head, { x: 0.04 + breath * 0.35 + headIdle, y: headTurn, z: 0 })
-  setPose(leftUpperArm, { x: 0, y: 0, z: armRestZ.left })
-  setPose(rightUpperArm, { x: 0, y: 0, z: armRestZ.right })
+  setPose(hips, { x: 0.12 + breath * 0.35, y: sway * 0.01, z: sway * 0.01 })
+  // 上半身がわずかに左右へ傾く
+  setPose(spine, { x: -0.08 + breath * 0.75, y: -sway * 0.01, z: sway * 0.018 })
+  setPose(chest, { x: -0.04 + breath * 1.15, y: 0, z: -sway * 0.006 })
+  // 頭は水平を保ち、ときどき見回す・小さくうなずく
+  setPose(head, {
+    x: 0.04 + breath * 0.35 + nod * 0.025,
+    y: look * 0.15,
+    z: -sway * 0.014,
+  })
+  // 吸うと肩が上がって腕が少し開く
+  setPose(leftUpperArm, { x: sway * 0.025, y: 0, z: armRestZ.left - breath * 1.0 })
+  setPose(rightUpperArm, { x: -sway * 0.025, y: 0, z: armRestZ.right + breath * 1.0 })
   setPose(leftLowerArm, { x: elbowBaseBend, y: 0, z: 0 })
   setPose(rightLowerArm, { x: elbowBaseBend, y: 0, z: 0 })
   setPose(leftUpperLeg, { x: 1.15, y: 0.04, z: 0 })
@@ -300,63 +349,75 @@ export function applyVRMLocomotion(vrm: VRM | null, options: LocomotionOptions) 
   const phase = options.walkPhaseOffset ?? 0
   const stride = Math.sin(options.elapsedTime * speed + phase)
   const counterStride = Math.sin(options.elapsedTime * speed + phase + Math.PI)
-  const idle = Math.sin(options.elapsedTime * 1.8 + (options.idleOffset ?? 0))
   const movementWeight = options.isMoving ? 1 : 0
   const idleWeight = 1 - movementWeight
+  const idle = sampleStandingIdle(options.elapsedTime, options.idleOffset ?? 0)
+  const breath = idle.breath * idleWeight
+  const sway = idle.sway * idleWeight
+  const look = idle.look * idleWeight
+  const nod = idle.nod * idleWeight
+  // 体重が乗っていない側の膝を軽く曲げる量
+  const leftKneeRelax = Math.max(0, sway) * 0.12
+  const rightKneeRelax = Math.max(0, -sway) * 0.12
 
   setRotation(hips, {
-    x: idle * 0.015 * idleWeight,
-    y: stride * 0.035 * movementWeight,
-    z: counterStride * 0.025 * movementWeight,
+    x: breath * 0.01,
+    y: stride * 0.035 * movementWeight + sway * 0.03,
+    z: counterStride * 0.025 * movementWeight + sway * 0.035,
   })
   setRotation(spine, {
-    x: -0.05 * movementWeight + idle * 0.012 * idleWeight,
-    y: counterStride * 0.03 * movementWeight,
+    x: -0.05 * movementWeight + breath * 0.02,
+    y: counterStride * 0.03 * movementWeight - sway * 0.015,
+    // 腰の傾きを背骨で打ち消す
+    z: -sway * 0.02,
   })
   setRotation(chest, {
-    x: idle * 0.018 * idleWeight,
+    x: breath * 0.03,
     y: counterStride * 0.04 * movementWeight,
-    z: stride * 0.018 * movementWeight,
+    z: stride * 0.018 * movementWeight - sway * 0.015,
   })
   setRotation(head, {
-    x: idle * 0.018 * idleWeight,
-    y: stride * 0.018 * movementWeight,
+    x: nod * 0.03 - breath * 0.01,
+    y: stride * 0.018 * movementWeight + look * 0.14,
+    // 体が傾いても頭は水平に
+    z: -sway * 0.02,
   })
 
+  // 吸うと肩が上がって腕が少し開く。重心移動に少し遅れて腕が揺れる
   setRotation(leftUpperArm, {
-    x: counterStride * 0.36 * movementWeight,
-    z: armRestZ.left,
+    x: counterStride * 0.36 * movementWeight + sway * 0.04,
+    z: armRestZ.left - breath * 0.04,
   })
   setRotation(rightUpperArm, {
-    x: stride * 0.36 * movementWeight,
-    z: armRestZ.right,
+    x: stride * 0.36 * movementWeight - sway * 0.04,
+    z: armRestZ.right + breath * 0.04,
   })
   setRotation(leftLowerArm, {
-    x: elbowBaseBend,
+    x: elbowBaseBend + (0.04 + breath * 0.02) * idleWeight,
     z: 0,
   })
   setRotation(rightLowerArm, {
-    x: elbowBaseBend,
+    x: elbowBaseBend + (0.04 + breath * 0.02) * idleWeight,
     z: 0,
   })
 
   setRotation(leftUpperLeg, {
-    x: stride * 0.34 * movementWeight,
+    x: stride * 0.34 * movementWeight + leftKneeRelax * 0.5,
   })
   setRotation(rightUpperLeg, {
-    x: counterStride * 0.34 * movementWeight,
+    x: counterStride * 0.34 * movementWeight + rightKneeRelax * 0.5,
   })
   setRotation(leftLowerLeg, {
-    x: kneeBaseBend - Math.max(0, -stride) * 0.62 * movementWeight,
+    x: kneeBaseBend - Math.max(0, -stride) * 0.62 * movementWeight - leftKneeRelax,
   })
   setRotation(rightLowerLeg, {
-    x: kneeBaseBend - Math.max(0, -counterStride) * 0.62 * movementWeight,
+    x: kneeBaseBend - Math.max(0, -counterStride) * 0.62 * movementWeight - rightKneeRelax,
   })
   setRotation(leftFoot, {
-    x: 0.08 + Math.max(0, stride) * 0.22 * movementWeight,
+    x: 0.08 + Math.max(0, stride) * 0.22 * movementWeight + leftKneeRelax * 0.5,
   })
   setRotation(rightFoot, {
-    x: 0.08 + Math.max(0, counterStride) * 0.22 * movementWeight,
+    x: 0.08 + Math.max(0, counterStride) * 0.22 * movementWeight + rightKneeRelax * 0.5,
   })
 }
 
