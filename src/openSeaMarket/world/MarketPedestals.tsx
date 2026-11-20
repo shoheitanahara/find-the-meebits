@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Text } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { useFrame } from '@react-three/fiber'
 import { Group, MeshBasicMaterial, MeshStandardMaterial } from 'three'
 import { VRMUtils } from '@pixiv/three-vrm'

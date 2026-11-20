@@ -1,4 +1,5 @@
-import { Text, useTexture } from '@react-three/drei'
+import { useTexture } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { DoubleSide } from 'three'
 import { OPEN_SEA_MARKET } from '../config'
 import { useOpenSeaMarketStore } from '../store'

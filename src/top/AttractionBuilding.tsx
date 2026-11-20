@@ -1,4 +1,5 @@
-import { Text, useTexture } from '@react-three/drei'
+import { useTexture } from '@react-three/drei'
+import { Text } from '../world/WorldText'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef, type ReactNode } from 'react'
 import type { Mesh } from 'three'

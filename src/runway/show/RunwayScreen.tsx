@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Text } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { formatTraitDisplayName } from '../../game/traitHunt'
 import { getLocale } from '../../i18n/locale'
 import {

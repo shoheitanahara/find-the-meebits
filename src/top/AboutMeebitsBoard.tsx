@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../world/WorldText'
 import { ABOUT_MEEBITS_BOARD_POSITION } from './aboutMeebits'
 
 /** Culture エリア: About Meebits 掲示板。 */

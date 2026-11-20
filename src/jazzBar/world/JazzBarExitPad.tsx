@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { getLocale } from '../../i18n/locale'

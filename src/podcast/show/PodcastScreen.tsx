@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Html, Text } from '@react-three/drei'
+import { Html } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { useThree } from '@react-three/fiber'
 import {
   PODCAST,

@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { useMemo } from 'react'
 import { MEET_SERGITO, WORKSHOP_DESK_TOP_Y } from '../config'
 import { VoxelBuilder } from '../../top/voxel/voxelBuilder'

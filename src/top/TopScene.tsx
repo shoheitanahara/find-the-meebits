@@ -1,4 +1,5 @@
-import { PerspectiveCamera, Stars, Text, Environment } from '@react-three/drei'
+import { PerspectiveCamera, Stars, Environment } from '@react-three/drei'
+import { Text } from '../world/WorldText'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
@@ -224,11 +225,10 @@ export function TopScene({
           <AboutMeebitsBoard locale={locale} />
         </group>
       ) : null}
-      {activeZoneId === 'plaza' ? (
-        <group userData={OCCLUDER_USER_DATA}>
-          <ParkMapBoard locale={locale} />
-        </group>
-      ) : null}
+      {/* 全エリアの手前にパークマップ（現在地はエリアごと） */}
+      <group userData={OCCLUDER_USER_DATA}>
+        <ParkMapBoard locale={locale} zoneId={activeZoneId} />
+      </group>
       <ParkLamps
         look={look}
         lamps={zone.lamps}

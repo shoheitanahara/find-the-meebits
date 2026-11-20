@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Text } from '@react-three/drei'
+import { Text } from '../../world/WorldText'
 import { CanvasTexture, SRGBColorSpace, TextureLoader, Vector2, type Texture } from 'three'
 import { SHOOTING_GALLERY } from '../config'
 import {

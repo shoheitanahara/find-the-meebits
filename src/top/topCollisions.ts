@@ -8,7 +8,7 @@ import { FEATURED_BOARD_POSITION, FOUNTAIN_CENTER_Z } from './dailyFeatured'
 import {
   PARK_MAP_BOARD_HALF_X,
   PARK_MAP_BOARD_HALF_Z,
-  PARK_MAP_BOARD_POSITION,
+  PARK_MAP_BOARD_SPOTS,
 } from './ParkMapBoard'
 import { getAttractionsForZone } from './topConfig'
 import {
@@ -205,11 +205,11 @@ function buildAboutMeebitsBoardObstacle(zoneId: ParkZoneId): ObstacleBox[] {
 }
 
 function buildParkMapBoardObstacle(zoneId: ParkZoneId): ObstacleBox[] {
-  if (zoneId !== 'plaza') return []
+  const [x, , z] = PARK_MAP_BOARD_SPOTS[zoneId]
   return [
     boxFromCenter(
-      PARK_MAP_BOARD_POSITION[0],
-      PARK_MAP_BOARD_POSITION[2],
+      x,
+      z,
       PARK_MAP_BOARD_HALF_X,
       PARK_MAP_BOARD_HALF_Z,
     ),

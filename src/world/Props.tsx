@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Text } from '@react-three/drei'
+import { Text } from './WorldText'
 import {
   BENCH_POSITIONS,
   SCULPTURE_POSITIONS,

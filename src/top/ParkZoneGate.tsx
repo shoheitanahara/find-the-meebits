@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei'
+import { Text } from '../world/WorldText'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { InstancedMesh, Object3D } from 'three'
 import { PARK_GROUND_Z, type ParkGateDef } from './parkZones'
