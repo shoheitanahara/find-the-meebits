@@ -270,7 +270,8 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
 
         const opening = getOpening(spec, sideDef.side)
         const isGateOpening = isPerimeterGateOpening(opening)
-        const riverGap = isGateOpening ? spec.openingHalf : 0
+        // 水は橋の下も切らずに流す（床を切り取ったので、切れ目があると穴に見える）
+        const riverGap = 0
         const wallGap = isGateOpening ? spec.wallOpeningHalf : 0
         // 本ゲート／封印門とも同じ along（奥＝北は FAR 左寄り／手前＝南はセンター）
         const openCenter = openCenterOnSide(spec, sideDef.side)
@@ -315,6 +316,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                 </group>
               )
             })}
+            <RiverBank spec={spec} side={sideDef.side} gap={isGateOpening} openCenter={openCenter} />
             {wallSegments.map((seg, index) => {
               // シーエリア: 壁・砂丘は一切出さない（海と砂だけ）
               if (isSeaTheme(spec)) return null
@@ -359,6 +361,79 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
           </group>
         )
       })}
+    </group>
+  )
+}
+
+/** 岸の石の縁の色（エリアの壁に合わせる） */
+function bankColor(spec: PerimeterSpec) {
+  if (isMountainTheme(spec)) return '#5d5a52'
+  if (isAstroTheme(spec)) return '#3a4256'
+  if (isMusicArtTheme(spec)) return '#2c2434'
+  if (isCultureTheme(spec)) return '#34405a'
+  return '#7a7266'
+}
+
+const BANK_THICKNESS = 0.32
+const BANK_TOP = 0.17
+const BANK_BOTTOM = -0.62
+
+/**
+ * 川の内側の岸（石の縁）。床の切り口を隠し、水面まで落ちる護岸に見せる。
+ * 橋のところはデッキの幅だけ切る。川の角（奥と東西が交わるところ）までで止める。
+ */
+function RiverBank({
+  spec,
+  side,
+  gap,
+  openCenter,
+}: {
+  spec: PerimeterSpec
+  side: CardinalSide
+  gap: boolean
+  openCenter: number
+}) {
+  const { cx, cz, riverInnerX, riverInnerZN, riverInnerZS, riverWidth, wallThickness } = spec
+  const halfH = (BANK_TOP - BANK_BOTTOM) / 2
+  const y = BANK_BOTTOM + halfH
+  const color = bankColor(spec)
+  const gapHalf = gap ? spec.bridgeDeckWidth * 0.5 + 0.02 : 0
+  // 縁の中心：岸の線から陸側へ厚みの大半、水側へ少しだけ
+  const inset = BANK_THICKNESS / 2 - 0.06
+
+  let segments: Array<{ mid: number; half: number }>
+  let pos: (mid: number) => [number, number, number]
+  let size: (half: number) => [number, number, number]
+
+  if (side === 'e' || side === 'w') {
+    const sign = side === 'e' ? 1 : -1
+    const x = cx + sign * (riverInnerX - inset)
+    // 奥の川があるならその岸まで、手前は川の端まで
+    const zMin = shouldBuildPerimeterSide(spec, 's') ? cz - riverInnerZS + inset : cz - riverInnerZS - riverWidth
+    const zMax = cz + Math.max(riverInnerZN, riverInnerZS) + riverWidth + wallThickness * 0.5
+    const center = (zMin + zMax) / 2
+    segments = splitAxisSegments(center, (zMax - zMin) / 2, openCenter, gapHalf)
+    pos = (mid) => [x, y, mid]
+    size = (half) => [BANK_THICKNESS, halfH * 2, half * 2]
+  } else {
+    const sign = side === 'n' ? 1 : -1
+    const z = cz + sign * ((side === 'n' ? riverInnerZN : riverInnerZS) - inset)
+    const xMax = shouldBuildPerimeterSide(spec, 'e') ? cx + riverInnerX - inset : cx + riverInnerX + riverWidth
+    const xMin = shouldBuildPerimeterSide(spec, 'w') ? cx - riverInnerX + inset : cx - riverInnerX - riverWidth
+    const center = (xMin + xMax) / 2
+    segments = splitAxisSegments(center, (xMax - xMin) / 2, openCenter, gapHalf)
+    pos = (mid) => [mid, y, z]
+    size = (half) => [half * 2, halfH * 2, BANK_THICKNESS]
+  }
+
+  return (
+    <group>
+      {segments.map((seg, index) => (
+        <mesh key={index} position={pos(seg.mid)} castShadow receiveShadow>
+          <boxGeometry args={size(seg.half)} />
+          <meshStandardMaterial color={color} roughness={0.92} metalness={0.04} />
+        </mesh>
+      ))}
     </group>
   )
 }

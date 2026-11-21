@@ -13,7 +13,8 @@ export function AboutMeebitsBrowser() {
   useEffect(() => {
     if (!open) return
     const onKey = (event: KeyboardEvent) => {
-      if (event.code === 'Escape') {
+      // Esc か Enter で閉じる（ページ内をクリックしたあとは、ページ側にキーが渡るので効かない）
+      if (event.code === 'Escape' || event.code === 'Enter' || event.code === 'NumpadEnter') {
         event.preventDefault()
         closeAboutBrowser()
       }

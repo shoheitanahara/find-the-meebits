@@ -12,6 +12,15 @@ export type CardinalSide = 'n' | 's' | 'e' | 'w'
 export const PARK_FAR_SIDE_GATE_X = -8
 export const PARK_NEAR_SIDE_GATE_X = 0
 
+/**
+ * 奥（口頭の北／−Z）の門のワールド Z。
+ * 川を橋と同じ幅にしたぶん、奥の門と壁を少し外へ下げた（旧 −18.4）。
+ */
+export const PARK_FAR_GATE_Z = -19.0
+
+/** 外周の川の幅。橋のデッキ（bridgeDeckWidth）と同じにそろえる */
+export const PERIMETER_RIVER_WIDTH = 4.0
+
 /** N/S 辺ゲートの沿軸 X（口頭の北南に対応） */
 export function gateAlongXForNS(side: 'n' | 's') {
   return side === 's' ? PARK_FAR_SIDE_GATE_X : PARK_NEAR_SIDE_GATE_X
@@ -86,10 +95,21 @@ export function buildPerimeterSpec(
   const isMountain = perimeter.theme === 'mountain'
   const isSea = perimeter.theme === 'sea'
   const isAstro = perimeter.theme === 'astro'
-  // 床スケルトンは全区共通。川内側も同じ基準で揃える
-  const riverInnerX = Math.min(layout.boundsX - 4.8, 22.2)
+  const wallThickness = isMountain ? 1.6 : isSea ? 0.2 : isAstro ? 1.35 : 1.25
+  // 海は広い海帯。それ以外の川は橋と同じ幅
+  const riverWidth = isSea ? 5.6 : PERIMETER_RIVER_WIDTH
+  /**
+   * 東西：壁と門（x = ±26.4 / ±25.6）は動かさず、川を内側へ広げる。
+   * 旧川幅（2.5〜3.0）のときの川内側から、広げたぶんだけ内へ寄せる。
+   */
+  const legacyRiverWidth = isMountain ? 3.0 : isAstro ? 2.8 : 2.5
+  const legacyInnerX = Math.min(layout.boundsX - 4.8, 22.2)
+  const riverInnerX = isSea ? legacyInnerX : legacyInnerX - (riverWidth - legacyRiverWidth)
   const riverInnerZN = Math.min(layout.maxZ - 2.2, 12.5)
-  const riverInnerZS = Math.min(Math.abs(layout.minZ) - 0.4, 16.2)
+  // 奥：門が PARK_FAR_GATE_Z に来るように川の内側を決める（門 = 川内側 + 川幅 + 壁厚 × 0.55）
+  const riverInnerZS = isSea
+    ? Math.min(Math.abs(layout.minZ) - 0.4, 16.2)
+    : layout.groundZ - PARK_FAR_GATE_Z - riverWidth - wallThickness * 0.55
 
   return {
     cx: 0,
@@ -98,8 +118,8 @@ export function buildPerimeterSpec(
     riverInnerZN,
     riverInnerZS,
     // sea: 広い海帯。壁寸法は未使用（描画・衝突ともスキップ）
-    riverWidth: isMountain ? 3.0 : isSea ? 5.6 : isAstro ? 2.8 : 2.5,
-    wallThickness: isMountain ? 1.6 : isSea ? 0.2 : isAstro ? 1.35 : 1.25,
+    riverWidth,
+    wallThickness,
     wallHeight: isMountain ? 3.6 : isSea ? 0.2 : isAstro ? 3.2 : 2.85,
     wallOpeningHalf: isMountain ? 5.4 : isSea ? 5.6 : isAstro ? 5.3 : 5.2,
     openingHalf: 2.35,
@@ -382,4 +402,17 @@ export function getBridgePlacement(
     return { x: along, z: cz + riverInnerZN + riverWidth * 0.5, rotationY: -Math.PI / 2, length }
   }
   return { x: along, z: cz - riverInnerZS - riverWidth * 0.5, rotationY: Math.PI / 2, length }
+}
+
+/**
+ * 床を敷いてよい範囲（川の内側）。川のある辺だけ制限し、ない辺は null。
+ * 床はこの外側を切り取り、川が床の下を流れて見えるようにする。
+ */
+export function getLandClip(spec: PerimeterSpec): { maxX: number | null; minX: number | null; minZ: number | null } {
+  if (spec.theme === 'sea') return { maxX: null, minX: null, minZ: null }
+  return {
+    maxX: shouldBuildPerimeterSide(spec, 'e') ? spec.cx + spec.riverInnerX : null,
+    minX: shouldBuildPerimeterSide(spec, 'w') ? spec.cx - spec.riverInnerX : null,
+    minZ: shouldBuildPerimeterSide(spec, 's') ? spec.cz - spec.riverInnerZS : null,
+  }
 }

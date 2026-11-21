@@ -111,7 +111,8 @@ function buildJungleTrees(): Array<readonly [number, number]> {
     for (let gz = -13.5; gz <= 14.5; gz += STEP) {
       const x = gx + (hash2(gx, gz) - 0.5) * 1.6
       const z = gz + (hash2(gx + 13, gz - 7) - 0.5) * 1.6
-      if (Math.abs(x) > 20.6 || z < -13.8 || z > 14.6) continue
+      // 外周の川（東西 |x| > 21.2・奥 z < -14.1）から幹と枝の分だけ離す
+      if (Math.abs(x) > 20.0 || z < -12.9 || z > 14.6) continue
       // 道（大通り・小道）から幹の半径ぶん以上離す
       if (Math.abs(z - JUNGLE_PATHS.mainZ) < JUNGLE_PATHS.mainHalf + 1.4) continue
       if (Math.abs(x - JUNGLE_PATHS.crossX) < JUNGLE_PATHS.crossHalf + 1.4) continue

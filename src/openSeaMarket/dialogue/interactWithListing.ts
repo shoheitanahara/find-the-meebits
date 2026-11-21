@@ -1,9 +1,13 @@
+import { loadMeebitTraitsDataset } from '../../data/meebitTraits'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { usePlayerStore } from '../../stores/playerStore'
 import { playSfx } from '../../ui/sfx'
 import { useOpenSeaMarketStore } from '../store'
 import { createGuideDialogue } from './createGuideDialogue'
 import { createListingDialogue } from './createListingDialogue'
+
+// 作品の解説と案内係の性格に使うトレイトを先に読み込んでおく
+void loadMeebitTraitsDataset()
 
 export function marketNpcId(tokenId: number) {
   return `opensea-${tokenId}`

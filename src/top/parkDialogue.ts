@@ -5,11 +5,8 @@ import { getCreatorDialogueLinesEn } from '../npc/npcGeneration'
 import type { DialogueLine } from '../npc/npcTypes'
 import type { DailyThemeTrait } from './dailyFeatured'
 import { isParkChristmasSeason } from './parkChristmas'
-import {
-  getChristmasGreetingLines,
-  getParkDialoguePools,
-  type ParkDialoguePools,
-} from './parkDialogueExpand'
+import { selectParkTalk } from './parkTalk/selectParkTalk'
+import { useTopStore } from './topStore'
 import type { ParkNpcRecord } from './parkNpcRegistry'
 import type { ParkZoneId } from './parkZones'
 
@@ -17,18 +14,6 @@ function seededIndex(seed: number, talkCount: number, length: number) {
   if (length <= 0) return 0
   const mixed = Math.imul(seed ^ (talkCount * 2654435761), 1597334677) >>> 0
   return mixed % length
-}
-
-function pickLine(pool: string[], seed: number, talkCount: number, salt: number): string {
-  return pool[seededIndex(seed + salt, talkCount, pool.length)] ?? pool[0] ?? '...'
-}
-
-function themeLabel(theme: DailyThemeTrait) {
-  return `${theme.traitType} · ${formatTraitDisplayName(theme.traitType, theme.traitValue)}`
-}
-
-function fillTheme(text: string, theme: DailyThemeTrait) {
-  return text.replaceAll('{theme}', themeLabel(theme)).replaceAll('{value}', theme.traitValue)
 }
 
 function selectCreatorParkLines(talkCount: number): DialogueLine[] {
@@ -53,8 +38,8 @@ function selectCreatorParkLines(talkCount: number): DialogueLine[] {
 const CREATOR_SEED = 11143
 
 /**
- * パーク来場者のセリフを 1〜2 行選ぶ。
- * plaza / mountain / culture / sea / astro で別プール。挨拶 + 本文。
+ * パーク来場者のセリフを選ぶ。
+ * 作成者は専用プール。来場者は性格つきの会話（parkTalk）。
  */
 export function selectParkDialogueLines(
   npc: ParkNpcRecord,
@@ -67,102 +52,16 @@ export function selectParkDialogueLines(
     return selectCreatorParkLines(talkCount)
   }
 
-  const locale = getLocale()
-  const pools: ParkDialoguePools = getParkDialoguePools(locale === 'ja' ? 'ja' : 'en', zoneId)
-  const seed = npc.meebitNumber
-  const lines: DialogueLine[] = []
-  const isMountain = zoneId === 'mountain'
-  const isCulture = zoneId === 'culture'
-  const isSea = zoneId === 'sea'
-  const isAstro = zoneId === 'astro'
-  const isMusicArt = zoneId === 'musicArt'
-  /** 噴水や Plaza のゲームから遠いエリア（話題を雑談に回す） */
-  const isFarZone = isAstro || isMusicArt || zoneId === 'jungle'
-
-  // クリスマスシーズンは通常挨拶に季節パターンを足す（必ず出るわけではない）
-  const greetPool = isParkChristmasSeason()
-    ? [...pools.greetings, ...getChristmasGreetingLines(locale === 'ja' ? 'ja' : 'en')]
-    : pools.greetings
-  const greeting = pickLine(greetPool, seed, talkCount, 11)
-  lines.push({
-    id: `${npc.id}-greet-${talkCount}`,
-    text: greeting,
-    category: 'greeting',
+  const top = useTopStore.getState()
+  return selectParkTalk({
+    npc,
+    talkCount,
+    zoneId,
+    timeOfDay: top.timeOfDay,
+    lang: getLocale() === 'ja' ? 'ja' : 'en',
+    playerNumber: top.meebitNumber,
+    featuredId,
+    traitName: formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue),
+    winter: isParkChristmasSeason(),
   })
-
-  // 2行目: マッチ / 主役本人 / ゲーム / テーマ / フレーバー をローテート
-  const branch = seededIndex(seed, talkCount, 6)
-  let second = ''
-
-  if (npc.isFeatured) {
-    second =
-      locale === 'ja'
-        ? isFarZone
-          ? `広場の銅像、#${featuredId}。ぼく。ここまで来ると、別の人の話みたい。`
-          : isMountain || isCulture || isSea
-          ? `噴水の銅像、#${featuredId}。ぼく。遠くからだと信じにくいよね。`
-          : `噴水の銅像、#${featuredId}。ぼく。横から見ると別人みたい。`
-        : isFarZone
-          ? `Plaza statue’s #${featuredId}. That’s me. Feels like they’re talking about someone else out here.`
-          : isMountain || isCulture || isSea
-            ? `Fountain statue’s #${featuredId}. That’s me. Hard to believe from here.`
-            : `Fountain statue’s #${featuredId}. That’s me. Looks different from the side.`
-  } else if (npc.matched && branch <= 2) {
-    second = fillTheme(pickLine(pools.themeMatched, seed, talkCount, 23), themeTrait)
-    if (branch === 0) {
-      second = pickLine(pools.featuredMatched, seed, talkCount, 29)
-    }
-  } else if (branch === 3) {
-    second = isMountain
-      ? pickLine(pools.gameMountain, seed, talkCount, 31)
-      : isCulture
-        ? pickLine(pools.gameRunway, seed, talkCount, 31)
-        : isSea
-          ? pickLine(pools.gameSergito, seed, talkCount, 31)
-          : isFarZone
-            ? pickLine(pools.flavor, seed, talkCount, 31)
-            : pickLine(pools.gameFind, seed, talkCount, 31)
-  } else if (branch === 4) {
-    second = isMountain
-      ? pickLine(pools.gameNeon, seed, talkCount, 37)
-      : isCulture
-        ? pickLine(pools.gameLookLocker, seed, talkCount, 37)
-        : isSea
-          ? pickLine(pools.gameSergito, seed, talkCount, 37)
-          : isFarZone
-            ? pickLine(pools.flavor, seed, talkCount, 37)
-            : pickLine(pools.gameTraits, seed, talkCount, 37)
-  } else if (branch === 5) {
-    second = isMountain
-      ? pickLine(pools.gameShooting, seed, talkCount, 41)
-      : isCulture || isSea || isFarZone
-        ? pickLine(pools.flavor, seed, talkCount, 41)
-        : pickLine(pools.gameStreet, seed, talkCount, 41)
-  } else {
-    second =
-      talkCount % 2 === 0
-        ? fillTheme(pickLine(pools.themeAny, seed, talkCount, 43), themeTrait)
-        : pickLine(pools.featuredAny, seed, talkCount, 47)
-  }
-
-  // たまにフレーバーで差し替え
-  if (seededIndex(seed, talkCount, 10) === 0) {
-    second = pickLine(pools.flavor, seed, talkCount, 53)
-  }
-
-  // マッチ時はときどき共通の見た目に触れる（仕組み説明にしない）
-  if (npc.matched && !npc.isFeatured && seededIndex(seed, talkCount, 3) === 1) {
-    second =
-      locale === 'ja'
-        ? `今日は ${themeLabel(themeTrait)}、よく見かける。ぼくもその一人。`
-        : `Seeing a lot of ${themeLabel(themeTrait)} today. I’m one of them.`
-  }
-
-  lines.push({
-    id: `${npc.id}-body-${talkCount}`,
-    text: second,
-    category: 'daily',
-  })
-
-  return lines
 }

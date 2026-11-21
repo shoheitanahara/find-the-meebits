@@ -51,7 +51,7 @@ AI エージェントが作業を中断・再開しても文脈を失わない�
 - 恒久的な仕様変更は **productContext.md** / **systemPatterns.md** に反映する
 - **Park のゾーン・導線・配置ルール**が変わったら **parkDesigner.md** も更新する
 - **入口看板・スタートカードのコピー**が変わったら **attractionCopy.md** も更新する
-- **NPC の魅力トーン・日替わり伝え方**が変わったら **parkNpcDialogue.md** と `parkDialogueExpand.ts` をセットで更新する
+- **NPC の魅力トーン・日替わり伝え方**が変わったら **parkNpcDialogue.md** と `src/top/parkTalk/` をセットで更新する
 - **Photo Booth のポーズ／カメラ／小道具／来場証**が変わったら **photoStudio.md**（と必要なら **meebitVrmArms.md**）を更新する
 - **Park 時間帯・季節スキン**が変わったら **activeContext.md** / **productContext.md** を更新する
 - **登山進捗（unlockedStage 哨兵など）**が変わったら **activeContext.md** / **progress.md** / **photoStudio.md**（Visit Pass）を更新する

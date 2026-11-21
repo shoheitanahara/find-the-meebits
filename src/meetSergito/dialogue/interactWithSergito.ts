@@ -5,10 +5,12 @@ import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { recordSergitoTalk } from '../../park/dailyRecords'
 import { SERGITO_NPC_ID } from '../config'
 import { useMeetSergitoStore } from '../store'
+import { getParkTimeOfDayFromDate } from '../../top/parkTimeOfDay'
 import { createSergitoDialogue } from './createSergitoDialogue'
+import { loadSergitoMemory, rememberSergitoTalk } from './sergitoMemory'
 
 export async function openSergitoDialogue() {
-  const { bootPhase, canTalkToSergito, talkCount, incrementTalkCount } = useMeetSergitoStore.getState()
+  const { bootPhase, canTalkToSergito, incrementTalkCount } = useMeetSergitoStore.getState()
   const dialogueState = useDialogueStore.getState()
 
   if (bootPhase !== 'ready' || !canTalkToSergito || dialogueState.isOpen) return
@@ -16,7 +18,16 @@ export async function openSergitoDialogue() {
   await loadMeebitTraitsDataset()
   const meebitId = usePlayerStore.getState().meebitNumber
   const traits = getCachedMeebitTraits(meebitId)
-  const lines = createSergitoDialogue({ meebitId, traits, talkCount })
+  // 来店をまたいで覚えている回数と、前回の Meebit
+  const memory = loadSergitoMemory()
+  const lines = createSergitoDialogue({
+    meebitId,
+    traits,
+    talkCount: memory.talks,
+    lastGuest: memory.lastGuest,
+    timeOfDay: getParkTimeOfDayFromDate(),
+  })
+  rememberSergitoTalk(meebitId)
 
   void unlockAudioIfNeeded().then(() => playSfx('uiConfirm'))
   usePlayerStore.getState().setMovementLocked(true)

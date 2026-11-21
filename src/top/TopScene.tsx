@@ -1,8 +1,8 @@
 import { PerspectiveCamera, Stars, Environment } from '@react-three/drei'
 import { Text } from '../world/WorldText'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
-import { Group, MathUtils, Vector2, Vector3 } from 'three'
+import { Group, MathUtils, type Material, type Mesh, Plane, Vector2, Vector3 } from 'three'
 import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
 import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
@@ -63,6 +63,7 @@ import {
   type ParkZoneLayout,
 } from './parkZones'
 import { isInsideGateTrigger } from './parkGateRules'
+import { buildPerimeterSpec, getLandClip } from './parkPerimeterSpec'
 import { ParkBenchProp } from './ParkBenchProp'
 import { ParkBackdrop } from './ParkBackdrop'
 import { CameraOcclusionFader, OCCLUDER_USER_DATA } from '../world/CameraOcclusionFader'
@@ -200,6 +201,7 @@ export function TopScene({
         musicArtGround={activeZoneId === 'musicArt'}
         jungleGround={activeZoneId === 'jungle'}
         showFountain={zone.hasFountain}
+        landClip={zone.perimeter ? getLandClip(buildPerimeterSpec(layout, zone.perimeter, zone.gates)) : null}
       />
       {zone.perimeter ? (
         <ParkPerimeter
@@ -435,6 +437,7 @@ function HubGround({
   musicArtGround = false,
   jungleGround = false,
   showFountain,
+  landClip,
 }: {
   featuredId: number
   look: ParkLook
@@ -449,6 +452,8 @@ function HubGround({
   musicArtGround?: boolean
   jungleGround?: boolean
   showFountain: boolean
+  /** 外周の川の上は床を切り取る（川が床の下を流れて見えるように） */
+  landClip: ReturnType<typeof getLandClip> | null
 }) {
   const {
     groundZ,
@@ -464,9 +469,47 @@ function HubGround({
 
   const paverCount = Math.max(12, Math.ceil(pathSizeZ / 1.9))
   const paverStart = Math.floor(layout.maxZ) - 1
+  const groundRef = useRef<Group>(null)
+  const gl = useThree((state) => state.gl)
+  const clipMaxX = landClip?.maxX ?? null
+  const clipMinX = landClip?.minX ?? null
+  const clipMinZ = landClip?.minZ ?? null
+
+  // 床だけを川の内側で切る（建物・木・外周には付けない）
+  useEffect(() => {
+    const group = groundRef.current
+    if (!group) return
+    const planes: Plane[] = []
+    if (clipMaxX !== null) planes.push(new Plane(new Vector3(-1, 0, 0), clipMaxX))
+    if (clipMinX !== null) planes.push(new Plane(new Vector3(1, 0, 0), -clipMinX))
+    if (clipMinZ !== null) planes.push(new Plane(new Vector3(0, 0, 1), -clipMinZ))
+    if (planes.length > 0) gl.localClippingEnabled = true
+    group.traverse((object) => {
+      const mesh = object as Mesh
+      if (!mesh.isMesh) return
+      const materials: Material[] = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+      for (const material of materials) {
+        material.clippingPlanes = planes.length > 0 ? planes : null
+        material.needsUpdate = true
+      }
+    })
+  }, [
+    gl,
+    clipMaxX,
+    clipMinX,
+    clipMinZ,
+    voxelGround,
+    cultureGround,
+    seaGround,
+    astroGround,
+    musicArtGround,
+    jungleGround,
+    look.christmas,
+  ])
 
   return (
     <group>
+      <group ref={groundRef}>
       {voxelGround ? (
         <MountainVoxelGround layout={layout} christmas={look.christmas} />
       ) : cultureGround ? (
@@ -524,6 +567,7 @@ function HubGround({
           ) : null}
         </>
       )}
+      </group>
       {showFountain ? (
         <>
           <mesh position={[0, 0.05, FOUNTAIN_CENTER_Z]} rotation={[-Math.PI / 2, 0, 0]}>

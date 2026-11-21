@@ -1,6 +1,7 @@
 import type { MeebitTraitMap } from '../../data/meebitTraits'
 import { getLocale } from '../../i18n/locale'
 import type { DialogueLine } from '../../npc/npcTypes'
+import type { ParkTimeOfDay } from '../../top/parkTimeOfDay'
 import { SERGITO_MEEBIT_ID } from '../config'
 import {
   SERGITO_CATEGORY_COMMENTS,
@@ -13,15 +14,28 @@ import {
   type LocalizedText,
   type SergitoDialogueCategory,
 } from './sergitoDialogueData'
+import {
+  SERGITO_FIRST_MEETING,
+  SERGITO_GREET_AGAIN,
+  SERGITO_GREET_REGULAR,
+  SERGITO_NEW_GUEST,
+  SERGITO_WORKSHOP_STORIES,
+} from './sergitoTalkExtras'
 
 export type SergitoDialogueContext = {
   meebitId: number
   traits: MeebitTraitMap | null
+  /** これまで Sergito と話した回数（来店をまたいで保存。今回を含まない） */
   talkCount: number
+  /** 前回いっしょに来た Meebit */
+  lastGuest?: number | null
+  timeOfDay?: ParkTimeOfDay
 }
 
-/** 1会話は最大2行。挨拶・観察・組み合わせ・締めをランダムに組み合わせる */
+/** 本題（観察・組み合わせ・締め）は最大2行。前にあいさつが付く */
 const SERGITO_LINES_PER_TALK = 2
+/** 常連あつかいになる回数 */
+const SERGITO_REGULAR_TALKS = 4
 
 type TraitFeature = {
   id: string
@@ -752,11 +766,58 @@ function assembleTalk(beats: TalkBeat[]): DialogueLine[] {
   )
 }
 
+/**
+ * 会話の入り。来店回数・前回の Meebit・時間帯で変える。
+ */
+function buildOpeningLines(context: SergitoDialogueContext): DialogueLine[] {
+  const { talkCount, meebitId } = context
+  const toLines = (texts: LocalizedText[], key: string) =>
+    texts.map((text, i) => toLine(`sergito-open-${key}-${i}`, pickLocalized(text), 'greeting'))
+
+  if (talkCount === 0) {
+    return toLines(SERGITO_FIRST_MEETING[meebitId % SERGITO_FIRST_MEETING.length], 'first')
+  }
+  if (context.lastGuest != null && context.lastGuest !== meebitId) {
+    return toLines(SERGITO_NEW_GUEST[seededIndex(meebitId + 5, talkCount, SERGITO_NEW_GUEST.length)], 'new')
+  }
+  if (talkCount >= SERGITO_REGULAR_TALKS) {
+    return toLines([pickFromPool([...SERGITO_GREET_REGULAR, ...SERGITO_GREETINGS], meebitId + 7, talkCount)], 'regular')
+  }
+  // 時間帯のあいさつは、合うものを2倍出やすく
+  const pool = [
+    ...SERGITO_GREET_AGAIN.flatMap((g) =>
+      !g.times ? [g.text] : context.timeOfDay && g.times.includes(context.timeOfDay) ? [g.text, g.text, g.text] : [],
+    ),
+    ...SERGITO_GREETINGS,
+  ]
+  return toLines([pickFromPool(pool, meebitId + 3, talkCount)], 'again')
+}
+
+/** 工房の話（見た目のコメントのかわり） */
+function buildWorkshopStory(context: SergitoDialogueContext): DialogueLine[] {
+  const story =
+    SERGITO_WORKSHOP_STORIES[seededIndex(context.meebitId + 31, context.talkCount, SERGITO_WORKSHOP_STORIES.length)]
+  return story.map((text, i) => toLine(`sergito-story-${i}`, pickLocalized(text), 'overall'))
+}
+
 export function createSergitoDialogue(context: SergitoDialogueContext): DialogueLine[] {
   if (context.meebitId === SERGITO_MEEBIT_ID) {
     return buildSpecialDialogue(context.talkCount)
   }
 
+  // 見た目へのコメントは毎回必ず話す（このアトラクションの本題）。
+  // 工房の話は、ふつうの再来店のあいさつのかわりに、3 回に 1 回くらい前置きとして出す。
+  const isPlainReturn =
+    context.talkCount > 0 && (context.lastGuest == null || context.lastGuest === context.meebitId)
+  const opening =
+    isPlainReturn && seededIndex(context.meebitId + 41, context.talkCount, 3) === 0
+      ? buildWorkshopStory(context)
+      : buildOpeningLines(context)
+  return [...opening, ...createLookTalk(context)]
+}
+
+/** 見た目へのコメント（観察＋組み合わせ／締め） */
+function createLookTalk(context: SergitoDialogueContext): DialogueLine[] {
   if (!context.traits) {
     return buildFallbackDialogue(context.talkCount)
   }
@@ -767,10 +828,6 @@ export function createSergitoDialogue(context: SergitoDialogueContext): Dialogue
     return buildFallbackDialogue(context.talkCount)
   }
 
-  const greeting: TalkBeat = {
-    text: pickFromPool(SERGITO_GREETINGS, context.meebitId, context.talkCount),
-    category: 'greeting',
-  }
   const closing: TalkBeat = {
     text: pickFromPool(SERGITO_CLOSINGS, context.meebitId + 11, context.talkCount),
     category: 'closing',
@@ -788,13 +845,9 @@ export function createSergitoDialogue(context: SergitoDialogueContext): Dialogue
       }
     : null
 
-  if (combination && seededIndex(context.meebitId + 23, context.talkCount, 4) === 0) {
+  // 観察のあとに、組み合わせのコメント（あれば半分くらい）か締めの一言を続ける
+  if (combination && seededIndex(context.meebitId + 23, context.talkCount, 2) === 0) {
     return assembleTalk([observation, combination])
   }
-
-  const patterns: TalkBeat[][] = [
-    [greeting, observation],
-    [observation, closing],
-  ]
-  return assembleTalk(patterns[seededIndex(context.meebitId + 19, context.talkCount, patterns.length)])
+  return assembleTalk([observation, closing])
 }

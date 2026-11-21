@@ -333,7 +333,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     color: '#b89870',
     roofColor: '#3a6a88',
     x: DEFAULT_PARK_ATTRACTION_SLOTS.west.x,
-    z: DEFAULT_PARK_ATTRACTION_SLOTS.west.z,
+    // シーは外周が海で川がないので、奥へ寄せた旧位置のまま
+    z: -11.5,
     // 正面ドア (z + halfDepth = -8.0) のすぐ手前 — アルコーブ奥まで入らなくても発火
     entranceZ: -7.85,
     footprint: {

@@ -15,8 +15,10 @@ export type ParkAttractionSlot = {
 /**
  * Mountain 現行配置:
  * - 中央 (0, -7)
- * - 西 (-15.7, -11.5) … footprint halfWidth≈3.2 の半棟左寄せ
- * - 東 (15.7, -11.0)
+ * - 西 (-15.7, -10.2) … footprint halfWidth≈3.2 の半棟左寄せ
+ * - 東 (15.7, -9.7)
+ * 外周の川を橋と同じ幅にしたとき、奥の角の建物が川にかからないよう 1.3 手前へ寄せた
+ * （旧 西 -11.5 / 東 -11.0、入口も同じだけ手前へ）。
  */
 export const DEFAULT_PARK_ATTRACTION_SLOTS = {
   center: {
@@ -28,14 +30,14 @@ export const DEFAULT_PARK_ATTRACTION_SLOTS = {
   west: {
     id: 'west',
     x: -15.7,
-    z: -11.5,
-    entranceZ: -8.0,
+    z: -10.2,
+    entranceZ: -6.7,
   },
   east: {
     id: 'east',
     x: 15.7,
-    z: -11.0,
-    entranceZ: -8.0,
+    z: -9.7,
+    entranceZ: -6.7,
   },
 } as const satisfies Record<ParkAttractionSlotId, ParkAttractionSlot>
 

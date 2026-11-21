@@ -1,6 +1,11 @@
 import type { AttractionId } from './topStore'
 import { DEFAULT_PARK_ATTRACTION_SLOTS } from './parkAttractionSlots'
-import { PARK_FAR_SIDE_GATE_X, PARK_NEAR_SIDE_GATE_X, type ParkPerimeterDef } from './parkPerimeterSpec'
+import {
+  PARK_FAR_GATE_Z,
+  PARK_FAR_SIDE_GATE_X,
+  PARK_NEAR_SIDE_GATE_X,
+  type ParkPerimeterDef,
+} from './parkPerimeterSpec'
 import { SEA_PALM_TREE_XZ } from './seaPalms'
 import { JUNGLE_LAMP_XZ, JUNGLE_TREE_XZ } from './jungle/jungleConfig'
 import { getGateArrivalPoint, type GateSpawn } from './parkGateRules'
@@ -258,7 +263,7 @@ const RAW_PARK_ZONES: Record<ParkZoneId, RawParkZoneDef> = {
       {
         id: 'plaza-to-culture',
         x: PARK_FAR_SIDE_GATE_X,
-        z: -18.4,
+        z: PARK_FAR_GATE_Z,
         halfWidth: 2.55,
         alcoveDepth: 2.6,
         theme: 'culture',
@@ -338,7 +343,7 @@ const RAW_PARK_ZONES: Record<ParkZoneId, RawParkZoneDef> = {
       {
         id: 'mountain-to-astro',
         x: PARK_FAR_SIDE_GATE_X,
-        z: -18.4,
+        z: PARK_FAR_GATE_Z,
         halfWidth: 2.55,
         alcoveDepth: 2.6,
         theme: 'astro',
@@ -421,7 +426,7 @@ const RAW_PARK_ZONES: Record<ParkZoneId, RawParkZoneDef> = {
       {
         id: 'culture-to-musicArt',
         x: PARK_FAR_SIDE_GATE_X,
-        z: -18.4,
+        z: PARK_FAR_GATE_Z,
         halfWidth: 2.55,
         alcoveDepth: 2.6,
         theme: 'musicArt',
