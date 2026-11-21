@@ -4,7 +4,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { Group, MathUtils, type Material, type Mesh, Plane, Vector2, Vector3 } from 'three'
 import { MeebitSilhouette } from '../avatar/MeebitSilhouette'
-import { applyVRMLocomotion, getNpcWalkPhaseOffset } from '../avatar/VRMLocomotion'
+import {
+  applyVRMLocomotion,
+  applyVRMSitPose,
+  getAudienceBreathParams,
+  getNpcWalkPhaseOffset,
+} from '../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
 import { useVRMModel } from '../avatar/useVRMModel'
 import { INTERACTION_DISTANCE, CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE, CREATOR_MEEBIT_ID } from '../game/gameConfig'
@@ -29,7 +34,7 @@ import {
   type DailyVisitor,
 } from './dailyFeatured'
 import { AboutMeebitsBoard } from './AboutMeebitsBoard'
-import { ParkMapBoard } from './ParkMapBoard'
+import { ParkMapBoard, PARK_MAP_BOARD_SPOTS } from './ParkMapBoard'
 import {
   ABOUT_MEEBITS_BOARD_POSITION,
   ABOUT_MEEBITS_INTERACT_DISTANCE,
@@ -1314,11 +1319,90 @@ type TopNpcSpawn = {
   rotationY: number
   walkPattern: 0 | 1 | 2
   matched: boolean
+  /** walk = 歩き回る / sit = ベンチに座っている / view = 看板などを眺めて立っている */
+  role: 'walk' | 'sit' | 'view'
+}
+
+type NpcSpot = { x: number; z: number; rotationY: number }
+
+/** ベンチに座ったときの体の高さ（座りポーズで腰が座面に乗る高さ） */
+const PARK_BENCH_SIT_Y = 0.02
+
+/** ベンチの座る位置（1 台に 2 席。座面の少し前寄り、ベンチの正面を向く） */
+function getBenchSeats(zoneId: ParkZoneId): NpcSpot[] {
+  return getParkZone(zoneId).benches.flatMap(([bx, bz, ry]) =>
+    [-0.5, 0.5].map((lx) => {
+      const lz = 0.12
+      return {
+        x: bx + lx * Math.cos(ry) + lz * Math.sin(ry),
+        z: bz - lx * Math.sin(ry) + lz * Math.cos(ry),
+        rotationY: ry,
+      }
+    }),
+  )
+}
+
+/** 看板・銅像などの前で、そちらを向いて立つ場所（どれも -Z 側を見る） */
+function getViewSpots(zoneId: ParkZoneId): NpcSpot[] {
+  const spots: NpcSpot[] = []
+  const facingBack = Math.PI
+  const [mx, , mz] = PARK_MAP_BOARD_SPOTS[zoneId]
+  spots.push({ x: mx - 0.9, z: mz + 2.0, rotationY: facingBack }, { x: mx + 0.9, z: mz + 2.2, rotationY: facingBack })
+  for (const attraction of getAttractionsForZone(zoneId)) {
+    const bx = attraction.x + attraction.infoBoardLocal[0]
+    const bz = attraction.z + attraction.infoBoardLocal[1]
+    spots.push({ x: bx, z: bz + 1.6, rotationY: facingBack })
+  }
+  if (zoneId === 'plaza') {
+    // 今日の主役の看板と、噴水の銅像
+    spots.push({ x: FEATURED_BOARD_POSITION[0], z: FEATURED_BOARD_POSITION[2] + 1.6, rotationY: facingBack })
+    for (const side of [-1, 1]) {
+      const x = side * 2.5
+      const z = FOUNTAIN_CENTER_Z + 2.5
+      spots.push({ x, z, rotationY: Math.atan2(-x, FOUNTAIN_CENTER_Z - z) })
+    }
+  }
+  if (zoneId === 'culture') {
+    spots.push({ x: ABOUT_MEEBITS_BOARD_POSITION[0], z: ABOUT_MEEBITS_BOARD_POSITION[2] + 1.6, rotationY: facingBack })
+  }
+  return spots.filter((spot) => isTopNpcPositionWalkable(spot.x, spot.z, zoneId))
+}
+
+function shuffled<T>(items: T[]): T[] {
+  const list = [...items]
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[list[i], list[j]] = [list[j], list[i]]
+  }
+  return list
 }
 
 function createTopNpcSpawns(visitors: DailyVisitor[], zoneId: ParkZoneId): TopNpcSpawn[] {
   // ID は日次固定。位置・向きだけ訪問ごとにランダムにして探しがいを出す。
   const spawns: TopNpcSpawn[] = []
+
+  // 何人かはベンチに座り、何人かは看板や銅像を眺めている（どちらも 2〜3 人）
+  const seats = shuffled(getBenchSeats(zoneId)).slice(0, MathUtils.randInt(2, 3))
+  const views = shuffled(getViewSpots(zoneId)).slice(0, MathUtils.randInt(2, 3))
+  for (const [role, spots] of [
+    ['sit', seats],
+    ['view', views],
+  ] as const) {
+    for (const spot of spots) {
+      const visitor = visitors[spawns.length]
+      if (!visitor) break
+      spawns.push({
+        meebitNumber: visitor.meebitNumber,
+        matched: visitor.matched,
+        x: spot.x,
+        z: spot.z,
+        rotationY: spot.rotationY,
+        walkPattern: (spawns.length % TOP_NPC_WALK_PATTERNS.length) as 0 | 1 | 2,
+        role,
+      })
+    }
+  }
+
   let attempts = 0
   const maxAttempts = visitors.length * 80
 
@@ -1329,6 +1413,7 @@ function createTopNpcSpawns(visitors: DailyVisitor[], zoneId: ParkZoneId): TopNp
 
     if (!isTopNpcPositionWalkable(x, z, zoneId)) continue
     if (spawns.some((spawn) => Math.hypot(spawn.x - x, spawn.z - z) < 1.45)) continue
+    if (seats.some((seat) => Math.hypot(seat.x - x, seat.z - z) < 1.2)) continue
 
     const visitor = visitors[spawns.length]
     if (!visitor) break
@@ -1340,6 +1425,7 @@ function createTopNpcSpawns(visitors: DailyVisitor[], zoneId: ParkZoneId): TopNp
       z,
       rotationY: Math.random() * Math.PI * 2,
       walkPattern: (spawns.length % TOP_NPC_WALK_PATTERNS.length) as 0 | 1 | 2,
+      role: 'walk',
     })
   }
 
@@ -1363,6 +1449,7 @@ function createTopNpcSpawns(visitors: DailyVisitor[], zoneId: ParkZoneId): TopNp
       z,
       rotationY: Math.random() * Math.PI * 2,
       walkPattern: (fallbackIndex % TOP_NPC_WALK_PATTERNS.length) as 0 | 1 | 2,
+      role: 'walk',
     })
   }
 
@@ -1648,6 +1735,7 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
   const targetRotationYRef = useRef(spawn.rotationY)
   const localTimeRef = useRef(index * 0.37)
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
+  const breathParams = useMemo(() => getAudienceBreathParams(spawn.meebitNumber), [spawn.meebitNumber])
   const { vrmRef, vrmScene, update } = useVRMModel(
     spawn.meebitNumber,
     true,
@@ -1665,6 +1753,17 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
 
     if (group) {
       useNpcStore.getState().setNpcPosition(npcId, [group.position.x, 0, group.position.z])
+    }
+
+    // ベンチに座っている人は、話しかけられても座ったまま（向きも変えない）
+    if (spawn.role === 'sit') {
+      if (group) {
+        group.position.set(spawn.x, PARK_BENCH_SIT_Y, spawn.z)
+        group.rotation.y = spawn.rotationY
+      }
+      applyVRMSitPose(vrmRef.current, { elapsedTime: localTimeRef.current, ...breathParams })
+      update(safeDelta)
+      return
     }
 
     const dx = group ? parkPlayerWorld.x - group.position.x : 0
@@ -1685,6 +1784,28 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
       targetRotationYRef.current = faceY
       group.rotation.y = faceY
       group.position.y = 0.06
+      applyVRMLocomotion(vrmRef.current, {
+        elapsedTime: localTimeRef.current,
+        isMoving: false,
+        isRunning: false,
+        idleOffset: index * 0.61,
+        walkPhaseOffset,
+      })
+      update(safeDelta)
+      return
+    }
+
+    // 看板などを眺めている人は、その場で立ち止まったまま（話したあとは向き直る）
+    if (spawn.role === 'view') {
+      if (group) {
+        const angleDelta = Math.atan2(
+          Math.sin(spawn.rotationY - rotationYRef.current),
+          Math.cos(spawn.rotationY - rotationYRef.current),
+        )
+        rotationYRef.current += angleDelta * (1 - Math.exp(-safeDelta * 2.2))
+        group.rotation.y = rotationYRef.current
+        group.position.y = 0.06
+      }
       applyVRMLocomotion(vrmRef.current, {
         elapsedTime: localTimeRef.current,
         isMoving: false,
