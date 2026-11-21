@@ -1327,6 +1327,10 @@ type NpcSpot = { x: number; z: number; rotationY: number }
 
 /** ベンチに座ったときの体の高さ（座りポーズで腰が座面に乗る高さ） */
 const PARK_BENCH_SIT_Y = 0.02
+/** 座っている人が話しかけられたとき、顔を向けられる左右の最大角（30°） */
+const SEATED_HEAD_TURN_MAX = Math.PI / 6
+/** 顔の向きは首と頭で分けて回す（首 4 : 頭 6） */
+const SEATED_NECK_SHARE = 0.4
 
 /** ベンチの座る位置（1 台に 2 席。座面の少し前寄り、ベンチの正面を向く） */
 function getBenchSeats(zoneId: ParkZoneId): NpcSpot[] {
@@ -1737,6 +1741,9 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
   const localTimeRef = useRef(index * 0.37)
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
   const breathParams = useMemo(() => getAudienceBreathParams(spawn.meebitNumber), [spawn.meebitNumber])
+  /** 座っている人の顔の向き（体の正面からの角度）と、前のフレームで首・頭に足した量 */
+  const headYawRef = useRef(0)
+  const appliedHeadYawRef = useRef(0)
   const { vrmRef, vrmScene, update } = useVRMModel(
     spawn.meebitNumber,
     true,
@@ -1758,11 +1765,40 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
 
     // ベンチに座っている人は、話しかけられても座ったまま（向きも変えない）
     if (spawn.role === 'sit') {
+      const vrm = vrmRef.current
+      const neck = vrm?.humanoid.getNormalizedBoneNode('neck') ?? null
+      const head = vrm?.humanoid.getNormalizedBoneNode('head') ?? null
+      // 前のフレームで足した顔の向きをいったん戻してから、座りポーズ（呼吸・揺れ）を当てる
+      const applied = appliedHeadYawRef.current
+      if (neck) neck.rotation.y -= applied * SEATED_NECK_SHARE
+      if (head) head.rotation.y -= applied * (1 - SEATED_NECK_SHARE)
+
       if (group) {
         group.position.set(spawn.x, PARK_BENCH_SIT_Y, spawn.z)
         group.rotation.y = spawn.rotationY
       }
-      applyVRMSitPose(vrmRef.current, { elapsedTime: localTimeRef.current, ...breathParams })
+      applyVRMSitPose(vrm, { elapsedTime: localTimeRef.current, ...breathParams })
+
+      // 話しかけられている（または近くに来た）ときだけ、体はそのままで顔をこちらへ（左右 30° まで）
+      let target = 0
+      if (group) {
+        const px = parkPlayerWorld.x - group.position.x
+        const pz = parkPlayerWorld.z - group.position.z
+        if (isDialogueActive || Math.hypot(px, pz) < PLAYER_STOP_DISTANCE) {
+          const relative = Math.atan2(px, pz) - spawn.rotationY
+          target = MathUtils.clamp(
+            Math.atan2(Math.sin(relative), Math.cos(relative)),
+            -SEATED_HEAD_TURN_MAX,
+            SEATED_HEAD_TURN_MAX,
+          )
+        }
+      }
+      headYawRef.current += (target - headYawRef.current) * (1 - Math.exp(-safeDelta * 4))
+      const yaw = headYawRef.current
+      if (neck) neck.rotation.y += yaw * SEATED_NECK_SHARE
+      if (head) head.rotation.y += yaw * (1 - SEATED_NECK_SHARE)
+      appliedHeadYawRef.current = neck || head ? yaw : 0
+
       update(safeDelta)
       return
     }

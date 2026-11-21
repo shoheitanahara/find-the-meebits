@@ -25,6 +25,7 @@ export type PersonalityId =
   | 'sisterly'
   | 'explorer'
   | 'sage'
+  | 'robot'
 
 export type TalkKind =
   /** はじめて話したときのあいさつ（自己紹介） */

@@ -11,6 +11,7 @@ export const PERSONALITIES: readonly PersonalityId[] = [
   'sisterly',
   'explorer',
   'sage',
+  'robot',
 ]
 
 /**
@@ -37,11 +38,19 @@ const POOLS: Record<MeebitBody, readonly PersonalityId[]> = {
   other: MALE_POOL,
 }
 
-/** 番号から性格を決める（同じ Meebit はいつも同じ性格） */
+/** 話さない種類（話しかけても「……」だけ） */
+const SILENT_TYPES = new Set(['Visitor', 'Dissected'])
+
+export function isSilentMeebit(traits: MeebitTraitMap | null | undefined) {
+  return Boolean(traits && SILENT_TYPES.has(traits.Type))
+}
+
+/** 番号から性格を決める（同じ Meebit はいつも同じ性格。Robot は必ずロボット） */
 export function getPersonality(
   meebitNumber: number,
   traits: MeebitTraitMap | null | undefined = getCachedMeebitTraits(meebitNumber),
 ): PersonalityId {
+  if (traits?.Type === 'Robot') return 'robot'
   const pool = POOLS[getMeebitBody(traits)]
   const mixed = Math.imul(meebitNumber ^ 0x5bd1e995, 0x27d4eb2d) >>> 0
   return pool[(mixed >>> 7) % pool.length]

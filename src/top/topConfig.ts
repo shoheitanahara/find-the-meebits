@@ -54,12 +54,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'FIND THE MEEBIT',
     subtitle: 'The Museum',
     description: {
-      en: 'A packed gallery.\nFind the odd face.',
-      ja: '人でいっぱいの美術館。\nまぎれた一人を探す。',
+      en: 'A crowded museum.\nFind the target Meebit.',
+      ja: '人でいっぱいの美術館。\nターゲットの Meebit を探そう。',
     },
     storyTitle: {
-      en: 'FIND ONE',
-      ja: 'ひとり探せ',
+      en: 'FIND THE TARGET',
+      ja: 'ターゲットを探せ',
     },
     color: '#d4cdc2',
     roofColor: '#3a3530',
@@ -84,12 +84,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MEEBITS PODCAST',
     subtitle: 'The Studio',
     description: {
-      en: 'Sit by the mic.\nListen to the show.',
-      ja: 'マイクの前の席。\n番組を観て聴ける。',
+      en: 'Take a seat by the mics.\nWatch the Meebits podcast.',
+      ja: 'マイクの前の席に座って、\nMeebits のポッドキャストを観よう。',
     },
     storyTitle: {
       en: 'ON AIR',
-      ja: 'オンエア',
+      ja: 'オンエア中',
     },
     color: '#2a1c14',
     roofColor: '#ff9a3c',
@@ -110,8 +110,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: '8TH STREET',
     subtitle: 'The Night Alley',
     description: {
-      en: 'The same alley.\nSpot what’s changed.',
-      ja: '同じ路地、同じ夜。\nどこか一つ、おかしい。',
+      en: 'Remember the usual faces.\nA stranger? Turn back.',
+      ja: 'いつもの顔ぶれを覚えて。\n見慣れない人がいたら引き返そう。',
     },
     storyTitle: {
       en: 'WRONG FACE',
@@ -141,8 +141,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MT. MEEB',
     subtitle: 'The Summit',
     description: {
-      en: 'New route each day.\nClimb to the summit.',
-      ja: '毎日、ルートが変わる。\n跳んで登って、頂上へ。',
+      en: 'A new route every day.\nJump your way to the top.',
+      ja: '毎日ルートが変わる山。\n跳んで登って、頂上をめざそう。',
     },
     storyTitle: {
       en: 'CLIMB TODAY',
@@ -171,12 +171,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'JERRY MOUNTAIN',
     subtitle: 'Neon Cliffs',
     description: {
-      en: 'Glowing jelly steps.\nHop block to block.',
-      ja: '光るゼリーの足場。\n一段ずつ跳んで上がる。',
+      en: 'Glowing jelly blocks.\nHop up one step at a time.',
+      ja: '光るゼリーの足場。\n一段ずつ跳んで登ろう。',
     },
     storyTitle: {
       en: 'JELLY CLIMB',
-      ja: 'ゼリーを登る',
+      ja: 'ゼリーを登れ',
     },
     color: '#1a0a30',
     roofColor: '#ff2bd6',
@@ -202,12 +202,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'SHOOTING GALLERY',
     subtitle: 'The Fair Booth',
     description: {
-      en: 'Hit moving targets.\nGold and red score.',
-      ja: '動く的を次々撃つ。\n金と赤の的が混ざる。',
+      en: '45 seconds of moving targets.\nHit the gold. Never the red.',
+      ja: '45秒で、動く的を撃ちまくろう。\n金はねらい目、赤は撃たない。',
     },
     storyTitle: {
       en: 'AIM & FIRE',
-      ja: '的を狙え',
+      ja: '的をねらえ',
     },
     color: '#6a5038',
     roofColor: '#c8a060',
@@ -232,12 +232,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MEEBITS RUNWAY',
     subtitle: 'The Catwalk',
     description: {
-      en: 'Color of the day.\nSit back and watch.',
-      ja: '今日の色のランウェイ。\n客席からゆっくり見る。',
+      en: 'A new theme color every day.\nWatch the show from your seat.',
+      ja: '毎日テーマカラーが変わるショー。\n客席からゆっくり観よう。',
     },
     storyTitle: {
       en: "TODAY'S COLOR",
-      ja: '今日の色',
+      ja: '今日のテーマカラー',
     },
     color: '#1a1a1a',
     roofColor: '#f5f5f5',
@@ -262,12 +262,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'LOOK LOCKER',
     subtitle: 'The Fitting Room',
     description: {
-      en: 'Swap hats and hair.\nBefore and after.',
-      ja: '帽子や髪を取り替える。\nいまの姿と比べる。',
+      en: 'Try on hats and hair.\nCompare with your look now.',
+      ja: '帽子や髪を試着して、\nいまの姿と見くらべよう。',
     },
     storyTitle: {
       en: 'TRY IT ON',
-      ja: 'きせ替え',
+      ja: '試着してみよう',
     },
     color: '#1a2a48',
     roofColor: '#6a9ee8',
@@ -291,14 +291,14 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'pfp',
     zoneId: 'culture',
     title: 'PHOTO BOOTH',
-    subtitle: 'Visit Pass',
+    subtitle: 'Portrait Studio',
     description: {
-      en: 'Pose in the studio.\nGet your visit pass.',
-      ja: 'スタジオで撮ろう！\n来場者パスを受けよう！',
+      en: 'Strike a pose in the studio.\nTake home your Visit Pass.',
+      ja: 'スタジオでポーズを決めて、\n来場者パスをもらおう。',
     },
     storyTitle: {
       en: 'PROFILE PIC',
-      ja: 'プロフィール画像をつくろう',
+      ja: 'プロフィール写真',
     },
     color: '#1a2438',
     roofColor: '#8eb4e8',
@@ -323,12 +323,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'SHORE FISHING',
     subtitle: 'Cast & Catch',
     description: {
-      en: 'Cast at the shadows.\nReel in the big one.',
-      ja: '岸辺に魚の影。\n投げて、大物を狙う。',
+      en: 'Fish shadows by the shore.\nCast and reel in a big one.',
+      ja: '岸辺に魚の影。\n投げて、大物を釣り上げよう。',
     },
     storyTitle: {
       en: 'FISH ON!',
-      ja: '魚影をねらう',
+      ja: '大物をねらえ',
     },
     color: '#b89870',
     roofColor: '#3a6a88',
@@ -357,8 +357,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'OPENSEA MARKET',
     subtitle: 'Live Listings',
     description: {
-      en: 'Meebits on display.\nLook at each one.',
-      ja: '台座に並ぶ彫刻。\n一体ずつ眺める。',
+      en: 'Meebits listed on OpenSea,\non display as sculptures.',
+      ja: 'OpenSea に出ている Meebits を、\n彫刻として展示中。',
     },
     storyTitle: {
       en: 'MEEBIT GALLERY',
@@ -388,8 +388,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MEET SERGITO',
     subtitle: 'The Workshop',
     description: {
-      en: 'Woodshop by the sea.\nSergito, in person.',
-      ja: '海辺の木の工房。\n見た目に一言くれる。',
+      en: 'A woodshop by the sea.\nSergito reads your look.',
+      ja: '海辺の木の工房。\nSergito が見た目にひとこと。',
     },
     storyTitle: {
       en: 'SERGITO AWAITS',
@@ -421,8 +421,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'STARLIGHT RUSH',
     subtitle: 'The Cosmic Coaster',
     description: {
-      en: 'Ride the rails.\nShoot falling stars.',
-      ja: 'レールに乗って、\n流れ星を撃つ。',
+      en: 'Ride the star rails.\nShoot down falling stars.',
+      ja: 'レールに乗って星空へ。\n流れ星を撃ち落とそう。',
     },
     storyTitle: {
       en: 'STAR RAILS',
@@ -451,12 +451,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'MEEBIT CINEMA',
     subtitle: 'Origins Hall',
     description: {
-      en: 'The first Meebits.\nOn the big screen.',
-      ja: 'はじまりの顔たち。\n大画面で観る。',
+      en: 'Where the Meebits began,\non the big screen.',
+      ja: 'Meebits のはじまりを、\n大きなスクリーンで。',
     },
     storyTitle: {
       en: 'FIRST MEEBITS',
-      ja: 'はじまりの映画',
+      ja: 'はじまりの物語',
     },
     color: '#141c2c',
     roofColor: '#5ce0ff',
@@ -481,12 +481,12 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'TRAIT HUNT',
     subtitle: 'The Match Hall',
     description: {
-      en: 'Hats, hair, glasses.\nFind the same trait.',
-      ja: '帽子や髪を見比べる。\n同じ特徴を探す。',
+      en: 'Compare hats, hair, glasses.\nFind the matching trait.',
+      ja: '帽子や髪、眼鏡を見くらべて、\n同じ特徴の Meebit を探そう。',
     },
     storyTitle: {
       en: 'SAME TRAIT',
-      ja: '同じ特徴',
+      ja: '同じ特徴を探せ',
     },
     color: '#143848',
     roofColor: '#5ce0ff',
@@ -511,8 +511,8 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     title: 'HIP HOP CLUB',
     subtitle: 'The Dance Floor',
     description: {
-      en: 'Stand up and dance.\nNo seats tonight.',
-      ja: '椅子はない。\n音に合わせて踊る。',
+      en: 'No seats tonight.\nDance to the beat.',
+      ja: '今夜は椅子なし。\nビートに合わせて踊ろう。',
     },
     storyTitle: {
       en: 'ON THE FLOOR',
@@ -539,14 +539,14 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'learnArt',
     zoneId: 'musicArt',
     title: 'LEARN ART',
-    subtitle: 'Contemporary Docs',
+    subtitle: 'Art on Screen',
     description: {
-      en: 'Sit down and watch.\nArt documentaries.',
-      ja: '座って観る、\n現代アートの記録映像。',
+      en: 'Documentaries on modern art.\nSit back and watch.',
+      ja: '現代アートのドキュメンタリーを、\n座ってゆっくり観よう。',
     },
     storyTitle: {
       en: 'GALLERY SCREEN',
-      ja: 'ギャラリースクリーン',
+      ja: 'アートを観る',
     },
     color: '#2a2826',
     roofColor: '#d8c8a8',
@@ -569,14 +569,14 @@ export const TOP_ATTRACTIONS: Attraction[] = [
     id: 'jazzBar',
     zoneId: 'musicArt',
     title: 'JAZZ BAR',
-    subtitle: 'Blue Note Seats',
+    subtitle: 'Stage-Side Seats',
     description: {
-      en: 'Sit by the stage.\nJazz plays all night.',
-      ja: 'ステージ横の席。\nジャズが流れる夜。',
+      en: 'Seats right by the stage.\nJazz all night long.',
+      ja: 'ステージのすぐ横の席で、\n夜通しジャズを。',
     },
     storyTitle: {
       en: 'LIVE SET',
-      ja: '今夜のセット',
+      ja: '今夜のライブ',
     },
     color: '#121a28',
     roofColor: '#4a8cff',

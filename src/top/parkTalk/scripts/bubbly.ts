@@ -35,8 +35,8 @@ export const BUBBLY_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-find', 'topic',
-    ['美術館で、ちがう子を探すゲームやった？', 'あたし、見つけた瞬間、思わず「いた！」って叫んじゃった！', 'まわりの子、みんなこっち見てたよ…えへへ。'],
-    ['Have you played the find-the-odd-one game at the museum?', 'When I found them, I yelled “THERE!” out loud!', 'Everyone turned and stared… heehee.'],
+    ['美術館で、ターゲットを探すゲームやった？', 'あたし、見つけた瞬間、思わず「いた！」って叫んじゃった！', 'まわりの子、みんなこっち見てたよ…えへへ。'],
+    ['Have you played the find-the-target game at the museum?', 'When I found them, I yelled “THERE!” out loud!', 'Everyone turned and stared… heehee.'],
     { zones: ['plaza'] }),
   s('plaza-podcast', 'topic',
     ['広場のスタジオで、ポッドキャストを観てきたの！', 'マイクの前の席に座れるんだよ！', 'あたしもいつか、しゃべる側になってみたいなあ！'],
@@ -130,8 +130,8 @@ export const BUBBLY_SCRIPTS = [
     ['あたし、毎日ひとりは新しい子に話しかけるって決めてるの！', '今日は {you} で…あ、{you} は新しくなかった！', 'じゃあ、あとでもう一人さがしてくる！'],
     ['I talk to at least one new person every day!', 'Today it’s {you}… wait, you’re not new!', 'Okay, I’ll go find someone else later!']),
   s('plaza-street', 'topic',
-    ['8th Street の路地って、知ってる？', '夜の路地なんだけど、どこか一つだけおかしいの！', 'あたし、見つけたとき「あったー！」って叫んじゃった！'],
-    ['Do you know the 8th Street alley?', 'It’s a night alley where one thing is always off!', 'When I found it, I yelled “FOUND IT!”'],
+    ['8th Street って、知ってる？ 夜の路地で、いつも同じ人たちとすれ違うの！', 'でもね、ときどき見たことない子がまざってるんだよ！', 'あたし、見つけたとき「いた！」って言って、急いで引き返しちゃった！'],
+    ['Do you know 8th Street? You keep passing the same people in a night alley!', 'But sometimes there’s someone you’ve never seen before!', 'When I spotted one, I yelled “THERE!” and turned right around!'],
     { zones: ['plaza'] }),
   s('mountain-climb', 'topic',
     ['Mt. Meeb、のぼったよ！', '毎日道が変わるから、毎日がはじめての山なの！', '頂上の旗にさわったら、「やったー！」ってなるよ！'],

@@ -4,9 +4,12 @@
  * OpenSea の出品番号 = Meebit の番号なので、パークと同じトレイトデータを使える。
  * 値段の良し悪しや投資の話はしない。
  */
+import { getCachedMeebitTraits } from '../../data/meebitTraits'
 import { getLocale } from '../../i18n/locale'
 import type { DialogueLine } from '../../npc/npcTypes'
 import { isSoldMeebit, type ListedMeebit } from '../../opensea/types'
+import { selectSilentLines } from '../../top/parkDialogue'
+import { isSilentMeebit } from '../../top/parkTalk/personality'
 import { getParkTimeOfDayFromDate, type ParkTimeOfDay } from '../../top/parkTimeOfDay'
 import { useOpenSeaMarketStore } from '../store'
 import {
@@ -208,6 +211,12 @@ function guideInfo(pieces: DisplayedPiece[], guideId: number, talks: number): Ta
 export function createGuideDialogue(guideId: number): DialogueLine[] {
   const ja = getLocale() === 'ja'
   const talks = loadGuideTalks()
+  // Visitor と Dissected の案内係はほとんど話さない
+  const guideTraits = getCachedMeebitTraits(guideId)
+  if (isSilentMeebit(guideTraits)) {
+    saveGuideTalks(talks + 1)
+    return selectSilentLines(`opensea-guide-${guideId}`, talks, guideTraits?.Type === 'Visitor' ? 'sea' : null)
+  }
   const pieces = getDisplayedPieces(useOpenSeaMarketStore.getState().sessionPedestalListings)
 
   const weighted: Array<[() => Talk | null, number]> = [

@@ -35,12 +35,12 @@ export const SPORTY_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-street', 'topic',
-    ['8th Street って路地、行ったか？', '同じ夜の路地なのに、どこか一つだけおかしいんだ。', 'オレ、全力で走りぬけたら、何も見てなかった！ 次はゆっくり歩くぜ。'],
-    ['You been down 8th Street?', 'Same alley, same night… but one thing’s always off.', 'I sprinted straight through and saw nothing! Walking it next time.'],
+    ['8th Street って路地、行ったか？', 'いつも同じやつらとすれ違うんだけど、知らない顔がまざってたら引き返すんだ。', 'オレ、全力で走りぬけたら、誰の顔も見てなかった！ 次はゆっくり歩くぜ。'],
+    ['You been down 8th Street?', 'You pass the same crowd each time, and if a stranger shows up, you turn back.', 'I sprinted straight through and didn’t see a single face! Walking it next time.'],
     { zones: ['plaza'] }),
   s('plaza-find', 'topic',
-    ['奥の美術館、人がぎっしりでさ。', 'その中から、ちがうやつを一人だけ見つけるんだ。', 'オレの最速記録、教えてやろうか？ …まだ見つけてない！'],
-    ['The museum up back is packed with people.', 'You gotta find the one who doesn’t belong.', 'Want my best time? …Haven’t found ’em yet!'],
+    ['奥の美術館、人がぎっしりでさ。', 'その中から、ターゲットを一人見つけるんだ。', 'オレの最速記録、教えてやろうか？ …まだ見つけてない！'],
+    ['The museum up back is packed with people.', 'You gotta find the one target in that crowd.', 'Want my best time? …Haven’t found ’em yet!'],
     { zones: ['plaza'] }),
   s('mountain-climb', 'topic',
     ['Mt. Meeb、のぼったか？', 'ルートが毎日変わるんだぜ。昨日の近道が、今日はなくなってた！', 'でもそれがいいんだよな。毎日が初見だ！'],

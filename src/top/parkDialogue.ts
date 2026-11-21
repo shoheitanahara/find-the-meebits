@@ -5,6 +5,8 @@ import { getCreatorDialogueLinesEn } from '../npc/npcGeneration'
 import type { DialogueLine } from '../npc/npcTypes'
 import type { DailyThemeTrait } from './dailyFeatured'
 import { isParkChristmasSeason } from './parkChristmas'
+import { getCachedMeebitTraits } from '../data/meebitTraits'
+import { isSilentMeebit } from './parkTalk/personality'
 import { selectParkTalk } from './parkTalk/selectParkTalk'
 import { useTopStore } from './topStore'
 import type { ParkNpcRecord } from './parkNpcRegistry'
@@ -52,6 +54,12 @@ export function selectParkDialogueLines(
     return selectCreatorParkLines(talkCount)
   }
 
+  // Visitor と Dissected はほとんど話さない（Visitor はときどき単語をひとつだけ）
+  const traits = getCachedMeebitTraits(npc.meebitNumber)
+  if (isSilentMeebit(traits)) {
+    return selectSilentLines(npc.id, talkCount, traits?.Type === 'Visitor' ? zoneId : null)
+  }
+
   const top = useTopStore.getState()
   return selectParkTalk({
     npc,
@@ -64,4 +72,57 @@ export function selectParkDialogueLines(
     traitName: formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue),
     winter: isParkChristmasSeason(),
   })
+}
+
+const SILENT_PATTERNS: Array<{ ja: string[]; en: string[] }> = [
+  { ja: ['……'], en: ['…'] },
+  { ja: ['…………'], en: ['……'] },
+  { ja: ['……', '……'], en: ['…', '…'] },
+  { ja: ['…'], en: ['…'] },
+]
+
+/** Visitor がときどき口にする単語（どこでも） */
+const VISITOR_WORDS: Array<{ ja: string; en: string }> = [
+  { ja: '……ホシ。', en: '…Stars.' },
+  { ja: '……ヒカリ。', en: '…Light.' },
+  { ja: '……キレイ。', en: '…Pretty.' },
+  { ja: '……アナタ。', en: '…You.' },
+  { ja: '……カエル。', en: '…Home.' },
+  { ja: '……ミテル。', en: '…Watching.' },
+  { ja: '……オト。', en: '…Sound.' },
+  { ja: '……トモダチ？', en: '…Friend?' },
+]
+
+/** エリアに合わせた単語 */
+const VISITOR_ZONE_WORDS: Partial<Record<ParkZoneId, { ja: string; en: string }>> = {
+  plaza: { ja: '……ミズ。', en: '…Water.' },
+  mountain: { ja: '……タカイ。', en: '…High.' },
+  culture: { ja: '……イロ。', en: '…Color.' },
+  sea: { ja: '……ウミ。', en: '…Sea.' },
+  astro: { ja: '……ソラ。', en: '…Sky.' },
+  musicArt: { ja: '……オンガク。', en: '…Music.' },
+  jungle: { ja: '……ミドリ。', en: '…Green.' },
+}
+
+/**
+ * 話さない来場者の「……」。
+ * visitorZone を渡すと（Visitor）、2 回に 1 回くらい単語をひとつだけ言う。
+ */
+export function selectSilentLines(
+  npcId: string,
+  talkCount: number,
+  visitorZone: ParkZoneId | null = null,
+): DialogueLine[] {
+  const ja = getLocale() === 'ja'
+  let texts: string[]
+  if (visitorZone && talkCount % 2 === 1) {
+    const zoneWord = VISITOR_ZONE_WORDS[visitorZone]
+    const words = zoneWord ? [zoneWord, ...VISITOR_WORDS] : VISITOR_WORDS
+    const word = words[Math.floor(talkCount / 2) % words.length]
+    texts = [ja ? word.ja : word.en]
+  } else {
+    const pattern = SILENT_PATTERNS[talkCount % SILENT_PATTERNS.length]
+    texts = ja ? pattern.ja : pattern.en
+  }
+  return texts.map((text, i) => ({ id: `${npcId}-silent-${talkCount}-${i}`, text, category: 'greeting' as const }))
 }

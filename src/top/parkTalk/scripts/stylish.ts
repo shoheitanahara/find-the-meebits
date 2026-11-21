@@ -35,12 +35,12 @@ export const STYLISH_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-find', 'topic',
-    ['奥の美術館、人がいっぱいなの。', 'その中から、ひとりだけちがう子を探すのよ。', 'わたし、服ばかり見てて、顔を見るのを忘れちゃった。'],
-    ['The museum up back is packed.', 'You have to find the one face that doesn’t belong.', 'I got so caught up in the outfits, I forgot to look at faces.'],
+    ['奥の美術館、人がいっぱいなの。', 'その中から、ターゲットの Meebit をひとり探すのよ。', 'わたし、まわりの服ばかり見てて、ターゲットの顔を忘れちゃった。'],
+    ['The museum up back is packed.', 'You have to find one target Meebit in that crowd.', 'I got so caught up in everyone’s outfits, I forgot the target’s face.'],
     { zones: ['plaza'] }),
   s('plaza-street', 'topic',
-    ['8th Street の路地、雰囲気がすてきなのよ。', '同じ夜の路地なんだけど、どこか一つだけおかしいの。', 'わたしは、ちょっとした色のちがいで気づいたわ。…どこかは内緒。'],
-    ['8th Street has such a great vibe.', 'It’s the same alley on the same night, but one thing’s off.', 'I caught it from a tiny color difference. …Not telling you where.'],
+    ['8th Street の路地、雰囲気がすてきなのよ。', 'いつも同じ人たちとすれ違うんだけど、ときどき見慣れない子がまざるの。', 'わたしは服で覚えてるから、すぐ分かったわ。'],
+    ['8th Street has such a great vibe.', 'You pass the same people every time — but sometimes a stranger slips in.', 'I remember everyone by their outfits, so I noticed right away.'],
     { zones: ['plaza'] }),
   s('mountain-summit', 'topic',
     ['山でも、おしゃれは手をぬかないわ。', 'Mt. Meeb の頂上、写真映えするのよ。', '…のぼるまでに、髪がくずれるのが難点だけど。'],

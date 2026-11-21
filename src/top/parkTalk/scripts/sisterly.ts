@@ -35,8 +35,8 @@ export const SISTERLY_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-find', 'topic',
-    ['奥の美術館で、ちがう子を探すやつ、やった？', 'うち、まわりの子に「あっちじゃない？」って教えてたら、自分のが全然進まなかった。', 'まあ、みんな見つけられたから、いいんだけどね。'],
-    ['Tried the find-the-odd-one-out game at the museum?', 'I kept helping the people around me and never got anywhere myself.', 'Everyone found theirs, though, so it’s fine.'],
+    ['奥の美術館で、ターゲットを探すやつ、やった？', 'うち、まわりの子に「あっちにいたよ」って教えてたら、自分のが全然進まなかった。', 'まあ、みんな見つけられたから、いいんだけどね。'],
+    ['Tried the find-the-target game at the museum?', 'I kept helping the people around me and never got anywhere myself.', 'Everyone found theirs, though, so it’s fine.'],
     { zones: ['plaza'] }),
   s('plaza-podcast', 'topic',
     ['広場のスタジオのポッドキャスト、うちも観てるよ。', 'マイクの前の席に座ると、話してる人の顔がよく見えるんだ。', 'ああいう落ち着いた声、聞いてるとほっとするよね。'],
@@ -130,8 +130,8 @@ export const SISTERLY_SCRIPTS = [
     ['がんばりすぎてる子って、見てたら分かるんだよね。', 'そういう子には、「ちょっと座りな」って言うの。', '{you} も、たまには座りなよ。'],
     ['I can always tell when someone’s trying too hard.', 'I tell them, “Sit down for a bit.”', 'You too, {you}. Sit down once in a while.']),
   s('plaza-street', 'topic',
-    ['8th Street の路地、夜だからちょっと暗いでしょ。', 'うち、はじめての子にはいっしょについていくんだ。', 'どこか一つおかしいところ、ふたりで探すと楽しいんだよ。'],
-    ['The 8th Street alley’s a bit dark, being night and all.', 'I go along with anyone trying it for the first time.', 'Hunting for the one odd thing is more fun with two.'],
+    ['8th Street の路地、夜だからちょっと暗いでしょ。', 'うち、はじめての子にはいっしょについていくんだ。', 'いつもの顔ぶれに知らない人がまざってないか、ふたりで見ると楽しいんだよ。'],
+    ['The 8th Street alley’s a bit dark, being night and all.', 'I go along with anyone trying it for the first time.', 'Checking for a stranger among the usual faces is more fun with two.'],
     { zones: ['plaza'] }),
   s('mountain-jelly', 'topic',
     ['ジェリーマウンテン、足場がぷにぷにでしょ。', '落ちても大丈夫だから、こわがらずに跳んでみな。', 'うちは下で見ててあげるから。'],

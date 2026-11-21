@@ -1,4 +1,4 @@
-/** Jazz Bar — Blue Note 風の丸テーブル＋向かい合わせ丸椅子。 */
+/** Jazz Bar — ジャズクラブ風の丸テーブル＋向かい合わせ丸椅子。 */
 
 /** Jazz プレイリスト https://www.youtube.com/watch?v=GjkT_HKJY3o&list=PLSv3kdqpcJmo */
 export const JAZZ_BAR_YOUTUBE_PLAYLIST_ID = 'PLSv3kdqpcJmo'

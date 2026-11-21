@@ -39,8 +39,8 @@ export const STREET_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-street', 'topic',
-    ['8th Street、行った？ 夜の路地の雰囲気がマジでいいんだよ。', '同じ路地なのに、どこか一個だけおかしいってやつ。', '俺はポスターに見とれてて、気づくのが遅れた。'],
-    ['Been to 8th Street? That night alley has a seriously good vibe.', 'Same alley every time, but one thing’s off.', 'I was too busy checking out the posters to notice.'],
+    ['8th Street、行った？ 夜の路地の雰囲気がマジでいいんだよ。', 'すれ違うのはいつも同じやつらなんだけど、たまに見ない顔がまざってる。', '俺は靴で覚えてたから、気づくのは早かったよ。'],
+    ['Been to 8th Street? That night alley has a seriously good vibe.', 'You pass the same crowd every time, but sometimes there’s a face you’ve never seen.', 'I memorized everyone by their shoes, so I caught it fast.'],
     { zones: ['plaza'] }),
   s('plaza-podcast', 'topic',
     ['広場のポッドキャスト、地味にチェックしてる。', 'マイクの前の席で聴くと、声の質感まで分かるんだよね。', 'ああいうの、いつか自分でもやってみたいわ。'],
@@ -134,8 +134,8 @@ export const STREET_SCRIPTS = [
     ['パークって、いろんなやつがいるじゃん。', 'ロボットもいれば、ブタの見た目のやつもいる。', 'みんなちがうから、見てて飽きないんだよね。'],
     ['This park’s got all kinds, you know?', 'Robots, folks who look like pigs, you name it.', 'Everyone’s different. Never gets old.']),
   s('plaza-find', 'topic',
-    ['奥の美術館、人がぎっしりでさ。', 'その中から、ちがうやつを一人だけ探すんだけど、', '俺は服で探すから、似た服のやつがいるとマジで迷う。'],
-    ['The museum up back is packed wall to wall.', 'You’re looking for the one who doesn’t belong,', 'and since I look at clothes first, similar outfits throw me off every time.'],
+    ['奥の美術館、人がぎっしりでさ。', 'その中から、ターゲットを一人探すんだけど、', '俺は服で探すから、似た服のやつがいるとマジで迷う。'],
+    ['The museum up back is packed wall to wall.', 'You’re hunting for one target in there,', 'and since I look at clothes first, similar outfits throw me off every time.'],
     { zones: ['plaza'] }),
   s('mountain-climb', 'topic',
     ['Mt. Meeb、のぼったよ。', '頂上で聴く音楽って、なんでかいつもより良く聞こえるんだよね。', 'あれ、絶対高さのせいだと思う。'],

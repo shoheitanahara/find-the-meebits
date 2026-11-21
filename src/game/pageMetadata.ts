@@ -69,7 +69,7 @@ const metadata = {
     },
     jazzBar: {
       title: 'Jazz Bar | Meebits Park',
-      description: 'Take a Blue Note-style seat and listen to a random jazz playlist on the stage screen.',
+      description: 'Take a seat right by the stage and listen to a random jazz playlist on the stage screen.',
     },
     fishing: {
       title: 'Shore Fishing | Meebits Park',
@@ -147,7 +147,7 @@ const metadata = {
     },
     jazzBar: {
       title: 'Jazz Bar | Meebits Park',
-      description: 'Blue Note風の席に座って、ジャズのプレイリストをランダム再生。',
+      description: 'ステージのすぐ横の席に座って、ジャズのプレイリストをランダム再生。',
     },
     fishing: {
       title: 'ショアフィッシング | Meebits Park',
