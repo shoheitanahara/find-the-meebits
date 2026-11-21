@@ -1332,7 +1332,8 @@ const PARK_BENCH_SIT_Y = 0.02
 function getBenchSeats(zoneId: ParkZoneId): NpcSpot[] {
   return getParkZone(zoneId).benches.flatMap(([bx, bz, ry]) =>
     [-0.5, 0.5].map((lx) => {
-      const lz = 0.12
+      // 座面（奥行き 0.65、中心 +0.08）の前寄り。奥すぎると膝が座面にめり込む
+      const lz = 0.32
       return {
         x: bx + lx * Math.cos(ry) + lz * Math.sin(ry),
         z: bz - lx * Math.sin(ry) + lz * Math.cos(ry),
