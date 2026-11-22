@@ -1,3 +1,5 @@
+/// <reference types="node" />
+// Vercel は API 関数を独自の設定でコンパイルし、TypeScript 6 は @types/node を自動で読まないため明示する
 /**
  * Vercel Serverless: GET /api/opensea/meebits-listings
  * Env: OPENSEA_API_KEY（Developer Portal の永続キー。VITE_ 禁止）
