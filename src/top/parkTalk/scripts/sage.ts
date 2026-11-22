@@ -1,5 +1,5 @@
 /**
- * 物知り：一人称「わたし」。ていねい語。観察とノートが好きで、パークにくわしい。
+ * 物知り：一人称「わたし」。ていねい語。観察が好きで、パークにくわしい（ノートの話は控えめに）。
  * EN: polite, curious, loves a good fact.
  */
 import { scriptMaker } from './make'
@@ -22,7 +22,7 @@ export const SAGE_SCRIPTS = [
   s('again-any', 'greetAgain', ['おや、{you}。またお会いできましたね。'], ['Ah, {you}. How nice to see you again.']),
 
   s('friend-1', 'greetFriend', ['{you}。ちょうど、あなたにお話ししたいことがあったんです。'], ['{you}. I was hoping to run into you.']),
-  s('friend-2', 'greetFriend', ['こんにちは、{you}。', 'あなたと話すと、ノートのページがよく進むんですよ。'], ['Hello, {you}.', 'My notebook fills up fastest when I talk with you.']),
+  s('friend-2', 'greetFriend', ['こんにちは、{you}。', 'あなたと話すと、いつも新しい発見があるんです。'], ['Hello, {you}.', 'I always learn something new talking with you.']),
   s('friend-3', 'greetFriend', ['おや、{you}。今日はどんな発見がありましたか？'], ['Ah, {you}. What have you discovered today?']),
 
   // ── どこでも話す話題 ─────────────────────
@@ -101,23 +101,23 @@ export const SAGE_SCRIPTS = [
 
   // ── 今日の主役・トレイト ─────────────────
   s('star', 'star',
-    ['今日の噴水の銅像は {star} ですね。', '主役は、毎日入れかわるんです。', 'わたしのノートには、これまでの主役が全部書いてあるんですよ。'],
-    ['The fountain statue today is {star}.', 'The star changes every day.', 'I’ve written down every single one in my notebook.']),
+    ['今日の噴水の銅像は {star} ですね。', '主役は、毎日入れかわるんです。', 'これまでの主役を全部覚えている…と言いたいところですが、さすがに無理ですね。'],
+    ['The fountain statue today is {star}.', 'The star changes every day.', 'I’d love to say I remember every one so far… but even I can’t.']),
   s('trait', 'trait',
     ['今日のトレイトは {trait} だそうですね。', '広場の看板に書いてあります。', '今日は {trait} の来場者が多いので、数えてみると面白いですよ。'],
     ['Today’s trait is {trait}, I hear.', 'It’s posted on the board in the Plaza.', 'There are lots of {trait} visitors today — try counting them.']),
   s('star-self', 'starSelf',
-    ['じつは…今日の噴水の銅像は、わたしなんです。', '自分の銅像を観察するのは、ふしぎな気分ですね。', 'ノートに、なんと書けばいいのでしょう。'],
-    ['As it happens… the fountain statue today is me.', 'Observing a statue of yourself is a strange feeling.', 'I’m not sure what to write in my notebook.']),
+    ['じつは…今日の噴水の銅像は、わたしなんです。', '自分の銅像を観察するのは、ふしぎな気分ですね。', 'なんだか、少し背筋が伸びますね。'],
+    ['As it happens… the fountain statue today is me.', 'Observing a statue of yourself is a strange feeling.', 'It makes me stand up a little straighter.']),
   s('trait-self', 'traitSelf',
-    ['ええ、わたしも今日の {trait} なんです。', '偶然ですが、記録しておかないといけませんね。'],
-    ['Yes, I’m wearing today’s {trait} as well.', 'Pure coincidence, but I must make a note of it.']),
+    ['ええ、わたしも今日の {trait} なんです。', '偶然ですが、ちょっとうれしいですね。'],
+    ['Yes, I’m wearing today’s {trait} as well.', 'A coincidence, but a nice one.']),
   s('winter', 'winter',
     ['冬になると、パークの灯りがいっそう映えますね。', '空気が澄んでいるので、遠くの光までよく見えるんです。', 'あたたかくしてお出かけくださいね、{you}。'],
     ['The park lights look even better in winter.', 'The air is so clear you can see lights far in the distance.', 'Do dress warmly, {you}.']),
 
   // ── 追加分（2026-11）────────────────────
-  s('again-any-2', 'greetAgain', ['おや、{you}。', '今日のノートには、もう三ページ書きましたよ。'], ['Ah, {you}.', 'I’ve already written three pages in my notebook today.']),
+  s('again-any-2', 'greetAgain', ['おや、{you}。', '今日はもう、パークを半周してきましたよ。'], ['Ah, {you}.', 'I’ve already walked half the park today.']),
   s('again-any-3', 'greetAgain', ['こんにちは、{you}。', 'ちょうど、面白いことに気づいたところなんです。'], ['Hello, {you}.', 'I just noticed something rather interesting.']),
   s('friend-4', 'greetFriend', ['{you}。', 'あなたと話す時間は、わたしの一日のいちばんの楽しみなんです。'], ['{you}.', 'Talking with you is the highlight of my day.']),
   s('types', 'topic',
@@ -142,22 +142,22 @@ export const SAGE_SCRIPTS = [
     ['At Look Locker you can try on different hats and hair.', 'Comparing side by side with your current look is very well done.', 'I kept trying on glasses, over and over.'],
     { zones: ['culture'] }),
   s('sea-sergito', 'topic',
-    ['海辺の工房の Sergito さんは、見た目にひとことくださる方です。', 'わたしのことは「観察する人の顔」だとおっしゃいました。', '…ノートに書いておきました。'],
-    ['Mr. Sergito at the beach workshop gives you a comment on your look.', 'He said I have “the face of an observer.”', '…I wrote it down in my notebook.'],
+    ['海辺の工房の Sergito さんは、見た目にひとことくださる方です。', 'わたしのことは「観察する人の顔」だとおっしゃいました。', '…なかなか、うまいことをおっしゃいます。'],
+    ['Mr. Sergito at the beach workshop gives you a comment on your look.', 'He said I have “the face of an observer.”', '…He has a way with words.'],
     { zones: ['sea'] }),
   s('astro-starlight', 'topic',
-    ['スターライトラッシュは、レールに乗って流れ星を撃つアトラクションです。', '撃った数を記録しようと思ったのですが…', '速すぎて、ノートを開くひまがありませんでした。'],
-    ['Starlight Rush is a ride where you shoot falling stars from the rails.', 'I meant to record how many I hit, but…', 'It was too fast to even open my notebook.'],
+    ['スターライトラッシュは、レールに乗って流れ星を撃つアトラクションです。', '撃った数を数えようと思ったのですが…', '速すぎて、三つ目で分からなくなりました。'],
+    ['Starlight Rush is a ride where you shoot falling stars from the rails.', 'I meant to count how many I hit, but…', 'It was so fast I lost track at three.'],
     { zones: ['astro'] }),
   s('music-hiphop', 'topic',
-    ['ヒップホップクラブには、イスがないんです。', '音に合わせて踊るための場所なんですよ。', 'わたしも一度、端のほうで少しだけ揺れてみました。…ノートには書いていません。'],
-    ['The Hip Hop Club has no chairs.', 'It’s a place for dancing to the music.', 'I tried swaying a little at the edge once. …That’s not going in the notebook.'],
+    ['ヒップホップクラブには、イスがないんです。', '音に合わせて踊るための場所なんですよ。', 'わたしも一度、端のほうで少しだけ揺れてみました。…人には言わないでくださいね。'],
+    ['The Hip Hop Club has no chairs.', 'It’s a place for dancing to the music.', 'I tried swaying a little at the edge once. …Please don’t tell anyone.'],
     { zones: ['musicArt'] }),
   s('jungle-sheep', 'topic',
     ['ヒツジは、群れで動く習性があるそうです。', 'ここの羊も、ばらばらに見えて、ゆるやかにまとまっているんですよ。', '観察していると、時間を忘れてしまいます。'],
     ['Sheep are said to have a herding instinct.', 'The ones here look scattered, but they loosely stay together.', 'I lose track of time watching them.'],
     { zones: ['jungle'] }),
   s('friend-cover', 'friend',
-    ['{you}。わたし、ノートの表紙に、いちばん大事なことを書いているんです。', '「見たものは、だれかに話すと二倍楽しい」。', '…あなたに教わったことですよ。'],
-    ['{you}, I’ve written the most important thing on the cover of my notebook.', '“What you see is twice as fun when you share it.”', '…You taught me that.']),
+    ['{you}。わたし、いちばん大事にしている言葉があるんです。', '「見たものは、だれかに話すと二倍楽しい」。', '…あなたに教わったことですよ。'],
+    ['{you}, there’s a phrase I hold dearest.', '“What you see is twice as fun when you share it.”', '…You taught me that.']),
 ]

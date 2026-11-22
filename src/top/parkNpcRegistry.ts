@@ -47,6 +47,11 @@ export function getParkNpcById(id: string): ParkNpcRecord | null {
   return byId.get(id) ?? null
 }
 
+/** いまのエリアに登録されている来場者（作成者を含む） */
+export function getRegisteredParkNpcs(): ParkNpcRecord[] {
+  return [...byId.values()]
+}
+
 export function parkNpcIdFor(meebitNumber: number) {
   return `park-npc-${meebitNumber}`
 }

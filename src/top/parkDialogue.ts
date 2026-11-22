@@ -8,6 +8,9 @@ import { isParkChristmasSeason } from './parkChristmas'
 import { getCachedMeebitTraits } from '../data/meebitTraits'
 import { isSilentMeebit } from './parkTalk/personality'
 import { selectParkTalk } from './parkTalk/selectParkTalk'
+import { describePlace } from './parkTalk/zonePlaces'
+import { getRegisteredParkNpcs } from './parkNpcRegistry'
+import { useNpcStore } from '../stores/npcStore'
 import { useTopStore } from './topStore'
 import type { ParkNpcRecord } from './parkNpcRegistry'
 import type { ParkZoneId } from './parkZones'
@@ -61,6 +64,21 @@ export function selectParkDialogueLines(
   }
 
   const top = useTopStore.getState()
+  // その場のデータ：プレイヤーの見た目、同じエリアのほかの来場者（いる場所つき）、今日の主役
+  const positions = useNpcStore.getState().npcPositions
+  const others = getRegisteredParkNpcs()
+    .filter((record) => !record.isCreator && record.meebitNumber !== npc.meebitNumber)
+    .flatMap((record) => {
+      const position = positions[record.id]
+      if (!position) return []
+      return [
+        {
+          meebitNumber: record.meebitNumber,
+          traits: getCachedMeebitTraits(record.meebitNumber),
+          place: describePlace(zoneId, position[0], position[2]),
+        },
+      ]
+    })
   return selectParkTalk({
     npc,
     talkCount,
@@ -71,6 +89,12 @@ export function selectParkDialogueLines(
     featuredId,
     traitName: formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue),
     winter: isParkChristmasSeason(),
+    dynamic: {
+      selfTraits: traits,
+      playerTraits: getCachedMeebitTraits(top.meebitNumber),
+      featuredTraits: getCachedMeebitTraits(featuredId),
+      others,
+    },
   })
 }
 

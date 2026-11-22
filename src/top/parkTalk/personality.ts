@@ -28,10 +28,13 @@ export function getMeebitBody(traits: MeebitTraitMap | null | undefined): Meebit
   return FEMALE_PANTS.has(traits.Pants) ? 'female' : 'male'
 }
 
-const MALE_POOL: readonly PersonalityId[] = ['street', 'sporty', 'cool', 'artist', 'sage']
-const FEMALE_POOL: readonly PersonalityId[] = ['stylish', 'bubbly', 'sisterly', 'explorer', 'sage']
+/** 物知りは出すぎないよう、男性側だけに半分の重みで入れる（全体の 1 割弱） */
+const MALE_POOL: readonly PersonalityId[] = [
+  'street', 'street', 'sporty', 'sporty', 'cool', 'cool', 'artist', 'artist', 'sage',
+]
+const FEMALE_POOL: readonly PersonalityId[] = ['stylish', 'bubbly', 'sisterly', 'explorer']
 
-/** 体ごとの性格の候補（物知りはどちらでも。Human 以外は男性側と同じ） */
+/** 体ごとの性格の候補（Human 以外は男性側と同じ） */
 const POOLS: Record<MeebitBody, readonly PersonalityId[]> = {
   male: MALE_POOL,
   female: FEMALE_POOL,

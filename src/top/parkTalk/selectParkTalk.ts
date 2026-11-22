@@ -3,6 +3,7 @@ import type { DialogueLine } from '../../npc/npcTypes'
 import type { ParkNpcRecord } from '../parkNpcRegistry'
 import type { ParkTimeOfDay } from '../parkTimeOfDay'
 import type { ParkZoneId } from '../parkZones'
+import { buildDynamicScripts, type DynamicTalkData } from './dynamicTopics'
 import { formatPlayerName, getPersonality } from './personality'
 import { PARK_TALK_SCRIPTS } from './scripts'
 import type { TalkKind, TalkScript } from './types'
@@ -21,6 +22,8 @@ export type ParkTalkContext = {
   winter: boolean
   /** 話している来場者のトレイト（省略時は読み込み済みのデータから引く） */
   traits?: MeebitTraitMap | null
+  /** その場のデータ（プレイヤーの見た目・ほかの来場者・今日の主役）。あれば話題に混ぜる */
+  dynamic?: DynamicTalkData
 }
 
 /** 話すと「なかよし」になる回数 */
@@ -116,6 +119,12 @@ export function selectParkTalk(ctx: ParkTalkContext): DialogueLine[] {
   add('trait', 1, 1)
   if (isFriend) add('friend', 2, 2)
   if (ctx.winter) add('winter', 2, 2)
+  // その場のデータから作る話題（見た目・うわさ・主役のトレイト）
+  if (ctx.dynamic) {
+    for (const { script, weight } of buildDynamicScripts(personalityOf(ctx), ctx.dynamic, npc.meebitNumber, talkCount)) {
+      candidates.push([script, weight])
+    }
+  }
 
   const topic = pickScript(candidates, ctx, 29)
 
