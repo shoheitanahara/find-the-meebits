@@ -5,6 +5,7 @@
  * 値段の良し悪しや投資の話はしない。
  */
 import { getCachedMeebitTraits } from '../../data/meebitTraits'
+import { traitDisplayName } from '../../data/traitDisplayName'
 import { getLocale } from '../../i18n/locale'
 import type { DialogueLine } from '../../npc/npcTypes'
 import { isSoldMeebit, type ListedMeebit } from '../../opensea/types'
@@ -112,8 +113,9 @@ function pair(pieces: DisplayedPiece[], guideId: number, talks: number): Talk | 
     const rule = SHARED_TRAIT_KEYS[(start + k) % SHARED_TRAIT_KEYS.length]
     const groups = new Map<string, DisplayedPiece[]>()
     for (const p of pieces) {
-      const v = p.traits?.[rule.key]
-      if (!v || v === 'None' || v === 'No') continue
+      // 2体で色がちがうこともあるので、色なし（値＋ジャンル）でまとめる
+      const v = p.traits ? traitDisplayName(p.traits, rule.key, false) : null
+      if (!v) continue
       groups.set(v, [...(groups.get(v) ?? []), p])
     }
     const shared = [...groups.entries()].filter(([, list]) => list.length >= 2)

@@ -8,12 +8,6 @@ const s = scriptMaker('cool')
 
 export const COOL_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['……ああ、はじめてか。僕は {me}。', 'べつに用はないけど、話しかけられるのはきらいじゃない。'],
-    ['…Oh. First time? I’m {me}.', 'Not that I need anything. I don’t mind the company, though.']),
-  s('first-2', 'greetFirst',
-    ['{you}、か。覚えておく。', '僕は {me}。静かな場所を探して歩いてる。'],
-    ['{you}, huh. I’ll remember that.', 'I’m {me}. I walk around looking for quiet spots.']),
 
   s('again-morning', 'greetAgain', ['…おはよう、{you}。', '朝は人が少なくて、悪くない。'], ['…Morning, {you}.', 'Fewer people around. I like it.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['{you}か。…元気そうだな。'], ['{you}. …You look well.'], { times: ['noon'] }),
@@ -160,4 +154,10 @@ export const COOL_SCRIPTS = [
   s('friend-look-for', 'friend',
     ['{you}。君に会う前、僕はパークに来ても誰とも話さなかった。', '今は、来るたびに君を探してる。', '……べつに、深い意味はない。'],
     ['{you}. Before I met you, I came to the park and talked to no one.', 'Now I look for you every time I come.', '……It doesn’t mean anything.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['…{you}。いたのか。'], ['…{you}. Didn’t see you there.']),
+  s('again-more-2', 'greetAgain', ['{you}か。…今日は静かでいいな。'], ['{you}. …It’s nice and quiet today.']),
+  s('again-more-3', 'greetAgain', ['…ああ、{you}。ちょうど一息ついてた。'], ['…Ah, {you}. I was just taking a breather.']),
+  s('again-more-4', 'greetAgain', ['{you}。…今日も来たんだな。'], ['{you}. …Here again, huh.']),
 ]

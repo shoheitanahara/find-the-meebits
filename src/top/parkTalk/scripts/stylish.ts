@@ -8,12 +8,6 @@ const s = scriptMaker('stylish')
 
 export const STYLISH_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['あら、はじめまして。わたし、{me}。', 'あなた、{you} っていうのね。…その組み合わせ、ちょっと気になるわ。'],
-    ['Oh, hello. I’m {me}.', 'You’re {you}? Hmm, that look of yours caught my eye.']),
-  s('first-2', 'greetFirst',
-    ['はじめまして、{me} よ。', 'パークの中で、すてきな着こなしを探して歩いてるの。'],
-    ['Hi, I’m {me}.', 'I walk around the park hunting for great outfits.']),
 
   s('again-morning', 'greetAgain', ['おはよう、{you}。', '朝の光って、服の色がいちばんきれいに見えるのよね。'], ['Morning, {you}.', 'Morning light makes every color look its best.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['{you}、こんにちは。', '今日もいい感じじゃない？'], ['Hi, {you}.', 'Looking good today, aren’t we?'], { times: ['noon'] }),
@@ -160,4 +154,10 @@ export const STYLISH_SCRIPTS = [
   s('friend-shop', 'friend',
     ['{you}、わたしね、いつか自分のお店を開きたいの。', 'パークの子たちに、ぴったりの一着を見つけてあげるお店。', '最初のお客さんは、もちろんあなたよ。'],
     ['{you}, someday I want to open my own shop.', 'A place where I find the perfect outfit for everyone in the park.', 'And of course, you’ll be my first customer.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['あら、{you}。今日も来てくれたのね。'], ['Oh, {you}. You came again today.']),
+  s('again-more-2', 'greetAgain', ['{you}、ごきげんよう。…なんて、ちょっと言ってみたかったの。'], ['Good day, {you}. …I just wanted to say that once.']),
+  s('again-more-3', 'greetAgain', ['{you}、ちょうどいいところに来たわ。'], ['{you}, you came at just the right time.']),
+  s('again-more-4', 'greetAgain', ['あら、{you}。今日のパーク、にぎやかね。'], ['Oh, {you}. The park is lively today.']),
 ]

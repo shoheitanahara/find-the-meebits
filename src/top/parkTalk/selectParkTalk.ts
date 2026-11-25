@@ -96,7 +96,8 @@ function toLines(script: TalkScript, ctx: ParkTalkContext, prefix: string): Dial
  */
 export function selectParkTalk(ctx: ParkTalkContext): DialogueLine[] {
   const { npc, talkCount } = ctx
-  const stage: TalkKind = talkCount === 0 ? 'greetFirst' : talkCount < FRIEND_TALKS ? 'greetAgain' : 'greetFriend'
+  // Meebits はもともと仲間どうし。初対面のあいさつはせず、最初から顔なじみとして話す
+  const stage: TalkKind = talkCount < FRIEND_TALKS ? 'greetAgain' : 'greetFriend'
   const isFriend = stage === 'greetFriend'
 
   // あいさつ（時間帯つきのものがあれば少し優先）

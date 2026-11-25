@@ -9,15 +9,6 @@ const s = scriptMaker('street')
 
 export const STREET_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['よう。見ない顔じゃん。俺、{me}。', '{you} ね。…その足もと、なかなかいいセンスしてんな。'],
-    ['Yo. Haven’t seen you around. I’m {me}.', '{you}, huh? …Nice taste in footwear.']),
-  s('first-2', 'greetFirst',
-    ['お、新顔？ 俺は {me}。', 'だいたい音楽聴きながら、このへんぶらついてる。よろしくな。'],
-    ['Oh, new face? I’m {me}.', 'Usually just cruising around here with music on. Good to meet you.']),
-  s('first-3', 'greetFirst',
-    ['よう、{you}。俺、{me}。', 'このパーク、いい音が流れてる場所が多いんだよね。そのうち教えるわ。'],
-    ['Yo, {you}. I’m {me}.', 'Lotta spots in this park with good sound. I’ll show you sometime.']),
 
   s('again-morning', 'greetAgain', ['おはよ、{you}。', '朝イチのパーク、人が少なくて好きなんだよね。'], ['Morning, {you}.', 'Love the park first thing. Nobody around.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['よう、{you}。今日もいい感じじゃん。'], ['Yo, {you}. Looking good today.'], { times: ['noon'] }),
@@ -128,8 +119,8 @@ export const STREET_SCRIPTS = [
     ['キャップってさ、つばの向きで性格が出るんだよね。', '前向きはまじめ、後ろ向きはゆるい、横は…自由。', '俺？ 今日は気分で決めた。'],
     ['Caps say a lot depending on which way the brim faces.', 'Forward is serious, backward is chill, sideways is… free.', 'Me? Went with my mood today.']),
   s('palette', 'topic',
-    ['俺、パークで見つけた好きな配色をメモしてんの。', '屋根の色、床の色、誰かの服の色。', 'いつか全部まとめて、自分のコーデにするつもり。'],
-    ['I keep notes on color combos I find around the park.', 'Roof colors, floor colors, somebody’s outfit.', 'Someday I’m turning them all into one fit.']),
+    ['俺、パークで見つけた好きな配色を、スマホで撮ってんの。', '屋根の色、床の色、誰かの服の色。', 'いつか全部まとめて、自分のコーデにするつもり。'],
+    ['I snap photos of color combos I find around the park.', 'Roof colors, floor colors, somebody’s outfit.', 'Someday I’m turning them all into one fit.']),
   s('people', 'topic',
     ['パークって、いろんなやつがいるじゃん。', 'ロボットもいれば、ブタの見た目のやつもいる。', 'みんなちがうから、見てて飽きないんだよね。'],
     ['This park’s got all kinds, you know?', 'Robots, folks who look like pigs, you name it.', 'Everyone’s different. Never gets old.']),
@@ -164,4 +155,10 @@ export const STREET_SCRIPTS = [
   s('friend-brand', 'friend',
     ['{you}、俺さ、いつか自分のブランドを作りたいんだ。', 'まだ誰にも言ってないんだけどね。', '最初の一足は、{you} にあげるよ。'],
     ['{you}, someday I want to start my own brand.', 'Haven’t told anyone that yet.', 'The first pair goes to you.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['よう、{you}。今日も来てたんだ。'], ['Yo, {you}. You’re here again today.']),
+  s('again-more-2', 'greetAgain', ['お、{you}。ちょうど誰かと話したかったんだよね。'], ['Oh, {you}. I was just looking for someone to talk to.']),
+  s('again-more-3', 'greetAgain', ['{you} じゃん。今日のパーク、いい感じだよ。'], ['Hey, it’s {you}. The park’s got a good vibe today.']),
+  s('again-more-4', 'greetAgain', ['よう。{you} も、ぶらぶらしてる感じ？'], ['Yo. Just cruising around too, {you}?']),
 ]

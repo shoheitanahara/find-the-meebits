@@ -8,12 +8,6 @@ const s = scriptMaker('bubbly')
 
 export const BUBBLY_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['わっ、はじめまして！ あたし、{me}！', '{you} っていうの？ よろしくね！'],
-    ['Whoa, hi! I’m {me}!', 'You’re {you}? So nice to meet you!']),
-  s('first-2', 'greetFirst',
-    ['こんにちは！ あたし、{me} だよっ！', 'パークのこと、ぜんぶ知りたくて走り回ってるの！'],
-    ['Hi hi! I’m {me}!', 'I’m running all over trying to see every inch of this park!']),
 
   s('again-morning', 'greetAgain', ['おはよっ、{you}！', '今日は何して遊ぶ？'], ['Morning, {you}!', 'What are we doing today?'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['{you}！ ねえねえ、聞いて聞いて！'], ['{you}! Hey, hey, listen!'], { times: ['noon'] }),
@@ -96,8 +90,8 @@ export const BUBBLY_SCRIPTS = [
     ['ねえ {you}。あたしね、ほんとはちょっとさみしがりなんだ。', 'だから、こうやって話しかけてくれると、すっごくうれしいの。', 'これからも、いっぱいお話ししようね！'],
     ['Hey {you}. Truth is, I get a little lonely sometimes.', 'So when you come talk to me, it makes me super happy.', 'Let’s keep talking lots, okay?']),
   s('friend-diary', 'friend',
-    ['{you} とはじめて会った日のこと、覚えてる？', 'あたし、あの日のこと、日記に書いたんだよ！', 'タイトルは「新しいおともだち！」だよっ！'],
-    ['Remember the first day we met, {you}?', 'I wrote about it in my diary!', 'The title was “A New Friend!”']),
+    ['{you} と噴水のまわりを歩いた日のこと、覚えてる？', 'あたし、あの日のこと、日記に書いたんだよ！', 'タイトルは「いちばん楽しかった日！」だよっ！'],
+    ['Remember the day we walked around the fountain, {you}?', 'I wrote about it in my diary!', 'The title was “The Best Day Ever!”']),
 
   // ── 今日の主役・トレイト ─────────────────
   s('star', 'star',
@@ -158,6 +152,12 @@ export const BUBBLY_SCRIPTS = [
     ['Up close, cows have the roundest eyes!', 'I stared at one and it stared right back!', 'I lost the staring contest!'],
     { zones: ['jungle'] }),
   s('friend-treasure', 'friend',
-    ['{you}、あたしの宝物、見せてあげる！', '…これ、{you} とはじめて会った日に拾った葉っぱなの！', 'えへへ、大事にしてるんだ！'],
-    ['{you}, wanna see my treasure?', '…It’s a leaf I picked up the day we first met!', 'Heehee, I keep it safe!']),
+    ['{you}、あたしの宝物、見せてあげる！', '…これ、{you} といっしょに歩いた日に拾った葉っぱなの！', 'えへへ、大事にしてるんだ！'],
+    ['{you}, wanna see my treasure?', '…It’s a leaf I picked up the day we went walking together!', 'Heehee, I keep it safe!']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['{you}ー！ やっほー！'], ['{you}! Yoo-hoo!']),
+  s('again-more-2', 'greetAgain', ['あ、{you}！ ちょうど会いたいなって思ってたの！'], ['Oh, {you}! I was just hoping I’d see you!']),
+  s('again-more-3', 'greetAgain', ['{you}！ 今日はなにしてたの？'], ['{you}! What have you been up to today?']),
+  s('again-more-4', 'greetAgain', ['わーい、{you} だ！'], ['Yay, it’s {you}!']),
 ]

@@ -1,5 +1,5 @@
 /**
- * 物知り：一人称「わたし」。ていねい語。観察が好きで、パークにくわしい（ノートの話は控えめに）。
+ * 物知り：一人称「わたし」。ていねい語。観察が好きで、パークにくわしい。
  * EN: polite, curious, loves a good fact.
  */
 import { scriptMaker } from './make'
@@ -8,12 +8,6 @@ const s = scriptMaker('sage')
 
 export const SAGE_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['はじめまして。わたしは {me} と申します。', 'このパークのことなら、少しくわしいんですよ。よろしくお願いしますね、{you}。'],
-    ['How do you do? My name is {me}.', 'I know this park rather well. A pleasure to meet you, {you}.']),
-  s('first-2', 'greetFirst',
-    ['おや、はじめてお会いしますね。{me} です。', 'パークのあちこちを見て回って、ノートに書きとめているんです。'],
-    ['Oh, I don’t believe we’ve met. I’m {me}.', 'I go around the park taking notes on everything I see.']),
 
   s('again-morning', 'greetAgain', ['おはようございます、{you}。', '朝のパークは、光がやわらかいですね。'], ['Good morning, {you}.', 'The light in the park is so gentle in the morning.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['こんにちは、{you}。', '今日も見て回っていらっしゃるんですね。'], ['Good afternoon, {you}.', 'Out exploring again today, I see.'], { times: ['noon'] }),
@@ -35,16 +29,16 @@ export const SAGE_SCRIPTS = [
 
   // ── エリアの話題 ─────────────────────────
   s('plaza-podcast', 'topic',
-    ['広場のスタジオでは、Meebits のポッドキャストが観られます。', 'マイクの前の席に座ると、収録の雰囲気がよく分かるんですよ。', 'わたしは、毎回メモをとりながら観ています。'],
-    ['You can watch the Meebits podcast at the studio here in the Plaza.', 'Sit by the microphones and you really get a feel for the recording.', 'I take notes every time, of course.'],
+    ['広場のスタジオでは、Meebits のポッドキャストが観られます。', 'マイクの前の席に座ると、収録の雰囲気がよく分かるんですよ。', 'わたしは、毎回いちばん前の席で観ています。'],
+    ['You can watch the Meebits podcast at the studio here in the Plaza.', 'Sit by the microphones and you really get a feel for the recording.', 'I always take the front seat.'],
     { zones: ['plaza'] }),
   s('plaza-find', 'topic',
     ['奥の美術館は、来場者でいっぱいです。', 'その中から、ターゲットの Meebit を探す…観察力がためされますね。', 'コツですか？ まず目立つトレイトを一つ決めて、それで探すんです。'],
     ['The museum up back is full of visitors.', 'Finding the target Meebit among them is a real test of observation.', 'My tip? Pick one standout trait and search by that.'],
     { zones: ['plaza'] }),
   s('mountain-route', 'topic',
-    ['Mt. Meeb のルートは、毎日変わるんですよ。', 'わたしは毎日、どんな道だったかノートに記録しているんです。', '同じ道の日は…今のところ、まだありません。'],
-    ['The route up Mt. Meeb changes every single day.', 'I’ve been recording each day’s path in my notebook.', 'So far, not one day has repeated.'],
+    ['Mt. Meeb のルートは、毎日変わるんですよ。', 'わたしは毎日、どんな道だったか覚えるようにしているんです。', '同じ道の日は…今のところ、まだありません。'],
+    ['The route up Mt. Meeb changes every single day.', 'I try to remember each day’s path.', 'So far, not one day has repeated.'],
     { zones: ['mountain'] }),
   s('mountain-shooting', 'topic',
     ['射的の小屋は、お祭りの屋台をイメージしているそうですよ。', '動く的の中に、金色と赤の的が混ざっているんです。', '落ち着いてねらうのが、いちばんの近道ですね。'],
@@ -92,9 +86,9 @@ export const SAGE_SCRIPTS = [
     { zones: ['jungle'] }),
 
   // ── なかよしの話 ─────────────────────────
-  s('friend-notebook', 'friend',
-    ['{you}。じつは、わたしのノート、もうすぐ一冊目が終わるんです。', 'ページの半分くらいは、あなたと話したことなんですよ。', '…ふふ、それくらい楽しいということです。'],
-    ['{you}, my notebook is almost full.', 'About half the pages are things we’ve talked about.', '…That’s how much I enjoy our chats.']),
+  s('friend-observe', 'friend',
+    ['{you}。わたし、このパークでたくさんのことを観察してきました。', 'でも、いちばん楽しかったのは、あなたと話した時間なんですよ。', '…ふふ、本当です。'],
+    ['{you}, I’ve observed a great many things in this park.', 'But the most fun I’ve had is talking with you.', '…Truly.']),
   s('friend-books', 'friend',
     ['わたし、昔は本の中のことしか知らなかったんです。', 'このパークに来て、自分の目で見る楽しさを知りました。', 'あなたも、そのきっかけのひとりですよ、{you}。'],
     ['I used to know the world only through books.', 'Coming to this park taught me the joy of seeing things for myself.', 'And you’re part of that, {you}.']),
@@ -160,4 +154,10 @@ export const SAGE_SCRIPTS = [
   s('friend-cover', 'friend',
     ['{you}。わたし、いちばん大事にしている言葉があるんです。', '「見たものは、だれかに話すと二倍楽しい」。', '…あなたに教わったことですよ。'],
     ['{you}, there’s a phrase I hold dearest.', '“What you see is twice as fun when you share it.”', '…You taught me that.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['こんにちは、{you}。今日もお元気そうですね。'], ['Hello, {you}. You look well today.']),
+  s('again-more-2', 'greetAgain', ['おや、{you}。ちょうどお話ししたいと思っていました。'], ['Ah, {you}. I was hoping to have a chat.']),
+  s('again-more-3', 'greetAgain', ['これは {you}。今日のパークも、いい空気ですね。'], ['Why, {you}. The park feels lovely today.']),
+  s('again-more-4', 'greetAgain', ['{you}。お散歩日和ですね。'], ['{you}. Perfect weather for a stroll.']),
 ]

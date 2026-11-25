@@ -15,7 +15,6 @@ import {
   type SergitoDialogueCategory,
 } from './sergitoDialogueData'
 import {
-  SERGITO_FIRST_MEETING,
   SERGITO_GREET_AGAIN,
   SERGITO_GREET_REGULAR,
   SERGITO_NEW_GUEST,
@@ -774,9 +773,7 @@ function buildOpeningLines(context: SergitoDialogueContext): DialogueLine[] {
   const toLines = (texts: LocalizedText[], key: string) =>
     texts.map((text, i) => toLine(`sergito-open-${key}-${i}`, pickLocalized(text), 'greeting'))
 
-  if (talkCount === 0) {
-    return toLines(SERGITO_FIRST_MEETING[meebitId % SERGITO_FIRST_MEETING.length], 'first')
-  }
+  // Meebits はもともと仲間どうし。初対面のあいさつはしない
   if (context.lastGuest != null && context.lastGuest !== meebitId) {
     return toLines(SERGITO_NEW_GUEST[seededIndex(meebitId + 5, talkCount, SERGITO_NEW_GUEST.length)], 'new')
   }
@@ -806,9 +803,8 @@ export function createSergitoDialogue(context: SergitoDialogueContext): Dialogue
   }
 
   // 見た目へのコメントは毎回必ず話す（このアトラクションの本題）。
-  // 工房の話は、ふつうの再来店のあいさつのかわりに、3 回に 1 回くらい前置きとして出す。
-  const isPlainReturn =
-    context.talkCount > 0 && (context.lastGuest == null || context.lastGuest === context.meebitId)
+  // 工房の話は、ふつうのあいさつのかわりに、3 回に 1 回くらい前置きとして出す。
+  const isPlainReturn = context.lastGuest == null || context.lastGuest === context.meebitId
   const opening =
     isPlainReturn && seededIndex(context.meebitId + 41, context.talkCount, 3) === 0
       ? buildWorkshopStory(context)

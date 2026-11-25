@@ -1,8 +1,8 @@
 import type { TalkScript } from '../types'
-import { ARTIST_SCRIPTS } from './artist'
 import { BUBBLY_SCRIPTS } from './bubbly'
 import { COOL_SCRIPTS } from './cool'
 import { EXPLORER_SCRIPTS } from './explorer'
+import { PHOTOGRAPHER_SCRIPTS } from './photographer'
 import { ROBOT_SCRIPTS } from './robot'
 import { SAGE_SCRIPTS } from './sage'
 import { SISTERLY_SCRIPTS } from './sisterly'
@@ -14,7 +14,7 @@ export const PARK_TALK_SCRIPTS: readonly TalkScript[] = [
   ...STREET_SCRIPTS,
   ...SPORTY_SCRIPTS,
   ...COOL_SCRIPTS,
-  ...ARTIST_SCRIPTS,
+  ...PHOTOGRAPHER_SCRIPTS,
   ...STYLISH_SCRIPTS,
   ...BUBBLY_SCRIPTS,
   ...SISTERLY_SCRIPTS,

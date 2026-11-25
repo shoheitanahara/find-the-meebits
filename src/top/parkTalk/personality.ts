@@ -5,7 +5,7 @@ export const PERSONALITIES: readonly PersonalityId[] = [
   'street',
   'sporty',
   'cool',
-  'artist',
+  'photographer',
   'stylish',
   'bubbly',
   'sisterly',
@@ -30,7 +30,7 @@ export function getMeebitBody(traits: MeebitTraitMap | null | undefined): Meebit
 
 /** 物知りは出すぎないよう、男性側だけに半分の重みで入れる（全体の 1 割弱） */
 const MALE_POOL: readonly PersonalityId[] = [
-  'street', 'street', 'sporty', 'sporty', 'cool', 'cool', 'artist', 'artist', 'sage',
+  'street', 'street', 'sporty', 'sporty', 'cool', 'cool', 'photographer', 'photographer', 'sage',
 ]
 const FEMALE_POOL: readonly PersonalityId[] = ['stylish', 'bubbly', 'sisterly', 'explorer']
 

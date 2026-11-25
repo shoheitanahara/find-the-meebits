@@ -7,6 +7,7 @@
  * 性格ごとに言い方を変える。トレイトの値（例 Backwards Cap）はそのまま使う。
  */
 import type { MeebitTraitMap } from '../../data/meebitTraits'
+import { traitDisplayName } from '../../data/traitDisplayName'
 import type { PersonalityId, TalkScript } from './types'
 
 export type Phrase = { ja: string; en: string }
@@ -34,11 +35,12 @@ const TRAIT_WORDS: Array<{ key: string; ja: string; en: string }> = [
 
 type Trait = { value: string; cat: Phrase }
 
+/** 話題にできるトレイト（色＋値＋ジャンルの名前つき。Human 以外の髪型は除く） */
 function traitsOf(traits: MeebitTraitMap | null): Trait[] {
   if (!traits) return []
   return TRAIT_WORDS.flatMap((w) => {
-    const v = traits[w.key]
-    return v && v !== 'None' && v !== 'No' ? [{ value: v, cat: { ja: w.ja, en: w.en } }] : []
+    const name = traitDisplayName(traits, w.key)
+    return name ? [{ value: name, cat: { ja: w.ja, en: w.en } }] : []
   })
 }
 
@@ -106,22 +108,22 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
       (v, c) => L([`${c.ja}を見られるのは、少し落ち着かない。`, `…この ${v}、変じゃないか？`], [`Having my ${c.en} looked at is a little unsettling.`, `…Is this ${v} weird?`]),
     ],
   },
-  artist: {
+  photographer: {
     look: [
-      (v, c) => L([`{you}、その ${v}、描きたくなる形だな。`, `${c.ja}って、その人のシルエットを決めるんだよね。`], [`{you}, that ${v} has a shape I want to draw.`, `Your ${c.en} really defines your silhouette.`]),
-      (v) => L([`あ、動かないで…`, `その ${v}、いま一枚スケッチしたくなった。`], [`Oh, hold still…`, `That ${v} — I need a quick sketch.`]),
+      (v, c) => L([`{you}、その ${v}、写真映えするね。`, `${c.ja}って、写真だといちばん目に入るところなんだ。`], [`{you}, that ${v} would look great in a photo.`, `In photos, your ${c.en} is the first thing people notice.`]),
+      (v) => L([`あ、動かないで…`, `その ${v}、いま一枚撮りたくなった。`], [`Oh, hold still…`, `That ${v} — I need a quick shot.`]),
     ],
     gossip: [
-      (v, n, p) => L([`さっき${p.ja}のあたりで、${n} をスケッチしたんだ。`, `${v} の形が、すごく描きがいがあった。`], [`I sketched ${n} near ${p.en} earlier.`, `That ${v} was so fun to draw.`]),
+      (v, n, p) => L([`さっき${p.ja}のあたりで、${n} の写真を撮らせてもらったんだ。`, `${v} が、すごく写真映えしてた。`], [`I got to photograph ${n} near ${p.en} earlier.`, `That ${v} looked great on camera.`]),
       (v, n, p) => L([`${n} の ${v}、見た？`, `${p.ja}のほうにいたよ。色の組み合わせがきれいなんだ。`], [`Did you see ${n}’s ${v}?`, `They were near ${p.en}. Beautiful color combo.`]),
     ],
     star: [
-      (v, c) => L([`今日の主役の {star}、${v} なんだ。`, `銅像だと、${c.ja}の形がよく分かるんだよね。`], [`Today’s star {star} has the ${v}.`, `As a statue, you can really see the shape of the ${c.en}.`]),
-      (v) => L([`{star} の銅像、${v} のところを三回描いたよ。`, `まだ納得いってないけどね。`], [`I’ve drawn the ${v} on the {star} statue three times.`, `Still not happy with it.`]),
+      (v, c) => L([`今日の主役の {star}、${v} なんだ。`, `銅像だと、${c.ja}の形がよく写るんだよね。`], [`Today’s star {star} has the ${v}.`, `As a statue, the ${c.en} really shows up in photos.`]),
+      (v) => L([`{star} の銅像、${v} がきれいに写る角度を探してるんだ。`, `まだ見つかってないけどね。`], [`I’m hunting for the angle where the ${v} on the {star} statue looks best.`, `Haven’t found it yet.`]),
     ],
     self: [
-      (v, c) => L([`ボクの ${v}、自分でスケッチしてみたことがあるんだ。`, `自分の${c.ja}を描くのって、意外とむずかしいんだよ。`], [`I tried sketching my own ${v} once.`, `Drawing your own ${c.en} is harder than you’d think.`]),
-      (v) => L([`この ${v}、色が気に入ってるんだ。`, `光の加減で、毎回ちがって見えるんだよね。`], [`I love the color of this ${v}.`, `It looks different every time the light changes.`]),
+      (v, c) => L([`ボクの ${v}、自撮りするとけっこう目立つんだ。`, `自分の${c.ja}を撮るのって、意外とむずかしいんだよ。`], [`My ${v} really stands out in selfies.`, `Photographing your own ${c.en} is harder than you’d think.`]),
+      (v) => L([`この ${v}、色が気に入ってるんだ。`, `光の加減で、写真に撮るたびにちがって見えるんだよね。`], [`I love the color of this ${v}.`, `It looks different in every photo, depending on the light.`]),
     ],
   },
   stylish: {
@@ -181,7 +183,7 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
   explorer: {
     look: [
       (v, c) => L([`{you}、その ${v}、旅に似合いそうだね。`, `${c.ja}は、遠くから仲間を見つける目印になるんだ。`], [`{you}, that ${v} looks made for travel.`, `A good ${c.en} helps friends spot you from far away.`]),
-      (v) => L([`お、今日は ${v} なんだ。`, `地図に、きみの目印として書いておくよ。`], [`Oh, the ${v} today.`, `I’ll mark it on my map as your landmark.`]),
+      (v) => L([`お、今日は ${v} なんだ。`, `それなら、遠くからでもきみだってすぐ分かるね。`], [`Oh, the ${v} today.`, `I’d spot you from far away with that.`]),
     ],
     gossip: [
       (v, n, p) => L([`さっき${p.ja}のあたりで、${n} とすれ違ったよ。`, `${v} が目印になって、遠くからでも分かった。`], [`I passed ${n} near ${p.en} earlier.`, `That ${v} made them easy to spot from afar.`]),

@@ -8,12 +8,6 @@ const s = scriptMaker('sisterly')
 
 export const SISTERLY_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['お、見ない顔だね。うちは {me}。', '{you} っていうの？ 困ったことがあったら、なんでもうちに言いな。'],
-    ['Oh, new face. I’m {me}.', 'You’re {you}? If anything’s bugging you, come find me.']),
-  s('first-2', 'greetFirst',
-    ['はじめまして、{me} だよ。', 'このへんの子の面倒、なんだかんだ見ちゃうんだよね。よろしく。'],
-    ['Hey there, I’m {me}.', 'Somehow I always end up looking out for everyone around here. Nice to meet you.']),
 
   s('again-morning', 'greetAgain', ['おはよ、{you}。', '朝ごはん、ちゃんと食べてきた？'], ['Morning, {you}.', 'Did you eat breakfast? A real one?'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['お、{you}。今日も元気そうで安心した。'], ['Oh, {you}. Good to see you looking well.'], { times: ['noon'] }),
@@ -160,4 +154,10 @@ export const SISTERLY_SCRIPTS = [
   s('friend-honest', 'friend',
     ['{you}、うちね、ちっちゃいころからお姉ちゃんぶるのがくせなんだ。', 'でも {you} の前だと、なんだか素直になれるの。', '…ありがとね。'],
     ['{you}, I’ve been acting like everyone’s big sister since I was little.', 'But around you, I can just be myself.', '…Thanks.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['お、{you}。元気にしてた？'], ['Oh, {you}. Been doing okay?']),
+  s('again-more-2', 'greetAgain', ['{you}、来たね。今日も無理しないでね。'], ['There you are, {you}. Don’t push yourself today, okay?']),
+  s('again-more-3', 'greetAgain', ['あら、{you}。ちょうど休けいしてたとこ。'], ['Oh, {you}. I was just taking a break.']),
+  s('again-more-4', 'greetAgain', ['{you}。顔色いいね、安心した。'], ['{you}. You look well. That’s a relief.']),
 ]

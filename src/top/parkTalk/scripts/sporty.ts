@@ -8,12 +8,6 @@ const s = scriptMaker('sporty')
 
 export const SPORTY_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['よっ！ 見ない顔だな。オレは {me}！', 'パークじゅう走り回ってるから、またすぐ会うと思うぜ！'],
-    ['Yo! New face! I’m {me}!', 'I run laps all over this park, so you’ll see me around!']),
-  s('first-2', 'greetFirst',
-    ['お、{you} っていうのか！ オレ、{me}。', 'いい足してそうだな。今度いっしょに走ろうぜ！'],
-    ['Oh, you’re {you}? I’m {me}.', 'You look like you’ve got some speed. Let’s race sometime!']),
 
   s('again-morning', 'greetAgain', ['おはよう、{you}！', '朝のランニング、もう三周したぜ！'], ['Morning, {you}!', 'Already did three laps this morning!'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['よっ、{you}！ 調子はどうだ？'], ['Yo, {you}! How’s it going?'], { times: ['noon'] }),
@@ -160,4 +154,10 @@ export const SPORTY_SCRIPTS = [
   s('friend-dream', 'friend',
     ['{you}、オレの夢、聞いてくれるか？', 'いつか、パークじゅうの全部のアトラクションで一位になるんだ！', 'そのときは、いちばんに {you} に知らせるぜ！'],
     ['{you}, wanna hear my dream?', 'Someday I’m gonna be number one at every attraction in the park!', 'You’ll be the first to know when I do!']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['{you}！ 今日も元気そうだな！'], ['{you}! Looking full of energy today!']),
+  s('again-more-2', 'greetAgain', ['よっ、{you}！ 一周してきたところだぜ！'], ['Yo, {you}! Just finished a lap!']),
+  s('again-more-3', 'greetAgain', ['{you}、いいところに来た！ ちょっと聞いてくれよ！'], ['{you}, perfect timing! Listen to this!']),
+  s('again-more-4', 'greetAgain', ['おーい、{you}！ こっちこっち！'], ['Hey, {you}! Over here!']),
 ]

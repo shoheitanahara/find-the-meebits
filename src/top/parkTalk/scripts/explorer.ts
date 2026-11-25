@@ -1,5 +1,5 @@
 /**
- * 冒険家：一人称「わたし」。さっぱりした話し方で、パークの端から端まで歩いて地図を描いている。
+ * 冒険家：一人称「わたし」。さっぱりした話し方で、パークの端から端まで、全部の道を歩いている。
  * おしゃれ（わたし・服の話）や物知り（ていねい語）とは、旅・道・発見の話で分ける。
  * EN: brisk, outdoorsy, always mid-journey.
  */
@@ -9,12 +9,6 @@ const s = scriptMaker('explorer')
 
 export const EXPLORER_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['やあ、はじめまして。わたしは {me}。', 'パークの端から端まで歩いて、地図を描いてるんだ。よろしくね、{you}。'],
-    ['Hey, nice to meet you. I’m {me}.', 'I’m walking every corner of the park and mapping it. Good to meet you, {you}.']),
-  s('first-2', 'greetFirst',
-    ['お、新しい顔だね。わたし、{me}。', 'さっき山の向こうから戻ってきたところ。今日もいい道を見つけたよ。'],
-    ['Oh, a new face. I’m {me}.', 'Just got back from beyond the mountains. Found a nice path today.']),
 
   s('again-morning', 'greetAgain', ['おはよう、{you}。', '朝いちばんに歩くと、まだ誰も歩いてない道があるんだ。'], ['Morning, {you}.', 'Get out early enough and some paths are still untouched.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['やあ、{you}。', '今日はもう三つのエリアを回ってきたよ。'], ['Hey, {you}.', 'Already been through three areas today.'], { times: ['noon'] }),
@@ -26,13 +20,13 @@ export const EXPLORER_SCRIPTS = [
 
   s('friend-1', 'greetFriend', ['{you}！ 会えてうれしいよ。', '今日の発見、聞いてくれる？'], ['{you}! Great to see you.', 'Want to hear what I found today?']),
   s('friend-2', 'greetFriend', ['お、{you}。', 'きみに会うと、旅の途中で仲間に会えた気分になるんだ。'], ['Oh, {you}.', 'Running into you feels like meeting a friend on the road.']),
-  s('friend-3', 'greetFriend', ['{you}。', 'わたしの地図に、きみに会えた場所の印をつけてるんだよ。'], ['{you}.', 'I mark every spot where I run into you on my map.']),
+  s('friend-3', 'greetFriend', ['{you}。', 'きみに会えた場所、ぜんぶ覚えてるんだよ。'], ['{you}.', 'I remember every spot where I’ve run into you.']),
   s('friend-4', 'greetFriend', ['やあ、相棒の {you}。', '…なんて、ちょっと言ってみたかった。'], ['Hey there, partner {you}.', '…I just wanted to try saying that.']),
 
   // ── どこでも話す話題 ─────────────────────
   s('map', 'topic',
-    ['わたしの地図、もうすぐパーク全部がうまるんだ。', 'でもね、うめたと思ったら、まだ歩いてない場所がまた見つかる。', 'それが楽しいんだよ。'],
-    ['My map of the park is almost complete.', 'But every time I think it’s done, I find another spot I haven’t walked.', 'That’s the fun of it.']),
+    ['パークの道、もうすぐ全部歩きおわるんだ。', 'でもね、歩ききったと思ったら、まだ通ってない道がまた見つかる。', 'それが楽しいんだよ。'],
+    ['I’ve almost walked every path in the park.', 'But just when I think I’m done, I find another one I haven’t taken.', 'That’s the fun of it.']),
   s('bridges', 'topic',
     ['橋をわたるときって、ちょっとわくわくしない？', '向こうに何があるか分かってても、毎回少しだけ冒険の気分になるんだ。'],
     ['Don’t you get a little thrill crossing a bridge?', 'Even when I know what’s on the other side, it always feels like a small adventure.']),
@@ -72,8 +66,8 @@ export const EXPLORER_SCRIPTS = [
     ['Jerry Mountain is all about following the glowing blocks.', 'In the dark, the next step lights up softly ahead of you.', 'Like a trail marker. I love it.'],
     { zones: ['mountain'] }),
   s('culture-runway', 'topic',
-    ['ランウェイ、旅の途中で寄ってみたんだ。', 'ショーのテーマカラーが毎日変わるから、何色だったか地図にメモしてるの。', '今日の色も、ちゃんと書いておいたよ。'],
-    ['I stopped by the Runway on my way through.', 'The show’s theme color changes daily, so I note it down on my map.', 'Got today’s written down too.'],
+    ['ランウェイ、旅の途中で寄ってみたんだ。', 'ショーのテーマカラーが毎日変わるから、通るたびに何色か確かめてるの。', '今日の色も、ちゃんと見てきたよ。'],
+    ['I stopped by the Runway on my way through.', 'The show’s theme color changes daily, so I check it every time I pass.', 'Saw today’s too.'],
     { zones: ['culture'] }),
   s('culture-about', 'topic',
     ['カルチャーエリアに、Meebits のことが読める看板があるでしょ。', 'わたし、ああいうのを読むと、旅の目的地が増えるんだ。'],
@@ -134,11 +128,11 @@ export const EXPLORER_SCRIPTS = [
 
   // ── なかよしの話 ─────────────────────────
   s('friend-lost', 'friend',
-    ['{you}、わたしね、ほんとは方向音痴だったんだ。', '迷ってばかりだったから、地図を描きはじめたの。', 'いまじゃ、パークでいちばん道にくわしいかもね。'],
-    ['{you}, I used to have a terrible sense of direction.', 'I got lost so often that I started drawing maps.', 'Now I might know these paths better than anyone.']),
+    ['{you}、わたしね、ほんとは方向音痴だったんだ。', '迷ってばかりだったから、とにかく毎日歩くことにしたの。', 'いまじゃ、パークでいちばん道にくわしいかもね。'],
+    ['{you}, I used to have a terrible sense of direction.', 'I got lost so often that I decided to just walk every day.', 'Now I might know these paths better than anyone.']),
   s('friend-marks', 'friend',
-    ['わたしの地図にはね、きれいな場所だけじゃなくて、きみと話した場所にも印があるんだ。', '{you} に会えた場所は、ぜんぶお気に入りの場所だよ。'],
-    ['My map doesn’t just mark pretty spots — it marks where we’ve talked, too.', 'Every place I’ve met you, {you}, is a favorite of mine.']),
+    ['きれいな場所だけじゃなくて、きみと話した場所も、ちゃんと覚えてるんだ。', '{you} に会えた場所は、ぜんぶお気に入りの場所だよ。'],
+    ['I don’t just remember the pretty spots — I remember where we’ve talked, too.', 'Every place I’ve met you, {you}, is a favorite of mine.']),
   s('friend-promise', 'friend',
     ['いつか、まだ誰も知らないエリアができたら…', '{you}、いっしょに最初に歩いてくれる？', '約束だよ。'],
     ['If a new area ever opens that no one’s seen yet…', 'Will you be the one to walk it with me first, {you}?', 'It’s a promise.']),
@@ -148,8 +142,8 @@ export const EXPLORER_SCRIPTS = [
     ['今日の噴水の銅像、{star} なんだって。', 'わたし、毎朝銅像を見てから旅に出るんだ。', '今日の主役に、いってきますって言ってきたよ。'],
     ['The fountain statue today is {star}.', 'I always check the statue before I head out each morning.', 'Said “see you later” to today’s star.']),
   s('trait', 'trait',
-    ['今日は {trait} の子が多いね。', '歩きながら、どのエリアに {trait} が多いか数えてるんだ。', '地図に書きこんだら、ちょっとした宝の地図みたいになったよ。'],
-    ['Lots of {trait} out today.', 'I’ve been counting which areas have the most {trait} as I walk.', 'Marked on my map, it looks a bit like a treasure map.']),
+    ['今日は {trait} の子が多いね。', '歩きながら、どのエリアに {trait} が多いか数えてるんだ。', '{trait} の多いところをたどって歩くと、ちょっとした宝探しみたいになるよ。'],
+    ['Lots of {trait} out today.', 'I’ve been counting which areas have the most {trait} as I walk.', 'Following the {trait} around the park feels like a little treasure hunt.']),
   s('star-self', 'starSelf',
     ['…じつはね、今日の噴水の銅像、わたしなんだ。', 'いつもは旅に出る側なのに、今日はみんなが会いに来てくれる。', 'ちょっとふしぎな気分だよ。'],
     ['…Actually, the fountain statue today is me.', 'I’m usually the one setting out, but today everyone’s coming to see me.', 'Feels a little strange.']),
@@ -159,4 +153,10 @@ export const EXPLORER_SCRIPTS = [
   s('winter', 'winter',
     ['冬のパークは、空気がきりっとしてて歩きやすいんだ。', '遠くの灯りまでよく見えるから、道に迷いにくいしね。', '{you} も、あったかくして歩こう。'],
     ['The park in winter has crisp air. Great for walking.', 'You can see lights far off, so it’s harder to get lost.', 'Bundle up and let’s keep walking, {you}.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['やあ、{you}。今日はどこを歩いてきたの？'], ['Hey, {you}. Where have you walked today?']),
+  s('again-more-2', 'greetAgain', ['{you}！ ちょうど一周してきたところ。'], ['{you}! I just finished a full loop.']),
+  s('again-more-3', 'greetAgain', ['お、{you}。こんなところで会うなんて、いい日だね。'], ['Oh, {you}. Running into you here — good day.']),
+  s('again-more-4', 'greetAgain', ['{you}、今日も歩いてる？ わたしもだよ。'], ['Out walking again, {you}? Me too.']),
 ]

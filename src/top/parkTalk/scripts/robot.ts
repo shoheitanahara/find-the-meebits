@@ -9,12 +9,6 @@ const s = scriptMaker('robot')
 
 export const ROBOT_SCRIPTS = [
   // ── あいさつ ─────────────────────────────
-  s('first-1', 'greetFirst',
-    ['ピピッ。新シイ来場者ヲ検知シマシタ。', '本機ハ {me}。登録完了。ヨロシク、{you}。'],
-    ['BEEP. New visitor detected.', 'This unit is {me}. Registration complete. Greetings, {you}.']),
-  s('first-2', 'greetFirst',
-    ['…起動シマシタ。', 'ハジメマシテ。本機ハ {me}。パーク内ヲ巡回シテイマス。'],
-    ['…Booting up.', 'Nice to meet you. This unit is {me}. Currently patrolling the park.']),
 
   s('again-morning', 'greetAgain', ['オハヨウゴザイマス、{you}。', '本日ノ稼働ヲ開始シマシタ。'], ['Good morning, {you}.', 'Daily operations have begun.'], { times: ['morning'] }),
   s('again-noon', 'greetAgain', ['コンニチハ、{you}。', '現在、正午付近。バッテリー残量ハ良好デス。'], ['Hello, {you}.', 'Time: around noon. Battery level: good.'], { times: ['noon'] }),
@@ -159,4 +153,10 @@ export const ROBOT_SCRIPTS = [
   s('winter', 'winter',
     ['気温ノ低下ヲ検知。', '本機ノ関節ガ、少シカタクナリマス。', '{you} モ、アタタカクシテクダサイ。'],
     ['Temperature drop detected.', 'My joints stiffen slightly.', 'Please stay warm too, {you}.']),
+
+  // ── 再会のあいさつ（追加）──────────────
+  s('again-more-1', 'greetAgain', ['ピピッ。{you}、コンニチハ。'], ['BEEP. Hello, {you}.']),
+  s('again-more-2', 'greetAgain', ['{you} ヲ確認。本日モ、元気デスカ？'], ['{you} confirmed. Are you well today?']),
+  s('again-more-3', 'greetAgain', ['…ア、{you}。待機モードカラ、復帰シマシタ。'], ['…Oh, {you}. Resuming from standby.']),
+  s('again-more-4', 'greetAgain', ['ピピ。{you}。会エテ、ウレシイ、ト出力シマス。'], ['BEEP. {you}. Output: happy to see you.']),
 ]

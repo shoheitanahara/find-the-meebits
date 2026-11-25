@@ -3,6 +3,7 @@
  * OpenSea の出品番号 = Meebit の番号なので、パークと同じトレイトデータを引ける。
  */
 import { getCachedMeebitTraits, type MeebitTraitMap } from '../../data/meebitTraits'
+import { traitDisplayName } from '../../data/traitDisplayName'
 import type { ListedMeebit } from '../../opensea/types'
 
 export type Phrase = { ja: string; en: string }
@@ -24,25 +25,27 @@ export function getTraitHighlights(traits: MeebitTraitMap | null): TraitHighligh
       en: `A rare ${traits.Type} — as a sculpture, its form really comes through`,
     })
   }
-  const hat = has(traits, 'Hat')
+  // 色＋値＋ジャンルまで言う（例 Gray Backwards Cap / Yellow Canvas Shoes）
+  const name = (key: string) => traitDisplayName(traits, key)
+  const hat = name('Hat')
   if (hat) out.push({ key: 'Hat', ja: `頭の ${hat} が、遠くからでも目を引く`, en: `the ${hat} catches the eye even from across the room` })
-  const overshirt = has(traits, 'Overshirt')
+  const overshirt = name('Overshirt')
   if (overshirt) out.push({ key: 'Overshirt', ja: `羽織った ${overshirt} が、全体に奥行きを出している`, en: `the ${overshirt} layered on top gives the figure depth` })
-  const glasses = has(traits, 'Glasses')
-  if (glasses) out.push({ key: 'Glasses', ja: `眼鏡（${glasses}）が、表情をぐっと引きしめている`, en: `its eyewear — ${glasses} — sharpens the whole expression` })
-  const necklace = has(traits, 'Necklace')
+  const glasses = name('Glasses')
+  if (glasses) out.push({ key: 'Glasses', ja: `${glasses} が、表情をぐっと引きしめている`, en: `the ${glasses} bring focus to the whole face` })
+  const necklace = name('Necklace')
   if (necklace) out.push({ key: 'Necklace', ja: `胸もとの ${necklace} が、さりげないアクセント`, en: `the ${necklace} adds a quiet accent at the chest` })
-  const earring = has(traits, 'Earring')
+  const earring = name('Earring')
   if (earring) out.push({ key: 'Earring', ja: `耳もとの ${earring} が、横顔に表情をつけている`, en: `the profile comes alive with ${earring}` })
   const motif = has(traits, 'Tattoo Motif')
   if (motif) out.push({ key: 'Tattoo Motif', ja: `${motif} のタトゥーが、静かに個性を語っている`, en: `the ${motif} tattoo quietly speaks to its character` })
   const jersey = has(traits, 'Jersey Number')
   if (jersey) out.push({ key: 'Jersey Number', ja: `背番号 ${jersey} が、名札みたいになっている`, en: `jersey number ${jersey} works like a name tag` })
-  const hair = !hat ? has(traits, 'Hair Style') : null
-  if (hair) out.push({ key: 'Hair Style', ja: `${hair} の髪型が、印象を決めている`, en: `the ${hair} hairstyle sets the tone` })
-  const shirt = has(traits, 'Shirt')
+  const hair = !hat ? name('Hair Style') : null
+  if (hair) out.push({ key: 'Hair Style', ja: `${hair} が、印象を決めている`, en: `the ${hair} sets the tone` })
+  const shirt = name('Shirt')
   if (shirt) out.push({ key: 'Shirt', ja: `${shirt} がシンプルに効いている`, en: `the ${shirt} keeps it simple and strong` })
-  const shoes = has(traits, 'Shoes')
+  const shoes = name('Shoes')
   if (shoes) out.push({ key: 'Shoes', ja: `足もとの ${shoes} まで、きちんと見てほしい`, en: `don’t miss the ${shoes} at the feet` })
   return out
 }
@@ -77,13 +80,14 @@ export function describePedestalSpot(index: number): Phrase {
 /** 2体に共通するトレイトの言い方 */
 export const SHARED_TRAIT_KEYS: Array<{ key: string; ja: (v: string) => string; en: (v: string) => string }> = [
   { key: 'Hat', ja: (v) => `${v} をかぶってる`, en: (v) => `wear a ${v}` },
-  { key: 'Glasses', ja: (v) => `同じ眼鏡（${v}）をかけてる`, en: (v) => `wear the same eyewear (${v})` },
+  { key: 'Glasses', ja: (v) => `${v} をかけてる`, en: (v) => `wear ${v}` },
   { key: 'Overshirt', ja: (v) => `${v} を羽織ってる`, en: (v) => `wear a ${v}` },
-  { key: 'Hair Style', ja: (v) => `${v} の髪型なんだ`, en: (v) => `have the ${v} hairstyle` },
+  { key: 'Hair Style', ja: (v) => `${v} なんだ`, en: (v) => `have ${v}` },
   { key: 'Necklace', ja: (v) => `${v} をつけてる`, en: (v) => `wear a ${v}` },
   { key: 'Earring', ja: (v) => `${v} をつけてる`, en: (v) => `wear ${v}` },
   { key: 'Shirt', ja: (v) => `${v} を着てる`, en: (v) => `wear a ${v}` },
   { key: 'Shoes', ja: (v) => `${v} をはいてる`, en: (v) => `wear ${v}` },
+  { key: 'Pants', ja: (v) => `${v} をはいてる`, en: (v) => `wear ${v}` },
 ]
 
 const COLOR_JA: Record<string, string> = {

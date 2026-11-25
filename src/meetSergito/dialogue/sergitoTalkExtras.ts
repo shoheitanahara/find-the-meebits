@@ -7,19 +7,7 @@
 import type { ParkTimeOfDay } from '../../top/parkTimeOfDay'
 import type { LocalizedText } from './sergitoDialogueData'
 
-/** はじめて話すとき */
-export const SERGITO_FIRST_MEETING: LocalizedText[][] = [
-  [
-    { ja: 'やあ、はじめまして。ここは海辺の工房だよ。', en: 'Hey, nice to meet you. Welcome to the beach workshop.' },
-    { ja: 'Sergito っていうんだ。木を削ったり、フィギュアを作ったりしてる。', en: 'I’m Sergito. I carve wood and make figures here.' },
-  ],
-  [
-    { ja: 'いらっしゃい。はじめて見る顔だね。', en: 'Welcome in. I don’t think I’ve seen you before.' },
-    { ja: 'Sergito だよ。せっかくだから、その姿をよく見せてもらおうかな。', en: 'I’m Sergito. Since you’re here, let me get a good look at you.' },
-  ],
-]
-
-/** 2〜4 回目（時間帯つきは優先） */
+/** ふだんのあいさつ（時間帯つきは優先） */
 export const SERGITO_GREET_AGAIN: Array<{ text: LocalizedText; times?: ParkTimeOfDay[] }> = [
   { text: { ja: 'おはよう。朝の工房は、木の香りがいちばん強いんだ。', en: 'Morning. The workshop smells most like wood first thing.' }, times: ['morning'] },
   { text: { ja: 'やあ、いらっしゃい。ちょうど手を休めようと思ってたところ。', en: 'Hey, welcome. I was just about to rest my hands.' }, times: ['noon'] },
