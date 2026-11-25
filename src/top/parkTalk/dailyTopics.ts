@@ -169,16 +169,16 @@ const T: Record<PersonalityId, DailyTemplates> = {
     season: (s) => L([`${s.ja}になりましたね。`, `季節が変わっても、パークの楽しみ方はつきませんね。`], [`It’s ${s.en} now.`, `Whatever the season, the park never runs out of things to enjoy.`]),
   },
   robot: {
-    holiday: (g, n) => L([`${g.ja}…ト、出力シマス、{you}。`, `本日ハ、${n.ja}。カレンダーデータ、確認済ミ。`], [`${g.en}… Output complete, {you}.`, `Today: ${n.en}. Calendar data confirmed.`]),
-    runway: (c) => L([`本日ノランウェイ：テーマカラー ${c.ja}。`, `本機ノボディニモ、${c.ja}ヲ塗装スルカ、検討中。`], [`Today’s Runway: theme color ${c.en}.`, `Considering painting this unit ${c.en}.`]),
-    sighting: (t, n, z) => L([`情報：${z.ja}ニ、${t} ノ ${n} ヲ確認。`, `会イニ行クコトヲ、推奨シマス。`], [`Info: ${n}, type ${t}, confirmed in ${z.en}.`, `Recommend paying a visit.`]),
+    holiday: (g, n) => L([`${g.ja}…と、出力します、{you}。`, `本日は、${n.ja}。カレンダーデータ、確認済み。`], [`${g.en}… Output complete, {you}.`, `Today: ${n.en}. Calendar data confirmed.`]),
+    runway: (c) => L([`本日のランウェイ：テーマカラー ${c.ja}。`, `本機のボディにも、${c.ja}を塗装するか、検討中。`], [`Today’s Runway: theme color ${c.en}.`, `Considering painting this unit ${c.en}.`]),
+    sighting: (t, n, z) => L([`情報：${z.ja}に、${t} の ${n} を確認。`, `会いに行くことを、推奨します。`], [`Info: ${n}, type ${t}, confirmed in ${z.en}.`, `Recommend paying a visit.`]),
     market: (p, s) => s > 0
-      ? L([`OpenSea マーケット：48時間ノ売却数、${s}。`, `ロボットノ作品ガ含マレテイルカハ、不明デス。`], [`OpenSea Market: ${s} sold in 48 hours.`, `Whether any robot pieces were among them: unknown.`])
-      : L([`OpenSea マーケット：現在ノ展示数、${p}。`, `全テ見ルニハ、約${Math.max(1, Math.round(p / 6))}分ト推定シマス。`], [`OpenSea Market: ${p} pieces on display.`, `Estimated viewing time: about ${Math.max(1, Math.round(p / 6))} minutes.`]),
+      ? L([`OpenSea マーケット：48時間の売却数、${s}。`, `ロボットの作品が含まれているかは、不明です。`], [`OpenSea Market: ${s} sold in 48 hours.`, `Whether any robot pieces were among them: unknown.`])
+      : L([`OpenSea マーケット：現在の展示数、${p}。`, `全て見るには、約${Math.max(1, Math.round(p / 6))}分と推定します。`], [`OpenSea Market: ${p} pieces on display.`, `Estimated viewing time: about ${Math.max(1, Math.round(p / 6))} minutes.`]),
     weekday: (d, w) => w
-      ? L([`本日ハ${d.ja}。週末モードデス。`], [`Today: ${d.en}. Weekend mode.`])
-      : L([`本日ハ${d.ja}。通常稼働中デス。`], [`Today: ${d.en}. Normal operation.`]),
-    season: (s) => L([`現在ノ季節：${s.ja}。`, `外気温ノ変化ニ、適応中デス。`], [`Current season: ${s.en}.`, `Adapting to the temperature change.`]),
+      ? L([`本日は${d.ja}。週末モードです。`], [`Today: ${d.en}. Weekend mode.`])
+      : L([`本日は${d.ja}。通常稼働中です。`], [`Today: ${d.en}. Normal operation.`]),
+    season: (s) => L([`現在の季節：${s.ja}。`, `外気温の変化に、適応中です。`], [`Current season: ${s.en}.`, `Adapting to the temperature change.`]),
   },
 }
 

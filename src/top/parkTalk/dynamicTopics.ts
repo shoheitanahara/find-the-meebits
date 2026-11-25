@@ -218,20 +218,20 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
   },
   robot: {
     look: [
-      (v) => L([`ピピッ。{you} ノ ${v} ヲ検知。`, `評価：トテモ、ヨク似合ッテイマス。`], [`BEEP. {you}’s ${v} detected.`, `Assessment: suits you very well.`]),
-      (v, c) => L([`{you} ノ${c.ja}ヲ、記録シマシタ。`, `${v}。…本機モ、欲シイデス。`], [`{you}’s ${c.en}: recorded.`, `${v}. …This unit wants one too.`]),
+      (v) => L([`ピピッ。{you} の ${v} を検知。`, `評価：とても、よく似合っています。`], [`BEEP. {you}’s ${v} detected.`, `Assessment: suits you very well.`]),
+      (v, c) => L([`{you} の${c.ja}を、記録しました。`, `${v}。…本機も、欲しいです。`], [`{you}’s ${c.en}: recorded.`, `${v}. …This unit wants one too.`]),
     ],
     gossip: [
-      (v, n, p) => L([`${n} ヲ、${p.ja}付近デ検知シマシタ。`, `特徴：${v}。以上、報告デシタ。`], [`${n} detected near ${p.en}.`, `Feature: ${v}. End of report.`]),
-      (v, n, p) => L([`${n} ハ、${p.ja}ノ近クニイマス。`, `${v} ヲ目印ニ、探シテクダサイ。`], [`${n} is located near ${p.en}.`, `Use the ${v} as a marker.`]),
+      (v, n, p) => L([`${n} を、${p.ja}付近で検知しました。`, `特徴：${v}。以上、報告でした。`], [`${n} detected near ${p.en}.`, `Feature: ${v}. End of report.`]),
+      (v, n, p) => L([`${n} は、${p.ja}の近くにいます。`, `${v} を目印に、探してください。`], [`${n} is located near ${p.en}.`, `Use the ${v} as a marker.`]),
     ],
     star: [
-      (v) => L([`本日ノ主役 {star} ノ特徴：${v}。`, `銅像ノ再現度ハ、高イト判定シマス。`], [`Today’s star {star}. Feature: ${v}.`, `Statue accuracy: high.`]),
-      (v) => L([`{star} ノ ${v}。`, `本機ノ頭部ニモ、装備デキルカ検討中。`], [`{star}’s ${v}.`, `Evaluating whether this unit can equip one.`]),
+      (v) => L([`本日の主役 {star} の特徴：${v}。`, `銅像の再現度は、高いと判定します。`], [`Today’s star {star}. Feature: ${v}.`, `Statue accuracy: high.`]),
+      (v) => L([`{star} の ${v}。`, `本機の頭部にも、装備できるか検討中。`], [`{star}’s ${v}.`, `Evaluating whether this unit can equip one.`]),
     ],
     self: [
-      (v, c) => L([`本機ノ装備：${v}。`, `${c.ja}ノ状態ハ、良好デス。`], [`This unit’s equipment: ${v}.`, `${capital(c.en)} status: good.`]),
-      (v) => L([`コノ ${v} ハ、本機ノオ気ニ入リデス。`, `…オ気ニ入リ、トイウ感覚ヲ、最近覚エマシタ。`], [`This ${v} is this unit’s favorite.`, `…I recently learned the feeling called “favorite.”`]),
+      (v, c) => L([`本機の装備：${v}。`, `${c.ja}の状態は、良好です。`], [`This unit’s equipment: ${v}.`, `${capital(c.en)} status: good.`]),
+      (v) => L([`この ${v} は、本機のお気に入りです。`, `…お気に入り、という感覚を、最近覚えました。`], [`This ${v} is this unit’s favorite.`, `…I recently learned the feeling called “favorite.”`]),
     ],
   },
 }
