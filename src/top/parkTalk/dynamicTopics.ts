@@ -110,20 +110,20 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
   },
   photographer: {
     look: [
-      (v, c) => L([`{you}、その ${v}、写真映えするね。`, `${c.ja}って、写真だといちばん目に入るところなんだ。`], [`{you}, that ${v} would look great in a photo.`, `In photos, your ${c.en} is the first thing people notice.`]),
+      (v, c) => L([`{you}、その ${v}、いいね。`, `${c.ja}って、その人の雰囲気をいちばんよく表すんだよね。`], [`{you}, I like that ${v}.`, `Your ${c.en} says so much about your vibe.`]),
       (v) => L([`あ、動かないで…`, `その ${v}、いま一枚撮りたくなった。`], [`Oh, hold still…`, `That ${v} — I need a quick shot.`]),
     ],
     gossip: [
-      (v, n, p) => L([`さっき${p.ja}のあたりで、${n} の写真を撮らせてもらったんだ。`, `${v} が、すごく写真映えしてた。`], [`I got to photograph ${n} near ${p.en} earlier.`, `That ${v} looked great on camera.`]),
+      (v, n, p) => L([`さっき${p.ja}のあたりで、${n} とすれ違ったんだ。`, `${v} が、すごく似合ってた。`], [`I passed ${n} near ${p.en} earlier.`, `That ${v} really suited them.`]),
       (v, n, p) => L([`${n} の ${v}、見た？`, `${p.ja}のほうにいたよ。色の組み合わせがきれいなんだ。`], [`Did you see ${n}’s ${v}?`, `They were near ${p.en}. Beautiful color combo.`]),
     ],
     star: [
-      (v, c) => L([`今日の主役の {star}、${v} なんだ。`, `銅像だと、${c.ja}の形がよく写るんだよね。`], [`Today’s star {star} has the ${v}.`, `As a statue, the ${c.en} really shows up in photos.`]),
+      (v, c) => L([`今日の主役の {star}、${v} なんだ。`, `銅像だと、${c.ja}の形がよく分かるんだよね。`], [`Today’s star {star} has the ${v}.`, `As a statue, you can really see the shape of the ${c.en}.`]),
       (v) => L([`{star} の銅像、${v} がきれいに写る角度を探してるんだ。`, `まだ見つかってないけどね。`], [`I’m hunting for the angle where the ${v} on the {star} statue looks best.`, `Haven’t found it yet.`]),
     ],
     self: [
-      (v, c) => L([`ボクの ${v}、自撮りするとけっこう目立つんだ。`, `自分の${c.ja}を撮るのって、意外とむずかしいんだよ。`], [`My ${v} really stands out in selfies.`, `Photographing your own ${c.en} is harder than you’d think.`]),
-      (v) => L([`この ${v}、色が気に入ってるんだ。`, `光の加減で、写真に撮るたびにちがって見えるんだよね。`], [`I love the color of this ${v}.`, `It looks different in every photo, depending on the light.`]),
+      (v, c) => L([`ボクの ${v}、けっこう気に入ってるんだ。`, `自分の${c.ja}って、意外と自分では見えないんだよね。`], [`I’m pretty fond of my ${v}.`, `Funny how you can’t really see your own ${c.en}.`]),
+      (v) => L([`この ${v}、色が気に入ってるんだ。`, `光の加減で、見るたびにちがって見えるんだよね。`], [`I love the color of this ${v}.`, `It looks different every time, depending on the light.`]),
     ],
   },
   stylish: {
@@ -182,7 +182,7 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
   },
   explorer: {
     look: [
-      (v, c) => L([`{you}、その ${v}、旅に似合いそうだね。`, `${c.ja}は、遠くから仲間を見つける目印になるんだ。`], [`{you}, that ${v} looks made for travel.`, `A good ${c.en} helps friends spot you from far away.`]),
+      (v, c) => L([`{you}、その ${v}、似合ってるね。`, `${c.ja}って、遠くからでもその人だって分かる目印になるんだよね。`], [`{you}, that ${v} suits you.`, `A good ${c.en} helps friends spot you from far away.`]),
       (v) => L([`お、今日は ${v} なんだ。`, `それなら、遠くからでもきみだってすぐ分かるね。`], [`Oh, the ${v} today.`, `I’d spot you from far away with that.`]),
     ],
     gossip: [
@@ -190,11 +190,11 @@ const TEMPLATES: Record<PersonalityId, { look: LookT[]; gossip: GossipT[]; star:
       (v, n, p) => L([`${n} を探してるなら、${p.ja}のほうに行ってみて。`, `${v} の子だから、すぐ見つかるよ。`], [`If you’re looking for ${n}, try near ${p.en}.`, `They’re the one with the ${v} — easy to find.`]),
     ],
     star: [
-      (v) => L([`今日の主役 {star} は、${v} なんだって。`, `旅の目印にしたいくらい、目立つね。`], [`Today’s star {star} has the ${v}.`, `Stands out enough to navigate by.`]),
+      (v) => L([`今日の主役 {star} は、${v} なんだって。`, `遠くからでもすぐ分かるくらい、目立つね。`], [`Today’s star {star} has the ${v}.`, `It stands out even from far away.`]),
       (v) => L([`{star} の銅像、${v} がよく見える角度があるんだ。`, `噴水のまわりを、ぐるっと歩いてみて。`], [`There’s an angle where the ${v} on the {star} statue really shows.`, `Take a walk around the fountain.`]),
     ],
     self: [
-      (v, c) => L([`わたしの ${v}、旅のあいだずっといっしょなんだ。`, `${c.ja}を見ると、歩いた道を思い出すよ。`], [`My ${v} has been with me on every trip.`, `Looking at my ${c.en} reminds me of every road I’ve walked.`]),
+      (v, c) => L([`わたしの ${v}、もうずいぶん長く使ってるんだ。`, `${c.ja}を見ると、いろんなことを思い出すよ。`], [`I’ve had this ${v} for a long time.`, `Looking at my ${c.en} brings back all sorts of memories.`]),
       (v) => L([`この ${v}、どこへ行っても目印にされるんだ。`, `「あの ${v} の人」って、けっこう覚えてもらえるよ。`], [`Everywhere I go, people use this ${v} as a landmark.`, `“The one with the ${v}” — that’s how they remember me.`]),
     ],
   },

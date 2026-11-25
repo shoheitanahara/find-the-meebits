@@ -97,15 +97,15 @@ const T: Record<PersonalityId, DailyTemplates> = {
     season: (s) => L([`${s.ja}か。`, `…季節が変わると、灯りの見え方も少し変わる。`], [`${capital(s.en)}.`, `…The lights look a little different every season.`]),
   },
   photographer: {
-    holiday: (g, n) => L([`${g.ja}、{you}！`, `${n.ja}の日のパーク、記念に撮っておかなきゃ。`], [`${g.en}, {you}!`, `I have to get some shots of the park on ${n.en}.`]),
-    runway: (c) => L([`今日のランウェイ、${c.ja}なんだ。`, `${c.ja}の日は、写真がいつもとちがう雰囲気になるんだよ。`], [`Today’s Runway is ${c.en}.`, `${c.en} days give the photos a whole different mood.`]),
-    sighting: (t, n, z) => L([`今日、${z.ja}に ${t} の ${n} が来てるんだって。`, `写真に撮りたいなあ。`], [`${n}, a ${t}, is in ${z.en} today.`, `I’d love to get a photo.`]),
+    holiday: (g, n) => L([`${g.ja}、{you}！`, `${n.ja}の日のパーク、なんだかいつもより明るく見えるね。`], [`${g.en}, {you}!`, `The park looks a little brighter on ${n.en}.`]),
+    runway: (c) => L([`今日のランウェイ、${c.ja}なんだ。`, `${c.ja}の日は、客席の空気までちょっと変わるんだよ。`], [`Today’s Runway is ${c.en}.`, `On ${c.en} days, even the audience feels different.`]),
+    sighting: (t, n, z) => L([`今日、${z.ja}に ${t} の ${n} が来てるんだって。`, `会えたらいいなあ。`], [`${n}, a ${t}, is in ${z.en} today.`, `I hope I get to meet them.`]),
     market: (p, s) => s > 0
-      ? L([`OpenSea マーケット、48時間で ${s} 体売れたんだって。`, `売れる前に、写真を撮っておけばよかった。`], [`The OpenSea Market sold ${s} pieces in 48 hours.`, `Wish I’d photographed them first.`])
-      : L([`OpenSea マーケットに、今 ${p} 体並んでるんだ。`, `照明がきれいだから、撮りがいがあるよ。`], [`${p} pieces on display at the OpenSea Market.`, `The lighting makes them great to shoot.`]),
+      ? L([`OpenSea マーケット、48時間で ${s} 体売れたんだって。`, `売れる前に、もう一度ゆっくり見ておけばよかった。`], [`The OpenSea Market sold ${s} pieces in 48 hours.`, `I wish I’d taken one more slow look first.`])
+      : L([`OpenSea マーケットに、今 ${p} 体並んでるんだ。`, `照明がきれいだから、見て回るだけで楽しいよ。`], [`${p} pieces on display at the OpenSea Market.`, `The lighting makes it fun just to walk through.`]),
     weekday: (d, w) => w
-      ? L([`${d.ja}のパーク、人の流れがいい写真になるんだ。`], [`The crowds on a ${d.en} make for great photos.`])
-      : L([`${d.ja}は、ゆっくり撮影できていいね。`], [`${d.en}s are great for taking my time with photos.`]),
+      ? L([`${d.ja}のパーク、にぎやかで好きなんだ。`], [`I love how lively the park is on a ${d.en}.`])
+      : L([`${d.ja}は、ゆっくり歩けていいね。`], [`${d.en}s are nice for a slow walk.`]),
     season: (s) => L([`${s.ja}の光って、写真にするとすぐ分かるんだ。`, `同じ場所でも、季節で色がちがうんだよ。`], [`You can tell ${s.en} light in a photo right away.`, `Same spot, different colors every season.`]),
   },
   stylish: {
@@ -150,10 +150,10 @@ const T: Record<PersonalityId, DailyTemplates> = {
     sighting: (t, n, z) => L([`${z.ja}で、${t} の ${n} を見かけたよ。`, `今日しか会えないかもしれないから、行ってみたら？`], [`I spotted ${n}, a ${t}, in ${z.en}.`, `Might be your only chance — go see!`]),
     market: (p, s) => s > 0
       ? L([`OpenSea マーケット、48時間で ${s} 体売れたんだって。`, `どこか新しい場所へ旅立っていったんだね。`], [`The OpenSea Market sold ${s} pieces in 48 hours.`, `Off on journeys somewhere new.`])
-      : L([`OpenSea マーケットに、${p} 体並んでるよ。`, `ぐるっと一周するだけで、ちょっとした旅だね。`], [`${p} pieces at the OpenSea Market.`, `One loop around is a little journey.`]),
+      : L([`OpenSea マーケットに、${p} 体並んでるよ。`, `一体ずつ見てると、時間を忘れちゃうよ。`], [`${p} pieces at the OpenSea Market.`, `Looking at them one by one, I lose track of time.`]),
     weekday: (d, w) => w
       ? L([`${d.ja}は、遠くのエリアまで足をのばすんだ。`], [`On ${d.en}s, I walk out to the far areas.`])
-      : L([`${d.ja}も、いつもの道を一周してきたよ。`], [`Did my usual loop this ${d.en} too.`]),
+      : L([`${d.ja}か。今日はなにをしようかな。`], [`${d.en}, huh. What should I do today?`]),
     season: (s) => L([`${s.ja}の空気って、歩いてるとすぐ分かるんだ。`, `季節ごとに、パークの歩き心地が変わるんだよ。`], [`You can feel ${s.en} in the air as you walk.`, `The park feels different underfoot every season.`]),
   },
   sage: {
