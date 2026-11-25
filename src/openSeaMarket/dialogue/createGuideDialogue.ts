@@ -127,7 +127,8 @@ function pair(pieces: DisplayedPiece[], guideId: number, talks: number): Talk | 
     const spotB = describePedestalSpot(b.index)
     return [
       { ja: `#${a.listing.tokenId} と #${b.listing.tokenId}、どっちも ${rule.ja(value)}。`, en: `#${a.listing.tokenId} and #${b.listing.tokenId} both ${rule.en(value)}.` },
-      { ja: `#${a.listing.tokenId} は${spotA.ja}、#${b.listing.tokenId} は${spotB.ja}にあるよ。`, en: `#${a.listing.tokenId} is ${spotA.en}, and #${b.listing.tokenId} is ${spotB.en}.` },
+      { ja: `#${a.listing.tokenId} は、${spotA.ja}。`, en: `#${a.listing.tokenId} is ${spotA.en}.` },
+      { ja: `#${b.listing.tokenId} は、${spotB.ja}にあるよ。`, en: `#${b.listing.tokenId} is ${spotB.en}.` },
       { ja: '見くらべると、ほかのところのちがいがよく分かっておもしろいよ。', en: 'Compare them and the other differences really jump out.' },
     ]
   }

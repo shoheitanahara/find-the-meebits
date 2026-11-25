@@ -63,17 +63,27 @@ export function capitalize(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-/** 台座の場所（6列×5行。左右3列ずつ、奥が1列目） */
+/**
+ * 台座の場所（6列×5行、左右3列ずつ）。入口（手前）から見た言い方にする。
+ * 並びのデータは奥の列から順なので、手前からの番号に直す。
+ */
+const PEDESTAL_ROWS = 5
+
 export function describePedestalSpot(index: number): Phrase {
-  const row = Math.floor(index / 6) + 1
+  const rowFromBack = Math.floor(index / 6) + 1
+  const rowFromFront = PEDESTAL_ROWS - rowFromBack + 1
   const col = index % 6
   const left = col < 3
   const byAisle = (left ? col : col - 3) === 0
-  const sideJa = left ? '左側' : '右側'
-  const sideEn = left ? 'on the left' : 'on the right'
+  const sideJa = left ? '入口から見て左側' : '入口から見て右側'
+  const sideEn = left ? 'on the left as you come in' : 'on the right as you come in'
+  const rowJa =
+    rowFromFront === 1 ? 'いちばん手前の列' : rowFromFront === PEDESTAL_ROWS ? 'いちばん奥の列' : `手前から${rowFromFront}列目`
+  const rowEn =
+    rowFromFront === 1 ? 'in the front row' : rowFromFront === PEDESTAL_ROWS ? 'in the back row' : `in row ${rowFromFront} from the front`
   return {
-    ja: `${sideJa}の、奥から${row}列目${byAisle ? '（真ん中の通路ぞい）' : ''}`,
-    en: `${sideEn}, row ${row} from the back${byAisle ? ', right by the center aisle' : ''}`,
+    ja: `${sideJa}、${rowJa}${byAisle ? '（真ん中の通路ぞい）' : ''}`,
+    en: `${sideEn}, ${rowEn}${byAisle ? ', right by the center aisle' : ''}`,
   }
 }
 

@@ -12,7 +12,9 @@ import {
   isFrontClearSide,
   isPerimeterGateOpening,
   openCenterOnSide,
+  northSouthRiverSpanX,
   shouldBuildPerimeterSide,
+  shouldBuildRiverSide,
   splitAxisSegments,
   type CardinalSide,
   type ParkPerimeterDef,
@@ -265,8 +267,10 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
   return (
     <group>
       {sides.map((sideDef) => {
-        // 手前クリア辺はゲートが無い限り完全スキップ
-        if (!shouldBuildPerimeterSide(spec, sideDef.side)) return null
+        // 水路は四辺（手前も）。壁は手前には置かない（カメラがふさがるため）
+        const buildRiver = shouldBuildRiverSide(spec, sideDef.side)
+        const buildWall = shouldBuildPerimeterSide(spec, sideDef.side)
+        if (!buildRiver && !buildWall) return null
 
         const opening = getOpening(spec, sideDef.side)
         const isGateOpening = isPerimeterGateOpening(opening)
@@ -277,18 +281,16 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
         const openCenter = openCenterOnSide(spec, sideDef.side)
 
         const span = sideDef.axis === 'z' ? halfSpanZ : halfSpanX
-        const riverSegments = splitAxisSegments(
-          sideDef.axis === 'z' ? cz : cx,
-          span,
-          openCenter,
-          riverGap,
-        )
-        const wallSegments = splitAxisSegments(
-          sideDef.axis === 'z' ? cz : cx,
-          span,
-          openCenter,
-          wallGap,
-        )
+        // 南北の水路は東西の岸の内側まで（角は東西の水路だけが受け持ち、水面を重ねない）
+        const nsSpan = northSouthRiverSpanX(spec)
+        const riverSegments = buildRiver
+          ? sideDef.axis === 'z'
+            ? splitAxisSegments(cz, halfSpanZ, openCenter, riverGap)
+            : splitAxisSegments(nsSpan.center, nsSpan.half, openCenter, riverGap)
+          : []
+        const wallSegments = buildWall
+          ? splitAxisSegments(sideDef.axis === 'z' ? cz : cx, span, openCenter, wallGap)
+          : []
 
         return (
           <group key={sideDef.side}>
@@ -316,7 +318,9 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                 </group>
               )
             })}
-            <RiverBank spec={spec} side={sideDef.side} gap={isGateOpening} openCenter={openCenter} />
+            {buildRiver ? (
+              <RiverBank spec={spec} side={sideDef.side} gap={isGateOpening} openCenter={openCenter} />
+            ) : null}
             {wallSegments.map((seg, index) => {
               // シーエリア: 壁・砂丘は一切出さない（海と砂だけ）
               if (isSeaTheme(spec)) return null
@@ -349,7 +353,7 @@ function RiverAndWalls({ spec }: { spec: PerimeterSpec }) {
                 />
               )
             })}
-            {isGateOpening && !isSeaTheme(spec) ? (
+            {isGateOpening && buildWall && !isSeaTheme(spec) ? (
               <GateWallReveal
                 spec={spec}
                 side={sideDef.side}
@@ -409,8 +413,10 @@ function RiverBank({
     const sign = side === 'e' ? 1 : -1
     const x = cx + sign * (riverInnerX - inset)
     // 奥の川があるならその岸まで、手前は川の端まで
-    const zMin = shouldBuildPerimeterSide(spec, 's') ? cz - riverInnerZS + inset : cz - riverInnerZS - riverWidth
-    const zMax = cz + Math.max(riverInnerZN, riverInnerZS) + riverWidth + wallThickness * 0.5
+    const zMin = shouldBuildRiverSide(spec, 's') ? cz - riverInnerZS + inset : cz - riverInnerZS - riverWidth
+    const zMax = shouldBuildRiverSide(spec, 'n')
+      ? cz + riverInnerZN - inset
+      : cz + Math.max(riverInnerZN, riverInnerZS) + riverWidth + wallThickness * 0.5
     const center = (zMin + zMax) / 2
     segments = splitAxisSegments(center, (zMax - zMin) / 2, openCenter, gapHalf)
     pos = (mid) => [x, y, mid]
@@ -418,8 +424,8 @@ function RiverBank({
   } else {
     const sign = side === 'n' ? 1 : -1
     const z = cz + sign * ((side === 'n' ? riverInnerZN : riverInnerZS) - inset)
-    const xMax = shouldBuildPerimeterSide(spec, 'e') ? cx + riverInnerX - inset : cx + riverInnerX + riverWidth
-    const xMin = shouldBuildPerimeterSide(spec, 'w') ? cx - riverInnerX + inset : cx - riverInnerX - riverWidth
+    const xMax = shouldBuildRiverSide(spec, 'e') ? cx + riverInnerX - inset : cx + riverInnerX + riverWidth
+    const xMin = shouldBuildRiverSide(spec, 'w') ? cx - riverInnerX + inset : cx - riverInnerX - riverWidth
     const center = (xMin + xMax) / 2
     segments = splitAxisSegments(center, (xMax - xMin) / 2, openCenter, gapHalf)
     pos = (mid) => [mid, y, z]

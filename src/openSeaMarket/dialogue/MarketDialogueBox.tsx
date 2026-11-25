@@ -1,8 +1,8 @@
+import { DIALOGUE_BOX_POSITION_ATTRACTION } from '../../ui/dialogueChrome'
 import { type ReactNode } from 'react'
 import { ui } from '../../i18n/ui'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
-import { PHONE_LAND_DIALOGUE } from '../../ui/phoneLandscape'
 import { playSfx, unlockAudioIfNeeded } from '../../ui/sfx'
 import { usePlayerStore } from '../../stores/playerStore'
 import { SoldCornerRibbon } from '../ui/SoldCornerRibbon'
@@ -56,7 +56,7 @@ export function MarketDialogueBox() {
   }
 
   return (
-    <div className={`pointer-events-auto absolute inset-x-0 z-[35] mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)] ${PHONE_LAND_DIALOGUE}`}>
+    <div className={DIALOGUE_BOX_POSITION_ATTRACTION}>
       <div className="rounded-3xl border border-sky-400/30 bg-[#0c1828]/92 px-5 py-4 text-[#e8f4ff] shadow-2xl backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
         <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-4">
           <div className="relative h-40 w-40 overflow-hidden rounded-2xl">
@@ -180,10 +180,11 @@ function MarketDialogueContent({
               </span>
             ) : null}
           </p>
-          <h2 className={`mt-0.5 font-black text-[#e8f4ff] ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
-            {name}
-          </h2>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+          {/* 名前の横に「このアバターを使う」 */}
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <h2 className={`font-black text-[#e8f4ff] ${compact ? 'text-base' : 'text-xl sm:text-2xl'}`}>
+              {name}
+            </h2>
             {isCurrentAvatar ? (
               <span
                 className={`rounded-full bg-white/10 px-2 py-0.5 font-semibold uppercase tracking-[0.12em] text-sky-100/70 ${

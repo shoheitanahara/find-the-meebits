@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
 import { applyVRMLocomotion } from '../../avatar/VRMLocomotion'
+import { applyHeadTurn, createHeadTurn, headYawToward, resetHeadTurn } from '../../avatar/headTurn'
 import { useKeyboardControls } from '../../avatar/useKeyboardControls'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
@@ -51,6 +52,8 @@ export function MeetSergitoPlayer() {
   const setPlayerVrmReady = useMeetSergitoStore((state) => state.setPlayerVrmReady)
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  /** 会話中は、顔だけを Sergito へ向ける（左右 30° まで） */
+  const headTurnRef = useRef(createHeadTurn())
   const controlsLocked = movementLocked || bootPhase !== 'ready'
 
   useEffect(() => {
@@ -96,6 +99,7 @@ export function MeetSergitoPlayer() {
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05)
     localTimeRef.current += dt
+    resetHeadTurn(vrmRef.current, headTurnRef.current)
 
     const look = useMeetSergitoControlsStore.getState().consumeLookDelta()
     if (!controlsLocked && (look.lookDeltaX !== 0 || look.lookDeltaY !== 0)) {
@@ -170,6 +174,12 @@ export function MeetSergitoPlayer() {
       idleOffset: 0.2,
       walkPhaseOffset: 0.15,
     })
+    const talking = useDialogueStore.getState()
+    const headTarget =
+      talking.isOpen && talking.activeNpcId === SERGITO_NPC_ID
+        ? headYawToward(xRef.current, zRef.current, rotationYRef.current, MEET_SERGITO.sergito.x, MEET_SERGITO.sergito.z)
+        : 0
+    applyHeadTurn(vrmRef.current, headTurnRef.current, headTarget, dt)
     update(dt)
 
     const dialogue = useDialogueStore.getState()

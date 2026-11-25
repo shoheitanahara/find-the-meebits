@@ -29,7 +29,7 @@ const ATTRACTION_NAMES: Record<AttractionId, Phrase> = {
   jazzBar: { ja: 'ジャズバー', en: 'the Jazz Bar' },
 } as Record<AttractionId, Phrase>
 
-const ZONE_NAMES: Record<ParkZoneId, Phrase> = {
+export const ZONE_NAMES: Record<ParkZoneId, Phrase> = {
   plaza: { ja: '広場', en: 'the Plaza' },
   mountain: { ja: 'マウンテンエリア', en: 'the Mountain District' },
   culture: { ja: 'カルチャーエリア', en: 'the Culture District' },

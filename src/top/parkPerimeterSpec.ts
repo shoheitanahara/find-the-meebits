@@ -105,7 +105,8 @@ export function buildPerimeterSpec(
   const legacyRiverWidth = isMountain ? 3.0 : isAstro ? 2.8 : 2.5
   const legacyInnerX = Math.min(layout.boundsX - 4.8, 22.2)
   const riverInnerX = isSea ? legacyInnerX : legacyInnerX - (riverWidth - legacyRiverWidth)
-  const riverInnerZN = Math.min(layout.maxZ - 2.2, 12.5)
+  // 手前（+Z）の水路は、歩ける範囲のすぐ外（maxZ）から始める。壁は置かない（カメラがふさがるため）
+  const riverInnerZN = isSea ? Math.min(layout.maxZ - 2.2, 12.5) : layout.maxZ - layout.groundZ
   // 奥：門が PARK_FAR_GATE_Z に来るように川の内側を決める（門 = 川内側 + 川幅 + 壁厚 × 0.55）
   const riverInnerZS = isSea
     ? Math.min(Math.abs(layout.minZ) - 0.4, 16.2)
@@ -128,9 +129,43 @@ export function buildPerimeterSpec(
     bridgeLength: isMountain ? 3.6 : isSea ? 3.8 : isAstro ? 3.4 : 3.2,
     frontClearSides: perimeter.frontClearSides ?? ['n'],
     theme: perimeter.theme,
-    openings: perimeter.openings,
+    openings: withFrontGateBridges(perimeter, gates, layout.groundZ, isSea),
     gates,
   }
+}
+
+/**
+ * 手前（+Z）に門があるエリアは、門の先の水路に橋を架ける（開口として扱う）。
+ * 門そのものは ParkZoneGate が描くので、ここでは橋だけ。
+ */
+function withFrontGateBridges(
+  perimeter: ParkPerimeterDef,
+  gates: ParkGateDef[],
+  groundZ: number,
+  isSea: boolean,
+): PerimeterOpening[] {
+  if (isSea || perimeter.openings.some((o) => o.side === 'n')) return perimeter.openings
+  const front = gates.find((g) => g.z - groundZ > 10)
+  return front ? [...perimeter.openings, { side: 'n', kind: 'bridge-gate', gateId: front.id }] : perimeter.openings
+}
+
+/**
+ * その辺に水路を通すか。シー以外は四辺とも（手前も）。
+ * 壁は shouldBuildPerimeterSide（手前には置かない）。
+ */
+export function shouldBuildRiverSide(spec: PerimeterSpec, _side: CardinalSide) {
+  return spec.theme !== 'sea'
+}
+
+/**
+ * 南北（手前・奥）の水路の X 範囲。角は東西の水路が受け持つので、東西の岸の内側までにする
+ * （角で水面が二重に重なると、半透明のため模様がちらつく）。
+ */
+export function northSouthRiverSpanX(spec: PerimeterSpec) {
+  const halfSpanX = spec.riverInnerX + spec.riverWidth + spec.wallThickness * 0.5
+  const minX = shouldBuildRiverSide(spec, 'w') ? spec.cx - spec.riverInnerX : spec.cx - halfSpanX
+  const maxX = shouldBuildRiverSide(spec, 'e') ? spec.cx + spec.riverInnerX : spec.cx + halfSpanX
+  return { center: (minX + maxX) / 2, half: (maxX - minX) / 2 }
 }
 
 export function getOpening(spec: PerimeterSpec, side: CardinalSide) {
@@ -299,10 +334,13 @@ export function buildPerimeterObstacleBoxes(spec: PerimeterSpec): PerimeterBox[]
       }
     }
   }
-  if (shouldBuildPerimeterSide(spec, 'n')) {
-    for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 'n'), bridgeGap(spec, 'n'))) {
+  const nsSpan = northSouthRiverSpanX(spec)
+  if (shouldBuildRiverSide(spec, 'n') || shouldBuildPerimeterSide(spec, 'n')) {
+    for (const seg of splitAxisSegments(nsSpan.center, nsSpan.half, openCenterOnSide(spec, 'n'), bridgeGap(spec, 'n'))) {
       boxes.push({ x: seg.mid, z: cz + riverMidZN, halfX: seg.half, halfZ: riverWidth * 0.5 })
     }
+  }
+  if (shouldBuildPerimeterSide(spec, 'n')) {
     if (!isSea) {
       for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 'n'), bridgeWallGap(spec, 'n'))) {
         boxes.push({ x: seg.mid, z: cz + wallMidZN, halfX: seg.half, halfZ: wallThickness * 0.5 })
@@ -310,7 +348,7 @@ export function buildPerimeterObstacleBoxes(spec: PerimeterSpec): PerimeterBox[]
     }
   }
   if (shouldBuildPerimeterSide(spec, 's')) {
-    for (const seg of splitAxisSegments(cx, halfSpanX, openCenterOnSide(spec, 's'), bridgeGap(spec, 's'))) {
+    for (const seg of splitAxisSegments(nsSpan.center, nsSpan.half, openCenterOnSide(spec, 's'), bridgeGap(spec, 's'))) {
       boxes.push({ x: seg.mid, z: cz - riverMidZS, halfX: seg.half, halfZ: riverWidth * 0.5 })
     }
     if (!isSea) {
@@ -408,11 +446,17 @@ export function getBridgePlacement(
  * 床を敷いてよい範囲（川の内側）。川のある辺だけ制限し、ない辺は null。
  * 床はこの外側を切り取り、川が床の下を流れて見えるようにする。
  */
-export function getLandClip(spec: PerimeterSpec): { maxX: number | null; minX: number | null; minZ: number | null } {
-  if (spec.theme === 'sea') return { maxX: null, minX: null, minZ: null }
+export function getLandClip(spec: PerimeterSpec): {
+  maxX: number | null
+  minX: number | null
+  minZ: number | null
+  maxZ: number | null
+} {
+  if (spec.theme === 'sea') return { maxX: null, minX: null, minZ: null, maxZ: null }
   return {
-    maxX: shouldBuildPerimeterSide(spec, 'e') ? spec.cx + spec.riverInnerX : null,
-    minX: shouldBuildPerimeterSide(spec, 'w') ? spec.cx - spec.riverInnerX : null,
-    minZ: shouldBuildPerimeterSide(spec, 's') ? spec.cz - spec.riverInnerZS : null,
+    maxX: shouldBuildRiverSide(spec, 'e') ? spec.cx + spec.riverInnerX : null,
+    minX: shouldBuildRiverSide(spec, 'w') ? spec.cx - spec.riverInnerX : null,
+    minZ: shouldBuildRiverSide(spec, 's') ? spec.cz - spec.riverInnerZS : null,
+    maxZ: shouldBuildRiverSide(spec, 'n') ? spec.cz + spec.riverInnerZN : null,
   }
 }

@@ -8,6 +8,7 @@ import { isParkChristmasSeason } from './parkChristmas'
 import { getCachedMeebitTraits } from '../data/meebitTraits'
 import { isSilentMeebit } from './parkTalk/personality'
 import { selectParkTalk } from './parkTalk/selectParkTalk'
+import { getDailyNews } from './parkTalk/dailyNews'
 import { describePlace } from './parkTalk/zonePlaces'
 import { getRegisteredParkNpcs } from './parkNpcRegistry'
 import { useNpcStore } from '../stores/npcStore'
@@ -89,6 +90,7 @@ export function selectParkDialogueLines(
     featuredId,
     traitName: formatTraitDisplayName(themeTrait.traitType, themeTrait.traitValue),
     winter: isParkChristmasSeason(),
+    daily: { news: getDailyNews(), now: new Date() },
     dynamic: {
       selfTraits: traits,
       playerTraits: getCachedMeebitTraits(top.meebitNumber),

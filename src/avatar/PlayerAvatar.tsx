@@ -3,6 +3,9 @@ import { useEffect, useRef } from 'react'
 import { Group } from 'three'
 import { MeebitSilhouette } from './MeebitSilhouette'
 import { applyVRMLocomotion } from './VRMLocomotion'
+import { applyHeadTurn, createHeadTurn, headYawToward, resetHeadTurn } from './headTurn'
+import { useDialogueStore } from '../dialogue/dialogueStore'
+import { useNpcStore } from '../stores/npcStore'
 import { getPlayerWorldState } from './playerWorldState'
 import { useVRMModel } from './useVRMModel'
 import { useGameStore } from '../stores/gameStore'
@@ -31,6 +34,7 @@ export function PlayerAvatar() {
     true,
     true,
   )
+  const headTurnRef = useRef(createHeadTurn())
   const setPlayerModelLoading = useGameStore((state) => state.setPlayerModelLoading)
   const setPlayerModelReady = useGameStore((state) => state.setPlayerModelReady)
   const setPlayerModelError = useGameStore((state) => state.setPlayerModelError)
@@ -66,6 +70,7 @@ export function PlayerAvatar() {
   useFrame((state, delta) => {
     const root = rootRef.current
     const world = getPlayerWorldState()
+    if (shouldLoadPlayerVrm) resetHeadTurn(vrmRef.current, headTurnRef.current)
 
     if (root) {
       root.position.set(world.x, world.y, world.z)
@@ -79,6 +84,14 @@ export function PlayerAvatar() {
         isMoving: world.isMoving,
         isRunning: world.isRunning,
       })
+      // 会話中は、顔だけを相手の NPC へ向ける（左右 30° まで）
+      const talking = useDialogueStore.getState()
+      const talkPosition =
+        talking.isOpen && talking.activeNpcId ? useNpcStore.getState().npcPositions[talking.activeNpcId] : undefined
+      const headTarget = talkPosition
+        ? headYawToward(world.x, world.z, world.rotationY, talkPosition[0], talkPosition[2])
+        : 0
+      applyHeadTurn(vrmRef.current, headTurnRef.current, headTarget, Math.min(delta, 0.05))
       update(delta)
     }
 

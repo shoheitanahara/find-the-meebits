@@ -3,6 +3,8 @@ import type { DialogueLine } from '../../npc/npcTypes'
 import type { ParkNpcRecord } from '../parkNpcRegistry'
 import type { ParkTimeOfDay } from '../parkTimeOfDay'
 import type { ParkZoneId } from '../parkZones'
+import type { DailyNews } from './dailyNews'
+import { buildDailyScripts, buildHolidayGreeting } from './dailyTopics'
 import { buildDynamicScripts, type DynamicTalkData } from './dynamicTopics'
 import { formatPlayerName, getPersonality } from './personality'
 import { PARK_TALK_SCRIPTS } from './scripts'
@@ -24,6 +26,8 @@ export type ParkTalkContext = {
   traits?: MeebitTraitMap | null
   /** その場のデータ（プレイヤーの見た目・ほかの来場者・今日の主役）。あれば話題に混ぜる */
   dynamic?: DynamicTalkData
+  /** 今日パークで起きていること（ランウェイの色・めずらしい来場者・OpenSea）と、今日の日付 */
+  daily?: { news: DailyNews; now: Date }
 }
 
 /** 話すと「なかよし」になる回数 */
@@ -102,11 +106,15 @@ export function selectParkTalk(ctx: ParkTalkContext): DialogueLine[] {
 
   // あいさつ（時間帯つきのものがあれば少し優先）
   const greetings = pool(stage, ctx)
-  const greeting = pickScript(
-    greetings.map((s) => [s, s.times ? 2 : 1] as [TalkScript, number]),
-    ctx,
-    11,
-  )
+  // 記念日の当日は、みんな記念日のあいさつをする
+  const holidayGreeting = ctx.daily ? buildHolidayGreeting(personalityOf(ctx), ctx.daily.now) : null
+  const greeting =
+    holidayGreeting ??
+    pickScript(
+      greetings.map((s) => [s, s.times ? 2 : 1] as [TalkScript, number]),
+      ctx,
+      11,
+    )
 
   // 話題の候補
   const candidates: Array<[TalkScript, number]> = []
@@ -120,6 +128,12 @@ export function selectParkTalk(ctx: ParkTalkContext): DialogueLine[] {
   add('trait', 1, 1)
   if (isFriend) add('friend', 2, 2)
   if (ctx.winter) add('winter', 2, 2)
+  // 今日パークで起きていること・曜日・季節
+  if (ctx.daily) {
+    for (const { script, weight } of buildDailyScripts(personalityOf(ctx), ctx.daily.news, npc.meebitNumber, talkCount, ctx.daily.now)) {
+      candidates.push([script, weight])
+    }
+  }
   // その場のデータから作る話題（見た目・うわさ・主役のトレイト）
   if (ctx.dynamic) {
     for (const { script, weight } of buildDynamicScripts(personalityOf(ctx), ctx.dynamic, npc.meebitNumber, talkCount)) {

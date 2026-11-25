@@ -50,3 +50,29 @@ export function traitDisplayName(traits: MeebitTraitMap, key: string, withColor 
   const noun = rule.noun?.(value) ?? null
   return [color && color !== 'None' ? color : null, value, noun].filter(Boolean).join(' ')
 }
+
+const COLOR_JA: Record<string, string> = {
+  Black: '黒',
+  Blue: '青',
+  Brown: '茶色',
+  Camo: '迷彩',
+  Cyan: 'シアン',
+  Gold: '金色',
+  Gray: 'グレー',
+  Green: '緑',
+  'Light Blue': '水色',
+  Orange: 'オレンジ',
+  Pink: 'ピンク',
+  Purple: '紫',
+  Red: '赤',
+  Silver: 'シルバー',
+  Tan: 'ベージュ',
+  Teal: 'ティール',
+  White: '白',
+  Yellow: '黄色',
+}
+
+/** 色の名前（日本語は和名、なければそのまま） */
+export function colorDisplayName(value: string, lang: 'ja' | 'en') {
+  return lang === 'ja' ? (COLOR_JA[value] ?? value) : value
+}

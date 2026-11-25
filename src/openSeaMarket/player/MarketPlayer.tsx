@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Group, MathUtils, Vector2, Vector3 } from 'three'
 import { applyVRMLocomotion } from '../../avatar/VRMLocomotion'
+import { applyHeadTurn, createHeadTurn, headYawToward, resetHeadTurn } from '../../avatar/headTurn'
 import { useKeyboardControls } from '../../avatar/useKeyboardControls'
 import { useVRMModel } from '../../avatar/useVRMModel'
 import { MeebitSilhouette } from '../../avatar/MeebitSilhouette'
@@ -53,6 +54,8 @@ export function MarketPlayer() {
   const setPlayerVrmReady = useOpenSeaMarketStore((state) => state.setPlayerVrmReady)
   const meebitNumber = usePlayerStore((state) => state.meebitNumber)
   const { vrmRef, vrmScene, status, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  /** 会話中は、顔だけを相手（案内係・作品）へ向ける（左右 30° まで） */
+  const headTurnRef = useRef(createHeadTurn())
   const controlsLocked = movementLocked || bootPhase !== 'ready' || isSwitchingGallery
 
   useEffect(() => {
@@ -123,6 +126,7 @@ export function MarketPlayer() {
   useFrame((state, delta) => {
     const dt = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), 0.05) : 1 / 60
     localTimeRef.current += dt
+    resetHeadTurn(vrmRef.current, headTurnRef.current)
 
     const look = useOpenSeaMarketControlsStore.getState().consumeLookDelta()
     if (!controlsLocked && (look.lookDeltaX !== 0 || look.lookDeltaY !== 0)) {
@@ -197,6 +201,15 @@ export function MarketPlayer() {
       idleOffset: 0.2,
       walkPhaseOffset: 0.15,
     })
+    const talking = useDialogueStore.getState()
+    const talkingId = talking.isOpen && typeof talking.activeNpcId === 'string' && talking.activeNpcId.startsWith('opensea-')
+      ? Number(talking.activeNpcId.replace('opensea-', ''))
+      : null
+    const talkTarget = talkingId != null && Number.isFinite(talkingId) ? marketNpcPositions.get(talkingId) : undefined
+    const headTarget = talkTarget
+      ? headYawToward(xRef.current, zRef.current, rotationYRef.current, talkTarget.x, talkTarget.z)
+      : 0
+    applyHeadTurn(vrmRef.current, headTurnRef.current, headTarget, dt)
     update(dt)
 
     const dialogue = useDialogueStore.getState()

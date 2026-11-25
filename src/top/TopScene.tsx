@@ -12,6 +12,7 @@ import {
 } from '../avatar/VRMLocomotion'
 import { useKeyboardControls } from '../avatar/useKeyboardControls'
 import { useVRMModel } from '../avatar/useVRMModel'
+import { applyHeadTurn, createHeadTurn, headYawToward, resetHeadTurn } from '../avatar/headTurn'
 import { INTERACTION_DISTANCE, CAMERA_FOLLOW_OFFSET_XZ, VRM_WORLD_SCALE, CREATOR_MEEBIT_ID } from '../game/gameConfig'
 import { isTouchUiMode } from '../game/perfConfig'
 import { CREATOR_VRM_LOAD_PRIORITY } from '../game/perfConfig'
@@ -69,6 +70,7 @@ import {
 } from './parkZones'
 import { isInsideGateTrigger } from './parkGateRules'
 import { buildPerimeterSpec, getLandClip } from './parkPerimeterSpec'
+import { primeDailyNews } from './parkTalk/dailyNews'
 import { ParkBenchProp } from './ParkBenchProp'
 import { ParkBackdrop } from './ParkBackdrop'
 import { CameraOcclusionFader, OCCLUDER_USER_DATA } from '../world/CameraOcclusionFader'
@@ -129,6 +131,11 @@ export function TopScene({
   )
   const layout = zone.layout
   const zoneAttractions = getAttractionsForZone(activeZoneId)
+
+  // 今日パークで起きていること（会話の話題）を集めておく
+  useEffect(() => {
+    primeDailyNews(lineup)
+  }, [lineup])
 
   useEffect(() => {
     setParkCollisionZone(activeZoneId)
@@ -479,6 +486,7 @@ function HubGround({
   const clipMaxX = landClip?.maxX ?? null
   const clipMinX = landClip?.minX ?? null
   const clipMinZ = landClip?.minZ ?? null
+  const clipMaxZ = landClip?.maxZ ?? null
 
   // 床だけを川の内側で切る（建物・木・外周には付けない）
   useEffect(() => {
@@ -488,6 +496,7 @@ function HubGround({
     if (clipMaxX !== null) planes.push(new Plane(new Vector3(-1, 0, 0), clipMaxX))
     if (clipMinX !== null) planes.push(new Plane(new Vector3(1, 0, 0), -clipMinX))
     if (clipMinZ !== null) planes.push(new Plane(new Vector3(0, 0, 1), -clipMinZ))
+    if (clipMaxZ !== null) planes.push(new Plane(new Vector3(0, 0, -1), clipMaxZ))
     if (planes.length > 0) gl.localClippingEnabled = true
     group.traverse((object) => {
       const mesh = object as Mesh
@@ -503,6 +512,7 @@ function HubGround({
     clipMaxX,
     clipMinX,
     clipMinZ,
+    clipMaxZ,
     voxelGround,
     cultureGround,
     seaGround,
@@ -1327,10 +1337,6 @@ type NpcSpot = { x: number; z: number; rotationY: number }
 
 /** ベンチに座ったときの体の高さ（座りポーズで腰が座面に乗る高さ） */
 const PARK_BENCH_SIT_Y = 0.02
-/** 座っている人が話しかけられたとき、顔を向けられる左右の最大角（30°） */
-const SEATED_HEAD_TURN_MAX = Math.PI / 6
-/** 顔の向きは首と頭で分けて回す（首 4 : 頭 6） */
-const SEATED_NECK_SHARE = 0.4
 
 /** ベンチの座る位置（1 台に 2 席。座面の少し前寄り、ベンチの正面を向く） */
 function getBenchSeats(zoneId: ParkZoneId): NpcSpot[] {
@@ -1741,9 +1747,8 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
   const localTimeRef = useRef(index * 0.37)
   const walkPhaseOffset = getNpcWalkPhaseOffset(spawn.walkPattern)
   const breathParams = useMemo(() => getAudienceBreathParams(spawn.meebitNumber), [spawn.meebitNumber])
-  /** 座っている人の顔の向き（体の正面からの角度）と、前のフレームで首・頭に足した量 */
-  const headYawRef = useRef(0)
-  const appliedHeadYawRef = useRef(0)
+  /** 座っている人の顔の向き（話しかけられたとき、左右 30° までこちらを見る） */
+  const headTurnRef = useRef(createHeadTurn())
   const { vrmRef, vrmScene, update } = useVRMModel(
     spawn.meebitNumber,
     true,
@@ -1766,12 +1771,8 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
     // ベンチに座っている人は、話しかけられても座ったまま（向きも変えない）
     if (spawn.role === 'sit') {
       const vrm = vrmRef.current
-      const neck = vrm?.humanoid.getNormalizedBoneNode('neck') ?? null
-      const head = vrm?.humanoid.getNormalizedBoneNode('head') ?? null
       // 前のフレームで足した顔の向きをいったん戻してから、座りポーズ（呼吸・揺れ）を当てる
-      const applied = appliedHeadYawRef.current
-      if (neck) neck.rotation.y -= applied * SEATED_NECK_SHARE
-      if (head) head.rotation.y -= applied * (1 - SEATED_NECK_SHARE)
+      resetHeadTurn(vrm, headTurnRef.current)
 
       if (group) {
         group.position.set(spawn.x, PARK_BENCH_SIT_Y, spawn.z)
@@ -1785,19 +1786,10 @@ function TopNpc({ spawn, index }: { spawn: TopNpcSpawn; index: number }) {
         const px = parkPlayerWorld.x - group.position.x
         const pz = parkPlayerWorld.z - group.position.z
         if (isDialogueActive || Math.hypot(px, pz) < PLAYER_STOP_DISTANCE) {
-          const relative = Math.atan2(px, pz) - spawn.rotationY
-          target = MathUtils.clamp(
-            Math.atan2(Math.sin(relative), Math.cos(relative)),
-            -SEATED_HEAD_TURN_MAX,
-            SEATED_HEAD_TURN_MAX,
-          )
+          target = headYawToward(spawn.x, spawn.z, spawn.rotationY, parkPlayerWorld.x, parkPlayerWorld.z)
         }
       }
-      headYawRef.current += (target - headYawRef.current) * (1 - Math.exp(-safeDelta * 4))
-      const yaw = headYawRef.current
-      if (neck) neck.rotation.y += yaw * SEATED_NECK_SHARE
-      if (head) head.rotation.y += yaw * (1 - SEATED_NECK_SHARE)
-      appliedHeadYawRef.current = neck || head ? yaw : 0
+      applyHeadTurn(vrm, headTurnRef.current, target, safeDelta)
 
       update(safeDelta)
       return
@@ -1945,8 +1937,11 @@ function TopPlayer() {
   const rootRef = useRef<Group>(null)
   const meebitNumber = useTopStore((state) => state.meebitNumber)
   const { vrmRef, vrmScene, update } = useVRMModel(meebitNumber, true, 0, true, true)
+  /** 会話中は、顔だけを相手の NPC へ向ける（左右 30° まで） */
+  const headTurnRef = useRef(createHeadTurn())
 
   useFrame((state, delta) => {
+    resetHeadTurn(vrmRef.current, headTurnRef.current)
     const root = rootRef.current
     if (root) {
       root.position.set(parkPlayerWorld.x, 0.06, parkPlayerWorld.z)
@@ -1960,6 +1955,13 @@ function TopPlayer() {
       isMoving: parkPlayerWorld.isMoving,
       isRunning: parkPlayerWorld.isMoving,
     })
+    const dialogue = useDialogueStore.getState()
+    const talkPosition =
+      dialogue.isOpen && dialogue.activeNpcId ? useNpcStore.getState().npcPositions[dialogue.activeNpcId] : undefined
+    const headTarget = talkPosition
+      ? headYawToward(parkPlayerWorld.x, parkPlayerWorld.z, parkPlayerWorld.rotationY, talkPosition[0], talkPosition[2])
+      : 0
+    applyHeadTurn(vrmRef.current, headTurnRef.current, headTarget, Math.min(delta, 0.05))
     update(delta)
   })
 

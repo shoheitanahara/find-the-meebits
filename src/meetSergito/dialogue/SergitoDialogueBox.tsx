@@ -1,7 +1,7 @@
+import { DIALOGUE_BOX_POSITION_ATTRACTION } from '../../ui/dialogueChrome'
 import { ui } from '../../i18n/ui'
 import { useDialogueStore } from '../../dialogue/dialogueStore'
 import { TargetPreview } from '../../ui/TargetPreview'
-import { PHONE_LAND_DIALOGUE } from '../../ui/phoneLandscape'
 import { SERGITO_MEEBIT_ID, SERGITO_NPC_ID } from '../config'
 import { advanceSergitoDialogue, closeSergitoDialogue } from './interactWithSergito'
 
@@ -23,7 +23,7 @@ export function SergitoDialogueBox() {
   const name = 'Sergito'
 
   return (
-    <div className={`pointer-events-auto absolute inset-x-0 z-[35] mx-auto w-[min(860px,calc(100%-2rem))] bottom-5 max-lg:bottom-auto max-lg:top-[max(6rem,env(safe-area-inset-top))] max-lg:w-[calc(100%-0.75rem)] ${PHONE_LAND_DIALOGUE}`}>
+    <div className={DIALOGUE_BOX_POSITION_ATTRACTION}>
       <div className="rounded-3xl border border-[#d4a060]/35 bg-[#1a140c]/92 px-5 py-4 text-[#f4ead2] shadow-2xl backdrop-blur-md max-lg:px-3.5 max-lg:py-3 sm:px-6 sm:py-5">
         <div className="hidden lg:grid lg:grid-cols-[auto_1fr] lg:gap-4">
           <TargetPreview
