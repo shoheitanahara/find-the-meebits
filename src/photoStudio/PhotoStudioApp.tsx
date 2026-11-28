@@ -11,6 +11,7 @@ import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { unlockAudioIfNeeded } from '../ui/sfx'
 import { PHOTO_STUDIO, clampMeebitId } from './config'
 import { StudioGlBridge } from './capture/studioGlBridge'
+import { CustomPoseMarkers } from './customPose/CustomPoseMarkers'
 import { StudioPlayer } from './player/StudioPlayer'
 import { usePhotoStudioStore } from './store'
 import {
@@ -46,6 +47,7 @@ function PhotoStudioScene() {
       <StudioCamera />
       <StudioEnvironment />
       {phase === 'studio' ? <StudioPlayer /> : null}
+      {phase === 'studio' ? <CustomPoseMarkers /> : null}
     </>
   )
 }

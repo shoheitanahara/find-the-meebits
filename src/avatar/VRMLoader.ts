@@ -1,5 +1,5 @@
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm'
-import { Box3, SkinnedMesh } from 'three'
+import { Box3, SkinnedMesh, Vector3 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { Object3D } from 'three'
 import { DEFAULT_PLAYER_MEEBIT_ID, VRM_FEET_Y_OFFSET, VRM_WORLD_SCALE } from '../game/gameConfig'
@@ -8,6 +8,7 @@ export const DEFAULT_MEEBIT_ID = DEFAULT_PLAYER_MEEBIT_ID
 
 const _meshBox = new Box3()
 const _posedBounds = new Box3()
+const _feetPoint = new Vector3()
 
 const VRM_BASE_URL = (import.meta.env.VITE_VRM_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
@@ -66,22 +67,26 @@ function alignVrmFeetFlush(scene: Object3D) {
   scene.position.y -= box.min.y
 }
 
-/** 展示フィギュア用 — ポーズ後の SkinnedMesh bbox で足元を親原点 y=0 に合わせる */
+/**
+ * 展示フィギュア用 — ポーズ後の SkinnedMesh bbox で足元を親原点 y=0 に合わせる。
+ * primitive の scale を当てた後に呼ぶこと（scale 込みで合わせる）。
+ */
 export function alignVrmFigureFeet(vrm: VRM) {
   vrm.update(0)
-  vrm.scene.updateMatrixWorld(true)
+  vrm.scene.updateWorldMatrix(true, true)
 
   _posedBounds.makeEmpty()
   vrm.scene.traverse((obj) => {
     if (!(obj instanceof SkinnedMesh)) {
       return
     }
+    // ボーン変形後の bbox は mesh.boundingBox に入る（geometry.boundingBox は変形前のまま）
     obj.computeBoundingBox()
-    const bounds = obj.geometry.boundingBox
+    const bounds = obj.boundingBox
     if (!bounds) {
       return
     }
-    _meshBox.copy(bounds).applyMatrix4(obj.matrix)
+    _meshBox.copy(bounds).applyMatrix4(obj.matrixWorld)
     _posedBounds.union(_meshBox)
   })
 
@@ -90,8 +95,10 @@ export function alignVrmFigureFeet(vrm: VRM) {
     return
   }
 
-  // ローカル最低点を親原点へ（相対移動でロード時オフセットも打ち消す）
-  vrm.scene.position.y -= _posedBounds.min.y
+  // ワールド最低点 → 親ローカルへ。相対移動でロード時オフセットも打ち消す
+  _feetPoint.set(0, _posedBounds.min.y, 0)
+  vrm.scene.parent?.worldToLocal(_feetPoint)
+  vrm.scene.position.y -= _feetPoint.y
 }
 
 function enableShadows(root: Object3D) {

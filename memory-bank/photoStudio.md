@@ -1,6 +1,6 @@
 # Photo Booth — アバター操作・カメラの落とし所
 
-最終更新: 2026-11-09
+最終更新: 2026-11-29
 
 正方形 PFP / 来場証明書用スタジオ。ルート: `/photo-booth` `/jp/photo-booth`（互換 `/pfp-studio`）。  
 正本: `src/photoStudio/`（`config.ts`・`poses.ts`・`player/StudioPlayer.tsx`・`world/`・`capture/`）
@@ -36,6 +36,7 @@
 | `sit` | `applyVRMSitPose` + `StudioSitChair`（Sit 時のみ表示） |
 | `sleep` | 胎児ポーズ + group を Z−90° で横向き。`StudioSleepSofa`（Sleep 時のみ） |
 | `figure` | Stand と同じ直立 + 1段黒台座（`modelLiftY` で上面へ） |
+| `custom` | 関節を自由に編集（下記「カスタムポーズ」）。小道具・家具なし |
 
 分岐: `poses.ts` → `applyStudioPose`。UI は `PHOTO_STUDIO.poses` を map。
 
@@ -56,6 +57,19 @@ Mountain 空中ポーズそのもの。床にしゃがんで見えないよう r
 
 Photo Booth の Head **正の X ≒ 顎上げ**、**負の X ≒ 顎引き**。  
 （以前「負＝上げ」と書いて失敗した。見た目で確認すること）
+
+---
+
+## カスタムポーズ（2026-11）
+
+正本: `src/photoStudio/customPose/`
+
+- **データ** — normalized bone のローカル Euler `[x,y,z]`。プリセットを当てて `captureCustomPose` で読み取り、そこから編集（`customPoseBase` が「部位リセット」の戻り先）
+- **部位** — 頭・胸・お腹・腰・左右腕・左右脚の 8 グループ。スライダーは意味単位（腕: 上げ下げ／前後／内に寄せる／肘を曲げる／前腕を回す）。**LowerArm の X は前腕の長軸＝ねじり**（腕の rest が横向きのため）。肘の曲げは **Y**（左側座標系で負＝前）。可動範囲は `CUSTOM_POSE_JOINTS` で絞り、Hand / Shoulder は常に 0（捻り防止）
+- **左右** — 正中面の鏡像は `(x, −y, −z)`。スライダーは左側座標系で定義し右は鏡像表示 → 左右とも同じ向きに動く。「反対側にコピー」も同じ変換
+- **接地** — 直立時と現在のスキニング後メッシュ最低点の差で y を補正（`customPoseGrounding.ts`）。`SkinnedMesh.computeBoundingBox()` の結果は **`mesh.boundingBox`**（`geometry.boundingBox` は変形前のまま）
+- **マーカー** — depthTest なしの球。プレビューのタップは `pickCustomPoseJoint`（画面投影で最寄り）。`userData.studioCaptureHidden` で撮影画像から除外
+- **履歴・保存** — Undo/Redo（⌘Z / ⇧⌘Z）。編集中ポーズは localStorage `photoStudio.customPose.v1` に自動保存
 
 ---
 

@@ -1,7 +1,7 @@
 import { useThree } from '@react-three/fiber'
 import { useEffect } from 'react'
 import { Vector2 } from 'three'
-import type { Camera, Scene, WebGLRenderer } from 'three'
+import type { Camera, Object3D, Scene, WebGLRenderer } from 'three'
 import { PHOTO_STUDIO } from '../config'
 
 /** Canvas 外の撮影ボタンから参照する renderer / scene / camera。 */
@@ -33,7 +33,26 @@ export function hasStudioGl() {
   return studioContext !== null
 }
 
+/** カスタムポーズの関節タップ判定用 */
+export function getStudioCamera() {
+  return studioContext?.camera ?? null
+}
+
 const _size = new Vector2()
+
+/** この userData フラグが立った Object3D は撮影画像に写さない（関節マーカーなど） */
+export const STUDIO_CAPTURE_HIDDEN = 'studioCaptureHidden'
+
+function hideCaptureExcluded(scene: Scene) {
+  const hidden: Object3D[] = []
+  scene.traverse((obj) => {
+    if (obj.userData[STUDIO_CAPTURE_HIDDEN] && obj.visible) {
+      obj.visible = false
+      hidden.push(obj)
+    }
+  })
+  return hidden
+}
 
 /**
  * 画面表示サイズに関係なく、撮影の瞬間だけ高解像度で描き直した正方形スナップショットを返す。
@@ -61,6 +80,7 @@ export function renderStudioSnapshot(): HTMLCanvasElement | null {
 
   const prevRatio = gl.getPixelRatio()
   const output = document.createElement('canvas')
+  const hidden = hideCaptureExcluded(scene)
 
   try {
     gl.setPixelRatio(ratio)
@@ -77,6 +97,7 @@ export function renderStudioSnapshot(): HTMLCanvasElement | null {
     if (!ctx) return null
     ctx.drawImage(source, sx, sy, side, side, 0, 0, side, side)
   } finally {
+    for (const obj of hidden) obj.visible = true
     gl.setPixelRatio(prevRatio)
     gl.render(scene, camera)
   }

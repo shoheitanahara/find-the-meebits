@@ -23,6 +23,16 @@ type PhotoStudioCopy = {
   issuePass: string
   issuingPass: string
   backSetup: string
+  customHint: string
+  customDragHint: string
+  customJoint: string
+  customMirror: string
+  customResetJoint: string
+  customUndo: string
+  customRedo: string
+  customGrounded: string
+  customRebase: string
+  customRebaseHint: string
 }
 
 const en: PhotoStudioCopy = {
@@ -48,6 +58,16 @@ const en: PhotoStudioCopy = {
   issuePass: 'Issue Visit Pass',
   issuingPass: 'Issuing…',
   backSetup: 'Change Meebit',
+  customHint: 'Tap a dot on the preview, or pick a body part below. Left / right are the Meebit’s own.',
+  customDragHint: 'Tap a dot to pick · drag to rotate',
+  customJoint: 'Body part',
+  customMirror: 'Copy to other side',
+  customResetJoint: 'Reset this part',
+  customUndo: 'Undo',
+  customRedo: 'Redo',
+  customGrounded: 'Keep feet on the floor',
+  customRebase: 'Start over from a pose',
+  customRebaseHint: 'Replaces the whole custom pose (you can undo).',
 }
 
 const ja: PhotoStudioCopy = {
@@ -73,6 +93,16 @@ const ja: PhotoStudioCopy = {
   issuePass: '来場証明書を発行',
   issuingPass: '発行中…',
   backSetup: 'Meebitを変更',
+  customHint: 'プレビューの白い点をタップするか、下から部位を選んでください。左右は Meebit 本人から見た向きです。',
+  customDragHint: '点をタップで選択・ドラッグで回転',
+  customJoint: '部位',
+  customMirror: '反対側にコピー',
+  customResetJoint: 'この部位をリセット',
+  customUndo: '元に戻す',
+  customRedo: 'やり直す',
+  customGrounded: '足を床につける',
+  customRebase: 'ポーズから作り直す',
+  customRebaseHint: 'カスタムポーズ全体を置き換えます（元に戻せます）。',
 }
 
 export function photoStudioUi() {

@@ -8,6 +8,9 @@ import { applyHandPropFit, clearHandPropArmFitCache } from '../../avatar/vrmHand
 import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { ShootingPistol } from '../../shootingGallery/world/ShootingPistol'
 import { getBackground, PHOTO_STUDIO } from '../config'
+import { computeGroundLift } from '../customPose/customPoseGrounding'
+import { applyCustomPose, captureCustomPose, type CustomPose } from '../customPose/customPoseModel'
+import { setCustomPoseVrm } from '../customPose/customPoseRuntime'
 import { applyStudioPose } from '../poses'
 import { applyStudioVrmShading } from '../studioVrmShading'
 import { usePhotoStudioStore } from '../store'
@@ -68,6 +71,14 @@ function followRightHandProp(
 /** スタジオ中央のプレイヤー Meebit（位置固定・ドラッグで回転）。 */
 export function StudioPlayer() {
   const rootRef = useRef<Group>(null)
+  /** カスタムポーズの接地補正（y のみ） */
+  const liftRef = useRef<Group>(null)
+  const groundStateRef = useRef<{
+    pose: CustomPose | null
+    vrm: VRM | null
+    grounded: boolean
+    measuredAt: number
+  }>({ pose: null, vrm: null, grounded: true, measuredAt: 0 })
   const pistolAnchorRef = useRef<Group>(null)
   const mugAnchorRef = useRef<Group>(null)
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
@@ -81,6 +92,7 @@ export function StudioPlayer() {
   const isJump = poseId === 'jump'
   const isFigure = poseId === 'figure'
   const isSleep = poseId === 'sleep'
+  const isCustom = poseId === 'custom'
   const sleepBody = PHOTO_STUDIO.sleepSofa.body
   const letterColor = getBackground(backgroundId).color
   const groundY =
@@ -91,10 +103,18 @@ export function StudioPlayer() {
     clearHandPropArmFitCache(vrmRef.current)
     applyStudioVrmShading(vrmRef.current)
     enableStudioShadows(vrmRef.current.scene)
+    setCustomPoseVrm(vrmRef.current)
+    return () => setCustomPoseVrm(null)
   }, [status, meebitNumber, vrmRef, vrmScene])
 
   useFrame((_, delta) => {
-    applyStudioPose(vrmRef.current, poseId)
+    const vrm = vrmRef.current
+    if (isCustom && vrm) {
+      applyCustomPoseFrame(vrm, delta)
+      return
+    }
+    if (liftRef.current) liftRef.current.position.y = 0
+    applyStudioPose(vrm, poseId)
     if (isShoot) {
       followRightHandProp(
         vrmRef.current,
@@ -112,6 +132,40 @@ export function StudioPlayer() {
     }
     update(Math.min(delta, 0.05))
   })
+
+  /** カスタム: ベース読み取り → 適用 → 接地補正 */
+  function applyCustomPoseFrame(vrm: VRM, delta: number) {
+    const store = usePhotoStudioStore.getState()
+    if (store.customPoseBaseRequest || !store.customPose) {
+      applyStudioPose(vrm, store.customPoseBaseRequest ?? 'attention')
+      store.resolveCustomPoseBase(captureCustomPose(vrm))
+    }
+    const { customPose, customPoseGrounded } = usePhotoStudioStore.getState()
+    if (!customPose) return
+    applyCustomPose(vrm, customPose)
+    update(Math.min(delta, 0.05))
+
+    const lift = liftRef.current
+    if (!lift) return
+    if (!customPoseGrounded) {
+      lift.position.y = 0
+      groundStateRef.current.grounded = false
+      return
+    }
+    const ground = groundStateRef.current
+    const now = performance.now()
+    const changed =
+      ground.pose !== customPose || ground.vrm !== vrm || !ground.grounded
+    if (!changed) return
+    if (now - ground.measuredAt < PHOTO_STUDIO.customPose.groundMeasureIntervalMs) return
+    lift.position.y = computeGroundLift(
+      vrm,
+      lift,
+      () => applyStudioPose(vrm, 'attention'),
+      () => applyCustomPose(vrm, customPose),
+    )
+    groundStateRef.current = { pose: customPose, vrm, grounded: true, measuredAt: now }
+  }
 
   return (
     <group
@@ -135,11 +189,13 @@ export function StudioPlayer() {
         }
       >
         <group position={[0, isSleep ? sleepBody.hipsOffsetY : 0, 0]}>
-          {vrmScene ? (
-            <primitive object={vrmScene} scale={VRM_WORLD_SCALE * PHOTO_STUDIO.modelScale} />
-          ) : (
-            <MeebitSilhouette />
-          )}
+          <group ref={liftRef}>
+            {vrmScene ? (
+              <primitive object={vrmScene} scale={VRM_WORLD_SCALE * PHOTO_STUDIO.modelScale} />
+            ) : (
+              <MeebitSilhouette />
+            )}
+          </group>
         </group>
       </group>
       {isShoot ? (

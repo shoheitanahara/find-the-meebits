@@ -11,6 +11,7 @@ import {
 } from './workshopFigureLayout'
 import { applyWorkshopFigureVrmQuality } from './workshopFigureVrmQuality'
 
+/** フィギュアは alignVrmFigureFeet で足裏＝group 原点。台座上面にそのまま置く */
 const PEDESTAL_HEIGHT = 0.055
 const PEDESTAL_SIZE = 0.26
 
@@ -61,7 +62,7 @@ function WorkshopFigure({
     <group position={[placement.x, placement.y, placement.z]} rotation={[0, placement.rotationY, 0]}>
       <BlackSquarePedestal />
       {vrmScene ? (
-        <group position={[0, PEDESTAL_HEIGHT - 0.05, 0]}>
+        <group position={[0, PEDESTAL_HEIGHT, 0]}>
           <primitive object={vrmScene} scale={figureScale} />
         </group>
       ) : null}

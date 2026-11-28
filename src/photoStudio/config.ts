@@ -216,7 +216,27 @@ export const PHOTO_STUDIO = {
     { id: 'sit', label: { en: 'Sit', ja: '座り' } },
     { id: 'sleep', label: { en: 'Sleep', ja: '睡眠' } },
     { id: 'figure', label: { en: 'Figure', ja: 'フィギュア' } },
+    /** 関節を自由に動かす（customPose/）。小道具・家具なし */
+    { id: 'custom', label: { en: 'Custom', ja: 'カスタム' } },
   ] as const,
+
+  /** カスタムポーズ編集（customPose/） */
+  customPose: {
+    markers: {
+      /** ワールド半径（m） */
+      radius: 0.032,
+      selectedScale: 1.45,
+      color: '#ffffff',
+      selectedColor: '#8eb4e8',
+      outlineColor: '#101820',
+    },
+    /** プレビュー上のタップを関節選択とみなす最大距離（CSS px） */
+    tapRadiusPx: 44,
+    /** これ以上動いたらタップではなく回転ドラッグ（CSS px） */
+    tapMoveTolerancePx: 6,
+    /** 接地補正のメッシュ計測間隔（スライダー操作中の負荷を抑える, ms） */
+    groundMeasureIntervalMs: 60,
+  },
 
   /**
    * Shoot ポーズのピストル（射的場と同じ ShootingPistol）。

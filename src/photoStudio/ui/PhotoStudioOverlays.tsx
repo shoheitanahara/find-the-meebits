@@ -22,6 +22,8 @@ import {
   type VisitPassThemeId,
 } from '../capture/visitPassTheme'
 import { hasStudioGl, renderStudioSnapshot } from '../capture/studioGlBridge'
+import { CustomPosePanel } from '../customPose/CustomPosePanel'
+import { pickCustomPoseJoint } from '../customPose/customPoseRuntime'
 import { photoStudioUi } from '../i18n'
 import { usePhotoStudioStore } from '../store'
 import {
@@ -112,12 +114,16 @@ export function PhotoStudioStartScreen() {
   )
 }
 
-/** プレビュー枠内だけの左右ドラッグ。 */
+/**
+ * プレビュー枠内だけの左右ドラッグ。
+ * カスタムポーズ中は、ほぼ動かさずに離したら関節マーカーのタップ選択として扱う。
+ */
 export function PhotoStudioDragLayer() {
   const phase = usePhotoStudioStore((state) => state.phase)
   const nudgeYaw = usePhotoStudioStore((state) => state.nudgeYaw)
   const draggingRef = useRef(false)
   const lastXRef = useRef(0)
+  const startRef = useRef({ x: 0, y: 0, moved: false })
   const t = photoStudioUi()
 
   if (phase !== 'studio') return null
@@ -130,10 +136,19 @@ export function PhotoStudioDragLayer() {
         if (event.button !== 0) return
         draggingRef.current = true
         lastXRef.current = event.clientX
+        startRef.current = { x: event.clientX, y: event.clientY, moved: false }
         event.currentTarget.setPointerCapture(event.pointerId)
       }}
       onPointerMove={(event) => {
         if (!draggingRef.current) return
+        const start = startRef.current
+        if (
+          !start.moved &&
+          Math.hypot(event.clientX - start.x, event.clientY - start.y) >
+            PHOTO_STUDIO.customPose.tapMoveTolerancePx
+        ) {
+          start.moved = true
+        }
         const dxPx = event.clientX - lastXRef.current
         lastXRef.current = event.clientX
         const scale = 1 / PHOTO_STUDIO.orbit.pixelsPerRadian
@@ -141,10 +156,22 @@ export function PhotoStudioDragLayer() {
         nudgeYaw(dxPx * scale)
       }}
       onPointerUp={(event) => {
+        const wasDragging = draggingRef.current
         draggingRef.current = false
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId)
         }
+        const state = usePhotoStudioStore.getState()
+        if (!wasDragging || startRef.current.moved || state.poseId !== 'custom') return
+        const jointId = pickCustomPoseJoint(
+          event.clientX,
+          event.clientY,
+          event.currentTarget.getBoundingClientRect(),
+          PHOTO_STUDIO.customPose.tapRadiusPx,
+        )
+        if (!jointId) return
+        state.setCustomPoseJointId(jointId)
+        playSfx('uiClick')
       }}
       onPointerCancel={() => {
         draggingRef.current = false
@@ -265,6 +292,8 @@ export function PhotoStudioControls() {
           </div>
         </div>
 
+        {poseId === 'custom' ? <CustomPosePanel /> : null}
+
         {poseId === 'gm' ? (
           <div>
             <p className="text-[0.55rem] font-bold uppercase tracking-[0.2em] text-white/45">
@@ -366,6 +395,7 @@ export function PhotoStudioControls() {
 export function PhotoStudioPreviewChrome() {
   const phase = usePhotoStudioStore((state) => state.phase)
   const capturing = usePhotoStudioStore((state) => state.capturing)
+  const isCustom = usePhotoStudioStore((state) => state.poseId === 'custom')
   const t = photoStudioUi()
 
   if (phase !== 'studio') return null
@@ -378,7 +408,7 @@ export function PhotoStudioPreviewChrome() {
         </p>
       ) : (
         <p className="rounded-full bg-black/40 px-3 py-1 text-[0.6rem] text-white/45 backdrop-blur-sm">
-          {t.dragHint}
+          {isCustom ? t.customDragHint : t.dragHint}
         </p>
       )}
     </div>
