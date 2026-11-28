@@ -9,7 +9,12 @@ import { VRM_WORLD_SCALE } from '../../game/gameConfig'
 import { ShootingPistol } from '../../shootingGallery/world/ShootingPistol'
 import { getBackground, PHOTO_STUDIO } from '../config'
 import { computeGroundLift } from '../customPose/customPoseGrounding'
-import { applyCustomPose, captureCustomPose, type CustomPose } from '../customPose/customPoseModel'
+import {
+  applyCustomPose,
+  captureCustomPose,
+  resetCustomPoseBones,
+  type CustomPose,
+} from '../customPose/customPoseModel'
 import { setCustomPoseVrm } from '../customPose/customPoseRuntime'
 import { applyStudioPose } from '../poses'
 import { applyStudioVrmShading } from '../studioVrmShading'
@@ -20,6 +25,12 @@ import { StudioSitChair } from '../world/StudioSitChair'
 import { StudioSleepSofa } from '../world/StudioSleepSofa'
 
 const handWorld = new Vector3()
+
+/**
+ * パーク共通ポーズ（歩行・射撃など）は毎フレーム 35〜62% ずつ目標へ補間する。
+ * カスタムのベースとして読み取るときは、収束するまで繰り返し当てる。
+ */
+const BASE_POSE_SETTLE_ITERATIONS = 40
 
 /** 射撃ポーズ時はフラッシュ／リコイルを出さない。 */
 const IDLE_PISTOL_TIMING = { fireFlashUntil: 0, recoilUntil: 0 }
@@ -79,6 +90,11 @@ export function StudioPlayer() {
     grounded: boolean
     measuredAt: number
   }>({ pose: null, vrm: null, grounded: true, measuredAt: 0 })
+  /** ポーズ切替の検出（切替時に全ボーンを rest へ戻す） */
+  const appliedPoseRef = useRef<{ poseId: string | null; vrm: VRM | null }>({
+    poseId: null,
+    vrm: null,
+  })
   const pistolAnchorRef = useRef<Group>(null)
   const mugAnchorRef = useRef<Group>(null)
   const meebitNumber = usePhotoStudioStore((state) => state.meebitNumber)
@@ -109,6 +125,11 @@ export function StudioPlayer() {
 
   useFrame((_, delta) => {
     const vrm = vrmRef.current
+    const applied = appliedPoseRef.current
+    if (vrm && (applied.poseId !== poseId || applied.vrm !== vrm)) {
+      resetCustomPoseBones(vrm)
+      appliedPoseRef.current = { poseId, vrm }
+    }
     if (isCustom && vrm) {
       applyCustomPoseFrame(vrm, delta)
       return
@@ -137,7 +158,9 @@ export function StudioPlayer() {
   function applyCustomPoseFrame(vrm: VRM, delta: number) {
     const store = usePhotoStudioStore.getState()
     if (store.customPoseBaseRequest || !store.customPose) {
-      applyStudioPose(vrm, store.customPoseBaseRequest ?? 'attention')
+      const baseId = store.customPoseBaseRequest ?? 'attention'
+      resetCustomPoseBones(vrm)
+      for (let i = 0; i < BASE_POSE_SETTLE_ITERATIONS; i++) applyStudioPose(vrm, baseId)
       store.resolveCustomPoseBase(captureCustomPose(vrm))
     }
     const { customPose, customPoseGrounded } = usePhotoStudioStore.getState()

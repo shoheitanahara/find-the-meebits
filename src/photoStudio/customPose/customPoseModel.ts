@@ -296,6 +296,17 @@ export function captureCustomPose(vrm: VRM): CustomPose {
   return pose
 }
 
+/**
+ * ポーズ対象の全ボーンを rest（回転 0）へ戻す。
+ * ポーズ切替時に呼び、前ポーズ（特にカスタム）の値が、一部ボーンしか触らない
+ * プリセットに残らないようにする。
+ */
+export function resetCustomPoseBones(vrm: VRM) {
+  for (const name of CUSTOM_POSE_BONES) {
+    vrm.humanoid.getNormalizedBoneNode(name)?.rotation.set(0, 0, 0)
+  }
+}
+
 /** カスタムポーズを適用。Hand / Shoulder は捻り防止で常に 0。 */
 export function applyCustomPose(vrm: VRM, pose: CustomPose) {
   for (const name of CUSTOM_POSE_BONES) {
