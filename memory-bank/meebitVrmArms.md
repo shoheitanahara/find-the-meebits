@@ -22,7 +22,8 @@ PFP Studio / 射的 / 歩行などで使う**落とし所**。Meebit のボク�
 
 ## LowerArm / Hand / Shoulder
 
-- LowerArm: **x のみ**肘曲げが基本。Wave は `lowerY` もわずかに使用
+- LowerArm: **肘曲げは y**（2026-11 訂正）。腕の rest が横（±X）向きなので **x は前腕の長軸まわりのねじり**で、曲がって見えない。スタジオの `setArm({ bend })` は正＝前へ曲げる（左右の符号は内部で吸収）
+- 上腕を x=π/2 回す（長軸ねじり）と、肘の曲げ方向が「前」→「上」になる。Wave はこれで前腕を立てる。ボクセル腕は断面がほぼ正方形なので 90° ねじりは見た目が崩れにくい
 - Hand: 毎フレーム `{0,0,0}`（掌の残留捻り防止）が安全
 - Shoulder: 毎フレーム `{0,0,0}`
 
@@ -32,7 +33,7 @@ PFP Studio / 射的 / 歩行などで使う**落とし所**。Meebit のボク�
 |------|--------|
 | 下ろす | `upper x=0,y=0`, `z=attention` |
 | 高く上げる（Cheer） | `x=0,y=0` のまま `|z|` だけ減らす（符号維持） |
-| 肘を曲げる | 上腕は下ろしたまま（attention `z`）+ `lowerArm.x` |
+| 肘を曲げる | 上腕は下ろしたまま（attention `z`）+ `lowerArm.y`（`setArm` の `bend`） |
 | 前方に出す（Shoot / GM） | `applyVRMShootingPose`（`x≈π/2` + attention `z`、**y は使わない**） |
 | 歩行アーム | `applyVRMLocomotion` の stride（スタジオは位相固定） |
 | 着席 | 脚中心。腕は rest（`applyVRMSitPose`） |
@@ -81,12 +82,14 @@ z: MathUtils.lerp(rodArmZClosed, rodArmZWalk, movementWeight)
 
 1. Cheer のように上げる意図で **UpperArm.x** を入れる（ゾンビ前出し＆掌が回る）
 2. Wave 以外で **UpperArm.y** で掌を回す
-3. 肘の不要な `y/z` を触る
+3. 肘の **x（ねじり）や z** を曲げのつもりで触る（曲げは y）
 4. 一部軸だけ書いて前ポーズの捻りを残す
 
 ## 限界とポーズ選定
 
-- 完全な腕組み・腰に手・力こぶは、肘曲げ近似でも掌／肩が崩れる → **採用しない**
+- 以前「腕組み不可」としていたのは肘を x（ねじり）で曲げていたため。y で曲げれば Bored の腕組みは成立する（2026-11）
+- 腰に手（akimbo）は上腕の長軸ねじり＋外転の組み合わせが必要で未採用
+- Meebit は上腕が短く、肘を曲げても手は顎の下（GM）・太ももの横（Sit）までしか届かない
 - Photo Booth 採用ポーズ: Stand / Bored / Look away / Wave / Cheer / Point / Shoot / GM / Walk / Jump / Sit / Sleep / Figure（詳細は `photoStudio.md`）
 - 射的・GM の前方銃／マグ構えは意図的に `x` を使う例外（掌より道具の向き優先）
 - 釣りの前方出しも `x` を使うが、**y は常に 0**。脇の調整は **z 係数だけ**（`rodArmZClosed` / `rodArmZWalk`）
