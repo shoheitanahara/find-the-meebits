@@ -10,7 +10,7 @@ import {
 import { TargetPreviewCapture } from '../ui/TargetPreviewCapture'
 import { unlockAudioIfNeeded } from '../ui/sfx'
 import { PHOTO_STUDIO, clampMeebitId } from './config'
-import { setStudioGl } from './capture/studioGlBridge'
+import { StudioGlBridge } from './capture/studioGlBridge'
 import { StudioPlayer } from './player/StudioPlayer'
 import { usePhotoStudioStore } from './store'
 import {
@@ -42,6 +42,7 @@ function PhotoStudioScene() {
 
   return (
     <>
+      <StudioGlBridge />
       <StudioCamera />
       <StudioEnvironment />
       {phase === 'studio' ? <StudioPlayer /> : null}
@@ -64,7 +65,6 @@ export function PhotoStudioApp() {
     })
     return () => {
       usePhotoStudioStore.getState().exitToIdle()
-      setStudioGl(null)
     }
   }, [])
 
@@ -97,7 +97,6 @@ export function PhotoStudioApp() {
               onCreated={({ gl }) => {
                 gl.toneMapping = ACESFilmicToneMapping
                 gl.toneMappingExposure = PHOTO_STUDIO.lighting.exposureDefault
-                setStudioGl(gl)
               }}
               className="absolute inset-0 !h-full !w-full"
             >

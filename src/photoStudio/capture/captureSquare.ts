@@ -1,9 +1,7 @@
-import type { WebGLRenderer } from 'three'
 import { PHOTO_STUDIO } from '../config'
 
-/** メイン Canvas から正方形 PNG を切り出して DataURL を返す。 */
-export function captureSquarePfp(gl: WebGLRenderer): string | null {
-  const source = gl.domElement
+/** 撮影スナップショット（`renderStudioSnapshot`）から正方形 PNG の DataURL を返す。 */
+export function captureSquarePfp(source: HTMLCanvasElement): string | null {
   const size = PHOTO_STUDIO.exportSize
   const sw = source.width
   const sh = source.height

@@ -21,7 +21,7 @@ import {
   VISIT_PASS_THEMES,
   type VisitPassThemeId,
 } from '../capture/visitPassTheme'
-import { getStudioGl } from '../capture/studioGlBridge'
+import { hasStudioGl, renderStudioSnapshot } from '../capture/studioGlBridge'
 import { photoStudioUi } from '../i18n'
 import { usePhotoStudioStore } from '../store'
 import {
@@ -397,12 +397,12 @@ function CaptureButton({ className = '' }: { className?: string }) {
       disabled={capturing}
       className={`rounded-full bg-[#8eb4e8] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-[#101820] disabled:opacity-50 ${className}`}
       onClick={() => {
-        const gl = getStudioGl()
-        if (!gl) return
+        if (!hasStudioGl()) return
         setCapturing(true)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            const dataUrl = captureSquarePfp(gl)
+            const snapshot = renderStudioSnapshot()
+            const dataUrl = snapshot ? captureSquarePfp(snapshot) : null
             setCapturing(false)
             if (!dataUrl) return
             downloadDataUrl(dataUrl, `meebit-${meebitNumber}-pfp.png`)
@@ -533,12 +533,16 @@ function VisitPassButton({
       disabled={busy}
       className={`rounded-full border border-[#8eb4e8]/50 bg-[#8eb4e8]/10 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-[#c5d8f2] transition hover:bg-[#8eb4e8]/18 disabled:opacity-50 ${className}`}
       onClick={() => {
-        const gl = getStudioGl()
-        if (!gl) return
+        if (!hasStudioGl()) return
         setIssuing(true)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            void composeVisitPass(gl, {
+            const snapshot = renderStudioSnapshot()
+            if (!snapshot) {
+              setIssuing(false)
+              return
+            }
+            void composeVisitPass(snapshot, {
               meebitNumber,
               theme: themeOverride,
               christmas: christmasOverride,

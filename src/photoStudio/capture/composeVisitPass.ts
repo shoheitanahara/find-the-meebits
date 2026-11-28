@@ -1,4 +1,3 @@
-import type { WebGLRenderer } from 'three'
 import { getLocale } from '../../i18n/locale'
 import { isParkChristmasSeason } from '../../top/parkChristmas'
 import { getUtcDateKey } from '../../top/dailyFeatured'
@@ -62,15 +61,14 @@ export type VisitPassOptions = {
 }
 
 /**
- * スタジオ Canvas から来場証明書 PNG を合成する。
+ * 撮影スナップショット（`renderStudioSnapshot`）から来場証明書 PNG を合成する。
  * ミュージアム会員証寄りの紙質・ヘアライン・セリフ見出し。
  * 色味だけ日替わり（`visitPassTheme`）。
  */
 export async function composeVisitPass(
-  gl: WebGLRenderer,
+  source: HTMLCanvasElement,
   options: VisitPassOptions,
 ): Promise<string | null> {
-  const source = gl.domElement
   const sw = source.width
   const sh = source.height
   if (sw < 2 || sh < 2) return null

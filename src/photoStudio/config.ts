@@ -5,6 +5,11 @@ export const PHOTO_STUDIO = {
   /** 書き出し解像度（正方形） */
   exportSize: 1024,
   /**
+   * 撮影時に描き直す正方形の解像度（px）。exportSize の 2 倍で描いて縮小し、輪郭をくっきりさせる。
+   * GPU 上限を超える端末では自動で抑える（`renderStudioSnapshot`）。
+   */
+  captureRenderSize: 2048,
+  /**
    * プレビュー Canvas の最大 DPR。
    * パーク全体のモバイル制限（DPR1・AAオフ）は使わず、PC/SP とも同じ高画質にする。
    */
